@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "img", "img", "{856686E2-D32
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C96737FC-9A30-4203-837B-8F7ADE497CBC}"
 	ProjectSection(SolutionItems) = preProject
+		..\changelog.md = ..\changelog.md
 		..\readme.md = ..\readme.md
 		..\docs\tc_coding_practice.md = ..\docs\tc_coding_practice.md
 		..\docs\tc_nodecore_config.md = ..\docs\tc_nodecore_config.md

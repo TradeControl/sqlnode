@@ -465,9 +465,8 @@ namespace TradeControl.Node.Config
         {
             try
             {
-                RunScript(sender, Properties.Resources.ResourceManager.GetString(TCNodeCreationScript));
-                if (IsTCNode)
-                    UpgradeNode(sender);
+                RunScript(sender, Properties.Resources.ResourceManager.GetString(TCNodeCreationScript));             
+                UpgradeNode(sender);
                 return true;
             }
             catch (Exception e)
@@ -483,6 +482,9 @@ namespace TradeControl.Node.Config
             {
                 float percentComplete = 0;
                 List<string> upgrades = new List<string>();
+
+                if (!IsTCNode)
+                    return;
 
                 foreach (string candidate in Properties.Settings.Default.SqlUpgrades)
                 {                 

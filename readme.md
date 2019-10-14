@@ -19,6 +19,8 @@ Each instance is called a node because it is designed to be connected to other i
 
 ## Installation
 
+[Change Log](changelog.md)
+
 All schema and business logic dimensions of Trade Control are coded in Sql Server. However, technical knowledge of Sql Server is not required. Each instance is installed and configured by an app.
 
 [Configuration](docs/tc_nodecore_config.md)

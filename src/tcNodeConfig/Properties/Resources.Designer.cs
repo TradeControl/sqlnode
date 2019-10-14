@@ -257,7 +257,7 @@ namespace TradeControl.Node.Config.Properties {
                 return ResourceManager.GetString("InstanceNeedsUpgrading", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
@@ -273,14 +273,16 @@ namespace TradeControl.Node.Config.Properties {
         ///
         ///	https://www.gnu.org/licenses/gpl-3.0.en.html
         ///
-        ///************************************************************************ [rest of string was truncated]&quot;;.
+        ///***********************************************************************************/
+        ///go
+        ///CREATE SCHEMA Activi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_create_node {
             get {
                 return ResourceManager.GetString("tc_create_node", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
@@ -298,14 +300,16 @@ namespace TradeControl.Node.Config.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inserts the  [rest of string was truncated]&quot;;.
+        ///It inserts the upgade into App.tbInstall.
+        ///
+        ///******** [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_23_2 {
             get {
                 return ResourceManager.GetString("tc_upgrade_3_23_2", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
@@ -323,11 +327,40 @@ namespace TradeControl.Node.Config.Properties {
         ///
         ///Purpose:
         ///Demonstrates how upgrades are applied.
-        ///The script removes all references to Fax Machines fro [rest of string was truncated]&quot;;.
+        ///The script removes all references to Fax Machines from the schema.
+        ///
+        ///Instructions:
+        ///This s [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_1 {
             get {
                 return ResourceManager.GetString("tc_upgrade_3_24_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Sample upgrade script
+        ///Release: 3.24.2
+        ///
+        ///Date: 10 September 2019
+        ///Author: Ian Monnox
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Fix:
+        ///- trigger new current balance when OpeningBalance updated 
+        ///- include opening balance in the current balance in new accounts
+        ///- cas [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_24_2 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_24_2", resourceCulture);
             }
         }
         
