@@ -26,7 +26,7 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_Org_tbAccount]
 
 
 GO
-CREATE   TRIGGER Org.Org_tbAccount_TriggerUpdate 
+CREATE TRIGGER Org.Org_tbAccount_TriggerUpdate 
    ON  Org.tbAccount
    AFTER UPDATE, INSERT
 AS 
@@ -48,7 +48,23 @@ BEGIN
 			ROLLBACK
 			END
 		ELSE
-			BEGIN	
+			BEGIN
+			IF UPDATE(OpeningBalance)
+			BEGIN				
+				UPDATE Org.tbAccount
+				SET CurrentBalance = balance.CurrentBalance
+				FROM Org.tbAccount 
+					INNER JOIN inserted AS i ON tbAccount.CashAccountCode = i.CashAccountCode
+					INNER JOIN Cash.vwAccountRebuild balance ON balance.CashAccountCode = i.CashAccountCode;
+			
+				UPDATE Org.tbAccount
+				SET CurrentBalance = Org.tbAccount.OpeningBalance
+				FROM  Cash.vwAccountRebuild 
+					RIGHT OUTER JOIN Org.tbAccount ON Cash.vwAccountRebuild.CashAccountCode = Org.tbAccount.CashAccountCode
+					JOIN inserted i ON i.CashAccountCode = Org.tbAccount.CashAccountCode
+				WHERE     (Cash.vwAccountRebuild.CashAccountCode IS NULL);
+			END
+
 			UPDATE Org.tbAccount
 			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
 			FROM Org.tbAccount INNER JOIN inserted AS i ON tbAccount.CashAccountCode = i.CashAccountCode;

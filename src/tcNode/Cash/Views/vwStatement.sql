@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwStatement
+﻿CREATE VIEW Cash.vwStatement
 AS
 	--invoiced taxes
 	WITH corp_taxcode AS
@@ -27,6 +26,7 @@ AS
 		SELECT ROW_NUMBER() OVER (ORDER BY RowNumber DESC) AS Id, StartOn AS TransactOn, VatDue,
 			CASE WHEN VatPaid  < 0 THEN NULL ELSE 1 END IsLive
 		FROM Cash.vwTaxVatStatement
+		WHERE VatDue <> 0
 	), vat_invoiced_owing AS
 	(
 		SELECT AccountCode, CashCode, TransactOn, 5 AS CashEntryTypeCode, 

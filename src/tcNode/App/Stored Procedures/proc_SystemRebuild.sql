@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE App.proc_SystemRebuild
+﻿CREATE PROCEDURE App.proc_SystemRebuild
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -400,7 +399,7 @@ AS
 							Org.tbAccount ON Cash.vwAccountRebuild.CashAccountCode = Org.tbAccount.CashAccountCode;
 	
 		UPDATE Org.tbAccount
-		SET CurrentBalance = 0
+		SET CurrentBalance = Org.tbAccount.OpeningBalance
 		FROM         Cash.vwAccountRebuild RIGHT OUTER JOIN
 							  Org.tbAccount ON Cash.vwAccountRebuild.CashAccountCode = Org.tbAccount.CashAccountCode
 		WHERE     (Cash.vwAccountRebuild.CashAccountCode IS NULL);

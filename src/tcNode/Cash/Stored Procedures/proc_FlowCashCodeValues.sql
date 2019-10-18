@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Cash.proc_FlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
+﻿CREATE PROCEDURE Cash.proc_FlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
 AS
 	--ref Cash.fnFlowCashCodeValues() for a sample inline function implementation 
 
@@ -34,7 +33,7 @@ AS
 
 		IF (@IncludeActivePeriods <> 0)
 			BEGIN		
-			WITH active_tasks AS
+			WITH active_candidates AS
 			(
 				SELECT (SELECT TOP (1) StartOn FROM App.tbYearPeriod AS p WHERE (StartOn <= invoices.InvoicedOn) ORDER BY StartOn DESC) AS StartOn,
 						CASE WHEN invoice_type.CashModeCode = 0 THEN tasks.InvoiceValue * - 1 ELSE tasks.InvoiceValue END AS InvoiceValue, 
@@ -44,6 +43,11 @@ AS
 					JOIN Invoice.tbTask tasks ON invoices.InvoiceNumber = tasks.InvoiceNumber
 				WHERE invoices.InvoicedOn >= @StartOn
 					AND tasks.CashCode = @CashCode
+			), active_tasks AS
+			(
+				SELECT StartOn, SUM(InvoiceValue) InvoiceValue, SUM(InvoiceTax) InvoiceTax
+				FROM active_candidates
+				GROUP BY StartOn
 			), active_items AS
 			(
 				SELECT (SELECT TOP (1) StartOn FROM App.tbYearPeriod AS p WHERE (StartOn <= invoices.InvoicedOn) ORDER BY StartOn DESC) AS StartOn,

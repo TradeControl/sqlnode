@@ -1,7 +1,4 @@
-﻿CREATE PROCEDURE Task.proc_Configure 
-	(
-	@ParentTaskCode nvarchar(20)
-	)
+﻿CREATE PROCEDURE Task.proc_Configure (@ParentTaskCode nvarchar(20))
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -23,7 +20,7 @@ AS
 		SELECT Task.tbTask.AccountCode, Task.tbTask.ContactName, Task.tbTask.ContactName AS NickName, Org.tbOrg.PhoneNumber, Org.tbOrg.EmailAddress
 		FROM  Task.tbTask 
 			INNER JOIN Org.tbOrg ON Task.tbTask.AccountCode = Org.tbOrg.AccountCode
-		WHERE        (Task.tbTask.TaskCode = @ParentTaskCode)
+		WHERE LEN(ISNULL(Task.tbTask.ContactName, '')) > 0 AND (Task.tbTask.TaskCode = @ParentTaskCode)
 					AND EXISTS (SELECT *
 								FROM Task.tbTask
 								WHERE (TaskCode = @ParentTaskCode) AND (NOT (ContactName IS NULL)) OR (TaskCode = @ParentTaskCode) AND (ContactName <> N''))

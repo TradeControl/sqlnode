@@ -10,3 +10,7 @@ The following record logs changes to Trade Control, first released on **2019.09.
 - [x] include ActivityCode in Invoice.vwSalesInvoiceSpool
 - [x] exclude vat entries from Cash.vwStatement for un-registered businesses
 - [x] forward invoices with multiple lines not totaling in Cash.proc_FlowCashCodeValues
+
+## 3.24.3
+
+- [x] Task.proc_Configure inserting empty contacts into Org.tbContact 
