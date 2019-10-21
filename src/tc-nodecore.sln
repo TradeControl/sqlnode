@@ -25,6 +25,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcNodeConfig", "tcNodeConfi
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "tcNodeConfigSetup", "tcNodeConfigSetup\tcNodeConfigSetup.vdproj", "{AE2E1348-13C7-4ECB-AB54-CEBE98BB9F54}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "installation", "installation", "{91D3D148-DEB2-4E46-B71A-BA4AF18DBE7B}"
+	ProjectSection(SolutionItems) = preProject
+		installation\tcNodeConfigSetup.zip = installation\tcNodeConfigSetup.zip
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
