@@ -3,7 +3,6 @@
     [CashDescription] NVARCHAR (100) NOT NULL,
     [CategoryCode]    NVARCHAR (10)  NOT NULL,
     [TaxCode]         NVARCHAR (10)  NOT NULL,
-    [OpeningBalance]  MONEY          CONSTRAINT [DF_Cash_tbCode_OpeningBalance] DEFAULT ((0)) NOT NULL,
     [IsEnabled]       SMALLINT       CONSTRAINT [DF_Cash_tbCode_IsEnabled] DEFAULT ((1)) NOT NULL,
     [InsertedBy]      NVARCHAR (50)  CONSTRAINT [DF_Cash_tbCode_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
     [InsertedOn]      DATETIME       CONSTRAINT [DF_Cash_tbCode_InsertedOn] DEFAULT (getdate()) NOT NULL,

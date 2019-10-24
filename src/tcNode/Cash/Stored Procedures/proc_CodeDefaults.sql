@@ -9,8 +9,7 @@ CREATE   PROCEDURE Cash.proc_CodeDefaults
 	BEGIN TRY
 
 		SELECT     Cash.tbCode.CashCode, Cash.tbCode.CashDescription, Cash.tbCode.CategoryCode, Cash.tbCode.TaxCode, 
-				App.tbTaxCode.TaxTypeCode, Cash.tbCode.OpeningBalance, 
-							  ISNULL( Cash.tbCategory.CashModeCode, 0) AS CashModeCode, ISNULL(Cash.tbCategory.CashTypeCode, 0) AS CashTypeCode
+				App.tbTaxCode.TaxTypeCode, ISNULL( Cash.tbCategory.CashModeCode, 0) AS CashModeCode, ISNULL(Cash.tbCategory.CashTypeCode, 0) AS CashTypeCode
 		FROM         Cash.tbCode INNER JOIN
 							  App.tbTaxCode ON Cash.tbCode.TaxCode = App.tbTaxCode.TaxCode LEFT OUTER JOIN
 							  Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode

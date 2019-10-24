@@ -26,7 +26,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -107,6 +107,7 @@
     <Content Include="scripts\tc_upgrade_3_24_1.sql" />
     <Content Include="scripts\tc_upgrade_3_24_2.sql" />
     <Content Include="scripts\tc_upgrade_3_24_3.sql" />
+    <Content Include="scripts\tc_upgrade_3_24_4.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -26,7 +26,6 @@ AS
 		SELECT ROW_NUMBER() OVER (ORDER BY RowNumber DESC) AS Id, StartOn AS TransactOn, VatDue,
 			CASE WHEN VatPaid  < 0 THEN NULL ELSE 1 END IsLive
 		FROM Cash.vwTaxVatStatement
-		WHERE VatDue <> 0
 	), vat_invoiced_owing AS
 	(
 		SELECT AccountCode, CashCode, TransactOn, 5 AS CashEntryTypeCode, 
@@ -34,7 +33,7 @@ AS
 			CASE WHEN VatDue < 0 THEN ABS(VatDue) ELSE 0 END AS PayIn,
 			CASE WHEN VatDue >= 0 THEN VatDue ELSE 0 END AS PayOut
 		FROM vat_totals CROSS JOIN vat_taxcode
-		WHERE Id <  (SELECT TOP 1 t.Id FROM vat_totals t WHERE t.IsLive IS NULL ORDER BY Id)
+		WHERE Id <  COALESCE((SELECT TOP 1 t.Id FROM vat_totals t WHERE t.IsLive IS NULL ORDER BY Id), (SELECT MIN(Id) + 1 FROM vat_totals))
 	)
 	--uninvoiced taxes
 	,  corptax_dates AS

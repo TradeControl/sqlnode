@@ -24,7 +24,7 @@ Download and install the C# app into a 64 bit Windows environment. Run setup.exe
 
 The .NET assembly version is the same as the TC-Node that it installs or upgrades. This is displayed on the first page.
 
-Errors are shown on the appropriate page but are also written to an error log in more detail. File _tcnodeconfig_errorlog.csv_ can be found in the same location as the executing assembly.
+Errors are shown on the appropriate page but are also written to an error log in more detail. File _tcnodeconfig_errorlog.csv_ can be found in the _Documents\Trade Control_ folder.
 
 ### Connection
 

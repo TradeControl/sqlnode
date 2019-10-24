@@ -1029,8 +1029,12 @@ namespace TradeControl.Node.Config
             get
             {
                 const string fileName = "tcnodeconfig_errorlog.csv";
-                FileInfo info = new FileInfo(Assembly.GetExecutingAssembly().Location);
-                return string.Concat(info.DirectoryName, '\\', fileName);
+                string logFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\Trade Control";
+
+                if (!Directory.Exists(logFolder))
+                    Directory.CreateDirectory(logFolder);
+
+                return string.Concat(logFolder, '\\', fileName);
             }
         }
         #endregion
