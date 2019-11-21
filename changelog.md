@@ -22,3 +22,4 @@ The following record logs changes to Trade Control, first released on **2019.09.
 - [x] remove obsolete field Cash.tbCode.OpeningBalance
 - [x] invoiced vat not showing on _Cash.vwStatement_ when no payments have been made 
 - [x] move _TradeControl.Node.Config.exe_ error log to _Documents\Trade Control_ folder.
+- [x] code signing Sectigo RSA tcNodeConfigSetup 
