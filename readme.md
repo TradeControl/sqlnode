@@ -17,6 +17,12 @@ Trade Control has been created through the application of manufacturing system c
 
 Each instance is called a node because it is designed to be connected to other instances in a network. Inputs perfectly match outputs, so there are no native customer or supplier accounts; no sales, purchase or works orders. Instead demand and supply present a mirror interface and order types are modelled using a principle of cash polarity. Supply-chains are implemented in a [separate repository](https://github.com/tradecontrol/tc-network).
 
+### Book
+
+If you have any interest in technological production and manufacturing, there is a short book that explains the underlying principles and history of Trade Control. It is not necessary to read this in order to use the app, but it will give you a deeper understanding of the schema design, as well as insight into a vital aspect of human endeavour that is often ignored.
+
+[Trade Control Functions](https://www.amazon.co.uk/dp/B0845RQDVD/ref=sr_1_2?keywords=flyleaf&qid=1579879852&s=handmade&sr=1-2) is published by [Flyleaf](https://www.flyleaf.co.uk) for £5.99.
+
 ## Installation
 
 [Change Log](changelog.md)
