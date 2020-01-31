@@ -73,6 +73,8 @@ namespace TradeControl.Node.Config
 
         const string TCNodeCreationScript = "tc_create_node";
 
+        private bool IsInError = false;
+
         public TCNodeConfig(string sqlServerName, AuthenticationMode authenticationMode, string sqlUserName, string databaseName, string password)
         {
             SqlServerName = sqlServerName;
@@ -972,9 +974,14 @@ namespace TradeControl.Node.Config
         #region Error Log
         private async void ErrorLog(Exception e)
         {
-            bool result = await ErrorLogAsync(e);
-            if (!result)
-                throw new Exception(string.Format(Properties.Resources.ErrorLogFailure, ErrorLogFileName));
+            if (!IsInError)
+            {
+                IsInError = true;
+                bool result = await ErrorLogAsync(e);
+                if (!result)
+                    throw new Exception(string.Format(Properties.Resources.ErrorLogFailure, ErrorLogFileName));
+                
+            }
         }
 
         private Task<bool> ErrorLogAsync(Exception e)

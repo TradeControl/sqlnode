@@ -23,3 +23,11 @@ The following record logs changes to Trade Control, first released on **2019.09.
 - [x] invoiced vat not showing on _Cash.vwStatement_ when no payments have been made 
 - [x] move _TradeControl.Node.Config.exe_ error log to _Documents\Trade Control_ folder.
 - [x] code signing Sectigo RSA tcNodeConfigSetup 
+
+### 3.24.5
+
+- [x] remove obsolete field IndustrySector from Org.tbOrg
+- [x] early vat payment handling on _Cash.vwStatement_
+- [x] _App.proc_BasicSetup_ year periods creation fix for < StartMonth
+- [x] set historical year periods to closed instead of archived
+- [x] Error reporting in tcNodeConfig.exe crashing app if log write failure

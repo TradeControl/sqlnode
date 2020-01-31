@@ -9,7 +9,6 @@
     [PhoneNumber]            NVARCHAR (50)  NULL,
     [EmailAddress]           NVARCHAR (255) NULL,
     [WebSite]                NVARCHAR (255) NULL,
-    [IndustrySector]         NVARCHAR (255) NULL,
     [AccountSource]          NVARCHAR (100) NULL,
     [PaymentTerms]           NVARCHAR (100) NULL,
     [ExpectedDays]           SMALLINT       CONSTRAINT [DF_Org_tbOrg_ExpectedDays] DEFAULT ((0)) NOT NULL,
@@ -54,11 +53,6 @@ CREATE NONCLUSTERED INDEX [IX_Org_tb_AccountSource]
 GO
 CREATE NONCLUSTERED INDEX [IX_Org_tb_AreaCode]
     ON [Org].[tbOrg]([AreaCode] ASC) WITH (FILLFACTOR = 90);
-
-
-GO
-CREATE NONCLUSTERED INDEX [IX_Org_tb_IndustrySector]
-    ON [Org].[tbOrg]([IndustrySector] ASC) WITH (FILLFACTOR = 90);
 
 
 GO

@@ -230,15 +230,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Trade Control Node Configurator"
-        "ProductCode" = "8:{E011D9B6-639E-4AF3-9713-A2F10ABE696E}"
-        "PackageCode" = "8:{7C5F80D1-782C-4F6D-BF35-388A212F0A28}"
+        "ProductCode" = "8:{C8B530AE-387E-49EA-B2E8-A7A5DF56183C}"
+        "PackageCode" = "8:{672B49EF-8D36-4F40-AC52-27C83EF9C49F}"
         "UpgradeCode" = "8:{87530140-719B-40FB-88AF-371486179C12}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:3.24.4"
+        "ProductVersion" = "8:3.24.5"
         "Manufacturer" = "8:Trade Control"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -766,7 +766,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
             {
-            "SourcePath" = "8:..\\tcNodeConfig\\obj\\Release\\TradeControl.Node.Config.exe"
+            "SourcePath" = "8:..\\tcNodeConfig\\obj\\Debug\\TradeControl.Node.Config.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_5CF1BA07340340B497A48A5C96106A02"
