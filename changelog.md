@@ -30,4 +30,10 @@ The following record logs changes to Trade Control, first released on **2019.09.
 - [x] early vat payment handling on _Cash.vwStatement_
 - [x] _App.proc_BasicSetup_ year periods creation fix for < StartMonth
 - [x] set historical year periods to closed instead of archived
-- [x] Error reporting in tcNodeConfig.exe crashing app if log write failure
+- [x] error reporting in setup app terminating executing process on log write failure
+
+### 3.24.6
+
+- [x] remove obsolete IndustrySector code from the Services demo _App.proc_DemoServices_
+- [x] extract the _TCNodeConfig_ class into a separate library for use in the [TC-Network project](https://github.com/tradecontrol/tc-network).
+

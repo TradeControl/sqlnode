@@ -12,7 +12,7 @@ using System.Windows.Navigation;
 using System.ComponentModel;
 using System.Threading;
 
-namespace TradeControl.Node.Config
+namespace TradeControl.Node
 {
     public partial class MainWindow : Window
     {
@@ -26,10 +26,13 @@ namespace TradeControl.Node.Config
         {
             lbAssemblyVersion.Content = TCNodeConfig.CurrentVersion.ToString();
 
-            SqlServerName = Properties.Settings.Default.SqlServerName;
-            Authentication = (AuthenticationMode)Properties.Settings.Default.AuthenticationMode;
-            SqlUserName = Properties.Settings.Default.SqlUserName;
-            DatabaseName = Properties.Settings.Default.DatabaseName;
+            using (TCNodeConfig config = new TCNodeConfig())
+            {
+                SqlServerName = config.SqlServerName;
+                Authentication = config.Authentication;
+                SqlUserName = config.SqlUserName;
+                DatabaseName = config.DatabaseName;
+            }
 
             if (DatabaseName.Length > 0)
                 TestConnection();
@@ -42,7 +45,6 @@ namespace TradeControl.Node.Config
         {
             get
             {
-                Properties.Settings.Default.AuthenticationMode = cbAuthenticationMode.SelectedIndex;
                 return (AuthenticationMode)cbAuthenticationMode.SelectedIndex;
             }
             set
@@ -55,7 +57,6 @@ namespace TradeControl.Node.Config
         {
             get
             {
-                Properties.Settings.Default.SqlServerName = cbSqlServerName.Text;
                 return cbSqlServerName.Text;
             }
             set
@@ -68,7 +69,6 @@ namespace TradeControl.Node.Config
         {
             get
             {
-                Properties.Settings.Default.DatabaseName = cbDatabaseName.Text;
                 return cbDatabaseName.Text;
             }
             set
@@ -80,7 +80,6 @@ namespace TradeControl.Node.Config
         {
             get
             {
-                Properties.Settings.Default.SqlUserName = tbSqlUserName.Text;
                 return tbSqlUserName.Text;
             }
             set
@@ -100,139 +99,140 @@ namespace TradeControl.Node.Config
             {
                 Cursor = Cursors.Wait;
 
-                TCNodeConfig tcnode = new TCNodeConfig(
+                using (TCNodeConfig tcnode = new TCNodeConfig(
                     this.SqlServerName,
                     this.Authentication,
                     this.SqlUserName,
                     this.DatabaseName,
-                    this.Password
-                    );
-
-                if (tcnode.Authenticated)
+                    this.Password))
                 {
-                    if (tcnode.IsEmptyDatabase)
+                    if (tcnode.Authenticated)
                     {
-                        btnTestConnection.IsEnabled = false;
-                        lbConnectionStatus.Foreground = new SolidColorBrush(Colors.Red);
-                        lbConnectionStatus.Text = Properties.Resources.ExecutionInProgress;
-                        DisableFunctions();
-                        InstallNode(tcnode);
-                    }
-                    else
-                    {
-                        lbConnectionStatus.Foreground = new SolidColorBrush(Colors.Blue);
-                        lbConnectionStatus.Text = Properties.Resources.ConnectionSucceeded;
-
-                        if (tcnode.IsTCNode)
+                        if (tcnode.IsEmptyDatabase)
                         {
-
-                            lbUpgrade.Content = string.Format(Properties.Resources.UpgradeHeader, tcnode.DatabaseName);
-
-                            if (!tcnode.IsUpToDate)
-                            {
-                                lbUpgradeStatus.Text = string.Format(Properties.Resources.InstanceNeedsUpgrading, tcnode.DatabaseName, tcnode.InstalledVersion.ToString(), TCNodeConfig.CurrentVersion.ToString());
-                                lbUpgradeStatus.Foreground = new SolidColorBrush(Colors.Red);
-                                btnUpgrade.IsEnabled = true;
-                                tabsMain.SelectedItem = pageUpgrades;
-                            }
-                            else
-                            {
-                                lbUpgradeStatus.Text = string.Format(Properties.Resources.InstanceIsUpToDate, tcnode.DatabaseName, tcnode.InstalledVersion.ToString());
-                                lbUpgradeStatus.Foreground = new SolidColorBrush(Colors.Black);
-                                btnUpgrade.IsEnabled = false;
-
-                                if (!tcnode.IsInitialised)
-                                {
-                                    btnBusinessDetails.IsEnabled = true;
-                                    lbBusinessStatus.Foreground = new SolidColorBrush(Colors.Blue);
-                                    lbBusinessStatus.Text = Properties.Resources.ConfigureEnabled;
-                                    tabsMain.SelectedItem = pageBusinessDetails;
-                                }
-                                else
-                                {
-                                    btnBusinessDetails.IsEnabled = false;
-                                    lbBusinessStatus.Foreground = new SolidColorBrush(Colors.Red);
-                                    lbBusinessStatus.Text = string.Format(Properties.Resources.ConfigureDisabled, tcnode.DatabaseName);
-
-                                    btnAddUser.IsEnabled = true;
-                                    lbAddUserStatus.Foreground = new SolidColorBrush(Colors.Blue);                                                                     
-
-                                    switch (tcnode.Authentication)
-                                    {
-                                        case AuthenticationMode.SqlServer:
-                                            tbUsrLoginName.Text = this.SqlUserName;
-                                            lbAddUserStatus.Text = string.Format(Properties.Resources.AddSqlUserToDatabase, tcnode.DatabaseName, tcnode.SqlServerName);
-                                            pbUsrPassword.Password = this.Password;
-                                            cbCreateLogin.IsChecked = true;
-                                            cbCreateLogin.IsEnabled = true;
-                                            cbLoginAsUser.IsEnabled = true;
-                                            break;
-                                        case AuthenticationMode.Windows:
-                                            tbUsrLoginName.Text = tcnode.WinUserName;
-                                            lbAddUserStatus.Text = string.Format(Properties.Resources.AddWinUserToDatabase, tcnode.DatabaseName, tcnode.SqlServerName);
-                                            pbUsrPassword.Password = string.Empty;
-                                            cbCreateLogin.IsChecked = false;
-                                            cbLoginAsUser.IsChecked = false;
-                                            cbCreateLogin.IsEnabled = false;
-                                            cbLoginAsUser.IsEnabled = false;
-                                            break;
-                                    }
-
-                                    lbAddUserStatus.Foreground = new SolidColorBrush(Colors.Blue);
-
-                                    var calendarCodes = tcnode.CalendarCodes;
-                                    foreach (string calendarCode in calendarCodes)
-                                        cbUsrCalendarCode.Items.Add(calendarCode);
-                                    if (cbUsrCalendarCode.Items.Count > 0)
-                                        cbUsrCalendarCode.SelectedIndex = 0;
-
-                                    tabsMain.SelectedItem = pageAddUsers;
-
-                                    if (tcnode.IsConfigured)
-                                    {
-                                        btnBasicSetup.IsEnabled = false;
-                                        lbBasicSetupStatus.Foreground = new SolidColorBrush(Colors.Red);
-                                        lbBasicSetupStatus.Text = string.Format(Properties.Resources.InstanceIsConfigured, tcnode.DatabaseName, tcnode.SqlServerName);
-
-                                        btnServices.IsEnabled = true;
-                                        lbServicesStatus.Foreground = new SolidColorBrush(Colors.Blue);
-                                        lbServicesStatus.Text = string.Format(Properties.Resources.InstallDemoData, tcnode.SqlServerName, tcnode.DatabaseName);
-
-                                        btnManufacturing.IsEnabled = true;
-                                        lbManufacturingStatus.Foreground = new SolidColorBrush(Colors.Blue);
-                                        lbManufacturingStatus.Text = string.Format(Properties.Resources.InstallDemoData, tcnode.SqlServerName, tcnode.DatabaseName);
-                                    }
-                                    else
-                                    {
-                                        btnBasicSetup.IsEnabled = true;
-                                        lbBasicSetupStatus.Foreground = new SolidColorBrush(Colors.Blue);
-                                        lbBasicSetupStatus.Text = string.Format(Properties.Resources.InstallBasicSetupuration, tcnode.DatabaseName, tcnode.SqlServerName);
-
-                                        btnServices.IsEnabled = false;
-                                        lbServicesStatus.Foreground = new SolidColorBrush(Colors.Red);
-                                        lbServicesStatus.Text = Properties.Resources.InstanceIsUnconfigured;
-
-                                        btnManufacturing.IsEnabled = false;
-                                        lbManufacturingStatus.Foreground = new SolidColorBrush(Colors.Red);
-                                        lbManufacturingStatus.Text = Properties.Resources.InstanceIsUnconfigured;
-                                    }
-                                }
-                            }
+                            btnTestConnection.IsEnabled = false;
+                            lbConnectionStatus.Foreground = new SolidColorBrush(Colors.Red);
+                            lbConnectionStatus.Text = Properties.Resources.ExecutionInProgress;
+                            DisableFunctions();
+                            InstallNode(tcnode);
                         }
                         else
                         {
-                            lbConnectionStatus.Foreground = new SolidColorBrush(Colors.Red);
-                            lbConnectionStatus.Text = Properties.Resources.UnrecognisedDatasource;
-                            DisableFunctions();
+                            lbConnectionStatus.Foreground = new SolidColorBrush(Colors.Blue);
+                            lbConnectionStatus.Text = Properties.Resources.ConnectionSucceeded;
+
+                            if (tcnode.IsTCNode)
+                            {
+
+                                lbUpgrade.Content = string.Format(Properties.Resources.UpgradeHeader, tcnode.DatabaseName);
+
+                                if (!tcnode.IsUpToDate)
+                                {
+                                    lbUpgradeStatus.Text = string.Format(Properties.Resources.InstanceNeedsUpgrading, tcnode.DatabaseName, tcnode.InstalledVersion.ToString(), TCNodeConfig.CurrentVersion.ToString());
+                                    lbUpgradeStatus.Foreground = new SolidColorBrush(Colors.Red);
+                                    btnUpgrade.IsEnabled = true;
+                                    tabsMain.SelectedItem = pageUpgrades;
+                                }
+                                else
+                                {
+                                    lbUpgradeStatus.Text = string.Format(Properties.Resources.InstanceIsUpToDate, tcnode.DatabaseName, tcnode.InstalledVersion.ToString());
+                                    lbUpgradeStatus.Foreground = new SolidColorBrush(Colors.Black);
+                                    btnUpgrade.IsEnabled = false;
+
+                                    if (!tcnode.IsInitialised)
+                                    {
+                                        btnBusinessDetails.IsEnabled = true;
+                                        lbBusinessStatus.Foreground = new SolidColorBrush(Colors.Blue);
+                                        lbBusinessStatus.Text = Properties.Resources.ConfigureEnabled;
+                                        tabsMain.SelectedItem = pageBusinessDetails;
+                                    }
+                                    else
+                                    {
+                                        btnBusinessDetails.IsEnabled = false;
+                                        lbBusinessStatus.Foreground = new SolidColorBrush(Colors.Red);
+                                        lbBusinessStatus.Text = string.Format(Properties.Resources.ConfigureDisabled, tcnode.DatabaseName);
+
+                                        btnAddUser.IsEnabled = true;
+                                        lbAddUserStatus.Foreground = new SolidColorBrush(Colors.Blue);
+
+                                        switch (tcnode.Authentication)
+                                        {
+                                            case AuthenticationMode.SqlServer:
+                                                tbUsrLoginName.Text = this.SqlUserName;
+                                                lbAddUserStatus.Text = string.Format(Properties.Resources.AddSqlUserToDatabase, tcnode.DatabaseName, tcnode.SqlServerName);
+                                                pbUsrPassword.Password = this.Password;
+                                                cbCreateLogin.IsChecked = true;
+                                                cbCreateLogin.IsEnabled = true;
+                                                cbLoginAsUser.IsEnabled = true;
+                                                break;
+                                            case AuthenticationMode.Windows:
+                                                tbUsrLoginName.Text = tcnode.WinUserName;
+                                                lbAddUserStatus.Text = string.Format(Properties.Resources.AddWinUserToDatabase, tcnode.DatabaseName, tcnode.SqlServerName);
+                                                pbUsrPassword.Password = string.Empty;
+                                                cbCreateLogin.IsChecked = false;
+                                                cbLoginAsUser.IsChecked = false;
+                                                cbCreateLogin.IsEnabled = false;
+                                                cbLoginAsUser.IsEnabled = false;
+                                                break;
+                                        }
+
+                                        lbAddUserStatus.Foreground = new SolidColorBrush(Colors.Blue);
+
+                                        var calendarCodes = tcnode.CalendarCodes;
+                                        foreach (string calendarCode in calendarCodes)
+                                            cbUsrCalendarCode.Items.Add(calendarCode);
+                                        if (cbUsrCalendarCode.Items.Count > 0)
+                                            cbUsrCalendarCode.SelectedIndex = 0;
+
+                                        tabsMain.SelectedItem = pageAddUsers;
+
+                                        if (tcnode.IsConfigured)
+                                        {
+                                            btnBasicSetup.IsEnabled = false;
+                                            lbBasicSetupStatus.Foreground = new SolidColorBrush(Colors.Red);
+                                            lbBasicSetupStatus.Text = string.Format(Properties.Resources.InstanceIsConfigured, tcnode.DatabaseName, tcnode.SqlServerName);
+
+                                            btnServices.IsEnabled = true;
+                                            lbServicesStatus.Foreground = new SolidColorBrush(Colors.Blue);
+                                            lbServicesStatus.Text = string.Format(Properties.Resources.InstallDemoData, tcnode.SqlServerName, tcnode.DatabaseName);
+
+                                            btnManufacturing.IsEnabled = true;
+                                            lbManufacturingStatus.Foreground = new SolidColorBrush(Colors.Blue);
+                                            lbManufacturingStatus.Text = string.Format(Properties.Resources.InstallDemoData, tcnode.SqlServerName, tcnode.DatabaseName);
+                                        }
+                                        else
+                                        {
+                                            btnBasicSetup.IsEnabled = true;
+                                            lbBasicSetupStatus.Foreground = new SolidColorBrush(Colors.Blue);
+                                            lbBasicSetupStatus.Text = string.Format(Properties.Resources.InstallBasicSetupuration, tcnode.DatabaseName, tcnode.SqlServerName);
+
+                                            btnServices.IsEnabled = false;
+                                            lbServicesStatus.Foreground = new SolidColorBrush(Colors.Red);
+                                            lbServicesStatus.Text = Properties.Resources.InstanceIsUnconfigured;
+
+                                            btnManufacturing.IsEnabled = false;
+                                            lbManufacturingStatus.Foreground = new SolidColorBrush(Colors.Red);
+                                            lbManufacturingStatus.Text = Properties.Resources.InstanceIsUnconfigured;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                lbConnectionStatus.Foreground = new SolidColorBrush(Colors.Red);
+                                lbConnectionStatus.Text = Properties.Resources.UnrecognisedDatasource;
+                                DisableFunctions();
+                            }
                         }
                     }
-                }
-                else
-                {
-                    lbConnectionStatus.Foreground = new SolidColorBrush(Colors.Red);
-                    lbConnectionStatus.Text = Properties.Resources.ConnectionFailed;
+                    else
+                    {
+                        lbConnectionStatus.Foreground = new SolidColorBrush(Colors.Red);
+                        lbConnectionStatus.Text = Properties.Resources.ConnectionFailed;
 
-                    DisableFunctions();
+                        DisableFunctions();
+
+                    }
 
                 }
             }
@@ -249,7 +249,6 @@ namespace TradeControl.Node.Config
             }
             finally
             {
-                Properties.Settings.Default.Save();
                 Cursor = Cursors.Arrow;
             }
         }

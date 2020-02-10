@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TradeControl.Node.Config.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TradeControl.Node.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="SqlServerName" Type="System.String" Scope="User">
@@ -12,9 +12,9 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="AuthenticationMode" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="SqlUpgrades" Type="System.Collections.Specialized.StringCollection" Scope="Application">
+    <Setting Name="SqlUpgrades" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
   &lt;string&gt;tc_upgrade_3_23_2&lt;/string&gt;
@@ -23,6 +23,7 @@
   &lt;string&gt;tc_upgrade_3_24_3&lt;/string&gt;
   &lt;string&gt;tc_upgrade_3_24_4&lt;/string&gt;
   &lt;string&gt;tc_upgrade_3_24_5&lt;/string&gt;
+  &lt;string&gt;tc_upgrade_3_24_6&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
   </Settings>

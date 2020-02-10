@@ -3,7 +3,7 @@
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
-"ProjectName" = "8:tcNodeConfigSetup"
+"ProjectName" = "8:tcNodeInstaller"
 "LanguageId" = "3:1033"
 "CodePage" = "3:1252"
 "UILanguageId" = "3:1033"
@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_ADDC2900B2F091D0E6353A4999AB612B"
+        "OwnerKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -29,6 +35,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_ADDC2900B2F091D0E6353A4999AB612B"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -96,10 +108,10 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
                     {
-                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
                     }
                 }
             }
@@ -146,6 +158,37 @@
                     }
                 }
             "SourcePath" = "8:System.Net.Http.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_5CF1BA07340340B497A48A5C96106A02"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_ADDC2900B2F091D0E6353A4999AB612B"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.24.6.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_ADDC2900B2F091D0E6353A4999AB612B"
+                    {
+                    "Name" = "8:TradeControl.Node.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:TradeControl.Node.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_5CF1BA07340340B497A48A5C96106A02"
@@ -230,15 +273,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Trade Control Node Configurator"
-        "ProductCode" = "8:{C8B530AE-387E-49EA-B2E8-A7A5DF56183C}"
-        "PackageCode" = "8:{672B49EF-8D36-4F40-AC52-27C83EF9C49F}"
+        "ProductCode" = "8:{201BF45C-A483-4D7D-A402-3E9F2AB3ECCB}"
+        "PackageCode" = "8:{715886F2-AA67-4567-850D-6729329D8A74}"
         "UpgradeCode" = "8:{87530140-719B-40FB-88AF-371486179C12}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:3.24.5"
+        "ProductVersion" = "8:3.24.6"
         "Manufacturer" = "8:Trade Control"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -766,7 +809,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
             {
-            "SourcePath" = "8:..\\tcNodeConfig\\obj\\Debug\\TradeControl.Node.Config.exe"
+            "SourcePath" = "8:..\\tcNodeSetup\\obj\\Release\\TradeControl.Node.Config.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_5CF1BA07340340B497A48A5C96106A02"

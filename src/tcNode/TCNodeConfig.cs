@@ -10,7 +10,7 @@ using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace TradeControl.Node.Config
+namespace TradeControl.Node
 {
     public enum AuthenticationMode { Windows, SqlServer };
     public enum DemoInstallMode { Activities, Orders, Invoices, Payments };
@@ -60,10 +60,10 @@ namespace TradeControl.Node.Config
         }
     }
 
-    public class TCNodeConfig
+    public sealed class TCNodeConfig : IDisposable
     {
         public string SqlServerName { get; }
-        public AuthenticationMode Authentication { get; } = AuthenticationMode.SqlServer;
+        public AuthenticationMode Authentication { get; }
         public string SqlUserName { get; }
         public string DatabaseName { get; }
         public string Password { get; }
@@ -82,6 +82,23 @@ namespace TradeControl.Node.Config
             SqlUserName = sqlUserName;
             DatabaseName = databaseName;
             Password = password;
+        }
+
+        public TCNodeConfig() 
+        {
+            Authentication = (AuthenticationMode)Properties.Settings.Default.AuthenticationMode;
+            SqlServerName = Properties.Settings.Default.SqlServerName;
+            SqlUserName = Properties.Settings.Default.SqlUserName;
+            DatabaseName = Properties.Settings.Default.DatabaseName;
+        }
+
+        public void Dispose()
+        {
+            Properties.Settings.Default.SqlServerName = SqlServerName;
+            Properties.Settings.Default.AuthenticationMode = (int)Authentication;
+            Properties.Settings.Default.SqlUserName = SqlUserName;
+            Properties.Settings.Default.DatabaseName = DatabaseName;
+            Properties.Settings.Default.Save();
         }
 
         #region version

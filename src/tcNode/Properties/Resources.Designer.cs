@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TradeControl.Node.Config.Properties {
+namespace TradeControl.Node.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace TradeControl.Node.Config.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TradeControl.Node.Config.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TradeControl.Node.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,96 +61,6 @@ namespace TradeControl.Node.Config.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add a new data user to {0}. The password can be left blank if the user can already log into {1} and you are not automatically logging in as them. .
-        /// </summary>
-        internal static string AddSqlUserToDatabase {
-            get {
-                return ResourceManager.GetString("AddSqlUserToDatabase", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Note that an administator account has already been added. By default new users are denied access to system tables and user accounts. Log in with your administrator account to amend user profiles..
-        /// </summary>
-        internal static string AddUserNote {
-            get {
-                return ResourceManager.GetString("AddUserNote", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Add a new data user to {0}. Windows users must first be granted login permissions to {1} using Sql Management Studio..
-        /// </summary>
-        internal static string AddWinUserToDatabase {
-            get {
-                return ResourceManager.GetString("AddWinUserToDatabase", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The basic configuration has been installed on {0}. Try logging on with a client before loading one of the demos..
-        /// </summary>
-        internal static string BasicSetupInstalled {
-            get {
-                return ResourceManager.GetString("BasicSetupInstalled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} has been successfully configured.
-        /// </summary>
-        internal static string ConfigurationSuccess {
-            get {
-                return ResourceManager.GetString("ConfigurationSuccess", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} is already configured..
-        /// </summary>
-        internal static string ConfigureDisabled {
-            get {
-                return ResourceManager.GetString("ConfigureDisabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enter the above details and configure..
-        /// </summary>
-        internal static string ConfigureEnabled {
-            get {
-                return ResourceManager.GetString("ConfigureEnabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Connection Failed!.
-        /// </summary>
-        internal static string ConnectionFailed {
-            get {
-                return ResourceManager.GetString("ConnectionFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Successfully Connected..
-        /// </summary>
-        internal static string ConnectionSucceeded {
-            get {
-                return ResourceManager.GetString("ConnectionSucceeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Data source not found.
-        /// </summary>
-        internal static string DataSourceNotFound {
-            get {
-                return ResourceManager.GetString("DataSourceNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error log write failure. Check file permissions on {0}..
         /// </summary>
         internal static string ErrorLogFailure {
@@ -165,96 +75,6 @@ namespace TradeControl.Node.Config.Properties {
         internal static string ErrorLogHeader {
             get {
                 return ResourceManager.GetString("ErrorLogHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Installation in progress....
-        /// </summary>
-        internal static string ExecutionInProgress {
-            get {
-                return ResourceManager.GetString("ExecutionInProgress", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Install a basic configuration on server {0}, {1}.
-        /// </summary>
-        internal static string InstallBasicSetupuration {
-            get {
-                return ResourceManager.GetString("InstallBasicSetupuration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Demo data will be installed on server {0}, {1}.
-        /// </summary>
-        internal static string InstallDemoData {
-            get {
-                return ResourceManager.GetString("InstallDemoData", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The BOM demo has been installed on {0}..
-        /// </summary>
-        internal static string InstalledManDemo {
-            get {
-                return ResourceManager.GetString("InstalledManDemo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The Trade Control schema has been installed..
-        /// </summary>
-        internal static string InstalledSchema {
-            get {
-                return ResourceManager.GetString("InstalledSchema", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The services demo has been installed on {0}..
-        /// </summary>
-        internal static string InstalledServicesDemo {
-            get {
-                return ResourceManager.GetString("InstalledServicesDemo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} on {1} is already configured..
-        /// </summary>
-        internal static string InstanceIsConfigured {
-            get {
-                return ResourceManager.GetString("InstanceIsConfigured", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Instance must have a basic configuration before this demo can be installed.
-        /// </summary>
-        internal static string InstanceIsUnconfigured {
-            get {
-                return ResourceManager.GetString("InstanceIsUnconfigured", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} is up to date on version {1}..
-        /// </summary>
-        internal static string InstanceIsUpToDate {
-            get {
-                return ResourceManager.GetString("InstanceIsUpToDate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Upgrade {0} from version {1} to {2}.
-        /// </summary>
-        internal static string InstanceNeedsUpgrading {
-            get {
-                return ResourceManager.GetString("InstanceNeedsUpgrading", resourceCulture);
             }
         }
         
@@ -447,29 +267,30 @@ namespace TradeControl.Node.Config.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Datasource is not a recognised configuration.
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Sample upgrade script
+        ///Release: 3.24.6
+        ///
+        ///Date: 31 January 2019
+        ///Author: Ian Monnox
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/tc-nodecore
+        ///
+        ///Instructions:
+        ///This script should be applied by the TC Node Configuration ap [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string UnrecognisedDatasource {
+        internal static string tc_upgrade_3_24_6 {
             get {
-                return ResourceManager.GetString("UnrecognisedDatasource", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Upgrade {0}.
-        /// </summary>
-        internal static string UpgradeHeader {
-            get {
-                return ResourceManager.GetString("UpgradeHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} has been added successfully..
-        /// </summary>
-        internal static string UserAddedSuccessfully {
-            get {
-                return ResourceManager.GetString("UserAddedSuccessfully", resourceCulture);
+                return ResourceManager.GetString("tc_upgrade_3_24_6", resourceCulture);
             }
         }
     }

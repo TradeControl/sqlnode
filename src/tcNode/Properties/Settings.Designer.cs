@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TradeControl.Node.Config.Properties {
+namespace TradeControl.Node.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -61,7 +61,7 @@ namespace TradeControl.Node.Config.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int AuthenticationMode {
             get {
                 return ((int)(this["AuthenticationMode"]));
@@ -71,7 +71,7 @@ namespace TradeControl.Node.Config.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute(@"<?xml version=""1.0"" encoding=""utf-16""?>
 <ArrayOfString xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
@@ -81,10 +81,14 @@ namespace TradeControl.Node.Config.Properties {
   <string>tc_upgrade_3_24_3</string>
   <string>tc_upgrade_3_24_4</string>
   <string>tc_upgrade_3_24_5</string>
+  <string>tc_upgrade_3_24_6</string>
 </ArrayOfString>")]
         public global::System.Collections.Specialized.StringCollection SqlUpgrades {
             get {
                 return ((global::System.Collections.Specialized.StringCollection)(this["SqlUpgrades"]));
+            }
+            set {
+                this["SqlUpgrades"] = value;
             }
         }
     }

@@ -117,65 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddSqlUserToDatabase" xml:space="preserve">
-    <value>Add a new data user to {0}. The password can be left blank if the user can already log into {1} and you are not automatically logging in as them. </value>
+  <data name="ErrorLogFailure" xml:space="preserve">
+    <value>Error log write failure. Check file permissions on {0}.</value>
   </data>
-  <data name="AddUserNote" xml:space="preserve">
-    <value>Note that an administator account has already been added. By default new users are denied access to system tables and user accounts. Log in with your administrator account to amend user profiles.</value>
-  </data>
-  <data name="AddWinUserToDatabase" xml:space="preserve">
-    <value>Add a new data user to {0}. Windows users must first be granted login permissions to {1} using Sql Management Studio.</value>
-  </data>
-  <data name="BasicSetupInstalled" xml:space="preserve">
-    <value>The basic configuration has been installed on {0}. Try logging on with a client before loading one of the demos.</value>
-  </data>
-  <data name="ConfigurationSuccess" xml:space="preserve">
-    <value>{0} has been successfully configured</value>
-  </data>
-  <data name="ConfigureDisabled" xml:space="preserve">
-    <value>{0} is already configured.</value>
-  </data>
-  <data name="ConfigureEnabled" xml:space="preserve">
-    <value>Enter the above details and configure.</value>
-  </data>
-  <data name="ConnectionFailed" xml:space="preserve">
-    <value>Connection Failed!</value>
-  </data>
-  <data name="ConnectionSucceeded" xml:space="preserve">
-    <value>Successfully Connected.</value>
-  </data>
-  <data name="DataSourceNotFound" xml:space="preserve">
-    <value>Data source not found</value>
-  </data>
-  <data name="ExecutionInProgress" xml:space="preserve">
-    <value>Installation in progress...</value>
-  </data>
-  <data name="InstallBasicSetupuration" xml:space="preserve">
-    <value>Install a basic configuration on server {0}, {1}</value>
-  </data>
-  <data name="InstallDemoData" xml:space="preserve">
-    <value>Demo data will be installed on server {0}, {1}</value>
-  </data>
-  <data name="InstalledSchema" xml:space="preserve">
-    <value>The Trade Control schema has been installed.</value>
-  </data>
-  <data name="InstalledManDemo" xml:space="preserve">
-    <value>The BOM demo has been installed on {0}.</value>
-  </data>
-  <data name="InstalledServicesDemo" xml:space="preserve">
-    <value>The services demo has been installed on {0}.</value>
-  </data>
-  <data name="InstanceIsConfigured" xml:space="preserve">
-    <value>{0} on {1} is already configured.</value>
-  </data>
-  <data name="InstanceIsUnconfigured" xml:space="preserve">
-    <value>Instance must have a basic configuration before this demo can be installed</value>
-  </data>
-  <data name="InstanceIsUpToDate" xml:space="preserve">
-    <value>{0} is up to date on version {1}.</value>
-  </data>
-  <data name="InstanceNeedsUpgrading" xml:space="preserve">
-    <value>Upgrade {0} from version {1} to {2}</value>
+  <data name="ErrorLogHeader" xml:space="preserve">
+    <value>Timestamp, Message, Source, Target, Inner Message</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="tc_create_node" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -186,21 +132,6 @@
   </data>
   <data name="tc_upgrade_3_24_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\scripts\tc_upgrade_3_24_1.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
-  </data>
-  <data name="UnrecognisedDatasource" xml:space="preserve">
-    <value>Datasource is not a recognised configuration</value>
-  </data>
-  <data name="UpgradeHeader" xml:space="preserve">
-    <value>Upgrade {0}</value>
-  </data>
-  <data name="UserAddedSuccessfully" xml:space="preserve">
-    <value>{0} has been added successfully.</value>
-  </data>
-  <data name="ErrorLogFailure" xml:space="preserve">
-    <value>Error log write failure. Check file permissions on {0}.</value>
-  </data>
-  <data name="ErrorLogHeader" xml:space="preserve">
-    <value>Timestamp, Message, Source, Target, Inner Message</value>
   </data>
   <data name="tc_upgrade_3_24_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\scripts\tc_upgrade_3_24_2.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
@@ -213,5 +144,8 @@
   </data>
   <data name="tc_upgrade_3_24_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\scripts\tc_upgrade_3_24_5.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="tc_upgrade_3_24_6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\scripts\tc_upgrade_3_24_6.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
 </root>
