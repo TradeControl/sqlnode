@@ -1,14 +1,14 @@
-﻿CREATE   PROCEDURE App.proc_BasicSetup
+﻿CREATE PROCEDURE App.proc_BasicSetup
 (	
 	@FinancialMonth SMALLINT = 4,
 	@GovAccountName NVARCHAR(255),
 	@BankName NVARCHAR(255),
 	@BankAddress NVARCHAR(MAX),
-	@DummyAccount NVARCHAR(50), --empty string '' disables
+	@DummyAccount NVARCHAR(50), 
 	@CurrentAccount NVARCHAR(50),
 	@CA_SortCode NVARCHAR(10),
 	@CA_AccountNumber NVARCHAR(20),
-	@ReserveAccount NVARCHAR(50), --or empty string
+	@ReserveAccount NVARCHAR(50), 
 	@RA_SortCode NVARCHAR(10),
 	@RA_AccountNumber NVARCHAR(20)
 )
@@ -16,7 +16,7 @@ AS
 DECLARE @FinancialYear SMALLINT;
 
 	SET @FinancialYear = DATEPART(YEAR, CURRENT_TIMESTAMP);
-	IF DATEPART(MONTH, CURRENT_TIMESTAMP) > @FinancialMonth
+	IF DATEPART(MONTH, CURRENT_TIMESTAMP) < @FinancialMonth
 		 SET @FinancialYear -= 1;
 
 	DECLARE 
@@ -197,7 +197,7 @@ DECLARE @FinancialYear SMALLINT;
 		SET CorporationTaxRate = 0.2;
 
 		UPDATE App.tbYearPeriod
-		SET CashStatusCode = 3
+		SET CashStatusCode = 2
 		WHERE StartOn < CURRENT_TIMESTAMP
 
 		IF EXISTS(SELECT * FROM App.tbYearPeriod WHERE CashStatusCode = 3)
@@ -205,7 +205,7 @@ DECLARE @FinancialYear SMALLINT;
 			(
 				SELECT MAX(StartOn) AS StartOn
 				FROM App.tbYearPeriod
-				WHERE CashStatusCode = 3
+				WHERE CashStatusCode = 2
 			)
 			UPDATE App.tbYearPeriod
 			SET CashStatusCode = 1
@@ -233,7 +233,7 @@ DECLARE @FinancialYear SMALLINT;
 		FROM App.tbYear JOIN current_month ON App.tbYear.YearNumber = current_month.YearNumber;
 
 		UPDATE App.tbYear
-		SET CashStatusCode = 3
+		SET CashStatusCode = 2
 		WHERE YearNumber < 	(SELECT YearNumber FROM App.tbYear	WHERE CashStatusCode = 1);
 
 		--ASSIGN CASH CODES AND GOV TO TAX TYPES
@@ -256,4 +256,4 @@ DECLARE @FinancialYear SMALLINT;
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog
-	END CATCH 
+	END CATCH

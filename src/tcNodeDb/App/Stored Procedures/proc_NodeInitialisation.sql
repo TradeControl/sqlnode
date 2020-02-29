@@ -300,7 +300,8 @@ AS
 		, (3014, 'This entry cannot be rescheduled', 0)
 		, (3015, 'Dummy accounts should not be assigned a cash code', 0)
 		, (3016, 'Operations cannot end before they have been started', 0)
-		, (3017, 'Cash codes must be of catagory type BANK', 0);
+		, (3017, 'Cash codes must be of catagory type BANK', 0)
+		, (3018, 'The balance for this account is zero. Check for unposted payments.', 0);
 
 		/***************** BUSINESS DATA *****************************************/
 
@@ -332,7 +333,7 @@ AS
 		, (1, 2, 2, 0, 'Settings', 0, 'Trader', '', 0)
 		, (1, 4, 2, 1, 'Administration', 4, 'Trader', 'App_Admin', 0)
 		, (1, 5, 2, 2, 'SQL Connect', 4, 'Trader', 'Sys_SQLConnect', 0)
-		, (1, 16, 4, 4, 'Definitions', 4, 'Trader', 'App_Definition', 0)
+		, (1, 16, 2, 5, 'Definitions', 4, 'Trader', 'App_Definition', 0)
 		, (1, 23, 4, 0, 'Maintenance', 0, 'Trader', '', 0)
 		, (1, 25, 4, 1, 'Organisations', 4, 'Trader', 'Org_Maintenance', 0)
 		, (1, 29, 4, 2, 'Activities', 4, 'Trader', 'Activity_Edit', 0)
@@ -357,7 +358,7 @@ AS
 		, (1, 52, 6, 7, 'Status Graphs', 4, 'Trader', 'Cash_StatusGraphs', 0)
 		, (1, 53, 2, 4, 'Service Event Log', 2, 'Trader', 'App_EventLog', 1)
 		, (1, 54, 5, 5, 'Transfers', 4, 'Trader', 'Cash_Transfer', 0)
-		, (1, 55, 4, 5, 'Budget', 4, 'Trader', 'Cash_Budget', 0)
+		, (1, 55, 4, 4, 'Budget', 4, 'Trader', 'Cash_Budget', 0)
 		, (1, 66, 6, 9, 'Audit Accruals - Corporation Tax', 5, 'Trader', 'Cash_CorpTaxAuditAccruals', 4)
 		, (1, 67, 6, 8, 'Audit Accruals - VAT', 5, 'Trader', 'Cash_VatAuditAccruals', 4)
 		;

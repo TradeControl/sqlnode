@@ -16,5 +16,3 @@ AS
 	)
 	SELECT StartOn, PeriodYear, [Description], [Period], CorporationTaxRate, TaxAdjustment, CAST(NetProfit AS MONEY) NetProfit, CAST(CorporationTax AS MONEY) CorporationTax
 	FROM totals;
-
-

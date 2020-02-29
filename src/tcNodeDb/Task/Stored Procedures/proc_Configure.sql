@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE Task.proc_Configure (@ParentTaskCode nvarchar(20))
+﻿CREATE PROCEDURE Task.proc_Configure	(@ParentTaskCode nvarchar(20))
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 

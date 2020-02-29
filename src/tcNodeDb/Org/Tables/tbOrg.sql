@@ -28,9 +28,11 @@
     [UpdatedBy]              NVARCHAR (50)  CONSTRAINT [DF_Org_tb_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
     [UpdatedOn]              DATETIME       CONSTRAINT [DF_Org_tb_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]                 ROWVERSION     NOT NULL,
+    [TransmitStatusCode]     SMALLINT       CONSTRAINT [DF_Org_tbOrg_TransmitStatusCode] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Org_tbOrg] PRIMARY KEY NONCLUSTERED ([AccountCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Org_tb_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Org_tb_Org_tbAddress] FOREIGN KEY ([AddressCode]) REFERENCES [Org].[tbAddress] ([AddressCode]) NOT FOR REPLICATION,
+    CONSTRAINT [FK_Org_tbOrg_tbTransmitStatus] FOREIGN KEY ([TransmitStatusCode]) REFERENCES [Org].[tbTransmitStatus] ([TransmitStatusCode]),
     CONSTRAINT [tbOrg_FK00] FOREIGN KEY ([OrganisationStatusCode]) REFERENCES [Org].[tbStatus] ([OrganisationStatusCode]),
     CONSTRAINT [tbOrg_FK01] FOREIGN KEY ([OrganisationTypeCode]) REFERENCES [Org].[tbType] ([OrganisationTypeCode])
 );

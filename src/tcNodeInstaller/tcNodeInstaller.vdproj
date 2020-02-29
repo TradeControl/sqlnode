@@ -179,7 +179,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.24.6.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.25.1.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_ADDC2900B2F091D0E6353A4999AB612B"
@@ -273,15 +273,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Trade Control Node Configurator"
-        "ProductCode" = "8:{201BF45C-A483-4D7D-A402-3E9F2AB3ECCB}"
-        "PackageCode" = "8:{715886F2-AA67-4567-850D-6729329D8A74}"
+        "ProductCode" = "8:{2A2D6DDD-EAD9-4CF9-A12D-7CA363BE4100}"
+        "PackageCode" = "8:{08946181-3F4D-4953-8C55-2653F7ACD8BB}"
         "UpgradeCode" = "8:{87530140-719B-40FB-88AF-371486179C12}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:3.24.6"
+        "ProductVersion" = "8:3.25.1"
         "Manufacturer" = "8:Trade Control"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

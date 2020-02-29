@@ -3,7 +3,7 @@ Trade Control
 Sample upgrade script
 Release: 3.24.6
 
-Date: 31 January 2019
+Date: 31 January 2020
 Author: Ian Monnox
 
 Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
@@ -22,7 +22,7 @@ It inserts the upgade into App.tbInstall.
 
 
 ***********************************************************************************/
-
+go
 ALTER PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,

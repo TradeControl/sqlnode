@@ -121,7 +121,7 @@
   <ItemGroup>
     <ProjectReference Include="..\tcNode\tcNode.csproj">
       <Project>{e0b55ebe-7f5e-4703-b983-a43bb9e3b8d7}</Project>
-      <Name>tcNodeConfigLib</Name>
+      <Name>tcNode</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

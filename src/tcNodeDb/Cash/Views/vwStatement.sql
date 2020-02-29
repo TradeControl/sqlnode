@@ -1,4 +1,4 @@
-﻿CREATE VIEW [Cash].[vwStatement]
+﻿CREATE VIEW Cash.vwStatement
 AS
 	--invoiced taxes
 	WITH corp_taxcode AS

@@ -73,6 +73,27 @@ CREATE NONCLUSTERED INDEX [IX_Invoice_tbInvoice_FlowInitialise]
 
 
 GO
+CREATE   TRIGGER Invoice.Invoice_tbInvoice_TriggerDelete
+ON Invoice.tbInvoice
+FOR DELETE
+AS
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+
+		IF EXISTS (SELECT * FROM deleted INNER JOIN Org.tbOrg ON deleted.AccountCode = Org.tbOrg.AccountCode WHERE Org.tbOrg.TransmitStatusCode <> 1)
+		BEGIN
+			DECLARE @Msg NVARCHAR(MAX);
+			SELECT @Msg = Message FROM App.tbText WHERE TextId = 1220;
+			RAISERROR (@Msg, 10, 1)
+		END
+		
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+
+GO
 CREATE   TRIGGER Invoice.Invoice_tbInvoice_TriggerUpdate
 ON Invoice.tbInvoice
 FOR UPDATE
@@ -80,7 +101,7 @@ AS
 	SET NOCOUNT ON;
 
 	BEGIN TRY
-		IF UPDATE (Spooled)
+		IF UPDATE(Spooled)
 		BEGIN
 			INSERT INTO App.tbDocSpool (DocTypeCode, DocumentNumber)
 			SELECT     App.fnDocInvoiceType(i.InvoiceTypeCode) AS DocTypeCode, i.InvoiceNumber
@@ -94,7 +115,7 @@ AS
 		END
 
 
-		IF UPDATE (InvoicedOn)
+		IF UPDATE(InvoicedOn)
 		BEGIN
 			UPDATE invoice
 		SET DueOn = App.fnAdjustToCalendar(CASE WHEN org.PayDaysFromMonthEnd <> 0 
@@ -112,7 +133,35 @@ AS
 			FROM Invoice.tbInvoice invoice
 				JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
 				JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode
-		END		
+		END	
+		
+		IF UPDATE(InvoiceStatusCode) OR UPDATE(DueOn) OR UPDATE(PaidValue) OR UPDATE(PaidTaxValue) OR UPDATE(InvoiceValue) OR UPDATE (TaxValue)
+		BEGIN
+			WITH candidates AS
+			(
+				SELECT InvoiceNumber, AccountCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue 
+				FROM inserted
+				WHERE EXISTS (SELECT * FROM Invoice.tbChangeLog WHERE InvoiceNumber = inserted.InvoiceNumber)
+			)
+			, logs AS
+			(
+				SELECT clog.LogId, clog.InvoiceNumber, clog.InvoiceStatusCode, clog.TransmitStatusCode, clog.DueOn, clog.InvoiceValue, clog.TaxValue, clog.PaidValue, clog.PaidTaxValue 
+				FROM Invoice.tbChangeLog clog
+				JOIN candidates ON clog.InvoiceNumber = candidates.InvoiceNumber AND LogId = (SELECT MAX(LogId) FROM Invoice.tbChangeLog WHERE InvoiceNumber = candidates.InvoiceNumber)		
+			)
+			INSERT INTO Invoice.tbChangeLog
+									 (InvoiceNumber, TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue)
+			SELECT candidates.InvoiceNumber, CASE orgs.TransmitStatusCode WHEN 1 THEN 2 ELSE 0 END TransmitStatusCode, candidates.InvoiceStatusCode,
+				candidates.DueOn, candidates.InvoiceValue, candidates.TaxValue, candidates.PaidValue, candidates.PaidTaxValue
+			FROM candidates 
+				JOIN Org.tbOrg orgs ON candidates.AccountCode = orgs.AccountCode 
+				JOIN logs ON candidates.InvoiceNumber = logs.InvoiceNumber
+			WHERE (logs.InvoiceStatusCode <> candidates.InvoiceStatusCode) 
+				OR (logs.TransmitStatusCode < 2)
+				OR (logs.DueOn <> candidates.DueOn) 
+				OR ((logs.InvoiceValue + logs.TaxValue + logs.PaidValue + logs.PaidTaxValue) 
+						<> (candidates.InvoiceValue + candidates.TaxValue + candidates.PaidValue + candidates.PaidTaxValue))
+		END
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
@@ -142,7 +191,13 @@ AS
 		FROM Invoice.tbInvoice invoice
 			JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
 			JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode		
-							
+
+		INSERT INTO Invoice.tbChangeLog
+								 (InvoiceNumber, TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue)
+		SELECT      inserted.InvoiceNumber, Org.tbOrg.TransmitStatusCode, inserted.InvoiceStatusCode, inserted.DueOn, inserted.InvoiceValue, inserted.TaxValue
+		FROM            inserted INNER JOIN
+								 Org.tbOrg ON inserted.AccountCode = Org.tbOrg.AccountCode
+								 
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;

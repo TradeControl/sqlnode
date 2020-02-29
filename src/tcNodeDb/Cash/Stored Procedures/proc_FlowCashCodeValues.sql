@@ -224,3 +224,4 @@ AS
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
 	END CATCH
+

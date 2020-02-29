@@ -1,4 +1,5 @@
-﻿CREATE VIEW Task.vwProfit 
+﻿
+CREATE   VIEW Task.vwProfit 
 AS
 	WITH orders AS
 	(
@@ -107,4 +108,3 @@ AS
 			CAST(UninvoicedCost AS MONEY) UninvoicedCost, CAST(UnpaidCost AS MONEY) UnpaidCost,
 			ActionOn, ActionedOn, PaymentOn
 		FROM profits;
-go

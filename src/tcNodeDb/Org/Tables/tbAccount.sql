@@ -26,7 +26,7 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_Org_tbAccount]
 
 
 GO
-CREATE TRIGGER Org.Org_tbAccount_TriggerUpdate 
+CREATE   TRIGGER Org.Org_tbAccount_TriggerUpdate 
    ON  Org.tbAccount
    AFTER UPDATE, INSERT
 AS 

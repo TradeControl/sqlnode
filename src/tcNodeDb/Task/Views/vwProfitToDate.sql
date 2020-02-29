@@ -1,4 +1,5 @@
-﻿CREATE   VIEW Task.vwProfitToDate
+﻿
+CREATE   VIEW Task.vwProfitToDate
 AS
 	WITH TaskProfitToDate AS 
 		(SELECT        MAX(PaymentOn) AS LastPaymentOn

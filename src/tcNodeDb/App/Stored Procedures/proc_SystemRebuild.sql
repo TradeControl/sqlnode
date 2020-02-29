@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE App.proc_SystemRebuild
+﻿CREATE   PROCEDURE App.proc_SystemRebuild
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 

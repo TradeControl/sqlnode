@@ -134,7 +134,7 @@ CREATE NONCLUSTERED INDEX [IX_Task_tbTask_TaskCode_TaxCode_CashCode]
 
 
 GO
-CREATE   TRIGGER Task.Task_tbTask_TriggerInsert
+CREATE TRIGGER Task.Task_tbTask_TriggerInsert
 ON Task.tbTask
 FOR INSERT
 AS
@@ -172,6 +172,14 @@ AS
 	    FROM inserted
 	    WHERE EXISTS (SELECT ContactName FROM inserted AS i WHERE (NOT (ContactName IS NULL)) AND (ContactName <> N''))
                 AND NOT EXISTS(SELECT Org.tbContact.ContactName FROM inserted AS i INNER JOIN Org.tbContact ON i.AccountCode = Org.tbContact.AccountCode AND i.ContactName = Org.tbContact.ContactName)
+
+		INSERT INTO Task.tbChangeLog
+								 (TaskCode, TransmitStatusCode, AccountCode, ActivityCode, TaskStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
+		SELECT inserted.TaskCode, Org.tbOrg.TransmitStatusCode, inserted.AccountCode, inserted.ActivityCode, inserted.TaskStatusCode, 
+								 inserted.ActionOn, inserted.Quantity, inserted.CashCode, inserted.TaxCode, inserted.UnitCharge
+		FROM inserted 
+			JOIN Org.tbOrg ON inserted.AccountCode = Org.tbOrg.AccountCode
+			JOIN Cash.tbCode ON inserted.CashCode = Cash.tbCode.CashCode
 	END TRY
 	BEGIN CATCH
 		IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
@@ -180,7 +188,7 @@ AS
 	END CATCH
 
 GO
-CREATE   TRIGGER Task.Task_tbTask_TriggerUpdate
+CREATE TRIGGER Task.Task_tbTask_TriggerUpdate
 ON Task.tbTask
 FOR UPDATE
 AS
@@ -436,6 +444,54 @@ AS
 		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM Task.tbTask INNER JOIN inserted AS i ON tbTask.TaskCode = i.TaskCode;
 
+		IF UPDATE(TaskStatusCode) OR UPDATE(Quantity) OR UPDATE(ActionOn) OR UPDATE(UnitCharge) OR UPDATE(ActivityCode) OR UPDATE(CashCode) OR UPDATE (TaxCode)
+		BEGIN
+			WITH candidates AS
+			(
+				SELECT TaskCode, AccountCode, ActivityCode, TaskStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge
+				FROM inserted
+				WHERE EXISTS (SELECT * FROM Task.tbChangeLog WHERE TaskCode = inserted.TaskCode)
+			)
+			, logs AS
+			(
+				SELECT clog.LogId, clog.TaskCode, clog.AccountCode, clog.ActivityCode, clog.TaskStatusCode, clog.TransmitStatusCode, clog.ActionOn, clog.Quantity, clog.CashCode, clog.TaxCode, clog.UnitCharge
+				FROM Task.tbChangeLog clog
+				JOIN candidates ON clog.TaskCode = candidates.TaskCode AND LogId = (SELECT MAX(LogId) FROM Task.tbChangeLog WHERE TaskCode = candidates.TaskCode)		
+			)
+			INSERT INTO Task.tbChangeLog
+									(TaskCode, TransmitStatusCode, AccountCode, ActivityCode, TaskStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
+			SELECT candidates.TaskCode, CASE orgs.TransmitStatusCode WHEN 1 THEN 2 ELSE 0 END TransmitStatusCode, candidates.AccountCode,
+				candidates.ActivityCode, candidates.TaskStatusCode, candidates.ActionOn, candidates.Quantity, candidates.CashCode, candidates.TaxCode, candidates.UnitCharge
+			FROM candidates 
+				JOIN Org.tbOrg orgs ON candidates.AccountCode = orgs.AccountCode 
+				JOIN logs ON candidates.TaskCode = logs.TaskCode
+			WHERE (logs.TaskStatusCode <> candidates.TaskStatusCode) 
+				OR (logs.TransmitStatusCode < 2)
+				OR (logs.ActionOn <> candidates.ActionOn) 
+				OR (logs.Quantity <> candidates.Quantity)
+				OR (logs.UnitCharge <> candidates.UnitCharge)
+				OR (logs.TaxCode <> candidates.TaxCode);
+		END
+
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+
+GO
+CREATE   TRIGGER Task.Task_tbTask_TriggerDelete
+ON Task.tbTask
+FOR DELETE
+AS
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+		INSERT INTO Task.tbChangeLog
+								 (TaskCode, TransmitStatusCode, AccountCode, ActivityCode, TaskStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
+		SELECT deleted.TaskCode, CASE Org.tbOrg.TransmitStatusCode WHEN 1 THEN 2 ELSE 0 END TransmitStatusCode, 
+					deleted.AccountCode, deleted.ActivityCode, 4 CancelledStatusCode, 
+					deleted.ActionOn, deleted.Quantity, deleted.CashCode, deleted.TaxCode, deleted.UnitCharge
+		FROM deleted INNER JOIN Org.tbOrg ON deleted.AccountCode = Org.tbOrg.AccountCode;
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;

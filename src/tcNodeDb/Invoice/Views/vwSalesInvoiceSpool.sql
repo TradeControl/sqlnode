@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Invoice.vwSalesInvoiceSpool
+﻿CREATE VIEW Invoice.vwSalesInvoiceSpool
 AS
 SELECT        sales_invoice.InvoiceNumber, Invoice.tbType.InvoiceType, sales_invoice.InvoiceStatusCode, Usr.tbUser.UserName, sales_invoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, 
                          sales_invoice.InvoicedOn, sales_invoice.InvoiceValue AS InvoiceValueTotal, sales_invoice.TaxValue AS TaxValueTotal, sales_invoice.PaymentTerms, sales_invoice.DueOn, sales_invoice.Notes, Org.tbOrg.EmailAddress, 

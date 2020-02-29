@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE App.proc_DemoServices
+﻿CREATE PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,

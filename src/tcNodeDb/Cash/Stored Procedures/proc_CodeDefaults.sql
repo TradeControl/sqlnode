@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Cash.proc_CodeDefaults 
+﻿CREATE PROCEDURE Cash.proc_CodeDefaults 
 	(
 	@CashCode nvarchar(50)
 	)

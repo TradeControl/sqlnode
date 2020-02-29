@@ -3,7 +3,7 @@ Trade Control
 Sample upgrade script
 Release: 3.24.5
 
-Date: 31 January 2019
+Date: 31 January 2020
 Author: Ian Monnox
 
 Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
