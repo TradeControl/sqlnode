@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [Invoice].[tbTask] (
     [InvoiceNumber] NVARCHAR (20) NOT NULL,
     [TaskCode]      NVARCHAR (20) NOT NULL,
-    [Quantity]      FLOAT (53)    CONSTRAINT [DF_Invoice_tbTask_Quantity] DEFAULT ((0)) NOT NULL,
+    [Quantity]      DECIMAL    CONSTRAINT [DF_Invoice_tbTask_Quantity] DEFAULT ((0)) NOT NULL,
     [TotalValue]    MONEY         CONSTRAINT [DF_Invoice_tbTask_TotalValue] DEFAULT ((0)) NOT NULL,
     [InvoiceValue]  MONEY         CONSTRAINT [DF_Invoice_tbActivity_InvoiceValue] DEFAULT ((0)) NOT NULL,
     [TaxValue]      MONEY         CONSTRAINT [DF_Invoice_tbActivity_TaxValue] DEFAULT ((0)) NOT NULL,

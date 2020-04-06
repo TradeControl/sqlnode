@@ -360,7 +360,6 @@
     <Build Include="Invoice\Functions\fnEditDebitCandidates.sql" />
     <Build Include="Invoice\Functions\fnEditTasks.sql" />
     <Build Include="App\Stored Procedures\proc_NodeInitialisation.sql" />
-    <Build Include="Usr\Stored Procedures\proc_AddUser.sql" />
     <Build Include="App\Stored Procedures\proc_BasicSetup.sql" />
     <Build Include="App\Stored Procedures\proc_DemoBom.sql" />
     <Build Include="App\Stored Procedures\proc_DemoServices.sql" />

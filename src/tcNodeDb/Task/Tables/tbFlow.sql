@@ -3,7 +3,7 @@
     [StepNumber]     SMALLINT      CONSTRAINT [DF_Task_tbFlow_StepNumber] DEFAULT ((10)) NOT NULL,
     [ChildTaskCode]  NVARCHAR (20) NULL,
     [SyncTypeCode]   SMALLINT      CONSTRAINT [DF_Task_tbFlow_SyncTypeCode] DEFAULT ((0)) NOT NULL,
-    [UsedOnQuantity] FLOAT (53)    CONSTRAINT [DF_Task_tbFlow_UsedOnQuantity] DEFAULT ((0)) NOT NULL,
+    [UsedOnQuantity] DECIMAL    CONSTRAINT [DF_Task_tbFlow_UsedOnQuantity] DEFAULT ((0)) NOT NULL,
     [OffsetDays]     REAL          CONSTRAINT [DF_Task_tbFlow_OffsetDays] DEFAULT ((0)) NOT NULL,
     [InsertedBy]     NVARCHAR (50) CONSTRAINT [DF_Task_tbFlow_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
     [InsertedOn]     DATETIME      CONSTRAINT [DF_Task_tbFlow_InsertedOn] DEFAULT (getdate()) NOT NULL,

@@ -58,3 +58,13 @@ A script to facilitate event processing by the [Trade Control Network](https://g
 - [x] _Invoice.tbChangeLog_ table maintained by the _Invoice.tbInvoice_ insert, update and delete triggers
 - [x] Cleardown procedures for the Service Event Log and the new Change Logs. 
 - [x] remove obsolete function _Cash.fnFlowCashCodeValues()_
+
+
+### 3.26.1
+
+[sql](src/tcNode/scripts/tc_upgrade_3_26_1.sql)
+
+- [x] ```FLOAT``` is a useful but imprecise type in Sql Server. Moving forward we are going to use ```DECIMAL``` for storing quantities, which is also the underlying type for ```MONEY```
+
+
+

@@ -21,7 +21,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Trade Control")]
 [assembly: AssemblyProduct("TC-Node Configurator")]
-[assembly: AssemblyCopyright("Copyright © Trade Control 2019")]
+[assembly: AssemblyCopyright("Copyright © Trade Control 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Windows;
     ResourceDictionaryLocation.SourceAssembly
 )]
 
-[assembly: AssemblyVersion("3.24.6.0")]
-[assembly: AssemblyFileVersion("3.24.6.0")]
+[assembly: AssemblyVersion("3.26.1.0")]
+[assembly: AssemblyFileVersion("3.26.1.0")]

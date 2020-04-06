@@ -25,6 +25,7 @@
   &lt;string&gt;tc_upgrade_3_24_5&lt;/string&gt;
   &lt;string&gt;tc_upgrade_3_24_6&lt;/string&gt;
   &lt;string&gt;tc_upgrade_3_25_1&lt;/string&gt;
+  &lt;string&gt;tc_upgrade_3_26_1&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
   </Settings>

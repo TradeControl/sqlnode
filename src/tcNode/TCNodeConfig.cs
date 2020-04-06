@@ -173,7 +173,7 @@ namespace TradeControl.Node
             }
         }
 
-        private string ConnectionString
+        public string ConnectionString
         {
             get
             {

@@ -4,7 +4,7 @@
     [ChildCode]      NVARCHAR (50) NOT NULL,
     [SyncTypeCode]   SMALLINT      CONSTRAINT [DF_Activity_tbFlow_SyncTypeCode] DEFAULT ((0)) NOT NULL,
     [OffsetDays]     SMALLINT      CONSTRAINT [DF_Activity_tbFlow_OffsetDays] DEFAULT ((0)) NOT NULL,
-    [UsedOnQuantity] FLOAT (53)    CONSTRAINT [DF_Activity_tbCodeFlow_Quantity] DEFAULT ((0)) NOT NULL,
+    [UsedOnQuantity] DECIMAL    CONSTRAINT [DF_Activity_tbCodeFlow_Quantity] DEFAULT ((0)) NOT NULL,
     [InsertedBy]     NVARCHAR (50) CONSTRAINT [DF_tbTemplateActivity_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
     [InsertedOn]     DATETIME      CONSTRAINT [DF_tbTemplateActivity_InsertedOn] DEFAULT (getdate()) NOT NULL,
     [UpdatedBy]      NVARCHAR (50) CONSTRAINT [DF_tbTemplateActivity_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,

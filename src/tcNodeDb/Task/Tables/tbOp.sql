@@ -8,7 +8,7 @@
     [Note]            NTEXT         NULL,
     [StartOn]         DATETIME      CONSTRAINT [DF_Task_tbOp_StartOn] DEFAULT (getdate()) NOT NULL,
     [EndOn]           DATETIME      CONSTRAINT [DF_Task_tbOp_EndOn] DEFAULT (getdate()) NOT NULL,
-    [Duration]        FLOAT (53)    CONSTRAINT [DF_Task_tbOp_Duration] DEFAULT ((0)) NOT NULL,
+    [Duration]        DECIMAL    CONSTRAINT [DF_Task_tbOp_Duration] DEFAULT ((0)) NOT NULL,
     [OffsetDays]      SMALLINT      CONSTRAINT [DF_Task_tbOp_OffsetDays] DEFAULT ((0)) NOT NULL,
     [InsertedBy]      NVARCHAR (50) CONSTRAINT [DF_Task_tbOp_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
     [InsertedOn]      DATETIME      CONSTRAINT [DF_Task_tbOp_InsertedOn] DEFAULT (getdate()) NOT NULL,

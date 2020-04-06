@@ -77,6 +77,7 @@
     <Content Include="scripts\tc_upgrade_3_24_6.sql" />
     <Content Include="scripts\tc_upgrade_3_24_5.sql" />
     <Content Include="scripts\tc_upgrade_3_25_1.sql" />
+    <Content Include="scripts\tc_upgrade_3_26_1.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

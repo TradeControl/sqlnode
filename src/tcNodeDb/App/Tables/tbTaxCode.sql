@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [App].[tbTaxCode] (
     [TaxCode]        NVARCHAR (10) NOT NULL,
-    [TaxRate]        FLOAT (53)    CONSTRAINT [DF_App_tbTaxCode_VatRate] DEFAULT ((0)) NOT NULL,
+    [TaxRate]        DECIMAL    CONSTRAINT [DF_App_tbTaxCode_VatRate] DEFAULT ((0)) NOT NULL,
     [TaxDescription] NVARCHAR (50) NOT NULL,
     [TaxTypeCode]    SMALLINT      CONSTRAINT [DF_App_tbTaxCode_TaxTypeCode] DEFAULT ((2)) NOT NULL,
     [RoundingCode]   SMALLINT      CONSTRAINT [DF_tbTaxCode_RoundingCode] DEFAULT ((0)) NOT NULL,

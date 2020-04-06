@@ -3,7 +3,7 @@
     [OperationNumber] SMALLINT      CONSTRAINT [DF_Activity_tbOp_OperationNumber] DEFAULT ((0)) NOT NULL,
     [SyncTypeCode]    SMALLINT      CONSTRAINT [DF_Activity_tbOp_SyncTypeCode] DEFAULT ((1)) NOT NULL,
     [Operation]       NVARCHAR (50) NOT NULL,
-    [Duration]        FLOAT (53)    CONSTRAINT [DF_Activity_tbOp_Duration] DEFAULT ((0)) NOT NULL,
+    [Duration]        DECIMAL    CONSTRAINT [DF_Activity_tbOp_Duration] DEFAULT ((0)) NOT NULL,
     [OffsetDays]      SMALLINT      CONSTRAINT [DF_Activity_tbOp_OffsetDays] DEFAULT ((0)) NOT NULL,
     [InsertedBy]      NVARCHAR (50) CONSTRAINT [DF_Activity_tbOp_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
     [InsertedOn]      DATETIME      CONSTRAINT [DF_Activity_tbOp_InsertedOn] DEFAULT (getdate()) NOT NULL,
