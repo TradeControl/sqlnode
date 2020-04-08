@@ -41,8 +41,8 @@ ALTER TABLE Task.tbTask DROP
 	COLUMN	Quantity, UnitCharge;
 go
 ALTER TABLE Task.tbTask WITH NOCHECK ADD
-	Quantity decimal NOT NULL CONSTRAINT DF_Task_tb_Quantity DEFAULT (0),
-	UnitCharge decimal NOT NULL CONSTRAINT DF_Task_tb_UnitCharge DEFAULT (0);
+	Quantity decimal(18, 4) NOT NULL CONSTRAINT DF_Task_tb_Quantity DEFAULT (0),
+	UnitCharge decimal(18, 6) NOT NULL CONSTRAINT DF_Task_tb_UnitCharge DEFAULT (0);
 go
 UPDATE Task.tbTask
 SET Quantity = QuantityStore, UnitCharge = UnitChargeStore
@@ -74,7 +74,7 @@ ENABLE TRIGGER Task.Task_tbTask_TriggerUpdate ON Task.tbTask;
 go
 
 ALTER TABLE [App].[tbTaxCode] ADD
-	TaxRateStore decimal
+	TaxRateStore float
 go
 UPDATE App.tbTaxCode SET TaxRateStore = TaxRate;
 go
@@ -83,7 +83,7 @@ ALTER TABLE App.tbTaxCode DROP
 	COLUMN TaxRate;
 go
 ALTER TABLE App.tbTaxCode WITH NOCHECK ADD
-	TaxRate decimal NOT NULL CONSTRAINT DF_App_tbTaxCode_TaxRate DEFAULT (0)
+	TaxRate decimal(18, 4) NOT NULL CONSTRAINT DF_App_tbTaxCode_TaxRate DEFAULT (0)
 go
 UPDATE App.tbTaxCode SET TaxRate = TaxRateStore;
 go
@@ -102,7 +102,7 @@ ALTER TABLE Task.tbFlow DROP
 	COLUMN UsedOnQuantity;
 go
 ALTER TABLE Task.tbFlow WITH NOCHECK ADD
-	UsedOnQuantity decimal NOT NULL CONSTRAINT DF_Task_tbFlow_UsedOnQuantity DEFAULT (1)
+	UsedOnQuantity decimal(18, 6) NOT NULL CONSTRAINT DF_Task_tbFlow_UsedOnQuantity DEFAULT (1)
 go
 UPDATE Task.tbFlow SET UsedOnQuantity = UsedOnQuantityStore
 go
@@ -120,7 +120,7 @@ ALTER TABLE [Invoice].[tbTask] DROP
 	COLUMN Quantity;
 go
 ALTER TABLE Invoice.tbTask WITH NOCHECK ADD
-	Quantity decimal NOT NULL CONSTRAINT DF_Invoice_tbTask_Quantity DEFAULT (0);
+	Quantity decimal(18, 4) NOT NULL CONSTRAINT DF_Invoice_tbTask_Quantity DEFAULT (0);
 go
 UPDATE Invoice.tbTask SET Quantity = QuantityStore;
 go
@@ -139,7 +139,7 @@ ALTER TABLE Task.tbOp DROP
 	COLUMN Duration;
 go
 ALTER TABLE [Task].[tbOp] ADD
-	Duration decimal CONSTRAINT DF_Task_tbOp_Duration DEFAULT (0);
+	Duration decimal(18, 4) CONSTRAINT DF_Task_tbOp_Duration DEFAULT (0);
 go
 UPDATE Task.tbOp SET Duration = DurationStore;
 go
@@ -160,8 +160,8 @@ ALTER TABLE Task.tbChangeLog DROP COLUMN
 	Quantity, UnitCharge;
 go
 ALTER TABLE Task.tbChangeLog WITH NOCHECK ADD
-	Quantity decimal NOT NULL CONSTRAINT DF_Task_tbChangeLog_Quantity DEFAULT (0),
-	UnitCharge decimal NOT NULL CONSTRAINT DF_Task_tbChangeLog_UnitCharge DEFAULT (0);
+	Quantity decimal(18, 4) NOT NULL CONSTRAINT DF_Task_tbChangeLog_Quantity DEFAULT (0),
+	UnitCharge decimal(18, 6) NOT NULL CONSTRAINT DF_Task_tbChangeLog_UnitCharge DEFAULT (0);
 go
 UPDATE Task.tbChangeLog
 SET Quantity = QuantityStore, UnitCharge = UnitChargeStore
@@ -183,7 +183,7 @@ ALTER TABLE Activity.tbFlow DROP
 	COLUMN UsedOnQuantity;
 go
 ALTER TABLE Activity.tbFlow WITH NOCHECK ADD
-	UsedOnQuantity decimal NOT NULL CONSTRAINT DF_Activity_tbFlow_UsedOnQuantity DEFAULT (1)
+	UsedOnQuantity decimal(18, 6) NOT NULL CONSTRAINT DF_Activity_tbFlow_UsedOnQuantity DEFAULT (1)
 go
 UPDATE Activity.tbFlow SET UsedOnQuantity = UsedOnQuantityStore
 go
@@ -204,7 +204,7 @@ ALTER TABLE Activity.tbOp DROP
 	COLUMN Duration;
 go
 ALTER TABLE [Activity].[tbOp] ADD
-	Duration decimal CONSTRAINT DF_Activity_tbOp_Duration DEFAULT (0);
+	Duration decimal(18, 4) CONSTRAINT DF_Activity_tbOp_Duration DEFAULT (0);
 go
 UPDATE Activity.tbOp SET Duration = DurationStore;
 go
@@ -230,10 +230,10 @@ ALTER TABLE Task.tbQuote DROP
 	COLUMN Quantity, RunOnQuantity, RunBackQuantity, RunBackPrice;
 go
 ALTER TABLE Task.tbQuote ADD
-	Quantity decimal NOT NULL CONSTRAINT DF_Task_tbQuote_Quantity DEFAULT (0),
-	RunOnQuantity decimal NOT NULL CONSTRAINT DF_Task_tbQuote_RunOnQuantity DEFAULT (0),
-	RunBackQuantity decimal NOT NULL CONSTRAINT DF_Task_tbQuote_RunBackQuantity DEFAULT (0),
-	RunBackPrice decimal NOT NULL CONSTRAINT DF_Task_tbQuote_RunBackPrice DEFAULT (0)
+	Quantity decimal(18, 4) NOT NULL CONSTRAINT DF_Task_tbQuote_Quantity DEFAULT (0),
+	RunOnQuantity decimal(18, 4) NOT NULL CONSTRAINT DF_Task_tbQuote_RunOnQuantity DEFAULT (0),
+	RunBackQuantity decimal(18, 4) NOT NULL CONSTRAINT DF_Task_tbQuote_RunBackQuantity DEFAULT (0),
+	RunBackPrice decimal(18, 4) NOT NULL CONSTRAINT DF_Task_tbQuote_RunBackPrice DEFAULT (0)
 go
 UPDATE Task.tbQuote
 SET Quantity = QuantityStore, RunOnQuantity = RunOnQuantityStore,
@@ -264,90 +264,6 @@ AS
 						  App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_AddTask 
-	(
-	@InvoiceNumber nvarchar(20),
-	@TaskCode nvarchar(20)	
-	)
- AS
-  	SET NOCOUNT, XACT_ABORT ON;
-
-	BEGIN TRY
-	DECLARE 
-		@InvoiceTypeCode smallint
-		, @InvoiceQuantity decimal
-		, @QuantityInvoiced decimal
-
-		IF EXISTS(SELECT     InvoiceNumber, TaskCode
-				  FROM         Invoice.tbTask
-				  WHERE     (InvoiceNumber = @InvoiceNumber) AND (TaskCode = @TaskCode))
-			RETURN
-		
-		SELECT   @InvoiceTypeCode = InvoiceTypeCode
-		FROM         Invoice.tbInvoice
-		WHERE     (InvoiceNumber = @InvoiceNumber) 
-
-		IF EXISTS(SELECT     SUM( Invoice.tbTask.Quantity) AS QuantityInvoiced
-				  FROM         Invoice.tbTask INNER JOIN
-										Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
-				  WHERE     ( Invoice.tbInvoice.InvoiceTypeCode = 0 OR
-										Invoice.tbInvoice.InvoiceTypeCode = 2) AND ( Invoice.tbTask.TaskCode = @TaskCode) AND ( Invoice.tbInvoice.InvoiceStatusCode > 0))
-			BEGIN
-			SELECT TOP 1 @QuantityInvoiced = isnull(SUM( Invoice.tbTask.Quantity), 0)
-			FROM         Invoice.tbTask INNER JOIN
-					tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
-			WHERE     ( Invoice.tbInvoice.InvoiceTypeCode = 0 OR
-					tbInvoice.InvoiceTypeCode = 2) AND ( Invoice.tbTask.TaskCode = @TaskCode) AND ( Invoice.tbInvoice.InvoiceStatusCode > 0)				
-			END
-		ELSE
-			SET @QuantityInvoiced = 0
-		
-		IF @InvoiceTypeCode = 1 or @InvoiceTypeCode = 3
-			BEGIN
-			IF EXISTS(SELECT     SUM( Invoice.tbTask.Quantity) AS QuantityInvoiced
-					  FROM         Invoice.tbTask INNER JOIN
-											tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
-					  WHERE     ( Invoice.tbInvoice.InvoiceTypeCode = 1 OR
-											tbInvoice.InvoiceTypeCode = 3) AND ( Invoice.tbTask.TaskCode = @TaskCode) AND ( Invoice.tbInvoice.InvoiceStatusCode > 0))
-				BEGIN
-				SELECT TOP 1 @InvoiceQuantity = isnull(@QuantityInvoiced, 0) - isnull(SUM( Invoice.tbTask.Quantity), 0)
-				FROM         Invoice.tbTask INNER JOIN
-						tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
-				WHERE     ( Invoice.tbInvoice.InvoiceTypeCode = 1 OR
-						tbInvoice.InvoiceTypeCode = 3) AND ( Invoice.tbTask.TaskCode = @TaskCode) AND ( Invoice.tbInvoice.InvoiceStatusCode > 0)										
-				END
-			ELSE
-				SET @InvoiceQuantity = isnull(@QuantityInvoiced, 0)
-			END
-		ELSE
-			BEGIN
-			SELECT  @InvoiceQuantity = Quantity - isnull(@QuantityInvoiced, 0)
-			FROM         Task.tbTask
-			WHERE     (TaskCode = @TaskCode)
-			END
-			
-		IF isnull(@InvoiceQuantity, 0) <= 0
-			SET @InvoiceQuantity = 1
-		
-		INSERT INTO Invoice.tbTask
-							  (InvoiceNumber, TaskCode, Quantity, InvoiceValue, CashCode, TaxCode)
-		SELECT     @InvoiceNumber AS InvoiceNumber, TaskCode, @InvoiceQuantity AS Quantity, UnitCharge * @InvoiceQuantity AS InvoiceValue, CashCode, 
-							  TaxCode
-		FROM         Task.tbTask
-		WHERE     (TaskCode = @TaskCode)
-
-		UPDATE Task.tbTask
-		SET ActionedOn = CURRENT_TIMESTAMP
-		WHERE TaskCode = @TaskCode;
-	
-		EXEC Invoice.proc_Total @InvoiceNumber	
-
-  	END TRY
-	BEGIN CATCH
-		EXEC App.proc_ErrorLog;
-	END CATCH
-
-go
 CREATE OR ALTER VIEW Cash.vwFlowVatRecurrenceAccruals
 AS	
 	WITH active_periods AS
@@ -420,7 +336,7 @@ AS
 		WITH task_flow AS
 		(
 			SELECT parent_task.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
-				CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent_task.Quantity * child.UsedOnQuantity AS decimal) ELSE child_task.Quantity END AS Quantity, 
+				CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent_task.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE child_task.Quantity END AS Quantity, 
 				1 AS Depth				
 			FROM Task.tbFlow child 
 				JOIN Task.tbTask parent_task ON child.ParentTaskCode = parent_task.TaskCode
@@ -430,7 +346,7 @@ AS
 			UNION ALL
 
 			SELECT parent.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
-				CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent.Quantity * child.UsedOnQuantity AS decimal) ELSE child_task.Quantity END AS Quantity, 
+				CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE child_task.Quantity END AS Quantity, 
 				parent.Depth + 1 AS Depth
 			FROM Task.tbFlow child 
 				JOIN task_flow parent ON child.ParentTaskCode = parent.ChildTaskCode
@@ -500,7 +416,7 @@ AS
 	), task_flow AS
 	(
 		SELECT orders.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
-			CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(orders.Quantity * child.UsedOnQuantity AS decimal) ELSE task.Quantity END AS Quantity
+			CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(orders.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE task.Quantity END AS Quantity
 		FROM Task.tbFlow child 
 			JOIN orders ON child.ParentTaskCode = orders.TaskCode
 			JOIN Task.tbTask task ON child.ChildTaskCode = task.TaskCode
@@ -508,7 +424,7 @@ AS
 		UNION ALL
 
 		SELECT parent.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
-			CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent.Quantity * child.UsedOnQuantity AS decimal) ELSE task.Quantity END AS Quantity
+			CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE task.Quantity END AS Quantity
 		FROM Task.tbFlow child 
 			JOIN task_flow parent ON child.ParentTaskCode = parent.ChildTaskCode
 			JOIN Task.tbTask task ON child.ChildTaskCode = task.TaskCode
