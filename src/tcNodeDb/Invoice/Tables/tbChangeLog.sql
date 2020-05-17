@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [Invoice].[tbChangeLog] (
-    [LogId]              INT           IDENTITY (1, 1) NOT NULL,
     [InvoiceNumber]      NVARCHAR (20) NOT NULL,
+    [LogId]              INT           IDENTITY (1, 1) NOT NULL,
     [ChangedOn]          DATETIME      CONSTRAINT [DF_Invoice_tbChangeLog_ChangedOn] DEFAULT (dateadd(millisecond,datepart(millisecond,getdate())*(-1),getdate())) NOT NULL,
     [TransmitStatusCode] SMALLINT      CONSTRAINT [DF_Invoice_tbChangeLog_TransmissionStatusCode] DEFAULT ((0)) NOT NULL,
     [InvoiceStatusCode]  SMALLINT      NOT NULL,
@@ -11,14 +11,15 @@
     [PaidTaxValue]       MONEY         CONSTRAINT [DF_Invoice_tbChangeLog_PaidTaxValue] DEFAULT ((0)) NOT NULL,
     [UpdatedBy]          NVARCHAR (50) CONSTRAINT [DF_Invoice_tbChangeLog_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
     [RowVer]             ROWVERSION    NOT NULL,
-    CONSTRAINT [PK_Invoice_tbChangeLog] PRIMARY KEY CLUSTERED ([LogId] DESC),
+    CONSTRAINT [PK_Invoice_tbChangeLog] PRIMARY KEY CLUSTERED ([InvoiceNumber] ASC, [LogId] DESC),
+    CONSTRAINT [FK_Invoice_tbChangeLog_tbInvoice] FOREIGN KEY ([InvoiceNumber]) REFERENCES [Invoice].[tbInvoice] ([InvoiceNumber]) ON DELETE CASCADE,
     CONSTRAINT [FK_Invoice_tbChangeLog_TrasmitStatusCode] FOREIGN KEY ([TransmitStatusCode]) REFERENCES [Org].[tbTransmitStatus] ([TransmitStatusCode])
 );
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_Invoice_tbChangeLog_InvoiceCode]
-    ON [Invoice].[tbChangeLog]([InvoiceNumber] ASC, [LogId] DESC);
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Invoice_tbChangeLog_LogId]
+    ON [Invoice].[tbChangeLog]([LogId] DESC);
 
 
 GO

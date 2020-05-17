@@ -1,6 +1,6 @@
 /**************************************************************************************
 Trade Control
-Sample upgrade script
+Upgrade script
 Release: 3.26.1
 
 Date: 06 April 2020
@@ -514,7 +514,3 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-
-
-
-

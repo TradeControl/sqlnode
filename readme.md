@@ -7,15 +7,15 @@ Modelling the physical and financial workflows of a business entity in Sql Serve
 - Share with the community a free, practical alternative to conventional MIS and accountancy implementations.
 - Introduce a new business framework that is resistant to fraud whilst enabling fine-grained global visibility at transaction level speeds.
 - Express the commercial architecture of the business entity as a recursive node, facilitating supply-chain scheduling.
-- Demonstrate the [author's](#author) knowledge of Sql Server, systems design and business control systems to prospective clients.
+- Demonstrate the author's knowledge of Sql Server, systems design and business control systems to prospective clients.
 
 Trade Control is not a development product or a prototype. Its functionality is materialised and tested in live environments.
 
 ## Overview
 
-Trade Control has been created through the application of manufacturing system control techniques to the general problem of managing cash and business activity.  The result is a generic tool that provides real-time information regarding overall business performance and project management.  It is an alternative to asset-based accounting systems which have been designed by accountants to support double entry book-keeping and the legal obligation to present accounts. Trade Control is designed using the methods of Systems Engineering to satisfy the needs of production and work; money is subsequently mapped onto these processes.  Double-entry book-keeping error checks by balancing ledgers. Trade Control error checks against a cash account in the UoA of the presiding jurisdiction. It could be a bank or crypto account, although there are no jurisdictions that currently support the latter.
+Trade Control has been created through the application of manufacturing system control techniques to the general problem of managing cash and business activity.  The result is a generic tool that provides real-time information regarding overall business performance and project management.  It is an alternative to asset-based accounting systems which have been designed by accountants to support double entry book-keeping and the legal obligation to present accounts. Trade Control is designed using the methods of Systems Engineering to satisfy the needs of production and work; money is subsequently mapped onto these processes.  Double-entry book-keeping error checks by balancing ledgers. Trade Control error checks against a cash account in the UoA of the presiding jurisdiction. It could be a bank or [crypto account](https://github.com/tradecontrol/tc-bitcoin), although there are no jurisdictions that currently support the latter.
 
-Each instance is called a node because it is designed to be connected to other instances in a network. Inputs perfectly match outputs, so there are no native customer or supplier accounts; no sales, purchase or works orders. Instead demand and supply present a mirror interface and order types are modelled using a principle of cash polarity. Supply-chains are implemented in a [separate repository](https://github.com/tradecontrol/tc-network).
+Each instance is called a node because it is designed to be connected to other instances in a network. Inputs perfectly match outputs, so there are no native customer or supplier accounts; no sales, purchase or works orders. Instead demand and supply present a mirror interface and order types are modelled using a principle of cash polarity. Supply-chains are implemented in the [Network repository](https://github.com/tradecontrol/tc-network).
 
 ### Book
 
@@ -25,7 +25,7 @@ If you have any interest in technological production and manufacturing, there is
 
 ## Installation
 
-[Change Log](changelog.md)
+For the latest changes and current version, consult the [Change Log](changelog.md)
 
 All schema and business logic dimensions of Trade Control are coded in Sql Server. However, technical knowledge of Sql Server is not required. Each instance is installed and configured by an app.
 
@@ -35,10 +35,13 @@ Whilst a configured instance contains the totality of schemas, views and busines
 
 [Client](https://github.com/tradecontrol/tc-office)
 
+To connect up the nodes using Ethereum, install the service from the following repository:
+
+[Network](https://github.com/tradecontrol/tc-network)
 
 ### Visual Studio Solution
 
-The repository can be opened in VS 2019 from TradeControl.sln in src. 
+The repository can be opened in Visual Studio from [the VS solution](src/tc-nodecore.sln). 
 Add the extensions:
 
 - Visual Studio Installer Projects

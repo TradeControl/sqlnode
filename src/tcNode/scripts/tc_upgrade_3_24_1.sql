@@ -1,6 +1,6 @@
 /**************************************************************************************
 Trade Control
-Sample upgrade script
+Upgrade script
 Release: 3.24.1
 
 Date: 1 August 2019

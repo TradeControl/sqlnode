@@ -123,8 +123,15 @@ namespace TradeControl.Node
 
                             if (tcnode.IsTCNode)
                             {
-
                                 lbUpgrade.Content = string.Format(Properties.Resources.UpgradeHeader, tcnode.DatabaseName);
+
+                                if (cbUocName.Items.Count == 0)
+                                {
+                                    List<string> uocNames = tcnode.UnitOfChargeNames;
+                                    foreach (string uocName in uocNames)
+                                        cbUocName.Items.Add(uocName);
+                                    cbUocName.Text = tcnode.UnitOfChargeDetault;
+                                }
 
                                 if (!tcnode.IsUpToDate)
                                 {
@@ -420,7 +427,8 @@ namespace TradeControl.Node
                     tbPhoneNumber.Text,
                     tbCompanyNumber.Text,
                     tbVatNumber.Text,
-                    tbCalendarCode.Text
+                    tbCalendarCode.Text,
+                    cbUocName.Text
                     );
 
                 lbBusinessStatus.Text = string.Format(Properties.Resources.ConfigurationSuccess, this.cbDatabaseName.Text);

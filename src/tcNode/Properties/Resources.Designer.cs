@@ -133,7 +133,7 @@ namespace TradeControl.Node.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
-        ///Sample upgrade script
+        ///Upgrade script
         ///Release: 3.24.1
         ///
         ///Date: 1 August 2019
@@ -150,7 +150,7 @@ namespace TradeControl.Node.Properties {
         ///The script removes all references to Fax Machines from the schema.
         ///
         ///Instructions:
-        ///This s [rest of string was truncated]&quot;;.
+        ///This script s [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_1 {
             get {
@@ -161,7 +161,7 @@ namespace TradeControl.Node.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
-        ///Sample upgrade script
+        ///Upgrade script
         ///Release: 3.24.2
         ///
         ///Date: 10 September 2019
@@ -176,7 +176,7 @@ namespace TradeControl.Node.Properties {
         ///Fix:
         ///- trigger new current balance when OpeningBalance updated 
         ///- include opening balance in the current balance in new accounts
-        ///- cas [rest of string was truncated]&quot;;.
+        ///- cast Entry [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_2 {
             get {
@@ -187,7 +187,7 @@ namespace TradeControl.Node.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
-        ///Sample upgrade script
+        ///Upgrade script
         ///Release: 3.24.3
         ///
         ///Date: 18 October 2019
@@ -203,7 +203,7 @@ namespace TradeControl.Node.Properties {
         ///- Task.proc_Configure inserting empty contact names into Org.tbContact
         ///
         ///Instructions:
-        ///This script should be applied by the TC Node [rest of string was truncated]&quot;;.
+        ///This script should be applied by the TC Node Config [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_3 {
             get {
@@ -214,7 +214,7 @@ namespace TradeControl.Node.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
-        ///Sample upgrade script
+        ///Upgrade script
         ///Release: 3.24.4
         ///
         ///Date: 21 October 2019
@@ -230,7 +230,7 @@ namespace TradeControl.Node.Properties {
         ///- Drop redundant column Cash.tbCode.OpeningBalance
         ///- Cash.vwStatement invoiced vat not carrying over before first payment
         ///
-        ///Instruc [rest of string was truncated]&quot;;.
+        ///Instructions:        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_4 {
             get {
@@ -241,7 +241,7 @@ namespace TradeControl.Node.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
-        ///Sample upgrade script
+        ///Upgrade script
         ///Release: 3.24.5
         ///
         ///Date: 31 January 2020
@@ -258,7 +258,8 @@ namespace TradeControl.Node.Properties {
         ///	https://github.com/tradecontrol/tc-nodecore
         ///
         ///Instructions:
-        ///This script should be applied by the TC Node Configuration ap [rest of string was truncated]&quot;;.
+        ///This script should be applied by the TC Node Configuration app.
+        ///It  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_5 {
             get {
@@ -269,7 +270,7 @@ namespace TradeControl.Node.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
-        ///Sample upgrade script
+        ///Upgrade script
         ///Release: 3.24.6
         ///
         ///Date: 31 January 2020
@@ -286,7 +287,8 @@ namespace TradeControl.Node.Properties {
         ///	https://github.com/tradecontrol/tc-nodecore
         ///
         ///Instructions:
-        ///This script should be applied by the TC Node Configuration ap [rest of string was truncated]&quot;;.
+        ///This script should be applied by the TC Node Configuration app.
+        ///It  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_6 {
             get {
@@ -297,7 +299,7 @@ namespace TradeControl.Node.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
-        ///Sample upgrade script
+        ///Upgrade script
         ///Release: 3.25.1
         ///
         ///Date: 29 February 2020
@@ -314,7 +316,8 @@ namespace TradeControl.Node.Properties {
         ///	https://github.com/tradecontrol/tc-nodecore
         ///
         ///Instructions:
-        ///This script should be applied by the TC Node Configuration a [rest of string was truncated]&quot;;.
+        ///This script should be applied by the TC Node Configuration app.
+        ///It [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_25_1 {
             get {
@@ -325,7 +328,7 @@ namespace TradeControl.Node.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /**************************************************************************************
         ///Trade Control
-        ///Sample upgrade script
+        ///Upgrade script
         ///Release: 3.26.1
         ///
         ///Date: 06 April 2020
@@ -342,11 +345,41 @@ namespace TradeControl.Node.Properties {
         ///	https://github.com/tradecontrol/tc-nodecore
         ///
         ///Instructions:
-        ///This script should be applied by the TC Node Configuration app. [rest of string was truncated]&quot;;.
+        ///This script should be applied by the TC Node Configuration app.
+        ///It in [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_26_1 {
             get {
                 return ResourceManager.GetString("tc_upgrade_3_26_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script
+        ///Release: 3.27.1
+        ///
+        ///Date: 01 May 2020
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/tc-nodecore
+        ///
+        ///Instructions:
+        ///This script should be applied by the TC Node Configuration app.
+        ///It inserts the [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_27_1 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_27_1", resourceCulture);
             }
         }
     }

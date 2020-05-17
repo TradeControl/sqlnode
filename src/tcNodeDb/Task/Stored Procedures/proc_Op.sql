@@ -1,8 +1,4 @@
-﻿
-CREATE   PROCEDURE Task.proc_Op
-	(
-	@TaskCode nvarchar(20)
-	)
+﻿CREATE PROCEDURE Task.proc_Op (@TaskCode nvarchar(20))
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 

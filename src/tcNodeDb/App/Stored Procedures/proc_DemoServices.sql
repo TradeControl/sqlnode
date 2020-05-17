@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE App.proc_DemoServices
+﻿CREATE   PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,
@@ -58,7 +58,7 @@ AS
 		SELECT 'Dividends', (SELECT MAX(NextNumber) + 10000 FROM App.tbRegister)
 		WHERE NOT EXISTS (SELECT * FROM App.tbRegister WHERE RegisterName = 'Dividends');
 
-		INSERT INTO [Activity].[tbActivity] ([ActivityCode], [TaskStatusCode], [DefaultText], [UnitOfMeasure], [CashCode], [UnitCharge], [Printed], [RegisterName])
+		INSERT INTO [Activity].[tbActivity] ([ActivityCode], [TaskStatusCode], ActivityDescription, [UnitOfMeasure], [CashCode], [UnitCharge], [Printed], [RegisterName])
 		VALUES ('Car Parking / Tolls', 3, '', 'each', '213', 0.0000, 0, 'Expenses')
 		, ('Communications monthly charge', 3, '', 'each', '202', 0.0000, 0, 'Expenses')
 		, ('Company Administration', 3, '', 'each', '201', 0.0000, 0, 'Expenses')

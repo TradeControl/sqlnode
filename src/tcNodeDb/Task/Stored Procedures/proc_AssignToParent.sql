@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Task.proc_AssignToParent 
+﻿CREATE PROCEDURE Task.proc_AssignToParent 
 	(
 	@ChildTaskCode nvarchar(20),
 	@ParentTaskCode nvarchar(20)
@@ -39,8 +38,8 @@ CREATE   PROCEDURE Task.proc_AssignToParent
 		WHERE     (TaskCode = @ChildTaskCode) AND ((TaskTitle IS NULL) OR (TaskTitle = ActivityCode))
 	
 		INSERT INTO Task.tbFlow
-							  (ParentTaskCode, StepNumber, ChildTaskCode)
-		VALUES     (@ParentTaskCode, @StepNumber, @ChildTaskCode)
+							  (ParentTaskCode, StepNumber, ChildTaskCode, UsedOnQuantity)
+		VALUES     (@ParentTaskCode, @StepNumber, @ChildTaskCode, 0)
 	
 		COMMIT TRANSACTION
 

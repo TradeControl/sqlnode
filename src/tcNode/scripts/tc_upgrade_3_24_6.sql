@@ -1,6 +1,6 @@
 /**************************************************************************************
 Trade Control
-Sample upgrade script
+Upgrade script
 Release: 3.24.6
 
 Date: 31 January 2020
@@ -23,7 +23,7 @@ It inserts the upgade into App.tbInstall.
 
 ***********************************************************************************/
 go
-ALTER PROCEDURE App.proc_DemoServices
+CREATE OR ALTER PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,

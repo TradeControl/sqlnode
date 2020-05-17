@@ -12,15 +12,12 @@ using System.Threading.Tasks;
 
 namespace TradeControl.Node
 {
-    public enum AuthenticationMode { Windows, SqlServer };
-    public enum DemoInstallMode { Activities, Orders, Invoices, Payments };
-
     public struct SemVer
     {
         public short Major;
         public short Minor;
-        public int ReleaseNumber;  
-        
+        public int ReleaseNumber;
+
         public float VersionNumber { get { return float.Parse(string.Concat(Major, '.', Minor)); } }
 
         public void FromString(string version)
@@ -49,12 +46,12 @@ namespace TradeControl.Node
             return $"{Major}.{Minor}.{ReleaseNumber}";
         }
 
-        public static bool operator < (SemVer v1, SemVer v2)
+        public static bool operator <(SemVer v1, SemVer v2)
         {
             return v1.VersionNumber < v2.VersionNumber || (v1.VersionNumber == v2.VersionNumber && v1.ReleaseNumber < v2.ReleaseNumber);
         }
 
-        public static bool operator > (SemVer v1, SemVer v2)
+        public static bool operator >(SemVer v1, SemVer v2)
         {
             return v1.VersionNumber > v2.VersionNumber || (v1.VersionNumber == v2.VersionNumber && v1.ReleaseNumber > v2.ReleaseNumber);
         }
@@ -84,7 +81,7 @@ namespace TradeControl.Node
             Password = password;
         }
 
-        public TCNodeConfig() 
+        public TCNodeConfig()
         {
             Authentication = (AuthenticationMode)Properties.Settings.Default.AuthenticationMode;
             SqlServerName = Properties.Settings.Default.SqlServerName;
@@ -116,7 +113,7 @@ namespace TradeControl.Node
                     version.FromString(assemblyName.Version.ToString());
                     return version;
                 }
-                catch 
+                catch
                 {
                     return new SemVer();
                 }
@@ -141,7 +138,7 @@ namespace TradeControl.Node
                     else
                         return false;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     ErrorLog(e);
                     throw e;
@@ -262,7 +259,7 @@ namespace TradeControl.Node
         public static List<string> SqlServers
         {
             get
-            {                
+            {
                 try
                 {
                     List<string> sqlServers = new List<string>();
@@ -271,13 +268,13 @@ namespace TradeControl.Node
                     DataTable sources = instance.GetDataSources();
                     foreach (DataRow row in sources.Rows)
                     {
-                        string sqlname = string.Concat(row[0].ToString(), '\\', row[1].ToString()); 
+                        string sqlname = string.Concat(row[0].ToString(), '\\', row[1].ToString());
                         sqlServers.Add(sqlname);
                     }
                     return sqlServers;
                 }
-                catch                 {
-                    return new List<string>();    
+                catch {
+                    return new List<string>();
                 }
             }
         }
@@ -353,7 +350,7 @@ namespace TradeControl.Node
             }
         }
 
-        public  bool IsTCNode
+        public bool IsTCNode
         {
             get
             {
@@ -484,7 +481,7 @@ namespace TradeControl.Node
         {
             try
             {
-                RunScript(sender, Properties.Resources.ResourceManager.GetString(TCNodeCreationScript));             
+                RunScript(sender, Properties.Resources.ResourceManager.GetString(TCNodeCreationScript));
                 UpgradeNode(sender);
                 return true;
             }
@@ -506,7 +503,7 @@ namespace TradeControl.Node
                     return;
 
                 foreach (string candidate in Properties.Settings.Default.SqlUpgradeScripts)
-                {                 
+                {
                     string[] parse = candidate.Split('_');
                     string versionString = string.Concat(parse[parse.Length - 3], '.', parse[parse.Length - 2], '.', parse[parse.Length - 1]);
                     SemVer candidateVersion = new SemVer();
@@ -597,7 +594,7 @@ namespace TradeControl.Node
         #endregion
 
         #region Configuration and Demos
-        public void ConfigureNode(  string accountCode,
+        public void ConfigureNode(string accountCode,
                                     string businessName,
                                     string fullName,
                                     string businessAddress,
@@ -605,10 +602,18 @@ namespace TradeControl.Node
                                     string phoneNumber,
                                     string companyNumber,
                                     string vatNumber,
-                                    string calendarCode)
+                                    string calendarCode,
+                                    string uocName)
         {
             try
             {
+                string unitOfCharge = string.Empty;
+
+                using (dbNodeNetworkDataContext db = new dbNodeNetworkDataContext(ConnectionString))
+                {
+                    unitOfCharge = (from tb in db.tbUocs where tb.UocName == uocName select tb.UnitOfCharge).FirstOrDefault();
+                }
+
                 using (SqlConnection connection = new SqlConnection(ConnectionString))
                 {
                     connection.Open();
@@ -670,7 +675,13 @@ namespace TradeControl.Node
                         p9.ParameterName = "@CalendarCode";
                         p9.Value = calendarCode;
                         command.Parameters.Add(p9);
-                       
+
+                        SqlParameter p10 = command.CreateParameter();
+                        p10.DbType = DbType.String;
+                        p10.ParameterName = "@UnitOfCharge";
+                        p10.Value = unitOfCharge;
+                        command.Parameters.Add(p10);
+
                         command.ExecuteNonQuery();
 
                     }
@@ -680,11 +691,54 @@ namespace TradeControl.Node
             catch (Exception e)
             {
                 throw e;
-            }            
+            }
 
         }
 
-        public void InstallBasicSetup(  short financialMonth,
+        public List<string> UnitOfChargeNames
+        {
+            get
+            {
+                try
+                {
+                    List<string> uocNames;
+                    using (dbNodeNetworkDataContext db = new dbNodeNetworkDataContext(ConnectionString))
+                    {
+                        uocNames = (from tb in db.tbUocs orderby tb.UocName select tb.UocName).ToList<string>();
+                    }
+
+                    return uocNames;
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
+        }
+
+        public string UnitOfChargeDetault
+        {
+            get
+            {
+                try
+                {
+                    string uocName;
+
+                    using (dbNodeNetworkDataContext db = new dbNodeNetworkDataContext(ConnectionString))
+                    {
+                        uocName = (from tb in db.tbUocs where tb.UnitOfCharge == "GBP" select tb.UocName).FirstOrDefault();
+                    }
+
+                    return uocName;
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }       
+        }
+
+public void InstallBasicSetup(  short financialMonth,
                                         string govAccountName,
                                         string bankName,
                                         string bankAddress,

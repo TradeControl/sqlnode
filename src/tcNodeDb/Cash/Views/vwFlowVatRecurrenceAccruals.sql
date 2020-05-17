@@ -1,4 +1,5 @@
-﻿CREATE VIEW Cash.vwFlowVatRecurrenceAccruals
+﻿
+CREATE   VIEW Cash.vwFlowVatRecurrenceAccruals
 AS	
 	WITH active_periods AS
 	(
@@ -31,3 +32,4 @@ AS
 		CAST(ISNULL(ExportPurchasesVat, 0) AS money) AS ExportPurchasesVat, CAST(ISNULL(VatDue, 0) AS money) AS VatDue 
 	FROM vat_accruals 
 		RIGHT OUTER JOIN active_periods ON active_periods.StartOn = vat_accruals.StartOn;		
+

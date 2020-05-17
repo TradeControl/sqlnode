@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -52,7 +53,14 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="TCEnums.cs" />
     <Compile Include="TCNodeConfig.cs" />
+    <Compile Include="dbNodeNetwork.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dbNodeNetwork.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="TCNodeNetwork.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -60,12 +68,20 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="dbNodeNetwork.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>dbNodeNetwork.designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="dbNodeNetwork.dbml.layout">
+      <DependentUpon>dbNodeNetwork.dbml</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="scripts\tc_create_node.sql" />
@@ -78,6 +94,10 @@
     <Content Include="scripts\tc_upgrade_3_24_5.sql" />
     <Content Include="scripts\tc_upgrade_3_25_1.sql" />
     <Content Include="scripts\tc_upgrade_3_26_1.sql" />
+    <Content Include="scripts\tc_upgrade_3_27_1.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Invoice.proc_Total 
+﻿CREATE PROCEDURE Invoice.proc_Total 
 	(
 	@InvoiceNumber nvarchar(20)
 	)
@@ -40,7 +39,7 @@ CREATE   PROCEDURE Invoice.proc_Total
 			InvoiceStatusCode = CASE 
 					WHEN grand_total.PaidValue >= grand_total.InvoiceValue THEN 3 
 					WHEN grand_total.PaidValue > 0 THEN 2 
-					ELSE 1 END
+					ELSE InvoiceStatusCode END
 		FROM Invoice.tbInvoice INNER JOIN grand_total ON Invoice.tbInvoice.InvoiceNumber = grand_total.InvoiceNumber;
 		
   	END TRY

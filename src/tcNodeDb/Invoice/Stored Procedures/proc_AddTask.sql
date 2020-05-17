@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE Invoice.proc_AddTask 
+﻿
+CREATE   PROCEDURE Invoice.proc_AddTask 
 	(
 	@InvoiceNumber nvarchar(20),
 	@TaskCode nvarchar(20)	
@@ -9,8 +10,8 @@
 	BEGIN TRY
 	DECLARE 
 		@InvoiceTypeCode smallint
-		, @InvoiceQuantity decimal
-		, @QuantityInvoiced decimal
+		, @InvoiceQuantity float
+		, @QuantityInvoiced float
 
 		IF EXISTS(SELECT     InvoiceNumber, TaskCode
 				  FROM         Invoice.tbTask

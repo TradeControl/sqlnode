@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE Task.proc_Configure	(@ParentTaskCode nvarchar(20))
+﻿CREATE   PROCEDURE Task.proc_Configure (@ParentTaskCode nvarchar(20))
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -90,7 +90,7 @@ AS
 			INSERT INTO Task.tbTask
 				(TaskCode, UserId, AccountCode, ContactName, ActivityCode, TaskStatusCode, ActionById, ActionOn, TaskNotes, Quantity, UnitCharge, AddressCodeFrom, AddressCodeTo, CashCode, Printed, TaskTitle)
 			SELECT  @TaskCode AS NewTask, Task_tb1.UserId, Task_tb1.AccountCode, Task_tb1.ContactName, Activity.tbActivity.ActivityCode, Activity.tbActivity.TaskStatusCode, 
-						Task_tb1.ActionById, Task_tb1.ActionOn, Activity.tbActivity.DefaultText, Task_tb1.Quantity * Activity.tbFlow.UsedOnQuantity AS Quantity,
+						Task_tb1.ActionById, Task_tb1.ActionOn, Activity.tbActivity.ActivityDescription, Task_tb1.Quantity * Activity.tbFlow.UsedOnQuantity AS Quantity,
 						Activity.tbActivity.UnitCharge, Org.tbOrg.AddressCode AS AddressCodeFrom, Org.tbOrg.AddressCode AS AddressCodeTo, 
 						tbActivity.CashCode, CASE WHEN Activity.tbActivity.Printed = 0 THEN 1 ELSE 0 END AS Printed, Task_tb1.TaskTitle
 			FROM  Activity.tbFlow 

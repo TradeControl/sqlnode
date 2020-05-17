@@ -127,6 +127,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Label Margin="5" Content="Account Code:"  />
                         <TextBox Margin="5" Grid.Column="1" Name="tbAccountCode" Text="HOME" MaxLength="10" FontWeight="Bold"  />
@@ -146,8 +147,10 @@
                         <TextBox Margin="5" Grid.Row="7" Grid.Column="1" Name="tbVatNumber" Text="-" MaxLength="20" FontWeight="Bold"  />
                         <Label Margin="5" Grid.Row="8" Content="Calendar Code:"  />
                         <TextBox Margin="5" Grid.Row="8" Grid.Column="1" Name="tbCalendarCode" Text="WORKS" MaxLength="10" FontWeight="Bold"  />
-                        <Label Margin="5" Grid.Row="9" Content="Info:" VerticalAlignment="Top"  />
-                        <TextBlock x:Name="lbBusinessStatus" Margin="10" Grid.Row="9" Grid.Column="1" Text="Data source not found" Foreground="#FFEA1111" TextWrapping="Wrap" />
+                        <Label Margin="5" Grid.Row="9" Content="Unit of Account:" VerticalAlignment="Top"/>
+                        <ComboBox Margin="5" Grid.Row="9" Grid.Column="1" x:Name="cbUocName" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="10" Content="Info:" VerticalAlignment="Top"  />
+                        <TextBlock x:Name="lbBusinessStatus" Margin="10" Grid.Row="10" Grid.Column="1" Text="Data source not found" Foreground="#FFEA1111" TextWrapping="Wrap" />
                     </Grid>
                     <StackPanel Grid.Row="1"  Margin="5,4.667,5.333,5.333" Grid.ColumnSpan="3" >
                         <Button Name="btnBusinessDetails" Content="Set Details" Grid.Column="1" Margin="3" IsEnabled="False" Click="btnBusinessDetails_Click" />

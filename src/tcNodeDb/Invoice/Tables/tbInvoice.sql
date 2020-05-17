@@ -94,7 +94,7 @@ AS
 	END CATCH
 
 GO
-CREATE   TRIGGER Invoice.Invoice_tbInvoice_TriggerUpdate
+CREATE TRIGGER Invoice.Invoice_tbInvoice_TriggerUpdate
 ON Invoice.tbInvoice
 FOR UPDATE
 AS
@@ -133,8 +133,17 @@ AS
 			FROM Invoice.tbInvoice invoice
 				JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
 				JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode
-		END	
+			WHERE i.InvoiceTypeCode = 0;
+		END;	
 		
+		WITH invoices AS
+		(
+			SELECT inserted.InvoiceNumber, inserted.AccountCode, inserted.InvoiceStatusCode, inserted.DueOn, inserted.InvoiceValue, inserted.TaxValue, inserted.PaidValue, inserted.PaidTaxValue FROM inserted JOIN deleted ON inserted.InvoiceNumber = deleted.InvoiceNumber WHERE inserted.InvoiceStatusCode = 1 AND deleted.InvoiceStatusCode = 0
+		)
+		INSERT INTO Invoice.tbChangeLog (InvoiceNumber, TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue)
+		SELECT InvoiceNumber, orgs.TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue
+		FROM invoices JOIN Org.tbOrg orgs ON invoices.AccountCode = orgs.AccountCode;
+
 		IF UPDATE(InvoiceStatusCode) OR UPDATE(DueOn) OR UPDATE(PaidValue) OR UPDATE(PaidTaxValue) OR UPDATE(InvoiceValue) OR UPDATE (TaxValue)
 		BEGIN
 			WITH candidates AS
@@ -168,7 +177,7 @@ AS
 	END CATCH
 
 GO
-CREATE   TRIGGER Invoice.Invoice_tbInvoice_TriggerInsert
+CREATE TRIGGER Invoice.Invoice_tbInvoice_TriggerInsert
 ON Invoice.tbInvoice
 FOR INSERT
 AS
@@ -190,13 +199,15 @@ AS
 												END, 0)				 
 		FROM Invoice.tbInvoice invoice
 			JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
-			JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode		
+			JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode
+		WHERE i.InvoiceTypeCode = 0;
 
 		INSERT INTO Invoice.tbChangeLog
 								 (InvoiceNumber, TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue)
 		SELECT      inserted.InvoiceNumber, Org.tbOrg.TransmitStatusCode, inserted.InvoiceStatusCode, inserted.DueOn, inserted.InvoiceValue, inserted.TaxValue
 		FROM            inserted INNER JOIN
 								 Org.tbOrg ON inserted.AccountCode = Org.tbOrg.AccountCode
+		WHERE InvoiceStatusCode > 0
 								 
 	END TRY
 	BEGIN CATCH

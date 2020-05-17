@@ -1,6 +1,6 @@
 /**************************************************************************************
 Trade Control
-Sample upgrade script
+Upgrade script
 Release: 3.25.1
 
 Date: 29 February 2020
@@ -61,8 +61,8 @@ AS
 
 go
 CREATE TABLE Task.tbChangeLog (
-	LogId int IDENTITY(1,1) NOT NULL,
 	TaskCode nvarchar(20) NOT NULL,
+	LogId int IDENTITY(1,1) NOT NULL,
 	ChangedOn datetime NOT NULL CONSTRAINT DF_Task_tbChangeLog_ChangedOn DEFAULT (DATEADD(MILLISECOND, DATEPART(MILLISECOND, CURRENT_TIMESTAMP) * -1, CURRENT_TIMESTAMP)),
 	TransmitStatusCode smallint NOT NULL CONSTRAINT DF_Task_tbChangeLog_TransmissionStatusCode DEFAULT (0),
 	AccountCode nvarchar(10) NOT NULL,
@@ -76,7 +76,6 @@ CREATE TABLE Task.tbChangeLog (
 	UpdatedBy nvarchar(50) NOT NULL CONSTRAINT DF_Task_tbChangeLog_UpdatedBy DEFAULT (SUSER_SNAME()),
 	RowVer timestamp NOT NULL,
 	CONSTRAINT PK_Task_tbChangeLog PRIMARY KEY CLUSTERED (LogId DESC),
-	--CONSTRAINT FK_Task_tbChangeLog_tbTask FOREIGN KEY(TaskCode) REFERENCES Task.tbTask (TaskCode),
 	CONSTRAINT FK_Task_tbChangeLog_TrasmitStatusCode FOREIGN KEY (TransmitStatusCode) REFERENCES Org.tbTransmitStatus (TransmitStatusCode)
 ) ON [PRIMARY];
 go
@@ -458,8 +457,8 @@ AS
 	END CATCH
 go
 CREATE TABLE Invoice.tbChangeLog (
-	LogId int IDENTITY(1,1) NOT NULL,
 	InvoiceNumber nvarchar(20) NOT NULL,
+	LogId int IDENTITY(1,1) NOT NULL,
 	ChangedOn datetime NOT NULL CONSTRAINT DF_Invoice_tbChangeLog_ChangedOn DEFAULT (DATEADD(MILLISECOND, DATEPART(MILLISECOND, CURRENT_TIMESTAMP) * -1, CURRENT_TIMESTAMP)),
 	TransmitStatusCode smallint NOT NULL CONSTRAINT DF_Invoice_tbChangeLog_TransmissionStatusCode DEFAULT (0),
 	InvoiceStatusCode smallint NOT NULL,

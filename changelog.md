@@ -66,5 +66,21 @@ A script to facilitate event processing by the [Trade Control Network](https://g
 
 - [x] ```FLOAT``` is a useful but imprecise type in Sql Server. Moving forward we are going to use ```DECIMAL``` for storing quantities, which is also the underlying type for ```MONEY```
 
+### 3.27.1
+
+Release 3.27.1 supports the first full release of the [Trade Control Network](https://github.com/tradecontrol/tc-network).  
+
+[sql](src/tcNode/scripts/tc_upgrade_3_27_1.sql)
+
+- [x] [Unit of Charge](src/tcNodeDb/App/Tables/tbUoC.sql)
+- [x] [Activity Code Mirrors](src/tcNodeDb/Activity/Tables/tbMirror.sql)
+- [x] [Task Allocations](src/tcNodeDb/Task/Tables/tbAllocation.sql) and [SvD algorithm](src/tcNodeDb/Task/Views/vwAllocationSvD.sql) 
+- [x] [Cash Code Mirrors](src/tcNodeDb/Cash/Tables/tbMirror.sql)
+- [x] [Invoice Mirrors](src/tcNodeDb/Invoice/Tables/tbMirror.sql) 
+- [x] Intialisation integration
+- [x] Network Interface to Sql Db class [tcNodeNetwork.cs](src/tcNode/TCNodeNetwork.cs).
+
+
+
 
 

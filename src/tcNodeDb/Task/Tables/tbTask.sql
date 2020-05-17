@@ -1,31 +1,31 @@
 ﻿CREATE TABLE [Task].[tbTask] (
-    [TaskCode]        NVARCHAR (20)  NOT NULL,
-    [UserId]          NVARCHAR (10)  NOT NULL,
-    [AccountCode]     NVARCHAR (10)  NOT NULL,
-    [SecondReference] NVARCHAR (20)  NULL,
-    [TaskTitle]       NVARCHAR (100) NULL,
-    [ContactName]     NVARCHAR (100) NULL,
-    [ActivityCode]    NVARCHAR (50)  NOT NULL,
-    [TaskStatusCode]  SMALLINT       NOT NULL,
-    [ActionById]      NVARCHAR (10)  NOT NULL,
-    [ActionOn]        DATETIME       CONSTRAINT [DF_Task_tbTask_ActionOn] DEFAULT (getdate()) NOT NULL,
-    [ActionedOn]      DATETIME       NULL,
-    [PaymentOn]       DATETIME       CONSTRAINT [DF_Task_tb_PaymentOn] DEFAULT (getdate()) NOT NULL,
-    [TaskNotes]       NVARCHAR (255) NULL,
-    [Quantity]        DECIMAL     CONSTRAINT [DF_Task_tbTask_Quantity] DEFAULT ((0)) NOT NULL,
-    [CashCode]        NVARCHAR (50)  NULL,
-    [TaxCode]         NVARCHAR (10)  NULL,
-    [UnitCharge]      DECIMAL     CONSTRAINT [DF_Task_tb_UnitCharge] DEFAULT ((0)) NOT NULL,
-    [TotalCharge]     MONEY          CONSTRAINT [DF_Task_tb_TotalCharge] DEFAULT ((0)) NOT NULL,
-    [AddressCodeFrom] NVARCHAR (15)  NULL,
-    [AddressCodeTo]   NVARCHAR (15)  NULL,
-    [Spooled]         BIT            CONSTRAINT [DF_Task_tb_Spooled] DEFAULT ((0)) NOT NULL,
-    [Printed]         BIT            CONSTRAINT [DF_Task_tb_Printed] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]      NVARCHAR (50)  CONSTRAINT [DF_Task_tb_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
-    [InsertedOn]      DATETIME       CONSTRAINT [DF_Task_tb_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]       NVARCHAR (50)  CONSTRAINT [DF_Task_tb_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
-    [UpdatedOn]       DATETIME       CONSTRAINT [DF_Task_tb_UpdatedOn] DEFAULT (getdate()) NOT NULL,
-    [RowVer]          ROWVERSION     NOT NULL,
+    [TaskCode]        NVARCHAR (20)   NOT NULL,
+    [UserId]          NVARCHAR (10)   NOT NULL,
+    [AccountCode]     NVARCHAR (10)   NOT NULL,
+    [SecondReference] NVARCHAR (20)   NULL,
+    [TaskTitle]       NVARCHAR (100)  NULL,
+    [ContactName]     NVARCHAR (100)  NULL,
+    [ActivityCode]    NVARCHAR (50)   NOT NULL,
+    [TaskStatusCode]  SMALLINT        NOT NULL,
+    [ActionById]      NVARCHAR (10)   NOT NULL,
+    [ActionOn]        DATETIME        CONSTRAINT [DF_Task_tbTask_ActionOn] DEFAULT (getdate()) NOT NULL,
+    [ActionedOn]      DATETIME        NULL,
+    [PaymentOn]       DATETIME        CONSTRAINT [DF_Task_tb_PaymentOn] DEFAULT (getdate()) NOT NULL,
+    [TaskNotes]       NVARCHAR (255)  NULL,
+    [CashCode]        NVARCHAR (50)   NULL,
+    [TaxCode]         NVARCHAR (10)   NULL,
+    [TotalCharge]     MONEY           CONSTRAINT [DF_Task_tb_TotalCharge] DEFAULT ((0)) NOT NULL,
+    [AddressCodeFrom] NVARCHAR (15)   NULL,
+    [AddressCodeTo]   NVARCHAR (15)   NULL,
+    [Spooled]         BIT             CONSTRAINT [DF_Task_tb_Spooled] DEFAULT ((0)) NOT NULL,
+    [Printed]         BIT             CONSTRAINT [DF_Task_tb_Printed] DEFAULT ((0)) NOT NULL,
+    [InsertedBy]      NVARCHAR (50)   CONSTRAINT [DF_Task_tb_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedOn]      DATETIME        CONSTRAINT [DF_Task_tb_InsertedOn] DEFAULT (getdate()) NOT NULL,
+    [UpdatedBy]       NVARCHAR (50)   CONSTRAINT [DF_Task_tb_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedOn]       DATETIME        CONSTRAINT [DF_Task_tb_UpdatedOn] DEFAULT (getdate()) NOT NULL,
+    [RowVer]          ROWVERSION      NOT NULL,
+    [Quantity]        DECIMAL (18, 4) CONSTRAINT [DF_Task_tb_Quantity] DEFAULT ((0)) NOT NULL,
+    [UnitCharge]      DECIMAL (18, 6) CONSTRAINT [DF_Task_tb_UnitCharge] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Task_tbTask] PRIMARY KEY CLUSTERED ([TaskCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [Activity_tb_FK00] FOREIGN KEY ([ActivityCode]) REFERENCES [Activity].[tbActivity] ([ActivityCode]) ON UPDATE CASCADE,
     CONSTRAINT [Activity_tb_FK01] FOREIGN KEY ([TaskStatusCode]) REFERENCES [Task].[tbStatus] ([TaskStatusCode]),
@@ -188,7 +188,7 @@ AS
 	END CATCH
 
 GO
-CREATE TRIGGER Task.Task_tbTask_TriggerUpdate
+CREATE   TRIGGER Task.Task_tbTask_TriggerUpdate
 ON Task.tbTask
 FOR UPDATE
 AS
@@ -471,6 +471,23 @@ AS
 				OR (logs.Quantity <> candidates.Quantity)
 				OR (logs.UnitCharge <> candidates.UnitCharge)
 				OR (logs.TaxCode <> candidates.TaxCode);
+		END;
+
+		IF UPDATE(AccountCode)
+		BEGIN
+			WITH candidates AS
+			(
+				SELECT inserted.* FROM inserted
+				JOIN deleted ON inserted.TaskCode = deleted.TaskCode
+				WHERE inserted.AccountCode <> deleted.AccountCode
+			)
+			INSERT INTO Task.tbChangeLog
+									 (TaskCode, TransmitStatusCode, AccountCode, ActivityCode, TaskStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
+			SELECT candidates.TaskCode, Org.tbOrg.TransmitStatusCode, candidates.AccountCode, candidates.ActivityCode, candidates.TaskStatusCode, 
+									 candidates.ActionOn, candidates.Quantity, candidates.CashCode, candidates.TaxCode, candidates.UnitCharge
+			FROM candidates 
+				JOIN Org.tbOrg ON candidates.AccountCode = Org.tbOrg.AccountCode
+				JOIN Cash.tbCode ON candidates.CashCode = Cash.tbCode.CashCode;
 		END
 
 	END TRY

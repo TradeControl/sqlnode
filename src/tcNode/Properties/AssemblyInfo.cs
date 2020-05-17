@@ -9,7 +9,6 @@ Documentation on github.com/tradecontrol/tcnodecore
 Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
 
 **************************************************************************************/
-
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -18,7 +17,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Installs and upgrades database instances")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Trade Control")]
-[assembly: AssemblyProduct("TCConfigLib")]
+[assembly: AssemblyProduct("TradeControl.Node")]
 [assembly: AssemblyCopyright("Copyright © Trade Control 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -27,5 +26,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("e0b55ebe-7f5e-4703-b983-a43bb9e3b8d7")]
 
-[assembly: AssemblyVersion("3.26.1.0")]
-[assembly: AssemblyFileVersion("3.26.1.0")]
+[assembly: AssemblyVersion("3.27.1.0")]
+[assembly: AssemblyFileVersion("3.27.1.0")]

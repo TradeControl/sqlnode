@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Invoice.proc_Cancel 
+﻿CREATE PROCEDURE Invoice.proc_Cancel
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -13,8 +12,8 @@ AS
 								 Invoice.tbTask AS InvoiceTask ON Task.TaskCode = InvoiceTask.TaskCode AND Task.TaskCode = InvoiceTask.TaskCode INNER JOIN
 								 Invoice.tbInvoice ON InvoiceTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
 								 Usr.vwCredentials ON Invoice.tbInvoice.UserId = Usr.vwCredentials.UserId
-		WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 0 OR
-								 Invoice.tbInvoice.InvoiceTypeCode = 2) AND (Invoice.tbInvoice.InvoiceStatusCode = 0)
+		WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 0 OR Invoice.tbInvoice.InvoiceTypeCode = 2) 
+			AND (Invoice.tbInvoice.InvoiceStatusCode = 0) AND (Task.TaskStatusCode = 3)
 	                      
 		DELETE Invoice.tbInvoice
 		FROM         Invoice.tbInvoice INNER JOIN

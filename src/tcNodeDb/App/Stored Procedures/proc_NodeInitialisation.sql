@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE App.proc_NodeInitialisation
+﻿CREATE PROCEDURE App.proc_NodeInitialisation
 (
 	@AccountCode NVARCHAR(10),
 	@BusinessName NVARCHAR(255),
@@ -8,7 +8,8 @@
 	@PhoneNumber NVARCHAR(50),
 	@CompanyNumber NVARCHAR(20),
 	@VatNumber NVARCHAR(20),
-	@CalendarCode NVARCHAR(10)
+	@CalendarCode NVARCHAR(10),
+	@UnitOfCharge NVARCHAR(5)
 )
 AS
    	SET NOCOUNT, XACT_ABORT ON;
@@ -222,80 +223,43 @@ AS
 		VALUES (1003, 'Enter new menu name', 0)
 		, (1004, 'Team Menu', 0)
 		, (1005, 'Ok to delete <1>', 1)
-		, (1006, 'Documents cannot be converted into folders.
-		Either delete the document or create a new folder elsewhere on the menu.
-		Press esc key to undo changes.', 0)
+		, (1006, 'Documents cannot be converted into folders. Either delete the document or create a new folder elsewhere on the menu. Press esc key to undo changes.', 0)
 		, (1007, '<Menu Item Text>', 0)
-		, (1008, 'Documents cannot have other menu items added to them.
-		Please select a folder then try again.', 0)
-		, (1009, 'The root cannot be deleted.
-		Please modify the text or remove the menu itself.', 0)
+		, (1008, 'Documents cannot have other menu items added to them. Please select a folder then try again.', 0)
+		, (1009, 'The root cannot be deleted. Please modify the text or remove the menu itself.', 0)
 		, (1189, 'Error <1>', 1)
-		, (1190, '<1>
-		Source: <2>  (err <3>)
-		<4>', 4)
+		, (1190, '<1> Source: <2>  (err <3>) <4>', 4)
 		, (1192, 'Server error listing:', 0)
 		, (1193, 'days', 0)
 		, (1194, 'Ok to delete the selected task and all tasks upon which it depends?', 0)
-		, (1208, 'A/No:   <3>
-		Ref.:   <2>
-		Title:  <4>
-		Status: <6>
-
-		Dear <1>
-
-		<5>
-
-		<7>', 7)
-		, (1209, 'Yours sincerely,
-
-		<1>
-		<2>
-
-		T: <3>
-		M: <4>
-		W: <5>', 5)
+		, (1208, 'A/No: <3>, Ref.: <2>, Title: <4>, Status: <6>. Dear <1>, <5> <7>', 7)
+		, (1209, 'Yours sincerely, <1> <2> T: <3> M: <4> W: <5>', 5)
 		, (1210, 'Okay to cancel invoice <1>?', 1)
 		, (1211, 'Invoice <1> cannot be cancelled because there are payments assigned to it.  Use the debit/credit facility if this account is not properly reconciled.', 1)
-		, (1212, 'Invoices are outstanding against account <1>
-		By specifying a cash code, invoices will not be matched.
-		Cash codes should only be entered for miscellaneous charges.', 1)
-		, (1213, 'Account <1> has no invoices outstanding for this payment and therefore cannot be posted.
-		Please specify a cash code so that one can be automatically generated.', 1)
+		, (1212, 'Invoices are outstanding against account <1>.	By specifying a cash code, invoices will not be matched. Cash codes should only be entered for miscellaneous charges.', 1)
+		, (1213, 'Account <1> has no invoices outstanding for this payment and therefore cannot be posted. Please specify a cash code so that one can be automatically generated.', 1)
 		, (1214, 'Invoiced', 0)
 		, (1215, 'Ordered', 0)
 		, (1217, 'Order charge differs from the invoice. Reconcile <1>?', 1)
 		, (1218, 'Raise invoice and pay expenses now?', 0)
 		, (1219, 'Reserve Balance', 0)
 		, (2002, 'Only administrators have access to the system configuration features of this application.', 0)
-		, (2003, 'You are not a registered user of this system.
-		Please contact the Administrator if you believe you should have access.', 0)
-		, (2004, 'The primary key you have entered contains invalid characters.
-		Digits and letters should be used for these keys.
-		Please amend accordingly or press Esc to cancel.', 0)
-		, (2136, 'You have attempted to execute an Application.Run command with an invalid string.
-		The run string is <1>
-		The error is <2>', 2)
+		, (2003, 'You are not a registered user of this system. Please contact the Administrator if you believe you should have access.', 0)
+		, (2004, 'The primary key you have entered contains invalid characters. Digits and letters should be used for these keys. Please amend accordingly or press Esc to cancel.', 0)
+		, (2136, 'You have attempted to execute an Application.Run command with an invalid string. The run string is <1>. The error is <2>', 2)
 		, (2188, '<1>', 1)
 		, (2206, 'Reminder: You are due for a period end close down.  Please follow the relevant procedures to complete this task. Once all financial data has been consolidated, use the Administrator to move onto the next period.', 0)
-		, (2312, 'The system is not setup correctly.
-		Make sure you have completed the initialisation procedures then try again.', 0)
-		, (3002, 'Periods not generated successfully.
-		Contact support.', 0)
-		, (3003, 'Okay to close down the active period?
-		Before proceeding make sure that you have entered and checked your cash details.
-		All invoices and cash transactions will be transferred into the Cash Flow analysis module.', 0)
+		, (2312, 'The system is not setup correctly. Make sure you have completed the initialisation procedures then try again.', 0)
+		, (3002, 'Periods not generated successfully. Contact support.', 0)
+		, (3003, 'Okay to close down the active period? Before proceeding make sure that you have entered and checked your cash details. All invoices and cash transactions will be transferred into the Cash Flow analysis module.', 0)
 		, (3004, 'Margin', 0)
 		, (3005, 'Opening Balance', 0)
 		, (3006, 'Rebuild executed successfully', 0)
-		, (3007, 'Ok to rebuild cash accounts?
-		Make sure no transactions are being processed, as this will re-set and update all your invoices.', 0)
+		, (3007, 'Ok to rebuild cash accounts? Make sure no transactions are being processed, as this will re-set and update all your invoices.', 0)
 		, (3009, 'Charged', 0)
 		, (3010, 'Service', 0)
-		, (3011, 'Ok to rebuild cash flow history for account <1>?
-		This would normally be required when payments or invoices have been retrospectively revised, or opening balances altered.', 1)
-		, (3012, 'Ok to raise an invoice for this task?
-		Use the Invoicing program to create specific invoice types with multiple tasks and additional charges.', 0)
+		, (3011, 'Ok to rebuild cash flow history for account <1>? This would normally be required when payments or invoices have been retrospectively revised, or opening balances altered.', 1)
+		, (3012, 'Ok to raise an invoice for this task? Use the Invoicing program to create specific invoice types with multiple tasks and additional charges.', 0)
 		, (3013, 'Current Balance', 0)
 		, (3014, 'This entry cannot be rescheduled', 0)
 		, (3015, 'Dummy accounts should not be assigned a cash code', 0)
@@ -319,8 +283,8 @@ AS
 		VALUES (CONCAT(LEFT(@FullName, 1), SUBSTRING(@FullName, CHARINDEX(' ', @FullName) + 1, 1)), @FullName, 
 			SUSER_NAME() , 1, 1, @CalendarCode, @EmailAddress, @PhoneNumber)
 
-		INSERT INTO App.tbOptions (Identifier, IsInitialised, AccountCode, RegisterName, DefaultPrintMode, BucketIntervalCode, BucketTypeCode, TaxHorizon, IsAutoOffsetDays)
-		VALUES ('TC', 0, @AccountCode, 'Event Log', 2, 1, 1, 730, 0);
+		INSERT INTO App.tbOptions (Identifier, IsInitialised, AccountCode, RegisterName, DefaultPrintMode, BucketIntervalCode, BucketTypeCode, TaxHorizon, IsAutoOffsetDays, UnitOfCharge)
+		VALUES ('TC', 0, @AccountCode, 'Event Log', 2, 1, 1, 730, 0, @UnitOfCharge);
 
 		SET IDENTITY_INSERT [Usr].[tbMenu] ON;
 		INSERT INTO [Usr].[tbMenu] ([MenuId], [MenuName])
@@ -361,6 +325,8 @@ AS
 		, (1, 55, 4, 4, 'Budget', 4, 'Trader', 'Cash_Budget', 0)
 		, (1, 66, 6, 9, 'Audit Accruals - Corporation Tax', 5, 'Trader', 'Cash_CorpTaxAuditAccruals', 4)
 		, (1, 67, 6, 8, 'Audit Accruals - VAT', 5, 'Trader', 'Cash_VatAuditAccruals', 4)
+		, (1, 68, 5, 7, 'Network Allocations', 4, 'Trader', 'Task_Allocation', 0)
+		, (1, 69, 5, 8, 'Network Invoices', 4, 'Trader', 'Invoice_Mirror', 0)
 		;
 		SET IDENTITY_INSERT [Usr].[tbMenuEntry] OFF;
 

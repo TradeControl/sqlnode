@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Invoice.proc_Accept 
+﻿CREATE PROCEDURE Invoice.proc_Accept 
 	(
 	@InvoiceNumber nvarchar(20)
 	)
@@ -22,21 +21,22 @@ AS
 			SET              InvoiceStatusCode = 1
 			WHERE     (InvoiceNumber = @InvoiceNumber) AND (InvoiceStatusCode = 0); 
 	
-			WITH invoiced_quantity AS
+			WITH task_codes AS
 			(
-				SELECT        Invoice.tbTask.TaskCode, SUM(Invoice.tbTask.Quantity) AS InvoiceQuantity
-				FROM            Invoice.tbTask INNER JOIN
-										 Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
-				WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 0) OR
-										 (Invoice.tbInvoice.InvoiceTypeCode = 2)
-				GROUP BY Invoice.tbTask.TaskCode
+				SELECT TaskCode
+				FROM Invoice.tbTask 
+				WHERE InvoiceNumber = @InvoiceNumber
+				GROUP BY TaskCode
+			), deliveries AS
+			(
+				SELECT invoices.TaskCode, SUM(Quantity) QuantityDelivered
+				FROM Invoice.tbTask invoices JOIN task_codes ON invoices.TaskCode = task_codes.TaskCode
+				GROUP BY invoices.TaskCode
 			)
-			UPDATE       Task
-			SET                TaskStatusCode = 3
-			FROM            Task.tbTask AS Task INNER JOIN
-									 invoiced_quantity ON Task.TaskCode = invoiced_quantity.TaskCode AND Task.Quantity <= invoiced_quantity.InvoiceQuantity INNER JOIN
-									 Invoice.tbTask AS InvoiceTask ON Task.TaskCode = InvoiceTask.TaskCode AND Task.TaskCode = InvoiceTask.TaskCode
-			WHERE        (InvoiceTask.InvoiceNumber = @InvoiceNumber) AND (Task.TaskStatusCode < 3);
+			UPDATE task
+			SET TaskStatusCode = 3
+			FROM Task.tbTask task JOIN deliveries ON task.TaskCode = deliveries.TaskCode
+			WHERE Quantity <= QuantityDelivered;
 			
 			COMMIT TRANSACTION
 		END

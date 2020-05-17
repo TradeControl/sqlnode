@@ -25,23 +25,23 @@ AS
 		DELETE FROM Activity.tbFlow;
 		DELETE FROM Activity.tbActivity;
 
-		WITH sys_accounts AS
-		(
-			SELECT AccountCode FROM App.tbOptions
-			UNION
-			SELECT DISTINCT AccountCode FROM Org.tbAccount
-			UNION
-			SELECT DISTINCT AccountCode FROM Cash.tbTaxType
-		), candidates AS
-		(
-			SELECT AccountCode
-			FROM Org.tbOrg
-			EXCEPT
-			SELECT AccountCode 
-			FROM sys_accounts
-		)
-		DELETE Org.tbOrg 
-		FROM Org.tbOrg JOIN candidates ON Org.tbOrg.AccountCode = candidates.AccountCode;
+		--WITH sys_accounts AS
+		--(
+		--	SELECT AccountCode FROM App.tbOptions
+		--	UNION
+		--	SELECT DISTINCT AccountCode FROM Org.tbAccount
+		--	UNION
+		--	SELECT DISTINCT AccountCode FROM Cash.tbTaxType
+		--), candidates AS
+		--(
+		--	SELECT AccountCode
+		--	FROM Org.tbOrg
+		--	EXCEPT
+		--	SELECT AccountCode 
+		--	FROM sys_accounts
+		--)
+		--DELETE Org.tbOrg 
+		--FROM Org.tbOrg JOIN candidates ON Org.tbOrg.AccountCode = candidates.AccountCode;
 		
 		UPDATE App.tbOptions
 		SET IsAutoOffsetDays = 0;
@@ -53,7 +53,7 @@ AS
 			INSERT INTO App.tbRegister (RegisterName, NextNumber)
 			SELECT 'Works Order', (SELECT MAX(NextNumber) + 10000 FROM App.tbRegister) AS NextNumber;
 
-		INSERT INTO Activity.tbActivity (ActivityCode, TaskStatusCode, DefaultText, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
+		INSERT INTO Activity.tbActivity (ActivityCode, TaskStatusCode, ActivityDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
 		VALUES ('M/00/70/00', 1, 'PIGEON HOLE SHELF ASSEMBLY CLEAR', 'each', '103', 16.6240, 1, 'Sales Order')
 		, ('M/100/70/00', 1, 'PIGEON HOLE SUB SHELF CLEAR', 'each', NULL, 0.0000, 0, 'Works Order')
 		, ('M/101/70/00', 1, 'PIGEON HOLE BACK DIVIDER', 'each', NULL, 0.0000, 0, 'Works Order')
@@ -169,23 +169,27 @@ AS
 		, ('M/99/70/00', 20, 'PC/999', 1, 0, 0.171)
 		, ('M/100/70/00', 30, 'INSERT/09', 1, 0, 2)
 		;
-		INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationTypeCode, OrganisationStatusCode, TaxCode, AddressCode, PaymentTerms, ExpectedDays, PaymentDays, PayDaysFromMonthEnd, PayBalance, NumberOfEmployees, CompanyNumber, VatNumber, Turnover, OpeningBalance, EUJurisdiction)
-		VALUES 
-		  ('PACSER', 'PACKING SERVICES', 8, 1, 'T1', 'PACSER_001', 'EOM', 10, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
-		, ('PALSUP', 'PALLET SUPPLIER', 8, 1, 'T1', 'PALSUP_001', 'COD', 0, -10, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
-		, ('PLAPRO', 'PLASTICS PROVIDER', 8, 1, 'T1', 'PLAPRO_001', '30 days from invoice', 15, 30, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
-		, ('TFCSPE', 'FASTENER SPECIALIST', 8, 1, 'T1', 'TFCSPE_001', 'EOM', 0, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
-		, ('STOBOX', 'STORAGE BOXES', 1, 1, 'T1', 'STOBOX_001', '60 days from invoice', 5, 60, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
-		, ('HAULOG', 'HAULIER LOGISTICS', 8, 1, 'T1', 'HAULOG_001', 'EOM', 0, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
-		;
-		INSERT INTO Org.tbAddress (AddressCode, AccountCode, Address)
-		VALUES ('STOBOX_001', 'STOBOX', 'SURREY GU24 9BJ')
-		, ('PACSER_001', 'PACSER', 'FAREHAM, HAMPSHIRE	PO15 5RZ')
-		, ('PLAPRO_001', 'PLAPRO', 'WARRINGTON, CHESHIRE WA1 4RA')
-		, ('PALSUP_001', 'PALSUP', 'HAMPSHIRE PO13 9NY')
-		, ('TFCSPE_001', 'TFCSPE', 'ESSEX CO4 9TZ')
-		, ('HAULOG_001', 'HAULOG', 'BERKSHIRE SL3 0BH')
-		;
+
+		IF (NOT EXISTS(SELECT * FROM Org.tbOrg WHERE AccountCode = 'TFCSPE'))
+		BEGIN
+			INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationTypeCode, OrganisationStatusCode, TaxCode, AddressCode, PaymentTerms, ExpectedDays, PaymentDays, PayDaysFromMonthEnd, PayBalance, NumberOfEmployees, CompanyNumber, VatNumber, Turnover, OpeningBalance, EUJurisdiction)
+			VALUES 
+			  ('PACSER', 'PACKING SERVICES', 8, 1, 'T1', 'PACSER_001', 'EOM', 10, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('PALSUP', 'PALLET SUPPLIER', 8, 1, 'T1', 'PALSUP_001', 'COD', 0, -10, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('PLAPRO', 'PLASTICS PROVIDER', 8, 1, 'T1', 'PLAPRO_001', '30 days from invoice', 15, 30, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('TFCSPE', 'FASTENER SPECIALIST', 8, 1, 'T1', 'TFCSPE_001', 'EOM', 0, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('STOBOX', 'STORAGE BOXES', 1, 1, 'T1', 'STOBOX_001', '60 days from invoice', 5, 60, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('HAULOG', 'HAULIER LOGISTICS', 8, 1, 'T1', 'HAULOG_001', 'EOM', 0, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			;
+			INSERT INTO Org.tbAddress (AddressCode, AccountCode, Address)
+			VALUES ('STOBOX_001', 'STOBOX', 'SURREY GU24 9BJ')
+			, ('PACSER_001', 'PACSER', 'FAREHAM, HAMPSHIRE	PO15 5RZ')
+			, ('PLAPRO_001', 'PLAPRO', 'WARRINGTON, CHESHIRE WA1 4RA')
+			, ('PALSUP_001', 'PALSUP', 'HAMPSHIRE PO13 9NY')
+			, ('TFCSPE_001', 'TFCSPE', 'ESSEX CO4 9TZ')
+			, ('HAULOG_001', 'HAULOG', 'BERKSHIRE SL3 0BH')
+			;
+		END
 
 		-- ***************************************************************************
 		IF @CreateOrders = 0
@@ -196,7 +200,7 @@ AS
 			@TaskCode NVARCHAR(20),
 			@ParentTaskCode NVARCHAR(20), 
 			@ToTaskCode NVARCHAR(20),
-			@Quantity FLOAT = 1000;
+			@Quantity DECIMAL = 1000;
 
 		EXEC Task.proc_NextCode 'PROJECT', @ParentTaskCode OUTPUT
 		INSERT INTO Task.tbTask
@@ -274,7 +278,7 @@ AS
 		)
 		UPDATE task
 		SET 
-			TaskNotes = activity.DefaultText, 
+			TaskNotes = activity.ActivityDescription, 
 			Quantity = demand.Quantity,
 			ActionOn = demand.ActionOn,
 			CashCode = activity.CashCode, 

@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Task.vwProfit 
+﻿CREATE VIEW Task.vwProfit 
 AS
 	WITH orders AS
 	(
@@ -37,7 +36,7 @@ AS
 	), task_flow AS
 	(
 		SELECT orders.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
-			CASE WHEN child.UsedOnQuantity <> 0 THEN orders.Quantity * child.UsedOnQuantity ELSE task.Quantity END AS Quantity
+			CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(orders.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE task.Quantity END AS Quantity
 		FROM Task.tbFlow child 
 			JOIN orders ON child.ParentTaskCode = orders.TaskCode
 			JOIN Task.tbTask task ON child.ChildTaskCode = task.TaskCode
@@ -45,7 +44,7 @@ AS
 		UNION ALL
 
 		SELECT parent.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
-			CASE WHEN child.UsedOnQuantity <> 0 THEN parent.Quantity * child.UsedOnQuantity ELSE task.Quantity END AS Quantity
+			CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE task.Quantity END AS Quantity
 		FROM Task.tbFlow child 
 			JOIN task_flow parent ON child.ParentTaskCode = parent.ChildTaskCode
 			JOIN Task.tbTask task ON child.ChildTaskCode = task.TaskCode

@@ -1,5 +1,5 @@
 ﻿
-CREATE   PROCEDURE Task.proc_Cost 
+CREATE PROCEDURE Task.proc_Cost 
 	(
 	@ParentTaskCode nvarchar(20),
 	@TotalCost money = 0 OUTPUT
@@ -11,7 +11,7 @@ AS
 		WITH task_flow AS
 		(
 			SELECT parent_task.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
-				CASE WHEN child.UsedOnQuantity <> 0 THEN parent_task.Quantity * child.UsedOnQuantity ELSE child_task.Quantity END AS Quantity, 
+				CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent_task.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE child_task.Quantity END AS Quantity, 
 				1 AS Depth				
 			FROM Task.tbFlow child 
 				JOIN Task.tbTask parent_task ON child.ParentTaskCode = parent_task.TaskCode
@@ -21,7 +21,7 @@ AS
 			UNION ALL
 
 			SELECT parent.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
-				CASE WHEN child.UsedOnQuantity <> 0 THEN parent.Quantity * child.UsedOnQuantity ELSE child_task.Quantity END AS Quantity, 
+				CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE child_task.Quantity END AS Quantity, 
 				parent.Depth + 1 AS Depth
 			FROM Task.tbFlow child 
 				JOIN task_flow parent ON child.ParentTaskCode = parent.ChildTaskCode

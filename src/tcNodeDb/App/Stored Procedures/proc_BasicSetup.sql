@@ -198,7 +198,7 @@ DECLARE @FinancialYear SMALLINT;
 
 		UPDATE App.tbYearPeriod
 		SET CashStatusCode = 2
-		WHERE StartOn < CURRENT_TIMESTAMP
+		WHERE StartOn < DATEADD(MONTH, -1, CURRENT_TIMESTAMP)
 
 		IF EXISTS(SELECT * FROM App.tbYearPeriod WHERE CashStatusCode = 3)
 			WITH current_month AS
