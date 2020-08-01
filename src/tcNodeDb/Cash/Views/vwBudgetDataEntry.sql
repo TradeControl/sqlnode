@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwBudgetDataEntry
+﻿CREATE VIEW Cash.vwBudgetDataEntry
 AS
 SELECT        TOP (100) PERCENT App.tbYearPeriod.YearNumber, Cash.tbPeriod.CashCode, Cash.tbPeriod.StartOn, App.tbMonth.MonthName, Cash.tbPeriod.ForecastValue, Cash.tbPeriod.ForecastTax, Cash.tbPeriod.Note, 
                          Cash.tbPeriod.RowVer

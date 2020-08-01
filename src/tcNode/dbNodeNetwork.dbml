@@ -21,8 +21,8 @@
       <Column Name="NumberOfEmployees" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="CompanyNumber" Type="System.String" DbType="NVarChar(20)" CanBeNull="true" />
       <Column Name="VatNumber" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
-      <Column Name="Turnover" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="OpeningBalance" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="Turnover" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="OpeningBalance" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="EUJurisdiction" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
       <Column Name="BusinessDescription" Type="System.String" DbType="NText" CanBeNull="true" />
       <Column Name="Logo" Type="System.Data.Linq.Binary" DbType="Image" CanBeNull="true" />
@@ -34,8 +34,8 @@
       <Column Name="TransmitStatusCode" Type="System.Int16" DbType="SmallInt NOT NULL" CanBeNull="false" />
       <Association Name="tbOrg_tbOption" Member="tbOptions" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbOption" />
       <Association Name="tbOrg_tbAllocation" Member="tbAllocations" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbAllocation" />
-      <Association Name="tbOrg_tbInvoiceMirror" Member="tbInvoiceMirrors" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbInvoiceMirror" />
       <Association Name="tbOrg_tbInvoice" Member="tbInvoices" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbInvoice" />
+      <Association Name="tbOrg_tbMirror" Member="tbInvoiceMirrors" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbInvoiceMirror" />
     </Type>
   </Table>
   <Table Name="App.tbEth" Member="tbEths">
@@ -152,11 +152,11 @@
       <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="CashCode" Type="System.String" DbType="NVarChar(50) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
-      <Column Name="TotalValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="TaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="TotalValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="ItemReference" Type="System.String" DbType="NText" CanBeNull="true" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
       <Association Name="tbInvoice_tbInvoiceItem" Member="tbInvoice" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="tbInvoice" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
@@ -166,11 +166,11 @@
     <Type Name="tbInvoiceTask">
       <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="TaskCode" Type="System.String" DbType="NVarChar(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="TotalValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="TaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="TotalValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="CashCode" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
@@ -183,11 +183,11 @@
       <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
       <Column Name="ChargeCode" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
       <Column Name="ChargeDescription" Type="System.String" DbType="NText" CanBeNull="true" UpdateCheck="Never" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="TaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="InvoiceQuantity" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
     </Type>
   </Table>
@@ -195,11 +195,11 @@
     <Type Name="vwInvoiceDeploymentTask">
       <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="TaskCode" Type="System.String" DbType="NVarChar(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="TotalValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="TaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="TotalValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="CashCode" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
@@ -207,26 +207,16 @@
       <Association Name="tbInvoice_vwInvoiceDeploymentTask" Member="tbInvoice" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="tbInvoice" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
     </Type>
   </Table>
-  <Table Name="Invoice.vwNetworkUpdates" Member="vwInvoiceUpdates">
-    <Type Name="vwInvoiceUpdate">
-      <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
-      <Column Name="AccountCode" Type="System.String" DbType="NVarChar(10) NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceStatusCode" Type="System.Int16" DbType="SmallInt NOT NULL" CanBeNull="false" />
-      <Column Name="DueOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-    </Type>
-  </Table>
   <Table Name="Invoice.tbMirrorItem" Member="tbMirrorItems">
     <Type Name="tbMirrorItem">
       <Column Name="ContractAddress" Type="System.String" DbType="NVarChar(42) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="ChargeCode" Type="System.String" DbType="NVarChar(50) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="ChargeDescription" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="TaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
-      <Association Name="tbInvoiceMirror_tbMirrorItem" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="tbMirror_tbMirrorItem" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
     </Type>
   </Table>
   <Table Name="Invoice.tbMirrorTask" Member="tbMirrorTasks">
@@ -234,34 +224,11 @@
       <Column Name="ContractAddress" Type="System.String" DbType="NVarChar(42) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="TaskCode" Type="System.String" DbType="NVarChar(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="Quantity" Type="System.Decimal" DbType="Decimal(18,4) NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="TaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion" CanBeNull="true" IsVersion="true" />
-      <Association Name="tbInvoiceMirror_tbMirrorTask" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
-    </Type>
-  </Table>
-  <Table Name="Invoice.tbMirror" Member="tbInvoiceMirrors">
-    <Type Name="tbInvoiceMirror">
-      <Column Name="ContractAddress" Type="System.String" DbType="NVarChar(42) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="AccountCode" Type="System.String" DbType="NVarChar(10) NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceTypeCode" Type="System.Int16" DbType="SmallInt NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceStatusCode" Type="System.Int16" DbType="SmallInt NOT NULL" CanBeNull="false" />
-      <Column Name="InvoicedOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="DueOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="UnitOfCharge" Type="System.String" DbType="NVarChar(5)" CanBeNull="true" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceTax" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaymentTerms" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
-      <Column Name="InsertedOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
-      <Association Name="tbInvoiceMirror_tbMirrorItem" Member="tbMirrorItems" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorItem" />
-      <Association Name="tbInvoiceMirror_tbMirrorTask" Member="tbMirrorTasks" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorTask" />
-      <Association Name="tbInvoiceMirror_tbMirrorReference" Member="tbMirrorReference" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorReference" Cardinality="One" />
-      <Association Name="tbOrg_tbInvoiceMirror" Member="tbOrg" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbOrg" IsForeignKey="true" />
+      <Association Name="tbMirror_tbMirrorTask" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
     </Type>
   </Table>
   <Table Name="Invoice.tbInvoice" Member="tbInvoices">
@@ -274,10 +241,10 @@
       <Column Name="InvoicedOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="ExpectedOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="DueOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="TaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="PaymentTerms" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
       <Column Name="Notes" Type="System.String" DbType="NText" CanBeNull="true" />
       <Column Name="Printed" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
@@ -295,7 +262,31 @@
       <Column Name="ContractAddress" Type="System.String" DbType="NVarChar(42) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
       <Association Name="tbInvoice_tbMirrorReference" Member="tbInvoice" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="tbInvoice" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
-      <Association Name="tbInvoiceMirror_tbMirrorReference" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="tbMirror_tbMirrorReference" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+    </Type>
+  </Table>
+  <Table Name="Invoice.tbMirror" Member="tbInvoiceMirrors">
+    <Type Name="tbInvoiceMirror">
+      <Column Name="ContractAddress" Type="System.String" DbType="NVarChar(42) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="AccountCode" Type="System.String" DbType="NVarChar(10) NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceTypeCode" Type="System.Int16" DbType="SmallInt NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceStatusCode" Type="System.Int16" DbType="SmallInt NOT NULL" CanBeNull="false" />
+      <Column Name="InvoicedOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="DueOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="UnitOfCharge" Type="System.String" DbType="NVarChar(5)" CanBeNull="true" />
+      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceTax" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaymentTerms" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="InsertedOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
+      <Column Name="PaymentAddress" Type="System.String" DbType="NVarChar(42)" CanBeNull="true" />
+      <Association Name="tbMirror_tbMirrorItem" Member="tbMirrorItems" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorItem" />
+      <Association Name="tbMirror_tbMirrorTask" Member="tbMirrorTasks" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorTask" />
+      <Association Name="tbMirror_tbMirrorReference" Member="tbMirrorReference" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorReference" Cardinality="One" />
+      <Association Name="tbOrg_tbMirror" Member="tbOrg" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbOrg" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="Invoice.vwNetworkDeployments" Member="vwInvoiceDeployments">
@@ -307,12 +298,24 @@
       <Column Name="InvoiceStatusCode" Type="System.Int16" DbType="SmallInt NOT NULL" CanBeNull="false" />
       <Column Name="DueOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="InvoicedOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
-      <Column Name="TaxValue" Type="System.Decimal" DbType="Money NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="PaymentTerms" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
       <Column Name="UnitOfCharge" Type="System.String" DbType="NVarChar(5)" CanBeNull="true" />
+      <Column Name="PaymentAddress" Type="System.String" DbType="NVarChar(42)" CanBeNull="true" />
       <Column Name="ContractAddress" Type="System.String" DbType="NVarChar(42)" CanBeNull="true" />
       <Column Name="ContractNumber" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="Invoice.vwNetworkUpdates" Member="vwInvoiceUpdates">
+    <Type Name="vwInvoiceUpdate">
+      <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
+      <Column Name="AccountCode" Type="System.String" DbType="NVarChar(10) NOT NULL" CanBeNull="false" />
+      <Column Name="InvoiceStatusCode" Type="System.Int16" DbType="SmallInt NOT NULL" CanBeNull="false" />
+      <Column Name="DueOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
+      <Column Name="PaymentAddress" Type="System.String" DbType="NVarChar(42)" CanBeNull="true" />
     </Type>
   </Table>
   <Function Name="App.proc_EventLog" Method="proc_EventLog">

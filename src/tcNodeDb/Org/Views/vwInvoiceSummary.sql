@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Org.vwInvoiceSummary
+﻿CREATE VIEW Org.vwInvoiceSummary
 AS
 	WITH ois AS
 	(
@@ -14,3 +13,4 @@ AS
 	SELECT TOP (100) PERCENT acc.AccountCode, acc.StartOn, ois.PeriodValue 
 	FROM ois RIGHT OUTER JOIN acc ON ois.AccountCode = acc.AccountCode AND ois.StartOn = acc.StartOn
 	ORDER BY acc.AccountCode, acc.StartOn;
+

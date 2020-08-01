@@ -1,6 +1,4 @@
-﻿
-
-CREATE   VIEW Task.vwPurchaseEnquiryDeliverySpool
+﻿CREATE VIEW Task.vwPurchaseEnquiryDeliverySpool
 AS
 SELECT        purchase_enquiry.TaskCode, purchase_enquiry.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, Org.tbAddress.Address AS InvoiceAddress, 
                          collection_account.AccountName AS CollectAccount, collection_address.Address AS CollectAddress, delivery_account.AccountName AS DeliveryAccount, delivery_address.Address AS DeliveryAddress, 
@@ -19,3 +17,4 @@ FROM            Org.tbOrg AS delivery_account INNER JOIN
                          Org.tbAddress AS collection_address ON purchase_enquiry.AddressCodeFrom = collection_address.AddressCode ON collection_account.AccountCode = collection_address.AccountCode ON 
                          delivery_account.AccountCode = delivery_address.AccountCode
 WHERE EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 2 AND UserName = SUSER_SNAME() AND purchase_enquiry.TaskCode = doc.DocumentNumber);
+

@@ -385,24 +385,10 @@ As shown in the **tbEventLog** creation statement above, all tables that are not
 
 Trade Control has been developed by a single author who does not like comments cluttering up the code.  Currently, comments are only used as reminders and requests for change. Coding, however, does strive to be self-documenting.
 
+## Licence
 
+The Trade Control Code licence is issued by Trade Control Ltd under a [GNU General Public Licence v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) 
 
+Trade Control Documentation by Trade Control Ltd is licenced under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/) 
 
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![Creative Commons](https://i.creativecommons.org/l/by-sa/4.0/88x31.png) 

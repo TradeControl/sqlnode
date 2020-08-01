@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwTaxCorpStatement
+﻿CREATE VIEW Cash.vwTaxCorpStatement
 AS
 	WITH tax_dates AS
 	(
@@ -17,9 +16,9 @@ AS
 		
 		UNION
 
-		SELECT Org.tbPayment.PaidOn AS StartOn, 0 As TaxDue, ( Org.tbPayment.PaidOutValue * -1) + Org.tbPayment.PaidInValue AS TaxPaid
-		FROM Org.tbPayment 
-			JOIN Cash.tbTaxType tt ON Org.tbPayment.CashCode = tt.CashCode
+		SELECT Cash.tbPayment.PaidOn AS StartOn, 0 As TaxDue, ( Cash.tbPayment.PaidOutValue * -1) + Cash.tbPayment.PaidInValue AS TaxPaid
+		FROM Cash.tbPayment 
+			JOIN Cash.tbTaxType tt ON Cash.tbPayment.CashCode = tt.CashCode
 		WHERE (tt.TaxTypeCode = 0)
 
 	), tax_statement AS
@@ -28,5 +27,5 @@ AS
 			SUM(TaxDue + TaxPaid) OVER (ORDER BY StartOn, TaxDue ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance
 		FROM tax_entries
 	)
-	SELECT StartOn, CAST(TaxDue AS MONEY) TaxDue, CAST(TaxPaid AS MONEY) TaxPaid, CAST(Balance AS MONEY) Balance FROM tax_statement 
+	SELECT StartOn, CAST(TaxDue AS decimal(18, 5)) TaxDue, CAST(TaxPaid AS decimal(18, 5)) TaxPaid, CAST(Balance AS decimal(18, 5)) Balance FROM tax_statement 
 	WHERE StartOn >= (SELECT MIN(StartOn) FROM App.tbYearPeriod p JOIN App.tbYear y ON p.YearNumber = y.YearNumber  WHERE y.CashStatusCode < 3);

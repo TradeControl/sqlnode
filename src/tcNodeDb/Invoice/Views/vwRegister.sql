@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Invoice.vwRegister
+﻿CREATE VIEW Invoice.vwRegister
 AS
 	SELECT       (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY p.StartOn DESC) AS StartOn,  
 			Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, 
@@ -13,3 +13,4 @@ AS
 							 Invoice.tbStatus ON Invoice.tbInvoice.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode INNER JOIN
 							 Usr.tbUser ON Invoice.tbInvoice.UserId = Usr.tbUser.UserId
 	WHERE        (Invoice.tbInvoice.AccountCode <> (SELECT AccountCode FROM App.tbOptions));
+

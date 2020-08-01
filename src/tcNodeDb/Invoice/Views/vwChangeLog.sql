@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Invoice.vwChangeLog
+﻿CREATE VIEW Invoice.vwChangeLog
 AS
 	SELECT LogId, InvoiceNumber, ChangedOn, changelog.TransmitStatusCode, transmit.TransmitStatus, changelog.InvoiceStatusCode, invoicestatus.InvoiceStatus, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, UpdatedBy
 	FROM Invoice.tbChangeLog changelog

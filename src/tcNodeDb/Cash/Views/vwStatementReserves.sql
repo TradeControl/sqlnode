@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwStatementReserves
+﻿CREATE VIEW Cash.vwStatementReserves
 AS
 	WITH reserve_account AS
 	(
@@ -11,7 +10,7 @@ AS
 	), last_payment AS
 	(
 		SELECT MAX( payments.PaidOn) AS TransactOn
-		FROM reserve_account JOIN Org.tbPayment payments 
+		FROM reserve_account JOIN Cash.tbPayment payments 
 						ON reserve_account.CashAccountCode = payments.CashAccountCode 
 		WHERE payments.PaymentStatusCode = 1
 	
@@ -40,7 +39,7 @@ AS
 			payments.PaidOn AS TransactOn, 6 AS CashEntryTypeCode, payments.PaymentCode AS ReferenceCode,  
 			payments.PaidOutValue, payments.PaidInValue, payments.CashCode, cash_code.CashDescription 
 		FROM reserve_account 
-			JOIN Org.tbPayment payments ON reserve_account.CashAccountCode = payments.CashAccountCode
+			JOIN Cash.tbPayment payments ON reserve_account.CashAccountCode = payments.CashAccountCode
 			JOIN Cash.tbCode cash_code ON payments.CashCode = cash_code.CashCode
 		WHERE payments.PaymentStatusCode = 2
 	)

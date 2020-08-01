@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwFlowVatPeriodTotals
+﻿CREATE VIEW Cash.vwFlowVatPeriodTotals
 AS
 	WITH active_periods AS
 	(
@@ -15,3 +14,4 @@ AS
 	FROM            active_periods LEFT OUTER JOIN
 							 Cash.vwTaxVatSummary AS vat ON active_periods.StartOn = vat.StartOn
 	GROUP BY active_periods.YearNumber, active_periods.StartOn;
+

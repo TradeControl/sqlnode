@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Invoice.vwCandidatePurchases
+﻿CREATE VIEW Invoice.vwCandidatePurchases
 AS
 SELECT TOP 100 PERCENT  TaskCode, AccountCode, ContactName, ActivityCode, ActionOn, ActionedOn, Quantity, UnitCharge, TotalCharge, TaskTitle, TaskNotes, CashDescription, ActionName, OwnerName, TaskStatus, InsertedBy, 
                          InsertedOn, UpdatedBy, UpdatedOn, TaskStatusCode

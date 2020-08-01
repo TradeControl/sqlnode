@@ -56,14 +56,14 @@ CREATE NONCLUSTERED INDEX [IX_Task_tbTask_ActionOn_TaskCode_CashCode] ON [Task].
 	[TaskStatusCode] ASC,
 	[AccountCode] ASC
 )
-INCLUDE([TaskTitle],[ActivityCode],[ActionedOn],[Quantity],[UnitCharge],[TotalCharge],[PaymentOn]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+INCLUDE([TaskTitle],[ActivityCode],[ActionedOn],[Quantity],[UnitCharge],[TotalCharge],[PaymentOn]) 
 go
 CREATE NONCLUSTERED INDEX [IX_Task_tbTask_TaskCode_CashCode] ON [Task].[tbTask]
 (
 	[TaskCode] ASC,
 	[CashCode] ASC
 )
-INCLUDE([Quantity],[UnitCharge]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+INCLUDE([Quantity],[UnitCharge]) 
 go
 
 

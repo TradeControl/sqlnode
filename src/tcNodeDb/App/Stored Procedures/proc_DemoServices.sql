@@ -18,7 +18,7 @@ AS
 		BEGIN TRAN
 
 		-->>>>>>>>>>>>> RESET >>>>>>>>>>>>>>>>>>>>>>>>>>>
-		DELETE FROM Org.tbPayment;
+		DELETE FROM Cash.tbPayment;
 		DELETE FROM Invoice.tbInvoice;
 		DELETE FROM Task.tbFlow;
 		DELETE FROM Task.tbTask;
@@ -58,7 +58,7 @@ AS
 		SELECT 'Dividends', (SELECT MAX(NextNumber) + 10000 FROM App.tbRegister)
 		WHERE NOT EXISTS (SELECT * FROM App.tbRegister WHERE RegisterName = 'Dividends');
 
-		INSERT INTO [Activity].[tbActivity] ([ActivityCode], [TaskStatusCode], ActivityDescription, [UnitOfMeasure], [CashCode], [UnitCharge], [Printed], [RegisterName])
+		INSERT INTO Activity.tbActivity (ActivityCode, TaskStatusCode, ActivityDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
 		VALUES ('Car Parking / Tolls', 3, '', 'each', '213', 0.0000, 0, 'Expenses')
 		, ('Communications monthly charge', 3, '', 'each', '202', 0.0000, 0, 'Expenses')
 		, ('Company Administration', 3, '', 'each', '201', 0.0000, 0, 'Expenses')
@@ -101,7 +101,7 @@ AS
 		, ('Travel (Flights etc)', 3, '', 'each', '213', 0.0000, 0, 'Expenses')
 		, ('Wages monthly payment', 2, '', 'each', '402', 0.0000, 0, 'Expenses')
 		;
-		INSERT INTO [Activity].[tbAttribute] ([ActivityCode], [Attribute], [PrintOrder], [AttributeTypeCode], [DefaultText])
+		INSERT INTO Activity.tbAttribute (ActivityCode, Attribute, PrintOrder, AttributeTypeCode, DefaultText)
 		VALUES ('PO Book', 'Extent', 20, 0, '')
 		, ('PO Book', 'Finishing', 70, 0, '')
 		, ('PO Book', 'Origination', 30, 0, '')
@@ -292,7 +292,7 @@ AS
 		, ('SO Transport', 'Scale prices', 5, 0, '')
 		, ('SO Transport', 'Storage', 30, 0, '')
 		;
-		INSERT INTO [Activity].[tbFlow] ([ParentCode], [StepNumber], [ChildCode], [SyncTypeCode], [OffsetDays], [UsedOnQuantity])
+		INSERT INTO Activity.tbFlow (ParentCode, StepNumber, ChildCode, SyncTypeCode, OffsetDays, UsedOnQuantity)
 		VALUES ('SO Book', 10, 'PO Book', 0, 0, 0)
 		, ('SO Book', 20, 'PO Transport', 0, 0, 0)
 		, ('SO Brochure or Catalogue', 10, 'PO Brochure or Catalogue', 0, 0, 0)
@@ -309,7 +309,7 @@ AS
 		, ('SO Stationery', 10, 'PO Stationery', 0, 0, 0)
 		, ('SO Transport', 10, 'PO Transport', 0, 0, 0)
 		;
-		INSERT INTO [Activity].[tbOp] ([ActivityCode], [OperationNumber], [SyncTypeCode], [Operation], [Duration], [OffsetDays])
+		INSERT INTO Activity.tbOp (ActivityCode, OperationNumber, SyncTypeCode, Operation, Duration, OffsetDays)
 		VALUES ('PO Book', 10, 0, 'Artwork', 0, 0)
 		, ('PO Book', 20, 0, 'Proofs', 0, 0)
 		, ('PO Book', 30, 0, 'Approval', 0, 0)
@@ -378,7 +378,7 @@ AS
 		IF (@CreateOrders = 0)
 			GOTO CommitTran;
 
-		INSERT INTO [Org].[tbOrg] ([AccountCode], [AccountName], [OrganisationTypeCode], [OrganisationStatusCode], [TaxCode], [AddressCode], [AreaCode], [PhoneNumber], [EmailAddress], [WebSite], [AccountSource], [PaymentTerms], [ExpectedDays], [PaymentDays], [PayDaysFromMonthEnd], [PayBalance])
+		INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationTypeCode, OrganisationStatusCode, TaxCode, AddressCode, AreaCode, PhoneNumber, EmailAddress, WebSite, AccountSource, PaymentTerms, ExpectedDays, PaymentDays, PayDaysFromMonthEnd, PayBalance)
 		VALUES ('ABCUST', 'AB Customer', 1, 1, 'T1', 'ABCUST_001', null, '+1234 56789', 'email@abcus.com', null, null, '30 days from date of invoice', 0, 30, 0, 0)
 		, ('CDCUST', 'CD Customer', 1, 1, 'T0', 'CDCUST_001', null, '+1234 123456', 'admin@cdcus.com', 'www.cdcus.com#http://www.cdcus.com#', null, '30 days end of month following date of invoice', 0, 30, 1, 0)
 		, ('EFCUST', 'EF Customer', 1, 1, 'T0', 'EFCUST_001', null, '01234 654321', 'accounts@efcust.net', 'www.efcust.net#http://www.efcust.net#', null, '30 days from date of invoice', 15, 30, 0, 1)
@@ -393,7 +393,7 @@ AS
 		, ('THEPAP', 'The Paper Supplier', 8, 1, 'T1', 'THEPAP_001', null, '01254 400000', 'adam@papersupplier.eu', 'www.papersupplier.eu#http://www.papersupplier.eu#', null, '30 days from date of invoice', 30, 0, 0, 1)
 		, ('BRICRA', 'British Crafts', 1, 1, 'T0', 'BRICRA_001', null, '1234 987654', 'ed@britishcrafts.org.uk', null, null, '30 days end of month following date of invoice', 10, 30, 1, 1)
 		;
-		INSERT INTO [Org].[tbAddress] ([AddressCode], [AccountCode], [Address])
+		INSERT INTO Org.tbAddress (AddressCode, AccountCode, Address)
 		VALUES ('ABCUST_001', 'ABCUST', '1 The Street
 		Anytown
 		AT1 100')
@@ -435,7 +435,7 @@ AS
 		ThatCounty
 		TT1 1CC')
 		;
-		INSERT INTO [Org].[tbContact] ([AccountCode], [ContactName], [FileAs], [OnMailingList], [NameTitle], [NickName], [JobTitle], [PhoneNumber], [MobileNumber], [EmailAddress])
+		INSERT INTO Org.tbContact (AccountCode, ContactName, FileAs, OnMailingList, NameTitle, NickName, JobTitle, PhoneNumber, MobileNumber, EmailAddress)
 		VALUES ('ABCUST', 'Andy Brass', 'Brass, Andy', 1, null, 'Andy', null, null, '07177 897897', 'andy@abcus.com')
 		, ('CDCUST', 'Ben Boyd', 'Boyd, Ben', 1, null, 'Ben', null, null, '07177 777566', 'ben@cdcus.com')
 		, ('EFCUST', 'Christine Cook', 'Cook, Christine', 1, null, 'Chrissie', null, null, '07891 123456', 'chrissie@efcust.net')
@@ -451,7 +451,7 @@ AS
 		, ('ABCUST', 'Ted Baker', 'Baker, Ted', 1, null, 'Ted', 'Accounts/Payments', null, null, 'ted@abcus.com')
 		;
 
-		INSERT INTO [Task].[tbTask] ([TaskCode], [UserId], [AccountCode], [SecondReference], [TaskTitle], [ContactName], [ActivityCode], [TaskStatusCode], [ActionById], [ActionOn], [ActionedOn], [PaymentOn], [TaskNotes], [Quantity], [CashCode], [TaxCode], [UnitCharge], [TotalCharge], [AddressCodeFrom], [AddressCodeTo], [Spooled], [Printed])
+		INSERT INTO Task.tbTask (TaskCode, UserId, AccountCode, SecondReference, TaskTitle, ContactName, ActivityCode, TaskStatusCode, ActionById, ActionOn, ActionedOn, PaymentOn, TaskNotes, Quantity, CashCode, TaxCode, UnitCharge, TotalCharge, AddressCodeFrom, AddressCodeTo, Spooled, Printed)
 		VALUES (CONCAT(@UserId, '_10000'), @UserId, 'ABCUST', 'Order No. 12345', 'One-Off Book Order', 'Andy Brass', 'SO Book', 1, @UserId, '20190910', null, '20190910', null, 50, '103', 'T0', 9, 450.0000, 'ABCUST_001', 'ABCUST_002', 0, 0)
 		, (CONCAT(@UserId, '_10007'), @UserId, 'CDCUST', 'Monthly Contract', 'CD Monthly Brochure', 'Ben Boyd', 'SO Brochure or Catalogue', 2, @UserId, '20190126', '20190126', '20190228', null, 5000, '103', 'T1', 0.2, 1000.0000, 'CDCUST_001', 'CDCUST_002', 0, 0)
 		, (CONCAT(@UserId, '_10008'), @UserId, 'CDCUST', 'Monthly Contract', 'CD Monthly Brochure', 'Ben Boyd', 'SO Brochure or Catalogue', 2, @UserId, '20190225', '20190225', '20190329', null, 5000, '103', 'T1', 0.2, 1000.0000, 'CDCUST_001', 'CDCUST_002', 0, 0)
@@ -541,7 +541,7 @@ AS
 		, (CONCAT(@UserId, '_40045'), @UserId, 'BUSOWN', null, '320 miles travel to NEC Show', null, 'Employee Transport', 1, @UserId, '20190801', null, '20190830', null, 212, '212', 'T0', 0.45, 95.4000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40046'), @UserId, 'SUNSUP', null, 'Ring Binders x 12 from local shop', null, 'Stationery - General', 2, @UserId, '20190702', '20190722', '20190702', null, 12, '209', 'T1', 4.5, 54.0000, null, null, 0, 1)
 		;
-		INSERT INTO [Task].[tbFlow] ([ParentTaskCode], [StepNumber], [ChildTaskCode], [SyncTypeCode], [UsedOnQuantity], [OffsetDays])
+		INSERT INTO Task.tbFlow (ParentTaskCode, StepNumber, ChildTaskCode, SyncTypeCode, UsedOnQuantity, OffsetDays)
 		VALUES (CONCAT(@UserId, '_10000'), 10, CONCAT(@UserId, '_20000'), 0, 0, 0)
 		, (CONCAT(@UserId, '_10007'), 10, CONCAT(@UserId, '_20010'), 0, 0, 7)
 		, (CONCAT(@UserId, '_10007'), 20, CONCAT(@UserId, '_20011'), 0, 0, -7)
@@ -599,7 +599,7 @@ AS
 		, (CONCAT(@UserId, '_30002'), 110, CONCAT(@UserId, '_40041'), 0, 0, 0)
 		, (CONCAT(@UserId, '_30002'), 120, CONCAT(@UserId, '_40042'), 0, 0, 0)
 		;
-		INSERT INTO [Task].[tbOp] ([TaskCode], [OperationNumber], [SyncTypeCode], [OpStatusCode], [UserId], [Operation], [Note], [StartOn], [EndOn], [Duration], [OffsetDays])
+		INSERT INTO Task.tbOp (TaskCode, OperationNumber, SyncTypeCode, OpStatusCode, UserId, Operation, Note, StartOn, EndOn, Duration, OffsetDays)
 		VALUES (CONCAT(@UserId, '_10000'), 10, 0, 1, @UserId, 'Artwork', null, '20190718', '20190718', 0, 0)
 		, (CONCAT(@UserId, '_10000'), 20, 0, 0, @UserId, 'Proofs', null, '20190718', '20190718', 0, 0)
 		, (CONCAT(@UserId, '_10000'), 30, 0, 0, @UserId, 'Approval', null, '20190717', '20190717', 0, 0)
@@ -720,12 +720,12 @@ AS
 		, (CONCAT(@UserId, '_40026'), 30, 0, 2, @UserId, 'Approval', null, '20190626', '20190701', 0, 3)
 		, (CONCAT(@UserId, '_40026'), 40, 2, 2, @UserId, 'Delivery', null, '20190701', '20190708', 0, 1)
 		;
-		INSERT INTO [Task].[tbQuote] ([TaskCode], [Quantity], [TotalPrice], [RunOnQuantity], [RunOnPrice], [RunBackQuantity], [RunBackPrice])
+		INSERT INTO Task.tbQuote (TaskCode, Quantity, TotalPrice, RunOnQuantity, RunOnPrice, RunBackQuantity, RunBackPrice)
 		VALUES (CONCAT(@UserId, '_10014'), 5000, 1000.0000, 1000, 50.0000, 1000, 45)
 		, (CONCAT(@UserId, '_10014'), 10000, 1400.0000, 1000, 48.0000, 1000, 43)
 		, (CONCAT(@UserId, '_10014'), 20000, 2200.0000, 1000, 45.0000, 1000, 42)
 		;
-		INSERT INTO [Task].[tbAttribute] ([TaskCode], [Attribute], [PrintOrder], [AttributeTypeCode], [AttributeDescription])
+		INSERT INTO Task.tbAttribute (TaskCode, Attribute, PrintOrder, AttributeTypeCode, AttributeDescription)
 		VALUES (CONCAT(@UserId, '_10000'), 'Extent', 20, 0, '180')
 		, (CONCAT(@UserId, '_10000'), 'Finishing', 70, 0, 'Perfect bind with cover drawn on, glued with 6mm hinge, trim flush')
 		, (CONCAT(@UserId, '_10000'), 'Origination', 30, 0, 'Complete print ready single page PDFs to be supplied')
@@ -1038,7 +1038,7 @@ AS
 		IF (@InvoiceOrders = 0)
 			GOTO CommitTran;
 
-		INSERT INTO [Invoice].[tbInvoice] ([InvoiceNumber], [UserId], [AccountCode], [InvoiceTypeCode], [InvoiceStatusCode], [InvoicedOn], [ExpectedOn], [DueOn], [InvoiceValue], [TaxValue], [PaidValue], [PaidTaxValue], [PaymentTerms], [Notes], [Printed], [Spooled])
+		INSERT INTO Invoice.tbInvoice (InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, ExpectedOn, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, PaymentTerms, Notes, Printed, Spooled)
 		VALUES (CONCAT('010000.', @UserId), @UserId, 'CDCUST', 0, 1, '20190126', '20190228', '20190228', 1000.0000, 200.0000, 1000.0000, 200.0000, '30 days end of month following date of invoice', null, 0, 0)
 		, (CONCAT('010001.', @UserId), @UserId, 'CDCUST', 0, 1, '20190225', '20190329', '20190329', 1000.0000, 200.0000, 1000.0000, 200.0000, '30 days end of month following date of invoice', null, 0, 0)
 		, (CONCAT('010002.', @UserId), @UserId, 'CDCUST', 0, 1, '20190328', '20190430', '20190430', 1000.0000, 200.0000, 1000.0000, 200.0000, '30 days end of month following date of invoice', null, 0, 0)
@@ -1091,7 +1091,7 @@ AS
 		, (CONCAT('030038.', @UserId), @UserId, 'SUNSUP', 2, 1, '20190722', '20190722', '20190722', 54.0000, 10.8000, 54.0000, 10.8000, 'Paid with order', null, 0, 0)
 		;
 
-		INSERT INTO [Invoice].[tbTask] ([InvoiceNumber], [TaskCode], [Quantity], [TotalValue], [InvoiceValue], [TaxValue], [PaidValue], [PaidTaxValue], [CashCode], [TaxCode])
+		INSERT INTO Invoice.tbTask (InvoiceNumber, TaskCode, Quantity, TotalValue, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, CashCode, TaxCode)
 		VALUES (CONCAT('010000.', @UserId), CONCAT(@UserId, '_10007'), 5000, 0.0000, 1000.0000, 200.0000, 1000.0000, 200.0000, '103', 'T1')
 		, (CONCAT('010001.', @UserId), CONCAT(@UserId, '_10008'), 5000, 0.0000, 1000.0000, 200.0000, 1000.0000, 200.0000, '103', 'T1')
 		, (CONCAT('010002.', @UserId), CONCAT(@UserId, '_10009'), 5000, 0.0000, 1000.0000, 200.0000, 1000.0000, 200.0000, '103', 'T1')
@@ -1146,7 +1146,7 @@ AS
 		, (CONCAT('030037.', @UserId), CONCAT(@UserId, '_20022'), 2, 0.0000, 150.0000, 30.0000, 150.0000, 30.0000, '200', 'T1')
 		, (CONCAT('030038.', @UserId), CONCAT(@UserId, '_40046'), 12, 0.0000, 54.0000, 10.8000, 54.0000, 10.8000, '209', 'T1')
 		;
-		INSERT INTO [Invoice].[tbItem] ([InvoiceNumber], [CashCode], [TaxCode], [TotalValue], [InvoiceValue], [TaxValue], [PaidValue], [PaidTaxValue], [ItemReference])
+		INSERT INTO Invoice.tbItem (InvoiceNumber, CashCode, TaxCode, TotalValue, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, ItemReference)
 		VALUES (CONCAT('010005.', @UserId), '305', 'N/A', 0.0000, 10000.0000, 0.0000, 10000.0000, 0.0000, null)
 		, (CONCAT('010007.', @UserId), '305', 'N/A', 0.0000, 15000.0000, 0.0000, 15000.0000, 0.0000, null)
 		, (CONCAT('010008.', @UserId), '305', 'N/A', 0.0000, 5000.0000, 0.0000, 5000.0000, 0.0000, null)
@@ -1235,7 +1235,7 @@ AS
 		IF (@PayInvoices = 0)
 			GOTO CommitTran;
 
-		INSERT INTO [Org].[tbPayment] ([PaymentCode], [UserId], [PaymentStatusCode], [AccountCode], [CashAccountCode], [CashCode], [TaxCode], [PaidOn], [PaidInValue], [PaidOutValue], [TaxInValue], [TaxOutValue], [PaymentReference])
+		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, TaxInValue, TaxOutValue, PaymentReference)
 		VALUES (CONCAT(@UserId, '_20190008_120000'), @UserId, 1, 'CDCUST', 'CURACC', '103', 'T1', '20190228', 1200.0000, 0.0000, 200.0000, 0.0000, CONCAT('010000.', @UserId))
 		, (CONCAT(@UserId, '_20190008_120001'), @UserId, 1, 'CDCUST', 'CURACC', '103', 'T1', '20190329', 1200.0000, 0.0000, 200.0000, 0.0000, CONCAT('010001.', @UserId))
 		, (CONCAT(@UserId, '_20190008_120002'), @UserId, 1, 'CDCUST', 'CURACC', '103', 'T1', '20190430', 1200.0000, 0.0000, 200.0000, 0.0000, CONCAT('010002.', @UserId))
@@ -1293,7 +1293,7 @@ AS
 		UPDATE Invoice.tbInvoice
 		SET InvoiceStatusCode = 3;
 
-		UPDATE Org.tbPayment
+		UPDATE Cash.tbPayment
 		SET PaidOn = DATEADD(MONTH, @OffsetMonth, App.fnAdjustToCalendar(PaidOn, 0));
 
 CommitTran:
@@ -1304,3 +1304,4 @@ CommitTran:
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
 	END CATCH
+

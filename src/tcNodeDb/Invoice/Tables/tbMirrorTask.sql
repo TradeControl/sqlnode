@@ -2,10 +2,10 @@
     [ContractAddress] NVARCHAR (42)   NOT NULL,
     [TaskCode]        NVARCHAR (20)   NOT NULL,
     [Quantity]        DECIMAL (18, 4) NOT NULL,
-    [InvoiceValue]    MONEY           NOT NULL,
-    [TaxValue]        MONEY           NOT NULL,
     [TaxCode]         NVARCHAR (10)   NULL,
     [RowVer]          ROWVERSION      NULL,
+    [InvoiceValue]    DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbMirrorTask_InvoiceValue] DEFAULT ((0)) NOT NULL,
+    [TaxValue]        DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbMirrorTask_TaxValue] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Invoice_tbMirrorTask] PRIMARY KEY CLUSTERED ([ContractAddress] ASC, [TaskCode] ASC),
     CONSTRAINT [FK_Invoice_tbMirrorTask_ContractAddress] FOREIGN KEY ([ContractAddress]) REFERENCES [Invoice].[tbMirror] ([ContractAddress]) ON DELETE CASCADE
 );

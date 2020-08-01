@@ -12,4 +12,3 @@ AS
 							 Org.tbAccount ON Cash.vwAccountStatement.CashAccountCode = Org.tbAccount.CashAccountCode INNER JOIN
 							 Org.tbOrg ON Org.tbAccount.AccountCode = Org.tbOrg.AccountCode ON App.tbYearPeriod.StartOn = Cash.vwAccountStatement.StartOn INNER JOIN
 							 App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber;
-

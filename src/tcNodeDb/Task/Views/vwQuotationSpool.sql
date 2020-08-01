@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Task.vwQuotationSpool
+﻿CREATE VIEW Task.vwQuotationSpool
 AS
 SELECT        sales_order.TaskCode, sales_order.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, invoice_address.Address AS InvoiceAddress, 
                          delivery_address.Address AS DeliveryAddress, sales_order.AccountCode, sales_order.TaskNotes, sales_order.ActivityCode, sales_order.ActionOn, Activity.tbActivity.UnitOfMeasure, sales_order.Quantity, 
@@ -16,3 +15,4 @@ WHERE EXISTS (
 	SELECT        UserName, DocTypeCode, DocumentNumber, SpooledOn
     FROM            App.tbDocSpool AS doc
     WHERE        (DocTypeCode = 0) AND (UserName = SUSER_SNAME()) AND (sales_order.TaskCode = DocumentNumber));
+

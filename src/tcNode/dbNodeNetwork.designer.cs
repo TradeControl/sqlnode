@@ -60,15 +60,15 @@ namespace TradeControl.Node
     partial void InserttbMirrorTask(tbMirrorTask instance);
     partial void UpdatetbMirrorTask(tbMirrorTask instance);
     partial void DeletetbMirrorTask(tbMirrorTask instance);
-    partial void InserttbInvoiceMirror(tbInvoiceMirror instance);
-    partial void UpdatetbInvoiceMirror(tbInvoiceMirror instance);
-    partial void DeletetbInvoiceMirror(tbInvoiceMirror instance);
     partial void InserttbInvoice(tbInvoice instance);
     partial void UpdatetbInvoice(tbInvoice instance);
     partial void DeletetbInvoice(tbInvoice instance);
     partial void InserttbMirrorReference(tbMirrorReference instance);
     partial void UpdatetbMirrorReference(tbMirrorReference instance);
     partial void DeletetbMirrorReference(tbMirrorReference instance);
+    partial void InserttbInvoiceMirror(tbInvoiceMirror instance);
+    partial void UpdatetbInvoiceMirror(tbInvoiceMirror instance);
+    partial void DeletetbInvoiceMirror(tbInvoiceMirror instance);
     #endregion
 		
 		public dbNodeNetworkDataContext() : 
@@ -205,14 +205,6 @@ namespace TradeControl.Node
 			}
 		}
 		
-		public System.Data.Linq.Table<vwInvoiceUpdate> vwInvoiceUpdates
-		{
-			get
-			{
-				return this.GetTable<vwInvoiceUpdate>();
-			}
-		}
-		
 		public System.Data.Linq.Table<tbMirrorItem> tbMirrorItems
 		{
 			get
@@ -226,14 +218,6 @@ namespace TradeControl.Node
 			get
 			{
 				return this.GetTable<tbMirrorTask>();
-			}
-		}
-		
-		public System.Data.Linq.Table<tbInvoiceMirror> tbInvoiceMirrors
-		{
-			get
-			{
-				return this.GetTable<tbInvoiceMirror>();
 			}
 		}
 		
@@ -253,11 +237,27 @@ namespace TradeControl.Node
 			}
 		}
 		
+		public System.Data.Linq.Table<tbInvoiceMirror> tbInvoiceMirrors
+		{
+			get
+			{
+				return this.GetTable<tbInvoiceMirror>();
+			}
+		}
+		
 		public System.Data.Linq.Table<vwInvoiceDeployment> vwInvoiceDeployments
 		{
 			get
 			{
 				return this.GetTable<vwInvoiceDeployment>();
+			}
+		}
+		
+		public System.Data.Linq.Table<vwInvoiceUpdate> vwInvoiceUpdates
+		{
+			get
+			{
+				return this.GetTable<vwInvoiceUpdate>();
 			}
 		}
 		
@@ -382,9 +382,9 @@ namespace TradeControl.Node
 		
 		private EntitySet<tbAllocation> _tbAllocations;
 		
-		private EntitySet<tbInvoiceMirror> _tbInvoiceMirrors;
-		
 		private EntitySet<tbInvoice> _tbInvoices;
+		
+		private EntitySet<tbInvoiceMirror> _tbInvoiceMirrors;
 		
     #region Extensibility Method Definitions
     partial void OnLoaded();
@@ -456,8 +456,8 @@ namespace TradeControl.Node
 		{
 			this._tbOptions = new EntitySet<tbOption>(new Action<tbOption>(this.attach_tbOptions), new Action<tbOption>(this.detach_tbOptions));
 			this._tbAllocations = new EntitySet<tbAllocation>(new Action<tbAllocation>(this.attach_tbAllocations), new Action<tbAllocation>(this.detach_tbAllocations));
-			this._tbInvoiceMirrors = new EntitySet<tbInvoiceMirror>(new Action<tbInvoiceMirror>(this.attach_tbInvoiceMirrors), new Action<tbInvoiceMirror>(this.detach_tbInvoiceMirrors));
 			this._tbInvoices = new EntitySet<tbInvoice>(new Action<tbInvoice>(this.attach_tbInvoices), new Action<tbInvoice>(this.detach_tbInvoices));
+			this._tbInvoiceMirrors = new EntitySet<tbInvoiceMirror>(new Action<tbInvoiceMirror>(this.attach_tbInvoiceMirrors), new Action<tbInvoiceMirror>(this.detach_tbInvoiceMirrors));
 			OnCreated();
 		}
 		
@@ -841,7 +841,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Turnover", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Turnover", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal Turnover
 		{
 			get
@@ -861,7 +861,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_OpeningBalance", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_OpeningBalance", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal OpeningBalance
 		{
 			get
@@ -921,7 +921,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Logo", DbType="Image", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Logo", DbType="Image", CanBeNull=true, UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary Logo
 		{
 			get
@@ -1087,19 +1087,6 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbOrg_tbInvoiceMirror", Storage="_tbInvoiceMirrors", ThisKey="AccountCode", OtherKey="AccountCode")]
-		public EntitySet<tbInvoiceMirror> tbInvoiceMirrors
-		{
-			get
-			{
-				return this._tbInvoiceMirrors;
-			}
-			set
-			{
-				this._tbInvoiceMirrors.Assign(value);
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbOrg_tbInvoice", Storage="_tbInvoices", ThisKey="AccountCode", OtherKey="AccountCode")]
 		public EntitySet<tbInvoice> tbInvoices
 		{
@@ -1110,6 +1097,19 @@ namespace TradeControl.Node
 			set
 			{
 				this._tbInvoices.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbOrg_tbInvoiceMirror", Storage="_tbInvoiceMirrors", ThisKey="AccountCode", OtherKey="AccountCode")]
+		public EntitySet<tbInvoiceMirror> tbInvoiceMirrors
+		{
+			get
+			{
+				return this._tbInvoiceMirrors;
+			}
+			set
+			{
+				this._tbInvoiceMirrors.Assign(value);
 			}
 		}
 		
@@ -1157,18 +1157,6 @@ namespace TradeControl.Node
 			entity.tbOrg = null;
 		}
 		
-		private void attach_tbInvoiceMirrors(tbInvoiceMirror entity)
-		{
-			this.SendPropertyChanging();
-			entity.tbOrg = this;
-		}
-		
-		private void detach_tbInvoiceMirrors(tbInvoiceMirror entity)
-		{
-			this.SendPropertyChanging();
-			entity.tbOrg = null;
-		}
-		
 		private void attach_tbInvoices(tbInvoice entity)
 		{
 			this.SendPropertyChanging();
@@ -1176,6 +1164,18 @@ namespace TradeControl.Node
 		}
 		
 		private void detach_tbInvoices(tbInvoice entity)
+		{
+			this.SendPropertyChanging();
+			entity.tbOrg = null;
+		}
+		
+		private void attach_tbInvoiceMirrors(tbInvoiceMirror entity)
+		{
+			this.SendPropertyChanging();
+			entity.tbOrg = this;
+		}
+		
+		private void detach_tbInvoiceMirrors(tbInvoiceMirror entity)
 		{
 			this.SendPropertyChanging();
 			entity.tbOrg = null;
@@ -3205,7 +3205,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TotalValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TotalValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal TotalValue
 		{
 			get
@@ -3225,7 +3225,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal InvoiceValue
 		{
 			get
@@ -3245,7 +3245,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal TaxValue
 		{
 			get
@@ -3265,7 +3265,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal PaidValue
 		{
 			get
@@ -3285,7 +3285,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal PaidTaxValue
 		{
 			get
@@ -3508,7 +3508,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TotalValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TotalValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal TotalValue
 		{
 			get
@@ -3528,7 +3528,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal InvoiceValue
 		{
 			get
@@ -3548,7 +3548,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal TaxValue
 		{
 			get
@@ -3568,7 +3568,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal PaidValue
 		{
 			get
@@ -3588,7 +3588,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal PaidTaxValue
 		{
 			get
@@ -3817,7 +3817,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Money NOT NULL")]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Decimal(18, 5) NOT NULL")]
 		public decimal InvoiceValue
 		{
 			get
@@ -3833,7 +3833,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Money NOT NULL")]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Decimal(18, 5) NOT NULL")]
 		public decimal TaxValue
 		{
 			get
@@ -3865,7 +3865,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Money NOT NULL")]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Decimal(18, 5) NOT NULL")]
 		public decimal PaidValue
 		{
 			get
@@ -3881,7 +3881,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Money NOT NULL")]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Decimal(18, 5) NOT NULL")]
 		public decimal PaidTaxValue
 		{
 			get
@@ -4022,7 +4022,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TotalValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TotalValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal TotalValue
 		{
 			get
@@ -4042,7 +4042,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal InvoiceValue
 		{
 			get
@@ -4062,7 +4062,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal TaxValue
 		{
 			get
@@ -4082,7 +4082,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal PaidValue
 		{
 			get
@@ -4102,7 +4102,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal PaidTaxValue
 		{
 			get
@@ -4257,123 +4257,6 @@ namespace TradeControl.Node
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="Invoice.vwNetworkUpdates")]
-	public partial class vwInvoiceUpdate
-	{
-		
-		private string _InvoiceNumber;
-		
-		private string _AccountCode;
-		
-		private short _InvoiceStatusCode;
-		
-		private System.DateTime _DueOn;
-		
-		private decimal _PaidValue;
-		
-		private decimal _PaidTaxValue;
-		
-		public vwInvoiceUpdate()
-		{
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceNumber", DbType="NVarChar(20) NOT NULL", CanBeNull=false)]
-		public string InvoiceNumber
-		{
-			get
-			{
-				return this._InvoiceNumber;
-			}
-			set
-			{
-				if ((this._InvoiceNumber != value))
-				{
-					this._InvoiceNumber = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_AccountCode", DbType="NVarChar(10) NOT NULL", CanBeNull=false)]
-		public string AccountCode
-		{
-			get
-			{
-				return this._AccountCode;
-			}
-			set
-			{
-				if ((this._AccountCode != value))
-				{
-					this._AccountCode = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceStatusCode", DbType="SmallInt NOT NULL")]
-		public short InvoiceStatusCode
-		{
-			get
-			{
-				return this._InvoiceStatusCode;
-			}
-			set
-			{
-				if ((this._InvoiceStatusCode != value))
-				{
-					this._InvoiceStatusCode = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DueOn", DbType="DateTime NOT NULL")]
-		public System.DateTime DueOn
-		{
-			get
-			{
-				return this._DueOn;
-			}
-			set
-			{
-				if ((this._DueOn != value))
-				{
-					this._DueOn = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Money NOT NULL")]
-		public decimal PaidValue
-		{
-			get
-			{
-				return this._PaidValue;
-			}
-			set
-			{
-				if ((this._PaidValue != value))
-				{
-					this._PaidValue = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Money NOT NULL")]
-		public decimal PaidTaxValue
-		{
-			get
-			{
-				return this._PaidTaxValue;
-			}
-			set
-			{
-				if ((this._PaidTaxValue != value))
-				{
-					this._PaidTaxValue = value;
-				}
-			}
-		}
-	}
-	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="Invoice.tbMirrorItem")]
 	public partial class tbMirrorItem : INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -4486,7 +4369,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal InvoiceValue
 		{
 			get
@@ -4506,7 +4389,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal TaxValue
 		{
 			get
@@ -4733,7 +4616,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal InvoiceValue
 		{
 			get
@@ -4753,7 +4636,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal TaxValue
 		{
 			get
@@ -4793,7 +4676,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RowVer", AutoSync=AutoSync.Always, DbType="rowversion", IsDbGenerated=true, IsVersion=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RowVer", AutoSync=AutoSync.Always, DbType="rowversion", CanBeNull=true, IsDbGenerated=true, IsVersion=true, UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary RowVer
 		{
 			get
@@ -4865,533 +4748,6 @@ namespace TradeControl.Node
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
-		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="Invoice.tbMirror")]
-	public partial class tbInvoiceMirror : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private string _ContractAddress;
-		
-		private string _AccountCode;
-		
-		private string _InvoiceNumber;
-		
-		private short _InvoiceTypeCode;
-		
-		private short _InvoiceStatusCode;
-		
-		private System.DateTime _InvoicedOn;
-		
-		private System.DateTime _DueOn;
-		
-		private string _UnitOfCharge;
-		
-		private decimal _InvoiceValue;
-		
-		private decimal _InvoiceTax;
-		
-		private decimal _PaidValue;
-		
-		private decimal _PaidTaxValue;
-		
-		private string _PaymentTerms;
-		
-		private System.DateTime _InsertedOn;
-		
-		private System.Data.Linq.Binary _RowVer;
-		
-		private EntitySet<tbMirrorItem> _tbMirrorItems;
-		
-		private EntitySet<tbMirrorTask> _tbMirrorTasks;
-		
-		private EntityRef<tbMirrorReference> _tbMirrorReference;
-		
-		private EntityRef<tbOrg> _tbOrg;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnContractAddressChanging(string value);
-    partial void OnContractAddressChanged();
-    partial void OnAccountCodeChanging(string value);
-    partial void OnAccountCodeChanged();
-    partial void OnInvoiceNumberChanging(string value);
-    partial void OnInvoiceNumberChanged();
-    partial void OnInvoiceTypeCodeChanging(short value);
-    partial void OnInvoiceTypeCodeChanged();
-    partial void OnInvoiceStatusCodeChanging(short value);
-    partial void OnInvoiceStatusCodeChanged();
-    partial void OnInvoicedOnChanging(System.DateTime value);
-    partial void OnInvoicedOnChanged();
-    partial void OnDueOnChanging(System.DateTime value);
-    partial void OnDueOnChanged();
-    partial void OnUnitOfChargeChanging(string value);
-    partial void OnUnitOfChargeChanged();
-    partial void OnInvoiceValueChanging(decimal value);
-    partial void OnInvoiceValueChanged();
-    partial void OnInvoiceTaxChanging(decimal value);
-    partial void OnInvoiceTaxChanged();
-    partial void OnPaidValueChanging(decimal value);
-    partial void OnPaidValueChanged();
-    partial void OnPaidTaxValueChanging(decimal value);
-    partial void OnPaidTaxValueChanged();
-    partial void OnPaymentTermsChanging(string value);
-    partial void OnPaymentTermsChanged();
-    partial void OnInsertedOnChanging(System.DateTime value);
-    partial void OnInsertedOnChanged();
-    partial void OnRowVerChanging(System.Data.Linq.Binary value);
-    partial void OnRowVerChanged();
-    #endregion
-		
-		public tbInvoiceMirror()
-		{
-			this._tbMirrorItems = new EntitySet<tbMirrorItem>(new Action<tbMirrorItem>(this.attach_tbMirrorItems), new Action<tbMirrorItem>(this.detach_tbMirrorItems));
-			this._tbMirrorTasks = new EntitySet<tbMirrorTask>(new Action<tbMirrorTask>(this.attach_tbMirrorTasks), new Action<tbMirrorTask>(this.detach_tbMirrorTasks));
-			this._tbMirrorReference = default(EntityRef<tbMirrorReference>);
-			this._tbOrg = default(EntityRef<tbOrg>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ContractAddress", DbType="NVarChar(42) NOT NULL", CanBeNull=false, IsPrimaryKey=true, UpdateCheck=UpdateCheck.Never)]
-		public string ContractAddress
-		{
-			get
-			{
-				return this._ContractAddress;
-			}
-			set
-			{
-				if ((this._ContractAddress != value))
-				{
-					this.OnContractAddressChanging(value);
-					this.SendPropertyChanging();
-					this._ContractAddress = value;
-					this.SendPropertyChanged("ContractAddress");
-					this.OnContractAddressChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_AccountCode", DbType="NVarChar(10) NOT NULL", CanBeNull=false, UpdateCheck=UpdateCheck.Never)]
-		public string AccountCode
-		{
-			get
-			{
-				return this._AccountCode;
-			}
-			set
-			{
-				if ((this._AccountCode != value))
-				{
-					if (this._tbOrg.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnAccountCodeChanging(value);
-					this.SendPropertyChanging();
-					this._AccountCode = value;
-					this.SendPropertyChanged("AccountCode");
-					this.OnAccountCodeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceNumber", DbType="NVarChar(50) NOT NULL", CanBeNull=false, UpdateCheck=UpdateCheck.Never)]
-		public string InvoiceNumber
-		{
-			get
-			{
-				return this._InvoiceNumber;
-			}
-			set
-			{
-				if ((this._InvoiceNumber != value))
-				{
-					this.OnInvoiceNumberChanging(value);
-					this.SendPropertyChanging();
-					this._InvoiceNumber = value;
-					this.SendPropertyChanged("InvoiceNumber");
-					this.OnInvoiceNumberChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceTypeCode", DbType="SmallInt NOT NULL", UpdateCheck=UpdateCheck.Never)]
-		public short InvoiceTypeCode
-		{
-			get
-			{
-				return this._InvoiceTypeCode;
-			}
-			set
-			{
-				if ((this._InvoiceTypeCode != value))
-				{
-					this.OnInvoiceTypeCodeChanging(value);
-					this.SendPropertyChanging();
-					this._InvoiceTypeCode = value;
-					this.SendPropertyChanged("InvoiceTypeCode");
-					this.OnInvoiceTypeCodeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceStatusCode", DbType="SmallInt NOT NULL", UpdateCheck=UpdateCheck.Never)]
-		public short InvoiceStatusCode
-		{
-			get
-			{
-				return this._InvoiceStatusCode;
-			}
-			set
-			{
-				if ((this._InvoiceStatusCode != value))
-				{
-					this.OnInvoiceStatusCodeChanging(value);
-					this.SendPropertyChanging();
-					this._InvoiceStatusCode = value;
-					this.SendPropertyChanged("InvoiceStatusCode");
-					this.OnInvoiceStatusCodeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoicedOn", DbType="DateTime NOT NULL", UpdateCheck=UpdateCheck.Never)]
-		public System.DateTime InvoicedOn
-		{
-			get
-			{
-				return this._InvoicedOn;
-			}
-			set
-			{
-				if ((this._InvoicedOn != value))
-				{
-					this.OnInvoicedOnChanging(value);
-					this.SendPropertyChanging();
-					this._InvoicedOn = value;
-					this.SendPropertyChanged("InvoicedOn");
-					this.OnInvoicedOnChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DueOn", DbType="DateTime NOT NULL", UpdateCheck=UpdateCheck.Never)]
-		public System.DateTime DueOn
-		{
-			get
-			{
-				return this._DueOn;
-			}
-			set
-			{
-				if ((this._DueOn != value))
-				{
-					this.OnDueOnChanging(value);
-					this.SendPropertyChanging();
-					this._DueOn = value;
-					this.SendPropertyChanged("DueOn");
-					this.OnDueOnChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UnitOfCharge", DbType="NVarChar(5)", UpdateCheck=UpdateCheck.Never)]
-		public string UnitOfCharge
-		{
-			get
-			{
-				return this._UnitOfCharge;
-			}
-			set
-			{
-				if ((this._UnitOfCharge != value))
-				{
-					this.OnUnitOfChargeChanging(value);
-					this.SendPropertyChanging();
-					this._UnitOfCharge = value;
-					this.SendPropertyChanged("UnitOfCharge");
-					this.OnUnitOfChargeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
-		public decimal InvoiceValue
-		{
-			get
-			{
-				return this._InvoiceValue;
-			}
-			set
-			{
-				if ((this._InvoiceValue != value))
-				{
-					this.OnInvoiceValueChanging(value);
-					this.SendPropertyChanging();
-					this._InvoiceValue = value;
-					this.SendPropertyChanged("InvoiceValue");
-					this.OnInvoiceValueChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceTax", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
-		public decimal InvoiceTax
-		{
-			get
-			{
-				return this._InvoiceTax;
-			}
-			set
-			{
-				if ((this._InvoiceTax != value))
-				{
-					this.OnInvoiceTaxChanging(value);
-					this.SendPropertyChanging();
-					this._InvoiceTax = value;
-					this.SendPropertyChanged("InvoiceTax");
-					this.OnInvoiceTaxChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
-		public decimal PaidValue
-		{
-			get
-			{
-				return this._PaidValue;
-			}
-			set
-			{
-				if ((this._PaidValue != value))
-				{
-					this.OnPaidValueChanging(value);
-					this.SendPropertyChanging();
-					this._PaidValue = value;
-					this.SendPropertyChanged("PaidValue");
-					this.OnPaidValueChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
-		public decimal PaidTaxValue
-		{
-			get
-			{
-				return this._PaidTaxValue;
-			}
-			set
-			{
-				if ((this._PaidTaxValue != value))
-				{
-					this.OnPaidTaxValueChanging(value);
-					this.SendPropertyChanging();
-					this._PaidTaxValue = value;
-					this.SendPropertyChanged("PaidTaxValue");
-					this.OnPaidTaxValueChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaymentTerms", DbType="NVarChar(100)", UpdateCheck=UpdateCheck.Never)]
-		public string PaymentTerms
-		{
-			get
-			{
-				return this._PaymentTerms;
-			}
-			set
-			{
-				if ((this._PaymentTerms != value))
-				{
-					this.OnPaymentTermsChanging(value);
-					this.SendPropertyChanging();
-					this._PaymentTerms = value;
-					this.SendPropertyChanged("PaymentTerms");
-					this.OnPaymentTermsChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InsertedOn", DbType="DateTime NOT NULL", UpdateCheck=UpdateCheck.Never)]
-		public System.DateTime InsertedOn
-		{
-			get
-			{
-				return this._InsertedOn;
-			}
-			set
-			{
-				if ((this._InsertedOn != value))
-				{
-					this.OnInsertedOnChanging(value);
-					this.SendPropertyChanging();
-					this._InsertedOn = value;
-					this.SendPropertyChanged("InsertedOn");
-					this.OnInsertedOnChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RowVer", AutoSync=AutoSync.Always, DbType="rowversion NOT NULL", CanBeNull=false, IsDbGenerated=true, IsVersion=true, UpdateCheck=UpdateCheck.Never)]
-		public System.Data.Linq.Binary RowVer
-		{
-			get
-			{
-				return this._RowVer;
-			}
-			set
-			{
-				if ((this._RowVer != value))
-				{
-					this.OnRowVerChanging(value);
-					this.SendPropertyChanging();
-					this._RowVer = value;
-					this.SendPropertyChanged("RowVer");
-					this.OnRowVerChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbInvoiceMirror_tbMirrorItem", Storage="_tbMirrorItems", ThisKey="ContractAddress", OtherKey="ContractAddress")]
-		public EntitySet<tbMirrorItem> tbMirrorItems
-		{
-			get
-			{
-				return this._tbMirrorItems;
-			}
-			set
-			{
-				this._tbMirrorItems.Assign(value);
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbInvoiceMirror_tbMirrorTask", Storage="_tbMirrorTasks", ThisKey="ContractAddress", OtherKey="ContractAddress")]
-		public EntitySet<tbMirrorTask> tbMirrorTasks
-		{
-			get
-			{
-				return this._tbMirrorTasks;
-			}
-			set
-			{
-				this._tbMirrorTasks.Assign(value);
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbInvoiceMirror_tbMirrorReference", Storage="_tbMirrorReference", ThisKey="ContractAddress", OtherKey="ContractAddress", IsUnique=true, IsForeignKey=false)]
-		public tbMirrorReference tbMirrorReference
-		{
-			get
-			{
-				return this._tbMirrorReference.Entity;
-			}
-			set
-			{
-				tbMirrorReference previousValue = this._tbMirrorReference.Entity;
-				if (((previousValue != value) 
-							|| (this._tbMirrorReference.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._tbMirrorReference.Entity = null;
-						previousValue.tbInvoiceMirror = null;
-					}
-					this._tbMirrorReference.Entity = value;
-					if ((value != null))
-					{
-						value.tbInvoiceMirror = this;
-					}
-					this.SendPropertyChanged("tbMirrorReference");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbOrg_tbInvoiceMirror", Storage="_tbOrg", ThisKey="AccountCode", OtherKey="AccountCode", IsForeignKey=true)]
-		public tbOrg tbOrg
-		{
-			get
-			{
-				return this._tbOrg.Entity;
-			}
-			set
-			{
-				tbOrg previousValue = this._tbOrg.Entity;
-				if (((previousValue != value) 
-							|| (this._tbOrg.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._tbOrg.Entity = null;
-						previousValue.tbInvoiceMirrors.Remove(this);
-					}
-					this._tbOrg.Entity = value;
-					if ((value != null))
-					{
-						value.tbInvoiceMirrors.Add(this);
-						this._AccountCode = value.AccountCode;
-					}
-					else
-					{
-						this._AccountCode = default(string);
-					}
-					this.SendPropertyChanged("tbOrg");
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_tbMirrorItems(tbMirrorItem entity)
-		{
-			this.SendPropertyChanging();
-			entity.tbInvoiceMirror = this;
-		}
-		
-		private void detach_tbMirrorItems(tbMirrorItem entity)
-		{
-			this.SendPropertyChanging();
-			entity.tbInvoiceMirror = null;
-		}
-		
-		private void attach_tbMirrorTasks(tbMirrorTask entity)
-		{
-			this.SendPropertyChanging();
-			entity.tbInvoiceMirror = this;
-		}
-		
-		private void detach_tbMirrorTasks(tbMirrorTask entity)
-		{
-			this.SendPropertyChanging();
-			entity.tbInvoiceMirror = null;
 		}
 	}
 	
@@ -5659,7 +5015,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal InvoiceValue
 		{
 			get
@@ -5679,7 +5035,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal TaxValue
 		{
 			get
@@ -5699,7 +5055,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal PaidValue
 		{
 			get
@@ -5719,7 +5075,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Money NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
 		public decimal PaidTaxValue
 		{
 			get
@@ -6162,6 +5518,557 @@ namespace TradeControl.Node
 		}
 	}
 	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="Invoice.tbMirror")]
+	public partial class tbInvoiceMirror : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _ContractAddress;
+		
+		private string _AccountCode;
+		
+		private string _InvoiceNumber;
+		
+		private short _InvoiceTypeCode;
+		
+		private short _InvoiceStatusCode;
+		
+		private System.DateTime _InvoicedOn;
+		
+		private System.DateTime _DueOn;
+		
+		private string _UnitOfCharge;
+		
+		private decimal _InvoiceValue;
+		
+		private decimal _InvoiceTax;
+		
+		private decimal _PaidValue;
+		
+		private decimal _PaidTaxValue;
+		
+		private string _PaymentTerms;
+		
+		private System.DateTime _InsertedOn;
+		
+		private System.Data.Linq.Binary _RowVer;
+		
+		private string _PaymentAddress;
+		
+		private EntitySet<tbMirrorItem> _tbMirrorItems;
+		
+		private EntitySet<tbMirrorTask> _tbMirrorTasks;
+		
+		private EntityRef<tbMirrorReference> _tbMirrorReference;
+		
+		private EntityRef<tbOrg> _tbOrg;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnContractAddressChanging(string value);
+    partial void OnContractAddressChanged();
+    partial void OnAccountCodeChanging(string value);
+    partial void OnAccountCodeChanged();
+    partial void OnInvoiceNumberChanging(string value);
+    partial void OnInvoiceNumberChanged();
+    partial void OnInvoiceTypeCodeChanging(short value);
+    partial void OnInvoiceTypeCodeChanged();
+    partial void OnInvoiceStatusCodeChanging(short value);
+    partial void OnInvoiceStatusCodeChanged();
+    partial void OnInvoicedOnChanging(System.DateTime value);
+    partial void OnInvoicedOnChanged();
+    partial void OnDueOnChanging(System.DateTime value);
+    partial void OnDueOnChanged();
+    partial void OnUnitOfChargeChanging(string value);
+    partial void OnUnitOfChargeChanged();
+    partial void OnInvoiceValueChanging(decimal value);
+    partial void OnInvoiceValueChanged();
+    partial void OnInvoiceTaxChanging(decimal value);
+    partial void OnInvoiceTaxChanged();
+    partial void OnPaidValueChanging(decimal value);
+    partial void OnPaidValueChanged();
+    partial void OnPaidTaxValueChanging(decimal value);
+    partial void OnPaidTaxValueChanged();
+    partial void OnPaymentTermsChanging(string value);
+    partial void OnPaymentTermsChanged();
+    partial void OnInsertedOnChanging(System.DateTime value);
+    partial void OnInsertedOnChanged();
+    partial void OnRowVerChanging(System.Data.Linq.Binary value);
+    partial void OnRowVerChanged();
+    partial void OnPaymentAddressChanging(string value);
+    partial void OnPaymentAddressChanged();
+    #endregion
+		
+		public tbInvoiceMirror()
+		{
+			this._tbMirrorItems = new EntitySet<tbMirrorItem>(new Action<tbMirrorItem>(this.attach_tbMirrorItems), new Action<tbMirrorItem>(this.detach_tbMirrorItems));
+			this._tbMirrorTasks = new EntitySet<tbMirrorTask>(new Action<tbMirrorTask>(this.attach_tbMirrorTasks), new Action<tbMirrorTask>(this.detach_tbMirrorTasks));
+			this._tbMirrorReference = default(EntityRef<tbMirrorReference>);
+			this._tbOrg = default(EntityRef<tbOrg>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ContractAddress", DbType="NVarChar(42) NOT NULL", CanBeNull=false, IsPrimaryKey=true, UpdateCheck=UpdateCheck.Never)]
+		public string ContractAddress
+		{
+			get
+			{
+				return this._ContractAddress;
+			}
+			set
+			{
+				if ((this._ContractAddress != value))
+				{
+					this.OnContractAddressChanging(value);
+					this.SendPropertyChanging();
+					this._ContractAddress = value;
+					this.SendPropertyChanged("ContractAddress");
+					this.OnContractAddressChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_AccountCode", DbType="NVarChar(10) NOT NULL", CanBeNull=false, UpdateCheck=UpdateCheck.Never)]
+		public string AccountCode
+		{
+			get
+			{
+				return this._AccountCode;
+			}
+			set
+			{
+				if ((this._AccountCode != value))
+				{
+					if (this._tbOrg.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnAccountCodeChanging(value);
+					this.SendPropertyChanging();
+					this._AccountCode = value;
+					this.SendPropertyChanged("AccountCode");
+					this.OnAccountCodeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceNumber", DbType="NVarChar(50) NOT NULL", CanBeNull=false, UpdateCheck=UpdateCheck.Never)]
+		public string InvoiceNumber
+		{
+			get
+			{
+				return this._InvoiceNumber;
+			}
+			set
+			{
+				if ((this._InvoiceNumber != value))
+				{
+					this.OnInvoiceNumberChanging(value);
+					this.SendPropertyChanging();
+					this._InvoiceNumber = value;
+					this.SendPropertyChanged("InvoiceNumber");
+					this.OnInvoiceNumberChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceTypeCode", DbType="SmallInt NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		public short InvoiceTypeCode
+		{
+			get
+			{
+				return this._InvoiceTypeCode;
+			}
+			set
+			{
+				if ((this._InvoiceTypeCode != value))
+				{
+					this.OnInvoiceTypeCodeChanging(value);
+					this.SendPropertyChanging();
+					this._InvoiceTypeCode = value;
+					this.SendPropertyChanged("InvoiceTypeCode");
+					this.OnInvoiceTypeCodeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceStatusCode", DbType="SmallInt NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		public short InvoiceStatusCode
+		{
+			get
+			{
+				return this._InvoiceStatusCode;
+			}
+			set
+			{
+				if ((this._InvoiceStatusCode != value))
+				{
+					this.OnInvoiceStatusCodeChanging(value);
+					this.SendPropertyChanging();
+					this._InvoiceStatusCode = value;
+					this.SendPropertyChanged("InvoiceStatusCode");
+					this.OnInvoiceStatusCodeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoicedOn", DbType="DateTime NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		public System.DateTime InvoicedOn
+		{
+			get
+			{
+				return this._InvoicedOn;
+			}
+			set
+			{
+				if ((this._InvoicedOn != value))
+				{
+					this.OnInvoicedOnChanging(value);
+					this.SendPropertyChanging();
+					this._InvoicedOn = value;
+					this.SendPropertyChanged("InvoicedOn");
+					this.OnInvoicedOnChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DueOn", DbType="DateTime NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		public System.DateTime DueOn
+		{
+			get
+			{
+				return this._DueOn;
+			}
+			set
+			{
+				if ((this._DueOn != value))
+				{
+					this.OnDueOnChanging(value);
+					this.SendPropertyChanging();
+					this._DueOn = value;
+					this.SendPropertyChanged("DueOn");
+					this.OnDueOnChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UnitOfCharge", DbType="NVarChar(5)", UpdateCheck=UpdateCheck.Never)]
+		public string UnitOfCharge
+		{
+			get
+			{
+				return this._UnitOfCharge;
+			}
+			set
+			{
+				if ((this._UnitOfCharge != value))
+				{
+					this.OnUnitOfChargeChanging(value);
+					this.SendPropertyChanging();
+					this._UnitOfCharge = value;
+					this.SendPropertyChanged("UnitOfCharge");
+					this.OnUnitOfChargeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		public decimal InvoiceValue
+		{
+			get
+			{
+				return this._InvoiceValue;
+			}
+			set
+			{
+				if ((this._InvoiceValue != value))
+				{
+					this.OnInvoiceValueChanging(value);
+					this.SendPropertyChanging();
+					this._InvoiceValue = value;
+					this.SendPropertyChanged("InvoiceValue");
+					this.OnInvoiceValueChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceTax", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		public decimal InvoiceTax
+		{
+			get
+			{
+				return this._InvoiceTax;
+			}
+			set
+			{
+				if ((this._InvoiceTax != value))
+				{
+					this.OnInvoiceTaxChanging(value);
+					this.SendPropertyChanging();
+					this._InvoiceTax = value;
+					this.SendPropertyChanged("InvoiceTax");
+					this.OnInvoiceTaxChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		public decimal PaidValue
+		{
+			get
+			{
+				return this._PaidValue;
+			}
+			set
+			{
+				if ((this._PaidValue != value))
+				{
+					this.OnPaidValueChanging(value);
+					this.SendPropertyChanging();
+					this._PaidValue = value;
+					this.SendPropertyChanged("PaidValue");
+					this.OnPaidValueChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Decimal(18, 5) NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		public decimal PaidTaxValue
+		{
+			get
+			{
+				return this._PaidTaxValue;
+			}
+			set
+			{
+				if ((this._PaidTaxValue != value))
+				{
+					this.OnPaidTaxValueChanging(value);
+					this.SendPropertyChanging();
+					this._PaidTaxValue = value;
+					this.SendPropertyChanged("PaidTaxValue");
+					this.OnPaidTaxValueChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaymentTerms", DbType="NVarChar(100)", UpdateCheck=UpdateCheck.Never)]
+		public string PaymentTerms
+		{
+			get
+			{
+				return this._PaymentTerms;
+			}
+			set
+			{
+				if ((this._PaymentTerms != value))
+				{
+					this.OnPaymentTermsChanging(value);
+					this.SendPropertyChanging();
+					this._PaymentTerms = value;
+					this.SendPropertyChanged("PaymentTerms");
+					this.OnPaymentTermsChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InsertedOn", DbType="DateTime NOT NULL", UpdateCheck=UpdateCheck.Never)]
+		public System.DateTime InsertedOn
+		{
+			get
+			{
+				return this._InsertedOn;
+			}
+			set
+			{
+				if ((this._InsertedOn != value))
+				{
+					this.OnInsertedOnChanging(value);
+					this.SendPropertyChanging();
+					this._InsertedOn = value;
+					this.SendPropertyChanged("InsertedOn");
+					this.OnInsertedOnChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RowVer", AutoSync=AutoSync.Always, DbType="rowversion NOT NULL", CanBeNull=false, IsDbGenerated=true, IsVersion=true, UpdateCheck=UpdateCheck.Never)]
+		public System.Data.Linq.Binary RowVer
+		{
+			get
+			{
+				return this._RowVer;
+			}
+			set
+			{
+				if ((this._RowVer != value))
+				{
+					this.OnRowVerChanging(value);
+					this.SendPropertyChanging();
+					this._RowVer = value;
+					this.SendPropertyChanged("RowVer");
+					this.OnRowVerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaymentAddress", DbType="NVarChar(42)", UpdateCheck=UpdateCheck.Never)]
+		public string PaymentAddress
+		{
+			get
+			{
+				return this._PaymentAddress;
+			}
+			set
+			{
+				if ((this._PaymentAddress != value))
+				{
+					this.OnPaymentAddressChanging(value);
+					this.SendPropertyChanging();
+					this._PaymentAddress = value;
+					this.SendPropertyChanged("PaymentAddress");
+					this.OnPaymentAddressChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbInvoiceMirror_tbMirrorItem", Storage="_tbMirrorItems", ThisKey="ContractAddress", OtherKey="ContractAddress")]
+		public EntitySet<tbMirrorItem> tbMirrorItems
+		{
+			get
+			{
+				return this._tbMirrorItems;
+			}
+			set
+			{
+				this._tbMirrorItems.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbInvoiceMirror_tbMirrorTask", Storage="_tbMirrorTasks", ThisKey="ContractAddress", OtherKey="ContractAddress")]
+		public EntitySet<tbMirrorTask> tbMirrorTasks
+		{
+			get
+			{
+				return this._tbMirrorTasks;
+			}
+			set
+			{
+				this._tbMirrorTasks.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbInvoiceMirror_tbMirrorReference", Storage="_tbMirrorReference", ThisKey="ContractAddress", OtherKey="ContractAddress", IsUnique=true, IsForeignKey=false)]
+		public tbMirrorReference tbMirrorReference
+		{
+			get
+			{
+				return this._tbMirrorReference.Entity;
+			}
+			set
+			{
+				tbMirrorReference previousValue = this._tbMirrorReference.Entity;
+				if (((previousValue != value) 
+							|| (this._tbMirrorReference.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._tbMirrorReference.Entity = null;
+						previousValue.tbInvoiceMirror = null;
+					}
+					this._tbMirrorReference.Entity = value;
+					if ((value != null))
+					{
+						value.tbInvoiceMirror = this;
+					}
+					this.SendPropertyChanged("tbMirrorReference");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="tbOrg_tbInvoiceMirror", Storage="_tbOrg", ThisKey="AccountCode", OtherKey="AccountCode", IsForeignKey=true)]
+		public tbOrg tbOrg
+		{
+			get
+			{
+				return this._tbOrg.Entity;
+			}
+			set
+			{
+				tbOrg previousValue = this._tbOrg.Entity;
+				if (((previousValue != value) 
+							|| (this._tbOrg.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._tbOrg.Entity = null;
+						previousValue.tbInvoiceMirrors.Remove(this);
+					}
+					this._tbOrg.Entity = value;
+					if ((value != null))
+					{
+						value.tbInvoiceMirrors.Add(this);
+						this._AccountCode = value.AccountCode;
+					}
+					else
+					{
+						this._AccountCode = default(string);
+					}
+					this.SendPropertyChanged("tbOrg");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_tbMirrorItems(tbMirrorItem entity)
+		{
+			this.SendPropertyChanging();
+			entity.tbInvoiceMirror = this;
+		}
+		
+		private void detach_tbMirrorItems(tbMirrorItem entity)
+		{
+			this.SendPropertyChanging();
+			entity.tbInvoiceMirror = null;
+		}
+		
+		private void attach_tbMirrorTasks(tbMirrorTask entity)
+		{
+			this.SendPropertyChanging();
+			entity.tbInvoiceMirror = this;
+		}
+		
+		private void detach_tbMirrorTasks(tbMirrorTask entity)
+		{
+			this.SendPropertyChanging();
+			entity.tbInvoiceMirror = null;
+		}
+	}
+	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="Invoice.vwNetworkDeployments")]
 	public partial class vwInvoiceDeployment
 	{
@@ -6187,6 +6094,8 @@ namespace TradeControl.Node
 		private string _PaymentTerms;
 		
 		private string _UnitOfCharge;
+		
+		private string _PaymentAddress;
 		
 		private string _ContractAddress;
 		
@@ -6308,7 +6217,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Money NOT NULL")]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceValue", DbType="Decimal(18, 5) NOT NULL")]
 		public decimal InvoiceValue
 		{
 			get
@@ -6324,7 +6233,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Money NOT NULL")]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TaxValue", DbType="Decimal(18, 5) NOT NULL")]
 		public decimal TaxValue
 		{
 			get
@@ -6372,6 +6281,22 @@ namespace TradeControl.Node
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaymentAddress", DbType="NVarChar(42)")]
+		public string PaymentAddress
+		{
+			get
+			{
+				return this._PaymentAddress;
+			}
+			set
+			{
+				if ((this._PaymentAddress != value))
+				{
+					this._PaymentAddress = value;
+				}
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ContractAddress", DbType="NVarChar(42)")]
 		public string ContractAddress
 		{
@@ -6400,6 +6325,141 @@ namespace TradeControl.Node
 				if ((this._ContractNumber != value))
 				{
 					this._ContractNumber = value;
+				}
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="Invoice.vwNetworkUpdates")]
+	public partial class vwInvoiceUpdate
+	{
+		
+		private string _InvoiceNumber;
+		
+		private string _AccountCode;
+		
+		private short _InvoiceStatusCode;
+		
+		private System.DateTime _DueOn;
+		
+		private decimal _PaidValue;
+		
+		private decimal _PaidTaxValue;
+		
+		private string _PaymentAddress;
+		
+		public vwInvoiceUpdate()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceNumber", DbType="NVarChar(20) NOT NULL", CanBeNull=false)]
+		public string InvoiceNumber
+		{
+			get
+			{
+				return this._InvoiceNumber;
+			}
+			set
+			{
+				if ((this._InvoiceNumber != value))
+				{
+					this._InvoiceNumber = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_AccountCode", DbType="NVarChar(10) NOT NULL", CanBeNull=false)]
+		public string AccountCode
+		{
+			get
+			{
+				return this._AccountCode;
+			}
+			set
+			{
+				if ((this._AccountCode != value))
+				{
+					this._AccountCode = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_InvoiceStatusCode", DbType="SmallInt NOT NULL")]
+		public short InvoiceStatusCode
+		{
+			get
+			{
+				return this._InvoiceStatusCode;
+			}
+			set
+			{
+				if ((this._InvoiceStatusCode != value))
+				{
+					this._InvoiceStatusCode = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DueOn", DbType="DateTime NOT NULL")]
+		public System.DateTime DueOn
+		{
+			get
+			{
+				return this._DueOn;
+			}
+			set
+			{
+				if ((this._DueOn != value))
+				{
+					this._DueOn = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidValue", DbType="Decimal(18, 5) NOT NULL")]
+		public decimal PaidValue
+		{
+			get
+			{
+				return this._PaidValue;
+			}
+			set
+			{
+				if ((this._PaidValue != value))
+				{
+					this._PaidValue = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaidTaxValue", DbType="Decimal(18, 5) NOT NULL")]
+		public decimal PaidTaxValue
+		{
+			get
+			{
+				return this._PaidTaxValue;
+			}
+			set
+			{
+				if ((this._PaidTaxValue != value))
+				{
+					this._PaidTaxValue = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PaymentAddress", DbType="NVarChar(42)")]
+		public string PaymentAddress
+		{
+			get
+			{
+				return this._PaymentAddress;
+			}
+			set
+			{
+				if ((this._PaymentAddress != value))
+				{
+					this._PaymentAddress = value;
 				}
 			}
 		}

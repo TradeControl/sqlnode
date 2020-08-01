@@ -1,15 +1,15 @@
 ﻿CREATE TABLE [Invoice].[tbTask] (
     [InvoiceNumber] NVARCHAR (20)   NOT NULL,
     [TaskCode]      NVARCHAR (20)   NOT NULL,
-    [TotalValue]    MONEY           CONSTRAINT [DF_Invoice_tbTask_TotalValue] DEFAULT ((0)) NOT NULL,
-    [InvoiceValue]  MONEY           CONSTRAINT [DF_Invoice_tbActivity_InvoiceValue] DEFAULT ((0)) NOT NULL,
-    [TaxValue]      MONEY           CONSTRAINT [DF_Invoice_tbActivity_TaxValue] DEFAULT ((0)) NOT NULL,
-    [PaidValue]     MONEY           CONSTRAINT [DF_Invoice_tbTask_PaidValue] DEFAULT ((0)) NOT NULL,
-    [PaidTaxValue]  MONEY           CONSTRAINT [DF_Invoice_tbTask_PaidTaxValue] DEFAULT ((0)) NOT NULL,
     [CashCode]      NVARCHAR (50)   NOT NULL,
     [TaxCode]       NVARCHAR (10)   NULL,
     [RowVer]        ROWVERSION      NOT NULL,
     [Quantity]      DECIMAL (18, 4) CONSTRAINT [DF_Invoice_tbTask_Quantity] DEFAULT ((0)) NOT NULL,
+    [TotalValue]    DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_TotalValue] DEFAULT ((0)) NOT NULL,
+    [InvoiceValue]  DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_InvoiceValue] DEFAULT ((0)) NOT NULL,
+    [TaxValue]      DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_TaxValue] DEFAULT ((0)) NOT NULL,
+    [PaidValue]     DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_PaidValue] DEFAULT ((0)) NOT NULL,
+    [PaidTaxValue]  DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_PaidTaxValue] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Invoice_tbTask] PRIMARY KEY CLUSTERED ([InvoiceNumber] ASC, [TaskCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Invoice_tbTask_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]),
     CONSTRAINT [FK_Invoice_tbTask_Cash_tbCode] FOREIGN KEY ([CashCode]) REFERENCES [Cash].[tbCode] ([CashCode]),
@@ -64,7 +64,7 @@ AS
 	END CATCH
 
 GO
-CREATE   TRIGGER Invoice.Invoice_tbTask_TriggerInsert
+CREATE TRIGGER Invoice.Invoice_tbTask_TriggerInsert
 ON Invoice.tbTask
 FOR INSERT, UPDATE
 AS
@@ -73,8 +73,8 @@ AS
 	BEGIN TRY
 
 		UPDATE task
-		SET InvoiceValue = ROUND(inserted.TotalValue / (1 + TaxRate), 2),
-			TaxValue = inserted.TotalValue - ROUND(inserted.TotalValue / (1 + TaxRate), 2)	
+		SET InvoiceValue = inserted.TotalValue / (1 + TaxRate),
+			TaxValue = inserted.TotalValue - inserted.TotalValue / (1 + TaxRate)
 		FROM inserted 
 			INNER JOIN Invoice.tbTask task ON inserted.InvoiceNumber = task.InvoiceNumber 
 					AND inserted.TaskCode = task.TaskCode
@@ -83,8 +83,8 @@ AS
 
 		UPDATE task
 		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
-				WHEN 0 THEN ROUND(task.InvoiceValue * App.tbTaxCode.TaxRate, 2)
-				WHEN 1 THEN ROUND( task.InvoiceValue * App.tbTaxCode.TaxRate, 2, 1) END
+				WHEN 0 THEN task.InvoiceValue * App.tbTaxCode.TaxRate
+				WHEN 1 THEN task.InvoiceValue * App.tbTaxCode.TaxRate END
 		FROM Invoice.tbTask task 
 			INNER JOIN inserted ON inserted.InvoiceNumber = task.InvoiceNumber
 					 AND inserted.TaskCode = task.TaskCode

@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Invoice.vwDocItem
+﻿CREATE VIEW Invoice.vwDocItem
 AS
 SELECT     Invoice.tbItem.InvoiceNumber, Invoice.tbItem.CashCode, Cash.tbCode.CashDescription, Invoice.tbInvoice.InvoicedOn AS ActionedOn, 
                       Invoice.tbItem.TaxCode, Invoice.tbItem.InvoiceValue, Invoice.tbItem.TaxValue, Invoice.tbItem.ItemReference

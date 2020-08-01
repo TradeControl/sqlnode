@@ -1,8 +1,7 @@
-﻿
-CREATE PROCEDURE Task.proc_Cost 
+﻿CREATE   PROCEDURE Task.proc_Cost 
 	(
 	@ParentTaskCode nvarchar(20),
-	@TotalCost money = 0 OUTPUT
+	@TotalCost decimal(18, 5) = 0 OUTPUT
 	)
 AS
  	SET NOCOUNT, XACT_ABORT ON;

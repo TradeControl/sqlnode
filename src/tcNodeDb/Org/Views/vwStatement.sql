@@ -1,13 +1,12 @@
-﻿
-CREATE   VIEW Org.vwStatement 
+﻿CREATE VIEW Org.vwStatement 
 AS
 	WITH payment_data AS
 	(
-		SELECT Org.tbPayment.AccountCode, Org.tbPayment.PaidOn AS TransactedOn, 2 AS OrderBy, 
-							  Org.tbPayment.PaymentReference AS Reference, Org.tbPaymentStatus.PaymentStatus AS StatementType, 
+		SELECT Cash.tbPayment.AccountCode, Cash.tbPayment.PaidOn AS TransactedOn, 2 AS OrderBy, 
+							  Cash.tbPayment.PaymentReference AS Reference, Cash.tbPaymentStatus.PaymentStatus AS StatementType, 
 							  CASE WHEN PaidInValue > 0 THEN PaidInValue ELSE PaidOutValue * - 1 END AS Charge
-		FROM         Org.tbPayment INNER JOIN
-							  Org.tbPaymentStatus ON Org.tbPayment.PaymentStatusCode = Org.tbPaymentStatus.PaymentStatusCode
+		FROM         Cash.tbPayment INNER JOIN
+							  Cash.tbPaymentStatus ON Cash.tbPayment.PaymentStatusCode = Cash.tbPaymentStatus.PaymentStatusCode
 	), payments AS
 	(
 		SELECT     AccountCode, TransactedOn, OrderBy, Reference, StatementType, SUM(Charge) AS Charge
@@ -46,3 +45,4 @@ AS
 		SELECT AccountCode, CAST(RowNumber AS INT) AS RowNumber, TransactedOn, OrderBy, Reference, StatementType, Charge,
 			SUM(Charge) OVER (PARTITION BY AccountCode ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance
 		FROM statement_data;
+

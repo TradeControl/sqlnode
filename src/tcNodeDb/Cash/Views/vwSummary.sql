@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwSummary
+﻿CREATE VIEW Cash.vwSummary
 AS
 	WITH company AS
 	(

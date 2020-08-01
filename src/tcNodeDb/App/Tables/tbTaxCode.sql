@@ -7,6 +7,7 @@
     [UpdatedOn]      DATETIME        CONSTRAINT [DF_App_tbTaxCode_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]         ROWVERSION      NOT NULL,
     [TaxRate]        DECIMAL (18, 4) CONSTRAINT [DF_App_tbTaxCode_TaxRate] DEFAULT ((0)) NOT NULL,
+    [Decimals]       SMALLINT        CONSTRAINT [DF_App_tbTaxCode_Decimals] DEFAULT ((2)) NOT NULL,
     CONSTRAINT [PK_App_tbTaxCode] PRIMARY KEY CLUSTERED ([TaxCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_App_tbTaxCode_App_tbRounding] FOREIGN KEY ([RoundingCode]) REFERENCES [App].[tbRounding] ([RoundingCode]),
     CONSTRAINT [FK_App_tbTaxCode_Cash_tbTaxType] FOREIGN KEY ([TaxTypeCode]) REFERENCES [Cash].[tbTaxType] ([TaxTypeCode])

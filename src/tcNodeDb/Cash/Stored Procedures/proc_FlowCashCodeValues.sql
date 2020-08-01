@@ -1,7 +1,5 @@
-﻿CREATE PROCEDURE Cash.proc_FlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
+﻿CREATE   PROCEDURE Cash.proc_FlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
 AS
-	--ref Cash.fnFlowCashCodeValues() for a sample inline function implementation 
-
 	SET NOCOUNT, XACT_ABORT ON;
 
 	BEGIN TRY
@@ -11,10 +9,10 @@ AS
 		DECLARE @tbReturn AS TABLE (
 			StartOn DATETIME NOT NULL, 
 			CashStatusCode SMALLINT NOT NULL, 
-			ForecastValue MONEY NOT NULL, 
-			ForecastTax MONEY NOT NULL, 
-			InvoiceValue MONEY NOT NULL, 
-			InvoiceTax MONEY NOT NULL);
+			ForecastValue DECIMAL(18, 5) NOT NULL, 
+			ForecastTax DECIMAL(18, 5) NOT NULL, 
+			InvoiceValue DECIMAL(18, 5) NOT NULL, 
+			InvoiceTax DECIMAL(18, 5) NOT NULL);
 
 		INSERT INTO @tbReturn (StartOn, CashStatusCode, ForecastValue, ForecastTax, InvoiceValue, InvoiceTax)
 		SELECT   Cash.tbPeriod.StartOn, App.tbYearPeriod.CashStatusCode,

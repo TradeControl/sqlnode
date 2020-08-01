@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwTaxCorpAuditAccruals
+﻿CREATE VIEW Cash.vwTaxCorpAuditAccruals
 AS
 	SELECT     App.tbYear.YearNumber, CONCAT(App.tbYear.Description, ' ', App.tbMonth.MonthName) AS YearPeriod, Cash.vwTaxCorpAccruals.StartOn, Task.tbTask.TaskCode, Task.tbTask.AccountCode, Org.tbOrg.AccountName, 
 							 Task.tbTask.TaskTitle, Activity.tbActivity.ActivityCode, Task.tbStatus.TaskStatusCode, Task.tbStatus.TaskStatus, Task.tbTask.CashCode, Cash.tbCode.CashDescription, Activity.tbActivity.UnitOfMeasure, 

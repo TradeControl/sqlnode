@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TradeControl.Node"
         mc:Ignorable="d"
-        Title="TRADE CONTROL Node Configuration" Height="616.596" Width="677.287" Icon="TCNodeSetup.ico" Loaded="MainWindow_Loaded" >
+        Title="TRADE CONTROL Node Configuration" Height="651.899" Width="604" Icon="TCNodeSetup.ico" Loaded="MainWindow_Loaded" >
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -128,29 +128,30 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Label Margin="5" Content="Account Code:"  />
                         <TextBox Margin="5" Grid.Column="1" Name="tbAccountCode" Text="HOME" MaxLength="10" FontWeight="Bold"  />
-                        <Label Margin="5" Grid.Row="1" Content="Business Name:"  />
-                        <TextBox Margin="5" Grid.Row="1" Grid.Column="1" Name="tbBusinessName" Text="THE BUSINESS" MaxLength="255" FontWeight="Bold"  />
-                        <Label Margin="5" Grid.Row="2" Content="Business Address:"  />
-                        <TextBox Margin="5" Grid.Row="2" Grid.Column="1" Name="tbBusinessAddress" Text="PREMISIS" MaxLength="255" FontWeight="Bold"  />
-                        <Label Margin="5" Grid.Row="3" Content="Full Name:" />
-                        <TextBox Margin="5" Grid.Row="3" Grid.Column="1" Name="tbFullName" Text="Administrator" MaxLength="100" FontWeight="Bold"  />
-                        <Label Margin="5" Grid.Row="4" Content="Email Address:" />
-                        <TextBox Margin="5" Grid.Row="4" Grid.Column="1" Name="tbEmailAddress" Text="info@thebusiness.co.uk"  MaxLength="255" FontWeight="Bold" />
-                        <Label Margin="5" Grid.Row="5" Content="Phone Number:" />
-                        <TextBox Margin="5" Grid.Row="5" Grid.Column="1" Name="tbPhoneNumber" Text="00000 000000" MaxLength="50" FontWeight="Bold"  />
-                        <Label Margin="5" Grid.Row="6" Content="Company Number:" />
-                        <TextBox Margin="5" Grid.Row="6" Grid.Column="1" Name="tbCompanyNumber" Text="-" MaxLength="20" FontWeight="Bold"  />
-                        <Label Margin="5" Grid.Row="7" Content="Vat Number:" />
-                        <TextBox Margin="5" Grid.Row="7" Grid.Column="1" Name="tbVatNumber" Text="-" MaxLength="20" FontWeight="Bold"  />
-                        <Label Margin="5" Grid.Row="8" Content="Calendar Code:"  />
-                        <TextBox Margin="5" Grid.Row="8" Grid.Column="1" Name="tbCalendarCode" Text="WORKS" MaxLength="10" FontWeight="Bold"  />
-                        <Label Margin="5" Grid.Row="9" Content="Unit of Account:" VerticalAlignment="Top"/>
-                        <ComboBox Margin="5" Grid.Row="9" Grid.Column="1" x:Name="cbUocName" FontWeight="Bold" />
-                        <Label Margin="5" Grid.Row="10" Content="Info:" VerticalAlignment="Top"  />
-                        <TextBlock x:Name="lbBusinessStatus" Margin="10" Grid.Row="10" Grid.Column="1" Text="Data source not found" Foreground="#FFEA1111" TextWrapping="Wrap" />
+                        <Label Margin="5" Grid.Row="2" Content="Business Name:"  />
+                        <TextBox Margin="5" Grid.Row="2" Grid.Column="1" Name="tbBusinessName" Text="THE BUSINESS" MaxLength="255" FontWeight="Bold"  />
+                        <Label Margin="5" Grid.Row="3" Content="Business Address:"  />
+                        <TextBox Margin="5" Grid.Row="3" Grid.Column="1" Name="tbBusinessAddress" Text="PREMISIS" MaxLength="255" FontWeight="Bold"  />
+                        <Label Margin="5" Grid.Row="4" Content="Full Name:" />
+                        <TextBox Margin="5" Grid.Row="4" Grid.Column="1" Name="tbFullName" Text="Administrator" MaxLength="100" FontWeight="Bold"  />
+                        <Label Margin="5" Grid.Row="5" Content="Email Address:" />
+                        <TextBox Margin="5" Grid.Row="5" Grid.Column="1" Name="tbEmailAddress" Text="info@thebusiness.co.uk"  MaxLength="255" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="6" Content="Phone Number:" />
+                        <TextBox Margin="5" Grid.Row="6" Grid.Column="1" Name="tbPhoneNumber" Text="00000 000000" MaxLength="50" FontWeight="Bold"  />
+                        <Label Margin="5" Grid.Row="7" Content="Company Number:" />
+                        <TextBox Margin="5" Grid.Row="7" Grid.Column="1" Name="tbCompanyNumber" Text="-" MaxLength="20" FontWeight="Bold"  />
+                        <Label Margin="5" Grid.Row="8" Content="Vat Number:" />
+                        <TextBox Margin="5" Grid.Row="8" Grid.Column="1" Name="tbVatNumber" Text="-" MaxLength="20" FontWeight="Bold"  />
+                        <Label Margin="5" Grid.Row="9" Content="Calendar Code:"  />
+                        <TextBox Margin="5" Grid.Row="9" Grid.Column="1" Name="tbCalendarCode" Text="WORKS" MaxLength="10" FontWeight="Bold"  />
+                        <Label Margin="5" Grid.Row="1" Content="Unit of Account:" VerticalAlignment="Top"/>
+                        <ComboBox Margin="5" Grid.Row="1" Grid.Column="1" x:Name="cbUocName" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="11" Content="Info:" VerticalAlignment="Top"  />
+                        <TextBlock x:Name="lbBusinessStatus" Margin="10" Grid.Row="11" Grid.Column="1" Text="Data source not found" Foreground="#FFEA1111" TextWrapping="Wrap" />
                     </Grid>
                     <StackPanel Grid.Row="1"  Margin="5,4.667,5.333,5.333" Grid.ColumnSpan="3" >
                         <Button Name="btnBusinessDetails" Content="Set Details" Grid.Column="1" Margin="3" IsEnabled="False" Click="btnBusinessDetails_Click" />
@@ -255,6 +256,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"></RowDefinition>
                                     <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"></RowDefinition>
                                     <RowDefinition Height="Auto"></RowDefinition>
                                     <RowDefinition Height="Auto"></RowDefinition>
@@ -283,26 +285,32 @@
                                 </ComboBox>
                                 <Label Margin="5" Grid.Row="1" Content="Government:" />
                                 <TextBox x:Name="tbGovAccountName" Grid.Row="1" Grid.Column="1" MaxLength="255" Text="HM REVENUE AND CUSTOMS" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="2" Content="Bank:" />
-                                <TextBox x:Name="tbBankName" Grid.Row="2" Grid.Column="1" MaxLength="255" Text="THE BANK PLC" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="3" Content="Bank Address:" />
-                                <TextBox x:Name="tbBankAddress" Grid.Row="3" Grid.Column="1" MaxLength="512" Text="BANK ADDRESS" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="4" Content="Current Account:" />
-                                <TextBox x:Name="tbCurrentAccount" Grid.Row="4" Grid.Column="1" MaxLength="50" Text="CURRENT ACCOUNT" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="5" Content="Sort Code:" />
-                                <TextBox x:Name="tbCA_SortCode" Grid.Row="5" Grid.Column="1" MaxLength="10" Text="00-00-00" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="6" Content="Current Account No.:" />
-                                <TextBox x:Name="tbCA_AccountNumber" Grid.Row="6" Grid.Column="1" MaxLength="20" Text="00000001" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="7" Content="Reserve Account:" />
-                                <TextBox x:Name="tbReserveAccount" Grid.Row="7" Grid.Column="1" MaxLength="50" Text="RESERVE ACCOUNT" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="8" Content="Sort Code:" />
-                                <TextBox x:Name="tbRA_SortCode" Grid.Row="8" Grid.Column="1" MaxLength="10" Text="00-00-00" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="9" Content="Reserve Account No.:" />
-                                <TextBox x:Name="tbRA_AccountNumber" Grid.Row="9" Grid.Column="1" MaxLength="20" Text="00000002" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="10" Content="Dummy Account:" />
-                                <TextBox x:Name="tbDummyAccount" Grid.Row="10" Grid.Column="1" MaxLength="20" Text="DUMMY BANK ACCOUNT" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="11" Content="Info:" VerticalAlignment="Top"  />
-                                <TextBlock x:Name="lbBasicSetupStatus" Margin="10" Grid.Row="11" Grid.Column="1" Text="Data source not found" Foreground="#FFEA1111" TextWrapping="Wrap" />
+                                <Label Margin="5" Grid.Row="2" Content="Coin Type:" />
+                                <ComboBox Margin="5" Grid.Row="2" Grid.Column="1" x:Name="cbCoinType" FontWeight="Bold">
+                                    <ComboBoxItem Content="Main" />
+                                    <ComboBoxItem Content="TestNet" />
+                                    <ComboBoxItem Content="Fiat" />
+                                </ComboBox>
+                                <Label Margin="5" Grid.Row="3" Content="Bank:" />
+                                <TextBox x:Name="tbBankName" Grid.Row="3" Grid.Column="1" MaxLength="255" Text="-" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="4" Content="Bank Address:" />
+                                <TextBox x:Name="tbBankAddress" Grid.Row="4" Grid.Column="1" MaxLength="512" Text="-" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="5" Content="Current Account:" />
+                                <TextBox x:Name="tbCurrentAccount" Grid.Row="5" Grid.Column="1" MaxLength="50" Text="CURRENT ACCOUNT" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="6" Content="Sort Code:" />
+                                <TextBox x:Name="tbCA_SortCode" Grid.Row="6" Grid.Column="1" MaxLength="10" Text="00-00-00" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="7" Content="Current Account No.:" />
+                                <TextBox x:Name="tbCA_AccountNumber" Grid.Row="7" Grid.Column="1" MaxLength="20" Text="00000001" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="8" Content="Reserve Account:" />
+                                <TextBox x:Name="tbReserveAccount" Grid.Row="8" Grid.Column="1" MaxLength="50" Text="RESERVE ACCOUNT" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="9" Content="Sort Code:" />
+                                <TextBox x:Name="tbRA_SortCode" Grid.Row="9" Grid.Column="1" MaxLength="10" Text="00-00-00" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="10" Content="Reserve Account No.:" />
+                                <TextBox x:Name="tbRA_AccountNumber" Grid.Row="10" Grid.Column="1" MaxLength="20" Text="00000002" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="11" Content="Capital Account:" />
+                                <TextBox x:Name="tbDummyAccount" Grid.Row="11" Grid.Column="1" MaxLength="20" Text="CAPITAL ACCOUNT" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="12" Content="Info:" VerticalAlignment="Top"  />
+                                <TextBlock x:Name="lbBasicSetupStatus" Margin="10" Grid.Row="12" Grid.Column="1" Text="Data source not found" Foreground="#FFEA1111" TextWrapping="Wrap" />
 
                             </Grid>
 

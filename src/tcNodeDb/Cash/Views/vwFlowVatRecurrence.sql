@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwFlowVatRecurrence
+﻿CREATE VIEW Cash.vwFlowVatRecurrence
 AS
 		WITH active_periods AS
 	(

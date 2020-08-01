@@ -150,11 +150,11 @@ AS
 		WHERE        (Cash.tbCategory.CashTypeCode = 2)
 	), transfer_accruals AS
 	(
-		SELECT        Org.tbPayment.AccountCode, Org.tbPayment.CashCode, Org.tbPayment.PaidOn AS TransactOn, Org.tbPayment.PaymentCode AS ReferenceCode, 
-			6 AS CashEntryTypeCode, Org.tbPayment.PaidInValue AS PayIn, Org.tbPayment.PaidOutValue AS PayOut
+		SELECT        Cash.tbPayment.AccountCode, Cash.tbPayment.CashCode, Cash.tbPayment.PaidOn AS TransactOn, Cash.tbPayment.PaymentCode AS ReferenceCode, 
+			6 AS CashEntryTypeCode, Cash.tbPayment.PaidInValue AS PayIn, Cash.tbPayment.PaidOutValue AS PayOut
 		FROM            transfer_current_account INNER JOIN
-								 Org.tbPayment ON transfer_current_account.CashAccountCode = Org.tbPayment.CashAccountCode
-		WHERE        (Org.tbPayment.PaymentStatusCode = 2)
+								 Cash.tbPayment ON transfer_current_account.CashAccountCode = Cash.tbPayment.CashAccountCode
+		WHERE        (Cash.tbPayment.PaymentStatusCode = 2)
 	)
 	, statement_unsorted AS
 	(
@@ -203,8 +203,9 @@ AS
 		FROM statement_data
 	)
 	SELECT RowNumber, cs.AccountCode, org.AccountName, cs.CashCode, cc.CashDescription,
-			TransactOn, ReferenceCode, cs.CashEntryTypeCode, et.CashEntryType, CAST(PayIn AS MONEY) PayIn, CAST(PayOut AS MONEY) PayOut, CAST(Balance AS MONEY) Balance
+			TransactOn, ReferenceCode, cs.CashEntryTypeCode, et.CashEntryType, CAST(PayIn AS decimal(18, 5)) PayIn, CAST(PayOut AS decimal(18, 5)) PayOut, CAST(Balance AS decimal(18, 5)) Balance
 	FROM company_statement cs 
 		JOIN Org.tbOrg org ON cs.AccountCode = org.AccountCode
 		JOIN Cash.tbEntryType et ON cs.CashEntryTypeCode = et.CashEntryTypeCode
 		LEFT OUTER JOIN Cash.tbCode cc ON cs.CashCode = cc.CashCode;
+

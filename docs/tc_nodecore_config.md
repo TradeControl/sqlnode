@@ -18,17 +18,17 @@ Follow the instructions for creating an Sql Database. Name the server after your
 
 Download and install the C# app into a 64 bit Windows environment. Run setup.exe to install missing dependencies.
 
-[TC Configuration app](../src/installation/tcNodeConfigSetup.zip)
+[Configuration app](../src/installation/tcNodeConfigSetup.zip)
 
 > Note: some older versions of Windows are not compatible with .NET Framework 4.7.2. If affected, you must update the OS or recompile the solution with a lower versioned framework. 
 
-The .NET assembly version is the same as the TC-Node that it installs or upgrades. This is displayed on the first page.
+The .NET assembly version is the same as the Trade Control Node that it installs or upgrades. This is displayed on the first page.
 
 Errors are shown on the appropriate page but are also written to an error log in more detail. File _tcnodeconfig_errorlog.csv_ can be found in the _Documents\Trade Control_ folder.
 
 ### Connection
 
-When you first load the app, it will request a connection. It must be to either an empty database or a valid TC instance. Otherwise the connection request will be rejected. Below is a valid example. If you are creating a new instance, make sure you log on with your Azure Sql Server admin account.
+When you first load the app, it will request a connection. It must be to either an empty database or a valid instance. Otherwise the connection request will be rejected. Below is a valid example. If you are creating a new instance, make sure you log on with your Azure Sql Server admin account.
 
 The button to the far right of the server name will collect local instances of Sql Server. For Azure, type in the server name manually.
 
@@ -47,6 +47,8 @@ When you test the connection, a series of checks are applied to assess its curre
 ### Business Details
 
 The details below are all you need to install an instance that can be used by clients. However, if you have never used Trade Control before, it will be difficult to know how to proceed. Either you can accept these defaults and try out the demos; or enter the correct information, add yourself as a data user and then install a [basic setup](#basic-setup).
+
+Trade Control supports both fiat and bitcoin as your Unit of Account. If you select bitcoin, the configuration process will be slightly different. Consult the [bitcoin wallet](https://github.com/tradecontrol/tc-bitcoin) documentation for details.
 
 ![Business Details](../img/tc_config_business_details.jpg)
 
@@ -73,9 +75,16 @@ New users are added by calling the procedure _Usr.proc_AddUser()_. It carries ou
 
 ### Basic Setup
 
-Unless you know what you are doing, you should install the Basic Set-up. You can modify everything from a client, but you will not be starting with a blank canvas.
+To get started, the system needs to know your financial year, the government of the presiding jurisdiction, your bank and at least one bank account. Here there are three, modelled by Cash Accounts:
 
-Login as a data user. Either enter your correct details if this is the live database, or just accept the defaults for the demo. If you do not have a reserve account, leave the defaults. You can edit/delete all these settings later from a client.
+1. Current Account for trading
+2. Reserve Account for savings and tax
+3. Capital Account for storing assets and applying depreciation
+
+Bitcoin users do not use a bank or transact exchanges from bank accounts. Instead, their current and reserve accounts correspond to HD Wallets. Therefore the basic setup has different defaults to that shown below.
+
+Login as a data user. Either enter your correct details if this is the live database, or just accept the defaults for the demo. If you do not have a reserve account, leave the defaults. You can edit/delete all these settings later from a client. 
+
 
 ![Basic Setup](../img/tc_config_basic_setup.jpg)
 
@@ -93,3 +102,11 @@ These settings are passed as parameters to the procedure _App.proc_BasicSetup_. 
 ### Demos
 
 You are now able to install the services or manufacturing demo. This is straight forward and explained in the [client documentation](https://github.com/tradecontrol/tc-office)
+
+## Licence
+
+The Trade Control Code licence is issued by Trade Control Ltd under a [GNU General Public Licence v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) 
+
+Trade Control Documentation by Trade Control Ltd is licenced under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/) 
+
+![Creative Commons](https://i.creativecommons.org/l/by-sa/4.0/88x31.png) 

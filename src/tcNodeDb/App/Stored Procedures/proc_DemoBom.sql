@@ -6,7 +6,7 @@
 )
 AS
 	 SET NOCOUNT, XACT_ABORT ON;
-
+	 
 	 BEGIN TRY
 	
 		IF NOT EXISTS (SELECT * FROM Usr.vwCredentials WHERE IsAdministrator <> 0)
@@ -14,11 +14,16 @@ AS
 			DECLARE @Msg NVARCHAR(100) = CONCAT('Access Denied: User ', SUSER_SNAME(), ' is not an administrsator');
 			RAISERROR ('%s', 13, 1, @Msg);
 		END
-				
+	
+		DECLARE @ExchangeRate float = CASE (SELECT UnitOfCharge FROM App.tbOptions) 
+										WHEN 'BTC' THEN 0.135 
+										ELSE 1 
+										END				
+
 		BEGIN TRAN
 
 		-->>>>>>>>>>>>> RESET >>>>>>>>>>>>>>>>>>>>>>>>>>>
-		DELETE FROM Org.tbPayment;
+		DELETE FROM Cash.tbPayment;
 		DELETE FROM Invoice.tbInvoice;
 		DELETE FROM Task.tbFlow;
 		DELETE FROM Task.tbTask;
@@ -54,16 +59,16 @@ AS
 			SELECT 'Works Order', (SELECT MAX(NextNumber) + 10000 FROM App.tbRegister) AS NextNumber;
 
 		INSERT INTO Activity.tbActivity (ActivityCode, TaskStatusCode, ActivityDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
-		VALUES ('M/00/70/00', 1, 'PIGEON HOLE SHELF ASSEMBLY CLEAR', 'each', '103', 16.6240, 1, 'Sales Order')
+		VALUES ('M/00/70/00', 1, 'PIGEON HOLE SHELF ASSEMBLY CLEAR', 'each', '103', 1.67 * @ExchangeRate, 1, 'Sales Order')
 		, ('M/100/70/00', 1, 'PIGEON HOLE SUB SHELF CLEAR', 'each', NULL, 0.0000, 0, 'Works Order')
 		, ('M/101/70/00', 1, 'PIGEON HOLE BACK DIVIDER', 'each', NULL, 0.0000, 0, 'Works Order')
 		, ('M/97/70/00', 1, 'SHELF DIVIDER (WIDE FOOT)', 'each', NULL, 0.0000, 0, 'Works Order')
 		, ('M/99/70/00', 1, 'SHELF DIVIDER (NARROW FOOT)', 'each', NULL, 0.0000, 0, 'Works Order')
-		, ('PALLET/01', 1, 'EURO 3 1200 x 800 4 WAY', 'each', '200', 2.2500, 1, 'Purchase Order')
-		, ('BOX/41', 1, 'PIGEON ASSY 125KTB S WALL 404x220x90', 'each', '200', 0.2940, 1, 'Purchase Order')
+		, ('PALLET/01', 1, 'EURO 3 1200 x 800 4 WAY', 'each', '200', 2.4 * @ExchangeRate, 1, 'Purchase Order')
+		, ('BOX/41', 1, 'PIGEON ASSY 125KTB S WALL 404x220x90', 'each', '200', 0.05 * @ExchangeRate, 1, 'Purchase Order')
 		, ('BOX/99', 1, 'INTERNAL USE ANY BLACK,BLUE,RED ANY', 'each', NULL, 0.0000, 0, 'Works Order')
-		, ('PC/999', 1, 'CALIBRE 303EP CLEAR UL94-V2', 'kilo', '200', 2.1500, 1, 'Purchase Order')
-		, ('INSERT/09', 1, 'HEAT-LOK SHK B M3.5 HEADED BRASS 8620035-80', 'each', '200', 0.0430, 1, 'Purchase Order')
+		, ('PC/999', 1, 'CALIBRE 303EP CLEAR UL94-V2', 'kilo', '200', 0.22 * @ExchangeRate, 1, 'Purchase Order')
+		, ('INSERT/09', 1, 'HEAT-LOK SHK B M3.5 HEADED BRASS 8620035-80', 'each', '200', 0.005 * @ExchangeRate, 1, 'Purchase Order')
 		, ('PROJECT', 0, NULL, 'each', NULL, 0, 0, 'Works Order')
 		, ('DELIVERY', 1, NULL, 'each', '200', 0, 1, 'Purchase Order')
 		;
@@ -200,7 +205,7 @@ AS
 			@TaskCode NVARCHAR(20),
 			@ParentTaskCode NVARCHAR(20), 
 			@ToTaskCode NVARCHAR(20),
-			@Quantity DECIMAL = 1000;
+			@Quantity DECIMAL(18, 4) = 100;
 
 		EXEC Task.proc_NextCode 'PROJECT', @ParentTaskCode OUTPUT
 		INSERT INTO Task.tbTask
@@ -211,7 +216,9 @@ AS
 		
 		INSERT INTO Task.tbTask
 				(TaskCode, UserId, AccountCode, TaskTitle, ContactName, ActivityCode, TaskStatusCode, ActionById, TaskNotes, Quantity, CashCode, TaxCode, UnitCharge, AddressCodeFrom, AddressCodeTo, SecondReference, Printed)
-		VALUES        (@TaskCode,@UserId, 'STOBOX', N'PIGEON HOLE SHELF ASSEMBLY', 'Francis Brown', 'M/00/70/00', 1,@UserId, 'PIGEON HOLE SHELF ASSEMBLY', @Quantity, '103', 'T1', 16.624, 'STOBOX_001', 'STOBOX_001', N'12354/2', 0);
+		SELECT @TaskCode,@UserId, 'STOBOX', ActivityDescription, 'Francis Brown', ActivityCode, 1,@UserId, ActivityDescription, @Quantity, '103', 'T1', UnitCharge, 'STOBOX_001', 'STOBOX_001', N'12354/2', 0		
+		FROM Activity.tbActivity
+		WHERE ActivityCode = 'M/00/70/00';
 
 		EXEC Task.proc_Configure @TaskCode;
 		EXEC Task.proc_AssignToParent @TaskCode, @ParentTaskCode;
@@ -234,7 +241,7 @@ AS
 		WHERE ActivityCode = 'PC/999';
 		
 		UPDATE Task.tbTask
-		SET AccountCode = 'HAULOG', ContactName = 'John Iron',  AddressCodeFrom = 'HOME_001', AddressCodeTo = 'STOBOX_001', Quantity = 1, UnitCharge = 250, TotalCharge = 250
+		SET AccountCode = 'HAULOG', ContactName = 'John Iron',  AddressCodeFrom = 'HOME_001', AddressCodeTo = 'STOBOX_001', Quantity = 1, UnitCharge = 25.0 * @ExchangeRate, TotalCharge = 25.0 * @ExchangeRate
 		WHERE ActivityCode = 'DELIVERY';
 
 		UPDATE Task.tbTask
@@ -322,21 +329,24 @@ AS
 		SET IsEnabled = 1
 		WHERE CashCode = '214';
 
-		DECLARE @PaymentCode NVARCHAR(20);
-		EXEC Org.proc_NextPaymentCode @PaymentCode OUTPUT
-		INSERT INTO Org.tbPayment (CashAccountCode, PaymentCode, UserId, AccountCode, CashCode, TaxCode, PaidInValue)
-		SELECT DISTINCT
-			CashAccountCode,
-			@PaymentCode AS PaymentCode, 
-			@UserId AS UserId,
-			AccountCode,
-			'214' AS CashCode,
-			'T0' AS TaxCode,
-			(SELECT ABS(ROUND(MIN(Balance), -3)) + 1000	FROM Cash.vwStatement) AS PaidInValue
-		FROM Org.tbAccount WHERE NOT CashCode IS NULL
 
-		EXEC Org.proc_PaymentPost;
+		IF @ExchangeRate = 1
+		BEGIN
+			DECLARE @PaymentCode NVARCHAR(20);
+			EXEC Cash.proc_NextPaymentCode @PaymentCode OUTPUT
+			INSERT INTO Cash.tbPayment (CashAccountCode, PaymentCode, UserId, AccountCode, CashCode, TaxCode, PaidInValue)
+			SELECT DISTINCT
+				CashAccountCode,
+				@PaymentCode AS PaymentCode, 
+				@UserId AS UserId,
+				AccountCode,
+				'214' AS CashCode,
+				'T0' AS TaxCode,
+				(SELECT ABS(ROUND(MIN(Balance), -3)) + 1000	FROM Cash.vwStatement) AS PaidInValue
+			FROM Org.tbAccount WHERE NOT CashCode IS NULL
 
+			EXEC Cash.proc_PaymentPost;
+		END
 
 		-- ***************************************************************************
 		IF @InvoiceOrders = 0

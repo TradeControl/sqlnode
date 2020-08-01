@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Invoice.vwNetworkChangeLog
+﻿CREATE VIEW Invoice.vwNetworkChangeLog
 AS
 	SELECT  Invoice.tbChangeLog.LogId, Invoice.tbInvoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbType.InvoiceType, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbStatus.InvoiceStatus, 
 							 Invoice.tbChangeLog.TransmitStatusCode, Org.tbTransmitStatus.TransmitStatus, Invoice.tbType.CashModeCode, Cash.tbMode.CashMode, Invoice.tbChangeLog.DueOn, Invoice.tbChangeLog.InvoiceValue, 
@@ -10,3 +10,4 @@ AS
 		INNER JOIN Invoice.tbStatus ON Invoice.tbChangeLog.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode 
 		INNER JOIN Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode AND Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode 
 		INNER JOIN Org.tbTransmitStatus ON Invoice.tbChangeLog.TransmitStatusCode = Org.tbTransmitStatus.TransmitStatusCode;
+

@@ -13,3 +13,4 @@ AS
 		FROM         Invoice.vwRegisterItems
 	)
 	SELECT *, (InvoiceValue)+TaxValue-(PaidValue+PaidTaxValue) AS UnpaidValue FROM register;
+

@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Task.proc_ReconcileCharge
+﻿CREATE   PROCEDURE Task.proc_ReconcileCharge
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -7,7 +6,7 @@ AS
   	SET NOCOUNT, XACT_ABORT ON;
 
 	BEGIN TRY
-		DECLARE @InvoiceValue money
+		DECLARE @InvoiceValue decimal(18, 5)
 
 		SELECT @InvoiceValue = SUM(InvoiceValue)
 		FROM         Invoice.tbTask

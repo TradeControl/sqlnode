@@ -368,6 +368,8 @@ namespace TradeControl.Node
             existingMirror.InvoiceStatusCode = newMirror.InvoiceStatusCode;
             existingMirror.PaidValue = newMirror.PaidValue;
             existingMirror.PaidTaxValue = newMirror.PaidTaxValue;
+            existingMirror.PaymentAddress = newMirror.PaymentAddress;
+
             SubmitChanges();
         }
 

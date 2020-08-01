@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Org.proc_BalanceToPay(@AccountCode NVARCHAR(10), @Balance MONEY = 0 OUTPUT)
+﻿CREATE   PROCEDURE [Org].[proc_BalanceToPay](@AccountCode NVARCHAR(10), @Balance DECIMAL(18, 5) = 0 OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -27,3 +26,4 @@ AS
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
 	END CATCH
+

@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Invoice.vwHistorySalesItems
+﻿CREATE VIEW Invoice.vwHistorySalesItems
 AS
 SELECT        App.tbYearPeriod.YearNumber, CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS PeriodName, Invoice.vwRegisterDetail.StartOn, Invoice.vwRegisterDetail.InvoiceNumber, 
                          (Invoice.vwRegisterDetail.InvoiceValue + Invoice.vwRegisterDetail.TaxValue) - (Invoice.vwRegisterDetail.PaidValue + Invoice.vwRegisterDetail.PaidTaxValue) AS UnpaidValue, Invoice.vwRegisterDetail.TaskCode, 
@@ -11,3 +11,4 @@ FROM            Invoice.vwRegisterDetail INNER JOIN
                          App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber INNER JOIN
                          App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 WHERE        (Invoice.vwRegisterDetail.InvoiceTypeCode < 2);
+

@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Task.proc_FullyInvoiced
+﻿CREATE   PROCEDURE Task.proc_FullyInvoiced
 	(
 	@TaskCode nvarchar(20),
 	@IsFullyInvoiced bit = 0 output
@@ -9,8 +8,8 @@ AS
 
 	BEGIN TRY
 		DECLARE 
-			@InvoiceValue money
-			, @TotalCharge money
+			@InvoiceValue decimal(18, 5)
+			, @TotalCharge decimal(18, 5)
 
 		SELECT @InvoiceValue = SUM(InvoiceValue)
 		FROM         Invoice.tbTask

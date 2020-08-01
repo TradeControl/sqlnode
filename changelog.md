@@ -53,7 +53,7 @@ The following record logs changes to Trade Control, first released on **2019.09.
 
 A script to facilitate event processing by the [Trade Control Network](https://github.com/tradecontrol/tc-network)
 
-- [x] A transmission status enumerated type for networking Orgs and triggering contract deployment
+- [x] transmission status enumerated type for networking Orgs and triggering contract deployment
 - [x] _Task.tbChangeLog_ table maintained by the _Task.tbTask_ insert, update and delete triggers 
 - [x] _Invoice.tbChangeLog_ table maintained by the _Invoice.tbInvoice_ insert, update and delete triggers
 - [x] Cleardown procedures for the Service Event Log and the new Change Logs. 
@@ -72,13 +72,49 @@ Release 3.27.1 supports the first full release of the [Trade Control Network](ht
 
 [sql](src/tcNode/scripts/tc_upgrade_3_27_1.sql)
 
-- [x] [Unit of Charge](src/tcNodeDb/App/Tables/tbUoC.sql)
-- [x] [Activity Code Mirrors](src/tcNodeDb/Activity/Tables/tbMirror.sql)
-- [x] [Task Allocations](src/tcNodeDb/Task/Tables/tbAllocation.sql) and [SvD algorithm](src/tcNodeDb/Task/Views/vwAllocationSvD.sql) 
-- [x] [Cash Code Mirrors](src/tcNodeDb/Cash/Tables/tbMirror.sql)
-- [x] [Invoice Mirrors](src/tcNodeDb/Invoice/Tables/tbMirror.sql) 
-- [x] Intialisation integration
-- [x] Network Interface to Sql Db class [tcNodeNetwork.cs](src/tcNode/TCNodeNetwork.cs).
+- [x] [unit of charge](src/tcNodeDb/App/Tables/tbUoC.sql)
+- [x] [activity code mirrors](src/tcNodeDb/Activity/Tables/tbMirror.sql)
+- [x] [task allocations](src/tcNodeDb/Task/Tables/tbAllocation.sql) and [SvD algorithm](src/tcNodeDb/Task/Views/vwAllocationSvD.sql) 
+- [x] [cash code mirrors](src/tcNodeDb/Cash/Tables/tbMirror.sql)
+- [x] [invoice mirrors](src/tcNodeDb/Invoice/Tables/tbMirror.sql) 
+- [x] intialisation integration
+- [x] network interface to sql db class [tcNodeNetwork.cs](src/tcNode/TCNodeNetwork.cs).
+
+### 3.28.1
+
+[sql](src/tcNode/scripts/tc_upgrade_3_28_1.sql)
+
+- [x] replace type ```MONEY``` with ```DECIMAL(18,5)``` to support bitcoin decimals (1000*BTC)
+- [x] re-create views to assign ```DECIMAL(18,5)``` type to outputs
+- [x] move payment tables, functions and procedures from Org to Cash schema
+- [x] add rounding decimals to tax codes 
+- [x] procedure _Cash.proc_PaymentPostReconcile_ to ensure wallet -> cash account -> invoice synchronisation
+
+### 3.28.2
+
+Implements the data logic of the [Trade Control Bitcoin Wallet](https://github.com/tradecontrol/tc-bitcoin).  
+
+[sql](src/tcNode/scripts/tc_upgrade_3_28_2.sql)
+
+- [x] [coin type](src/tcNodeDb/Cash/Tables/tbCoinType.sql) - Main, TestNet, Fiat
+- [x] [miner identity](src/tcNodeDb/App/Tables/tbOptions.sql) - cash and account code
+- [x] [key hierarchy](src/tcNodeDb/Org/Tables/tbAccountKey.sql) - extended keys
+- [x] [change keys](src/tcNodeDb/Cash/Tables/tbChange.sql)
+- [x] [company namespace](src/tcNodeDb/Org/Views/vwNamespace.sql)
+- [x] [invoice mirror](src/tcNodeDb/Invoice/Tables/tbMirrorEvent.sql) - payment address send event
+- [x] [bitcoin transactions](src/tcNodeDb/Cash/Tables/tbTx.sql)
+- [x] procedures to process transaction outputs  
+- [x] wallet interface to sql cb class [tcNodeCash.cs](src/tcNode/TCNodeCash.cs). 
+
+### 3.28.3
+
+[sql](src/tcNode/scripts/tc_upgrade_3_28_3.sql)
+
+- [x] node initialisation for crypto wallet
+- [x] unit of charge changes to demo data 
+- [x] remove the UOC from the installer for upgrades before 3.27.1
+ 
+
 
 
 

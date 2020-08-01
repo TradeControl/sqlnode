@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwAccountPeriodClosingBalance
+﻿CREATE VIEW Cash.vwAccountPeriodClosingBalance
 AS
 	WITH last_entries AS
 	(

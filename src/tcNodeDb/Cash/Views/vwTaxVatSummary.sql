@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Cash.vwTaxVatSummary
+﻿CREATE VIEW Cash.vwTaxVatSummary
 AS
 
 	WITH vat_transactions AS
@@ -51,4 +51,5 @@ AS
 		TaxCode, HomeSales, HomePurchases, ExportSales, ExportPurchases, HomeSalesVat, HomePurchasesVat, ExportSalesVat, ExportPurchasesVat
 			, (HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS VatDue
 	FROM vatcode_summary;
+
 

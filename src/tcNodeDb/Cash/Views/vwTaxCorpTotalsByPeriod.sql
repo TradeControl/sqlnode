@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwTaxCorpTotalsByPeriod
+﻿CREATE VIEW Cash.vwTaxCorpTotalsByPeriod
 AS
 	WITH invoiced_tasks AS
 	(
@@ -32,3 +31,4 @@ AS
 							App.tbYearPeriod.TaxAdjustment
 	FROM         netprofit_consolidated INNER JOIN
 							App.tbYearPeriod ON netprofit_consolidated.StartOn = App.tbYearPeriod.StartOn;
+

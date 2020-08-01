@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwTaxCorpTotals
+﻿CREATE VIEW Cash.vwTaxCorpTotals
 AS
 	WITH totals AS
 	(
@@ -14,5 +13,5 @@ AS
 		GROUP BY App.tbYear.Description, App.tbMonth.MonthName, netprofit_totals.StartOn, YEAR(App.tbYearPeriod.StartOn), 
 							  App.tbYearPeriod.CorporationTaxRate, App.tbYearPeriod.TaxAdjustment
 	)
-	SELECT StartOn, PeriodYear, [Description], [Period], CorporationTaxRate, TaxAdjustment, CAST(NetProfit AS MONEY) NetProfit, CAST(CorporationTax AS MONEY) CorporationTax
+	SELECT StartOn, PeriodYear, Description, Period, CorporationTaxRate, TaxAdjustment, CAST(NetProfit AS decimal(18, 5)) NetProfit, CAST(CorporationTax AS decimal(18, 5)) CorporationTax
 	FROM totals;

@@ -125,14 +125,6 @@ namespace TradeControl.Node
                             {
                                 lbUpgrade.Content = string.Format(Properties.Resources.UpgradeHeader, tcnode.DatabaseName);
 
-                                if (cbUocName.Items.Count == 0)
-                                {
-                                    List<string> uocNames = tcnode.UnitOfChargeNames;
-                                    foreach (string uocName in uocNames)
-                                        cbUocName.Items.Add(uocName);
-                                    cbUocName.Text = tcnode.UnitOfChargeDetault;
-                                }
-
                                 if (!tcnode.IsUpToDate)
                                 {
                                     lbUpgradeStatus.Text = string.Format(Properties.Resources.InstanceNeedsUpgrading, tcnode.DatabaseName, tcnode.InstalledVersion.ToString(), TCNodeConfig.CurrentVersion.ToString());
@@ -148,10 +140,19 @@ namespace TradeControl.Node
 
                                     if (!tcnode.IsInitialised)
                                     {
+                                        if (cbUocName.Items.Count == 0)
+                                        {
+                                            List<string> uocNames = tcnode.UnitOfChargeNames;
+                                            foreach (string uocName in uocNames)
+                                                cbUocName.Items.Add(uocName);
+                                            cbUocName.Text = tcnode.UnitOfChargeDefault;
+                                        }
+
                                         btnBusinessDetails.IsEnabled = true;
                                         lbBusinessStatus.Foreground = new SolidColorBrush(Colors.Blue);
                                         lbBusinessStatus.Text = Properties.Resources.ConfigureEnabled;
                                         tabsMain.SelectedItem = pageBusinessDetails;
+
                                     }
                                     else
                                     {
@@ -209,6 +210,25 @@ namespace TradeControl.Node
                                         }
                                         else
                                         {
+                                            if (tcnode.UnitOfCharge != "BTC")
+                                            {
+                                                tbBankName.Text = "THE BANK PLC";
+                                                tbBankAddress.Text = "BANK ADDRESS";
+                                                cbCoinType.SelectedIndex = (int)CoinType.Fiat;
+                                            }
+                                            else
+                                            {
+                                                tbBankName.Text = "N/A";
+                                                tbBankAddress.Text = "N/A";
+                                                cbCoinType.SelectedIndex = (int)CoinType.Main;
+                                                tbCurrentAccount.Text = "TRADE";
+                                                tbCA_AccountNumber.Text = string.Empty;
+                                                tbCA_SortCode.Text = string.Empty;
+                                                tbReserveAccount.Text = "RESERVES";
+                                                tbRA_AccountNumber.Text = string.Empty;
+                                                tbRA_SortCode.Text = string.Empty;
+                                            }
+
                                             btnBasicSetup.IsEnabled = true;
                                             lbBasicSetupStatus.Foreground = new SolidColorBrush(Colors.Blue);
                                             lbBasicSetupStatus.Text = string.Format(Properties.Resources.InstallBasicSetupuration, tcnode.DatabaseName, tcnode.SqlServerName);
@@ -529,8 +549,11 @@ namespace TradeControl.Node
                 {
                     short financialMonth = (short)(cbFinancialYear.SelectedIndex + 1);
 
+                    CoinType coinType = (CoinType)cbCoinType.SelectedIndex;
+
                     tcnode.InstallBasicSetup(
                         financialMonth,
+                        coinType,
                         tbGovAccountName.Text,
                         tbBankName.Text,
                         tbBankAddress.Text,
@@ -844,5 +867,8 @@ namespace TradeControl.Node
             e.Handled = true;
         }
         #endregion
+
+
+
     }
 }

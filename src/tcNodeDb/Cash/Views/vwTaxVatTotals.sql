@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwTaxVatTotals
+﻿CREATE VIEW Cash.vwTaxVatTotals
 AS
 	WITH vat_dates AS
 	(
@@ -30,3 +29,4 @@ AS
 		JOIN App.tbYearPeriod year_period ON vat_results.PostOn = year_period.StartOn
 		JOIN App.tbMonth active_month ON year_period.MonthNumber = active_month.MonthNumber
 		JOIN App.tbYear active_year ON year_period.YearNumber = active_year.YearNumber;
+

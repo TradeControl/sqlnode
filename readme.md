@@ -1,4 +1,4 @@
-# Trade Control - node core
+# Trade Control Node
 
 Modelling the physical and financial workflows of a business entity in Sql Server. 
 
@@ -39,6 +39,10 @@ To connect up the nodes using Ethereum, install the service from the following r
 
 [Network](https://github.com/tradecontrol/tc-network)
 
+To use bitcoin as your commercial Unit of Account:
+
+[Bitcoin](https://github.com/tradecontrol/tc-bitcoin)
+
 ### Visual Studio Solution
 
 The repository can be opened in Visual Studio from [the VS solution](src/tc-nodecore.sln). 
@@ -51,7 +55,7 @@ Add the extensions:
 
 Each version has a creation script, identified by a [SemVer](http://semver.org/) number in the form Version.External.Internal. The first digit is the schema version; the second increments when an upgrade necessitates changes to external apps; and the third identifies an internal change to the database. Any increment in the second digit resets the third to 1. A version change resets the second digit and involves a conversion script to transpose the old schema design into the new.
 
-The whole procedure is handled by a [Configurator](docs/tc_nodecore_config.md). Every release is encapsulated in an upgrade script (*.sql), applied in versioning order to the creation script. To illustrate how the upgrade procedure works, the first release applies two upgrades: one that alters the internal structure of the database, and another that affects clients. 
+The procedure is handled by a [Configurator](docs/tc_nodecore_config.md). Every release is encapsulated in an upgrade script (*.sql), applied in versioning order to the creation script. To illustrate how the upgrade procedure works, the first release applies two upgrades: one that alters the internal structure of the database, and another that affects clients. 
 
 ## T-SQL
 
@@ -63,13 +67,13 @@ Trade Control is free and Open Source. If you are using the system in your busin
 
 [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C55YGUTBJ4N36)
 
-## License
+## Licence
 
-[GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) 
+The Trade Control Code licence is issued by Trade Control Ltd under a [GNU General Public Licence v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) 
 
-## Author
+Trade Control Documentation by Trade Control Ltd is licenced under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/) 
 
-Ian Monnox
-&nbsp; [GitHub](https://github.com/iamonnox)
+![Creative Commons](https://i.creativecommons.org/l/by-sa/4.0/88x31.png) 
+
 
 

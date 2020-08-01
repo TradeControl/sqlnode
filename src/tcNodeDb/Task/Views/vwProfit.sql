@@ -1,4 +1,6 @@
-﻿CREATE VIEW Task.vwProfit 
+﻿
+
+CREATE   VIEW Task.vwProfit 
 AS
 	WITH orders AS
 	(
@@ -102,8 +104,9 @@ AS
 		)
 		SELECT StartOn, AccountCode, TaskCode, YearNumber, [Description], [Period], ActivityCode, CashCode,
 			TaskTitle, AccountName, CashDescription, TaskStatus, TotalCharge, InvoicedCharge, InvoicedChargePaid,
-			CAST(TotalCost AS MONEY) TotalCost, InvoicedCost, InvoicedCostPaid, CAST(Profit AS MONEY) Profit,
-			CAST(UninvoicedCharge AS MONEY) UninvoicedCharge, CAST(UnpaidCharge AS MONEY) UnpaidCharge,
-			CAST(UninvoicedCost AS MONEY) UninvoicedCost, CAST(UnpaidCost AS MONEY) UnpaidCost,
+			CAST(TotalCost AS decimal(18, 5)) TotalCost, InvoicedCost, InvoicedCostPaid, CAST(Profit AS decimal(18, 5)) Profit,
+			CAST(UninvoicedCharge AS decimal(18, 5)) UninvoicedCharge, CAST(UnpaidCharge AS decimal(18, 5)) UnpaidCharge,
+			CAST(UninvoicedCost AS decimal(18, 5)) UninvoicedCost, CAST(UnpaidCost AS decimal(18, 5)) UnpaidCost,
 			ActionOn, ActionedOn, PaymentOn
 		FROM profits;
+

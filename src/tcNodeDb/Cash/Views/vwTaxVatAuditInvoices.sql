@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwTaxVatAuditInvoices
+﻿CREATE VIEW Cash.vwTaxVatAuditInvoices
 AS
 	WITH vat_transactions AS
 	(

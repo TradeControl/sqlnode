@@ -690,6 +690,7 @@ namespace TradeControl.Node
             }
             catch (Exception e)
             {
+                ErrorLog(e);
                 throw e;
             }
 
@@ -711,12 +712,13 @@ namespace TradeControl.Node
                 }
                 catch (Exception e)
                 {
+                    ErrorLog(e);
                     throw e;
                 }
             }
         }
 
-        public string UnitOfChargeDetault
+        public string UnitOfChargeDefault
         {
             get
             {
@@ -726,19 +728,45 @@ namespace TradeControl.Node
 
                     using (dbNodeNetworkDataContext db = new dbNodeNetworkDataContext(ConnectionString))
                     {
-                        uocName = (from tb in db.tbUocs where tb.UnitOfCharge == "GBP" select tb.UocName).FirstOrDefault();
+                        uocName = (from tb in db.tbUocs where tb.UnitOfCharge == "BTC" select tb.UocName).FirstOrDefault();
                     }
 
                     return uocName;
                 }
                 catch (Exception e)
                 {
+                    ErrorLog(e);
                     throw e;
                 }
             }       
         }
 
-public void InstallBasicSetup(  short financialMonth,
+        public string UnitOfCharge
+        {
+            get
+            {
+                try
+                {
+                    string uoc;
+
+                    using (dbNodeNetworkDataContext db = new dbNodeNetworkDataContext(ConnectionString))
+                    {
+                        uoc = (from tb in db.tbOptions select tb.UnitOfCharge).FirstOrDefault();
+                    }
+
+                    return uoc;
+
+                }
+                catch (Exception e)
+                {
+                    ErrorLog(e);
+                    throw e;
+                }
+            }
+        }
+
+        public void InstallBasicSetup(  short financialMonth,
+                                        CoinType coinType,
                                         string govAccountName,
                                         string bankName,
                                         string bankAddress,
@@ -760,10 +788,16 @@ public void InstallBasicSetup(  short financialMonth,
                         command.CommandText = "App.proc_BasicSetup";
                         command.CommandType = CommandType.StoredProcedure;
 
+                        SqlParameter p0 = command.CreateParameter();
+                        p0.DbType = DbType.Int16;
+                        p0.ParameterName = "@FinancialMonth";
+                        p0.Value = financialMonth;
+                        command.Parameters.Add(p0);
+
                         SqlParameter p1 = command.CreateParameter();
                         p1.DbType = DbType.Int16;
-                        p1.ParameterName = "@FinancialMonth";
-                        p1.Value = financialMonth;
+                        p1.ParameterName = "@CoinTypeCode";
+                        p1.Value = (short)coinType;
                         command.Parameters.Add(p1);
 
                         SqlParameter p2 = command.CreateParameter();

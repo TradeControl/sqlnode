@@ -20,4 +20,3 @@ AS
 		LEFT OUTER JOIN App.tbTaxCode ON o.TaxCode = App.tbTaxCode.TaxCode 
 		LEFT OUTER JOIN Org.tbAddress ON o.AddressCode = Org.tbAddress.AddressCode 
 		LEFT OUTER JOIN task_count ON o.AccountCode = task_count.AccountCode
-

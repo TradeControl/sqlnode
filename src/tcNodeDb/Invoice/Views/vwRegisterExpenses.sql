@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Invoice.vwRegisterExpenses
+﻿CREATE VIEW Invoice.vwRegisterExpenses
  AS
 SELECT     Invoice.vwRegisterTasks.StartOn, Invoice.vwRegisterTasks.InvoiceNumber, Invoice.vwRegisterTasks.TaskCode, App.tbYearPeriod.YearNumber, 
                       App.tbYear.Description, App.tbMonth.MonthName + ' ' + LTRIM(STR(YEAR( App.tbYearPeriod.StartOn))) AS Period, Invoice.vwRegisterTasks.TaskTitle, 
@@ -15,4 +14,3 @@ FROM         Invoice.vwRegisterTasks INNER JOIN
                       App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber INNER JOIN
                       App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 WHERE     (Task.fnIsExpense(Invoice.vwRegisterTasks.TaskCode) = 1)
-

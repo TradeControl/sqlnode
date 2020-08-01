@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Org.vwBalanceOutstanding
+﻿CREATE VIEW Org.vwBalanceOutstanding
 AS
 	WITH invoices_unpaid AS
 	(
@@ -19,5 +18,3 @@ AS
 	SELECT org.AccountCode, ISNULL(current_balance.Balance, 0) AS Balance
 	FROM Org.tbOrg org 
 		LEFT OUTER JOIN current_balance ON org.AccountCode = current_balance.AccountCode;
-
-

@@ -382,5 +382,92 @@ namespace TradeControl.Node.Properties {
                 return ResourceManager.GetString("tc_upgrade_3_27_1", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script
+        ///Release: 3.28.1
+        ///
+        ///Date: 01 July 2020
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/tc-nodecore
+        ///
+        ///Instructions:
+        ///This script should be applied by the TC Node Configuration app.
+        ///It inserts th [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_28_1 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_28_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script
+        ///Release: 3.28.2
+        ///
+        ///Date: 01 July 2020
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/tc-nodecore
+        ///
+        ///Instructions:
+        ///This script should be applied by the TC Node Configuration app.
+        ///It inserts th [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_28_2 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_28_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script
+        ///Release: 3.28.3
+        ///
+        ///Date: 01 July 2020
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/tc-nodecore
+        ///
+        ///Instructions:
+        ///This script should be applied by the TC Node Configuration app.
+        ///It inserts th [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_28_3 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_28_3", resourceCulture);
+            }
+        }
     }
 }

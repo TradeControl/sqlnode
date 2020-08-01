@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW App.vwGraphTaskActivity
+﻿CREATE VIEW App.vwGraphTaskActivity
 AS
 SELECT        CONCAT(Task.tbStatus.TaskStatus, SPACE(1), Cash.tbMode.CashMode) AS Category, SUM(Task.tbTask.TotalCharge) AS SumOfTotalCharge
 FROM            Task.tbTask INNER JOIN

@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Invoice.vwSalesInvoiceSpoolByActivity
+﻿CREATE VIEW Invoice.vwSalesInvoiceSpoolByActivity
 AS
 WITH invoice AS 
 (
@@ -29,3 +28,4 @@ SELECT        invoice_1.InvoiceNumber, invoice_1.InvoiceType, invoice_1.InvoiceS
 FROM            invoice AS invoice_1 INNER JOIN
                         Invoice.tbInvoice ON invoice_1.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber LEFT OUTER JOIN
                         Org.tbAddress ON invoice_1.AddressCode = Org.tbAddress.AddressCode;
+

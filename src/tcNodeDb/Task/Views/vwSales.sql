@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Task.vwSales
+﻿CREATE VIEW Task.vwSales
 AS
 SELECT        Task.vwTasks.TaskCode, Task.vwTasks.ActivityCode, Task.vwTasks.TaskStatusCode, Task.vwTasks.ActionOn, Task.vwTasks.ActionById, Task.vwTasks.TaskTitle, Task.vwTasks.Period, Task.vwTasks.BucketId, 
                          Task.vwTasks.AccountCode, Task.vwTasks.ContactName, Task.vwTasks.TaskStatus, Task.vwTasks.TaskNotes, Task.vwTasks.ActionedOn, Task.vwTasks.OwnerName, Task.vwTasks.CashCode, 
@@ -10,3 +10,4 @@ FROM            Task.vwTasks LEFT OUTER JOIN
                          Org.tbAddress ON Task.vwTasks.AddressCodeTo = Org.tbAddress.AddressCode INNER JOIN
                          Activity.tbActivity ON Task.vwTasks.ActivityCode = Activity.tbActivity.ActivityCode
 WHERE        (Task.vwTasks.CashCode IS NOT NULL) AND (Task.vwTasks.CashModeCode = 1);
+

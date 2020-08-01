@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Invoice.proc_Pay
+﻿CREATE PROCEDURE Invoice.proc_Pay
 	(
 	@InvoiceNumber nvarchar(20),
 	@PaidOn datetime,
@@ -11,11 +10,11 @@ AS
 
 	BEGIN TRY
 	DECLARE 
-		@PaidOut money = 0
-		, @PaidIn money = 0
-		, @BalanceOutstanding money = 0
-		, @TaskOutstanding money = 0
-		, @ItemOutstanding money = 0
+		@PaidOut decimal(18, 5) = 0
+		, @PaidIn decimal(18, 5) = 0
+		, @BalanceOutstanding decimal(18, 5) = 0
+		, @TaskOutstanding decimal(18, 5) = 0
+		, @ItemOutstanding decimal(18, 5) = 0
 		, @CashModeCode smallint
 		, @AccountCode nvarchar(10)
 		, @CashAccountCode nvarchar(10)
@@ -49,7 +48,7 @@ AS
 
 		SET @PaymentCode = CONCAT(@UserId, '_', FORMAT(@PaidOn, 'yyyymmdd_hhmmss'))
 
-		WHILE EXISTS (SELECT * FROM Org.tbPayment WHERE PaymentCode = @PaymentCode)
+		WHILE EXISTS (SELECT * FROM Cash.tbPayment WHERE PaymentCode = @PaymentCode)
 			BEGIN
 			SET @PaidOn = DATEADD(s, 1, @PaidOn)
 			SET @PaymentCode = CONCAT(@UserId, '_', FORMAT(@PaidOn, 'yyyymmdd_hhmmss'))
@@ -96,12 +95,12 @@ AS
 		IF @PaidIn + @PaidOut > 0
 			BEGIN			
 
-			INSERT INTO Org.tbPayment
+			INSERT INTO Cash.tbPayment
 								  (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
 			VALUES     (@PaymentCode,@UserId, 0, @AccountCode, @CashAccountCode, @PaidOn, @PaidIn, @PaidOut, @PaymentReference)		
 		
 			IF @Post <> 0
-				EXEC Org.proc_PaymentPostInvoiced @PaymentCode			
+				EXEC Cash.proc_PaymentPostInvoiced @PaymentCode			
 			END
 		
 		IF @@TRANCOUNT > 0
@@ -111,3 +110,4 @@ AS
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
 	END CATCH
+

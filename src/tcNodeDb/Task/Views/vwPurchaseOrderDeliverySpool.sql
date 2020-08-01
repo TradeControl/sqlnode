@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Task.vwPurchaseOrderDeliverySpool
+﻿CREATE VIEW Task.vwPurchaseOrderDeliverySpool
 AS
 SELECT        purchase_order.TaskCode, purchase_order.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, invoice_address.Address AS InvoiceAddress, 
                          delivery_account.AccountName AS CollectAccount, delivery_address.Address AS CollectAddress, collection_account.AccountName AS DeliveryAccount, collection_address.Address AS DeliveryAddress, 
@@ -21,3 +20,4 @@ WHERE EXISTS (
 	SELECT        UserName, DocTypeCode, DocumentNumber, SpooledOn
     FROM            App.tbDocSpool AS doc
     WHERE        (DocTypeCode = 3) AND (UserName = SUSER_SNAME()) AND (purchase_order.TaskCode = DocumentNumber));
+

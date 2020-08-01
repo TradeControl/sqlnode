@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE App.proc_SystemRebuild
+﻿CREATE PROCEDURE App.proc_SystemRebuild
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -7,7 +7,7 @@ AS
 			InvoiceNumber NVARCHAR(10),
 			RefType SMALLINT,
 			RefCode NVARCHAR(20),
-			TotalPaidValue MONEY
+			TotalPaidValue decimal(18, 5)
 			);
 
 	BEGIN TRY
@@ -55,31 +55,77 @@ AS
 		FROM Task.tbFlow flow
 			JOIN step_ordered ON flow.ParentTaskCode = step_ordered.ParentTaskCode AND flow.ChildTaskCode = step_ordered.ChildTaskCode;
 
-		UPDATE Org.tbPayment
+		UPDATE Cash.tbPayment
 		SET
-			TaxInValue = PaidInValue - CASE App.tbTaxCode.RoundingCode 
-				WHEN 0 THEN ROUND((PaidInValue / (1 + TaxRate)), 2)
-				WHEN 1 THEN ROUND((PaidInValue / (1 + TaxRate)), 2, 1) END, 
-			TaxOutValue = PaidOutValue - CASE App.tbTaxCode.RoundingCode 
-				WHEN 0 THEN ROUND((PaidOutValue / (1 + TaxRate)), 2)
-				WHEN 1 THEN ROUND((PaidOutValue / (1 + TaxRate)), 2, 1) END
-		FROM         Org.tbPayment INNER JOIN
-								App.tbTaxCode ON Org.tbPayment.TaxCode = App.tbTaxCode.TaxCode;
+			TaxInValue = PaidInValue - 
+				CASE TaxRate WHEN 0 THEN PaidInValue
+				ELSE
+				(
+					CASE App.tbTaxCode.RoundingCode 
+						WHEN 0 THEN ROUND((PaidInValue / (1 + TaxRate)), Decimals)
+						WHEN 1 THEN ROUND((PaidInValue / (1 + TaxRate)), Decimals, 1) 
+					END
+				)
+				END, 
+			TaxOutValue = PaidOutValue - 
+				CASE TaxRate WHEN 0 THEN PaidOutValue
+				ELSE
+				(		
+					CASE App.tbTaxCode.RoundingCode 
+						WHEN 0 THEN ROUND((PaidOutValue / (1 + TaxRate)), Decimals)
+						WHEN 1 THEN ROUND((PaidOutValue / (1 + TaxRate)), Decimals, 1) 
+					END
+				)
+				END
+		FROM Cash.tbPayment 
+			INNER JOIN App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode;
 
 		--Invoice Items									
 		UPDATE Invoice.tbItem
-		SET InvoiceValue =  ROUND(Invoice.tbItem.TotalValue / (1 + App.tbTaxCode.TaxRate), 2),
-			TaxValue = TotalValue - ROUND(Invoice.tbItem.TotalValue / (1 + App.tbTaxCode.TaxRate), 2)
+		SET InvoiceValue = 
+				CASE WHEN TaxRate = 0 THEN Invoice.tbItem.TotalValue
+				ELSE
+				(
+					ROUND(Invoice.tbItem.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
+				)
+				END,
+			TaxValue = TotalValue - 
+				CASE WHEN TaxRate = 0 THEN TotalValue
+				ELSE
+				(
+					CASE App.tbTaxCode.RoundingCode
+						WHEN 0 THEN ROUND(Invoice.tbItem.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
+						WHEN 1 THEN ROUND(Invoice.tbItem.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals, 1)
+					END
+				)
+				END
 		FROM         Invoice.tbItem INNER JOIN
 								App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
 								Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
 		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0) AND Invoice.tbItem.TotalValue <> 0;
 
 		UPDATE Invoice.tbItem
-		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
-				WHEN 0 THEN ROUND(Invoice.tbItem.InvoiceValue * App.tbTaxCode.TaxRate, 2)
-				WHEN 1 THEN ROUND( Invoice.tbItem.InvoiceValue * App.tbTaxCode.TaxRate, 2, 1) END,
-			InvoiceValue = CASE WHEN Invoice.tbItem.TotalValue = 0 THEN Invoice.tbItem.InvoiceValue ELSE ROUND(Invoice.tbItem.TotalValue / (1 + App.tbTaxCode.TaxRate), 2) END
+		SET 
+			InvoiceValue = 
+				CASE WHEN Invoice.tbItem.TotalValue = 0 THEN Invoice.tbItem.InvoiceValue 
+				ELSE 
+				(
+					CASE WHEN TaxRate = 0 THEN Invoice.tbItem.TotalValue
+					ELSE
+						ROUND(Invoice.tbItem.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
+					END
+				)
+				END,
+			TaxValue = 
+				CASE WHEN TaxRate = 0 THEN 0
+				ELSE
+				(
+					CASE App.tbTaxCode.RoundingCode 
+						WHEN 0 THEN ROUND(Invoice.tbItem.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+						WHEN 1 THEN ROUND( Invoice.tbItem.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) 
+					END
+				)
+				END			
 		FROM         Invoice.tbItem INNER JOIN
 								App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode 
 								INNER JOIN Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
@@ -88,7 +134,7 @@ AS
 		WITH accounts_paid AS
 		(
 			SELECT AccountCode
-			FROM Org.tbPayment
+			FROM Cash.tbPayment
 			GROUP BY AccountCode
 		)
 		UPDATE Invoice.tbItem
@@ -102,7 +148,7 @@ AS
 		WITH accounts_paid AS
 		(
 			SELECT AccountCode
-			FROM Org.tbPayment
+			FROM Cash.tbPayment
 			GROUP BY AccountCode
 		)
 		UPDATE Invoice.tbItem
@@ -115,18 +161,45 @@ AS
 			AND (accounts_paid.AccountCode IS NULL);
                    
 		UPDATE Invoice.tbTask
-		SET InvoiceValue =  ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), 2),
-			TaxValue = TotalValue - ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), 2)
+		SET InvoiceValue =  
+				CASE WHEN TaxRate = 0 THEN Invoice.tbTask.TotalValue
+				ELSE
+					ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
+				END,
+			TaxValue = TotalValue - 
+				CASE WHEN TaxRate = 0 THEN TotalValue
+				ELSE
+				(
+					ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
+				)
+				END
 		FROM         Invoice.tbTask INNER JOIN
 								App.tbTaxCode ON Invoice.tbTask.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
 								Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
-		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0) AND Invoice.tbTask.TotalValue <> 0;
+		WHERE     (Invoice.tbInvoice.InvoiceStatusCode <> 0) AND Invoice.tbTask.TotalValue <> 0;
 
 		UPDATE Invoice.tbTask
-		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
-				WHEN 0 THEN ROUND(Invoice.tbTask.InvoiceValue * App.tbTaxCode.TaxRate, 2)
-				WHEN 1 THEN ROUND( Invoice.tbTask.InvoiceValue * App.tbTaxCode.TaxRate, 2, 1) END,
-			InvoiceValue = CASE WHEN Invoice.tbTask.TotalValue = 0 THEN Invoice.tbTask.InvoiceValue ELSE ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), 2) END
+		SET 
+			InvoiceValue = 
+				CASE WHEN Invoice.tbTask.TotalValue = 0 THEN Invoice.tbTask.InvoiceValue 
+				ELSE 
+				(
+					CASE WHEN TaxRate = 0 THEN Invoice.tbTask.TotalValue
+					ELSE
+						ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals) 
+					END
+				)
+				END,
+			TaxValue = 
+				CASE WHEN TaxRate = 0 THEN 0
+				ELSE
+				(
+					CASE App.tbTaxCode.RoundingCode 
+						WHEN 0 THEN ROUND(Invoice.tbTask.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+						WHEN 1 THEN ROUND( Invoice.tbTask.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) 
+					END
+				)
+				END
 		FROM         Invoice.tbTask INNER JOIN
 								App.tbTaxCode ON Invoice.tbTask.TaxCode = App.tbTaxCode.TaxCode 
 								INNER JOIN Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
@@ -135,7 +208,7 @@ AS
 		WITH accounts_paid AS
 		(
 			SELECT AccountCode
-			FROM Org.tbPayment
+			FROM Cash.tbPayment
 			GROUP BY AccountCode
 		)
 		UPDATE Invoice.tbTask
@@ -149,7 +222,7 @@ AS
 		WITH accounts_paid AS
 		(
 			SELECT AccountCode
-			FROM Org.tbPayment
+			FROM Cash.tbPayment
 			GROUP BY AccountCode
 		)
 		UPDATE Invoice.tbTask
@@ -195,7 +268,7 @@ AS
 		WITH accounts_paid AS
 		(
 			SELECT AccountCode
-			FROM Org.tbPayment
+			FROM Cash.tbPayment
 			GROUP BY AccountCode
 		)
 		UPDATE invoice_header
@@ -208,7 +281,7 @@ AS
 		WITH accounts_paid AS
 		(
 			SELECT AccountCode
-			FROM Org.tbPayment
+			FROM Cash.tbPayment
 			GROUP BY AccountCode
 		)
 		UPDATE invoice_header
@@ -223,7 +296,7 @@ AS
 		WITH paid_balance AS
 		(
 			SELECT  AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) AS PaidBalance
-			FROM         Org.tbPayment
+			FROM         Cash.tbPayment
 			WHERE     (PaymentStatusCode = 1)
 			GROUP BY AccountCode
 		), invoice_balance AS
@@ -238,7 +311,7 @@ AS
 			FROM paid_balance JOIN invoice_balance ON paid_balance.AccountCode = invoice_balance.AccountCode
 		), current_balance AS
 		(
-			SELECT account_balance.AccountCode, ROUND(OpeningBalance + account_balance.CurrentBalance, 2) AS CurrentBalance
+			SELECT account_balance.AccountCode, OpeningBalance + account_balance.CurrentBalance AS CurrentBalance
 			FROM Org.tbOrg JOIN
 				account_balance ON Org.tbOrg.AccountCode = account_balance.AccountCode
 		), closing_balance AS
@@ -322,15 +395,26 @@ AS
 
 		UPDATE task
 		SET 
-			PaidTaxValue = CASE RoundingCode 
-								WHEN 0 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), 2)
-								WHEN 1 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), 2, 1)
-							END,
-			PaidValue = TotalPaidValue -
+			PaidTaxValue = 
+						CASE WHEN TaxRate = 0 THEN 0
+						ELSE
+						(
 							CASE RoundingCode 
-								WHEN 0 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), 2)
-								WHEN 1 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), 2, 1)
+								WHEN 0 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), Decimals)
+								WHEN 1 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), Decimals, 1)
 							END
+						)
+						END,
+			PaidValue = TotalPaidValue -
+						CASE WHEN TaxRate = 0 THEN 0
+						ELSE
+						(
+							CASE RoundingCode 
+								WHEN 0 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), Decimals)
+								WHEN 1 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), Decimals, 1)
+							END
+						)
+						END
 		FROM @tbPartialInvoice unpaid_task
 			JOIN Invoice.tbTask task ON unpaid_task.InvoiceNumber = task.InvoiceNumber
 				AND unpaid_task.RefCode = task.TaskCode	
@@ -342,24 +426,35 @@ AS
 		FROM @tbPartialInvoice unpaid_task
 			JOIN Invoice.tbItem item ON unpaid_task.InvoiceNumber = item.InvoiceNumber
 				AND unpaid_task.RefCode = item.CashCode
-		WHERE unpaid_task.RefType = 1 AND unpaid_task.TotalPaidValue = 0;
+		WHERE unpaid_task.RefType = 2 AND unpaid_task.TotalPaidValue = 0;
 
 		UPDATE item
 		SET 
-			PaidTaxValue = CASE RoundingCode 
-								WHEN 0 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), 2)
-								WHEN 1 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), 2, 1)
-							END,
-			PaidValue = TotalPaidValue -
+			PaidTaxValue = 
+						CASE WHEN TaxRate = 0 THEN 0
+						ELSE
+						(
 							CASE RoundingCode 
-								WHEN 0 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), 2)
-								WHEN 1 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), 2, 1)
+								WHEN 0 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), Decimals)
+								WHEN 1 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), Decimals, 1)
 							END
+						)
+						END,
+			PaidValue = TotalPaidValue -
+						CASE WHEN TaxRate = 0 THEN 0
+						ELSE
+						(											
+							CASE RoundingCode 
+								WHEN 0 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), Decimals)
+								WHEN 1 THEN ROUND((TotalPaidValue - (TotalPaidValue / (1 + TaxRate))), Decimals, 1)
+							END
+						)
+						END
 		FROM @tbPartialInvoice unpaid_item
 			JOIN Invoice.tbItem item ON unpaid_item.InvoiceNumber = item.InvoiceNumber
 				AND unpaid_item.RefCode = item.CashCode	
 			JOIN App.tbTaxCode tax ON tax.TaxCode = item.TaxCode
-		WHERE unpaid_item.RefType = 1 AND unpaid_item.TotalPaidValue <> 0;
+		WHERE unpaid_item.RefType = 2 AND unpaid_item.TotalPaidValue <> 0;
 
 		WITH invoices AS
 		(

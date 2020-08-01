@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwUnMirrored
+﻿CREATE VIEW Cash.vwUnMirrored
 AS
 	WITH charge_codes AS
 	(
@@ -17,3 +16,4 @@ AS
 	FROM charge_codes 
 		LEFT OUTER JOIN Cash.tbMirror mirror ON charge_codes.AccountCode = mirror.AccountCode AND charge_codes.ChargeCode = mirror.ChargeCode
 	WHERE mirror.ChargeCode IS NULL;
+

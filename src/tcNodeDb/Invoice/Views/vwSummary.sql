@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Invoice.vwSummary
+﻿CREATE VIEW Invoice.vwSummary
 AS
 	WITH tasks AS
 	(
@@ -55,3 +54,4 @@ AS
 	SELECT     CONCAT(DATENAME(yyyy, StartOn), '/', FORMAT(MONTH(StartOn), '00')) AS PeriodOn, StartOn, InvoiceTypeCode, InvoiceType AS InvoiceType, 
 						  TotalInvoiceValue, TotalTaxValue
 	FROM         invoice_margin;
+

@@ -19,3 +19,4 @@ AS
 							 Task.tbTask AS Task ON InvoiceTask.TaskCode = Task.TaskCode AND InvoiceTask.TaskCode = Task.TaskCode LEFT OUTER JOIN
 							 App.tbTaxCode ON InvoiceTask.TaxCode = App.tbTaxCode.TaxCode;
 
+

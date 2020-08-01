@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Cash.vwFlowVatRecurrenceAccruals
+﻿CREATE   VIEW Cash.vwFlowVatRecurrenceAccruals
 AS	
 	WITH active_periods AS
 	(
@@ -26,10 +25,9 @@ AS
 		FROM Cash.vwFlowVatPeriodAccruals accruals JOIN vatPeriod ON accruals.StartOn = vatPeriod.StartOn
 		GROUP BY vatPeriod.VatStartOn
 	)
-	SELECT active_periods.YearNumber, active_periods.StartOn, CAST(ISNULL(HomeSales, 0) AS money) AS HomeSales, CAST(ISNULL(HomePurchases, 0) AS money) AS HomePurchases, 
-		CAST(ISNULL(ExportSales, 0) AS money) AS ExportSales, CAST(ISNULL(ExportPurchases, 0) AS money) AS ExportPurchases, CAST(ISNULL(HomeSalesVat, 0) as money) AS HomeSalesVat, 
-		CAST(ISNULL(HomePurchasesVat, 0) AS money) AS HomePurchasesVat, CAST(ISNULL(ExportSalesVat, 0) AS money) AS ExportSalesVat, 
-		CAST(ISNULL(ExportPurchasesVat, 0) AS money) AS ExportPurchasesVat, CAST(ISNULL(VatDue, 0) AS money) AS VatDue 
+	SELECT active_periods.YearNumber, active_periods.StartOn, CAST(ISNULL(HomeSales, 0) AS decimal(18,5)) AS HomeSales, CAST(ISNULL(HomePurchases, 0) AS decimal(18,5)) AS HomePurchases, 
+		CAST(ISNULL(ExportSales, 0) AS decimal(18,5)) AS ExportSales, CAST(ISNULL(ExportPurchases, 0) AS decimal(18,5)) AS ExportPurchases, CAST(ISNULL(HomeSalesVat, 0) as decimal(18,5)) AS HomeSalesVat, 
+		CAST(ISNULL(HomePurchasesVat, 0) AS decimal(18,5)) AS HomePurchasesVat, CAST(ISNULL(ExportSalesVat, 0) AS decimal(18,5)) AS ExportSalesVat, 
+		CAST(ISNULL(ExportPurchasesVat, 0) AS decimal(18,5)) AS ExportPurchasesVat, CAST(ISNULL(VatDue, 0) AS decimal(18,5)) AS VatDue 
 	FROM vat_accruals 
-		RIGHT OUTER JOIN active_periods ON active_periods.StartOn = vat_accruals.StartOn;		
-
+		RIGHT OUTER JOIN active_periods ON active_periods.StartOn = vat_accruals.StartOn;	

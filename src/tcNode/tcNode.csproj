@@ -30,6 +30,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>tcNode.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -42,6 +48,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="dbNodeCash.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dbNodeCash.dbml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -54,6 +65,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="TCEnums.cs" />
+    <Compile Include="TCNodeCash.cs" />
     <Compile Include="TCNodeConfig.cs" />
     <Compile Include="dbNodeNetwork.designer.cs">
       <AutoGen>True</AutoGen>
@@ -64,6 +76,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="dbNodeCash.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>dbNodeCash.designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -73,8 +90,12 @@
       <LastGenOutput>dbNodeNetwork.designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </None>
+    <None Include="tcNode.snk" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="dbNodeCash.dbml.layout">
+      <DependentUpon>dbNodeCash.dbml</DependentUpon>
+    </None>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -95,6 +116,9 @@
     <Content Include="scripts\tc_upgrade_3_25_1.sql" />
     <Content Include="scripts\tc_upgrade_3_26_1.sql" />
     <Content Include="scripts\tc_upgrade_3_27_1.sql" />
+    <Content Include="scripts\tc_upgrade_3_28_1.sql" />
+    <Content Include="scripts\tc_upgrade_3_28_2.sql" />
+    <Content Include="scripts\tc_upgrade_3_28_3.sql" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

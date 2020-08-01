@@ -2,9 +2,8 @@
 Trade Control Node Configuration
 
 Date: 1.8.19
-Author: Ian Monnox
 
-Documentation on github.com/tradecontrol/tcnodecore
+Documentation on github.com/tradecontrol/tc-nodecore
 
 Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
 
@@ -32,5 +31,5 @@ using System.Windows;
     ResourceDictionaryLocation.SourceAssembly
 )]
 
-[assembly: AssemblyVersion("3.27.1.0")]
-[assembly: AssemblyFileVersion("3.27.1.0")]
+[assembly: AssemblyVersion("3.28.3.0")]
+[assembly: AssemblyFileVersion("3.28.3.0")]

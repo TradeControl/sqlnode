@@ -31,10 +31,8 @@ CREATE TABLE App.tbUoc (
 	UnitOfCharge nvarchar(5) NOT NULL,
 	UocSymbol nvarchar(10) NOT NULL,
 	UocName nvarchar(100) NOT NULL,
-	CONSTRAINT PK_tbTag PRIMARY KEY CLUSTERED (
-		UnitOfCharge ASC
-	) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
+	CONSTRAINT PK_tbTag PRIMARY KEY CLUSTERED (UnitOfCharge ASC)
+) 
 GO
 INSERT App.tbUoc (UnitOfCharge, UocSymbol, UocName) VALUES 
 	(N'AED', N'د.إ.‏', N'United Arab Emirates Dirhams')
@@ -2447,7 +2445,7 @@ DECLARE @FinancialYear SMALLINT;
 		EXEC App.proc_ErrorLog
 	END CATCH
 go
-ALTER PROCEDURE App.proc_NodeInitialisation
+CREATE OR ALTER PROCEDURE App.proc_NodeInitialisation
 (
 	@AccountCode NVARCHAR(10),
 	@BusinessName NVARCHAR(255),
@@ -2788,7 +2786,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-ALTER PROCEDURE App.proc_DemoServices
+CREATE OR ALTER PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,

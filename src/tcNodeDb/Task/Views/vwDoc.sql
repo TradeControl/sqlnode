@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Task.vwDoc
+﻿CREATE VIEW Task.vwDoc
 AS
 SELECT     Task.fnEmailAddress(Task.tbTask.TaskCode) AS EmailAddress, Task.tbTask.TaskCode, Task.tbTask.TaskStatusCode, Task.tbStatus.TaskStatus, 
                       Task.tbTask.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, Org.tbAddress.Address AS InvoiceAddress, 
@@ -21,3 +20,4 @@ FROM         Org.tbOrg AS Org_tb2 RIGHT OUTER JOIN
                       Org_tbAddress2.AddressCode = Task.tbTask.AddressCodeFrom LEFT OUTER JOIN
                       Org.tbContact ON Task.tbTask.ContactName = Org.tbContact.ContactName AND Task.tbTask.AccountCode = Org.tbContact.AccountCode LEFT OUTER JOIN
                       App.tbTaxCode ON Task.tbTask.TaxCode = App.tbTaxCode.TaxCode
+

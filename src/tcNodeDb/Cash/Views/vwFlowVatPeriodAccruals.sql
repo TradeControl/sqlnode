@@ -16,8 +16,8 @@ AS
 								 active_periods ON active_periods.StartOn = vat_audit.StartOn
 		GROUP BY active_periods.YearNumber, active_periods.StartOn
 	)
-	SELECT YearNumber, StartOn, CAST(HomeSales AS money) HomeSales, CAST(HomePurchases AS money) HomePurchases, CAST(ExportSales AS money) AS ExportSales, 
-		CAST(ExportPurchases AS money) ExportPurchases, CAST(HomeSalesVat AS money) HomeSalesVat, CAST(HomePurchasesVat AS money) HomePurchasesVat, 
-		CAST(ExportSalesVat AS money) ExportSalesVat, CAST(ExportPurchasesVat AS money) ExportPurchasesVat,
-		CAST((HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS money) VatDue
+	SELECT YearNumber, StartOn, CAST(HomeSales AS decimal(18,5)) HomeSales, CAST(HomePurchases AS decimal(18,5)) HomePurchases, CAST(ExportSales AS decimal(18,5)) AS ExportSales, 
+		CAST(ExportPurchases AS decimal(18,5)) ExportPurchases, CAST(HomeSalesVat AS decimal(18,5)) HomeSalesVat, CAST(HomePurchasesVat AS decimal(18,5)) HomePurchasesVat, 
+		CAST(ExportSalesVat AS decimal(18,5)) ExportSalesVat, CAST(ExportPurchasesVat AS decimal(18,5)) ExportPurchasesVat,
+		CAST((HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS decimal(18,5)) VatDue
 	FROM vat_accruals;

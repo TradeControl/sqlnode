@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW App.vwGraphBankBalance
+﻿CREATE VIEW App.vwGraphBankBalance
 AS
 SELECT        Format(Cash.vwAccountPeriodClosingBalance.StartOn, 'yyyy-MM') AS PeriodOn, SUM(Cash.vwAccountPeriodClosingBalance.ClosingBalance) AS SumOfClosingBalance
 FROM            Cash.vwAccountPeriodClosingBalance INNER JOIN

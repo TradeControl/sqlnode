@@ -1,6 +1,6 @@
-﻿
-CREATE   VIEW Cash.vwBankAccounts
+﻿CREATE VIEW Cash.vwBankAccounts
 AS
 	SELECT CashAccountCode, CashAccountName, OpeningBalance, CASE WHEN NOT CashCode IS NULL THEN 0 ELSE 1 END AS DisplayOrder
 	FROM Org.tbAccount  
 	WHERE AccountCode <> (SELECT AccountCode FROM App.vwHomeAccount)
+

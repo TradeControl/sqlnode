@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Task.vwEdit
+﻿CREATE VIEW Task.vwEdit
 AS
 SELECT        Task.tbTask.TaskCode, Task.tbTask.UserId, Task.tbTask.AccountCode, Task.tbTask.TaskTitle, Task.tbTask.ContactName, Task.tbTask.ActivityCode, Task.tbTask.TaskStatusCode, Task.tbTask.ActionById, 
                          Task.tbTask.ActionOn, Task.tbTask.ActionedOn, Task.tbTask.TaskNotes, Task.tbTask.Quantity, Task.tbTask.CashCode, Task.tbTask.TaxCode, Task.tbTask.UnitCharge, Task.tbTask.TotalCharge, 
@@ -8,4 +7,3 @@ SELECT        Task.tbTask.TaskCode, Task.tbTask.UserId, Task.tbTask.AccountCode,
 FROM            Task.tbTask INNER JOIN
                          Activity.tbActivity ON Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode INNER JOIN
                          Task.tbStatus ON Task.tbTask.TaskStatusCode = Task.tbStatus.TaskStatusCode;
-

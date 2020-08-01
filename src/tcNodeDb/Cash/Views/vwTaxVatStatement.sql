@@ -1,6 +1,4 @@
-﻿
-
-CREATE   VIEW Cash.vwTaxVatStatement
+﻿CREATE VIEW Cash.vwTaxVatStatement
 AS
 	WITH vat_dates AS
 	(
@@ -35,9 +33,9 @@ AS
 		FROM vat_results r JOIN vat_adjustments a ON r.StartOn = a.StartOn
 			JOIN vat_dates ON r.StartOn = vat_dates.PayTo
 			UNION
-		SELECT     Org.tbPayment.PaidOn AS StartOn, 0 As VatDue, ( Org.tbPayment.PaidOutValue * -1) + Org.tbPayment.PaidInValue AS VatPaid
-		FROM         Org.tbPayment INNER JOIN
-							  vat_codes ON Org.tbPayment.CashCode = vat_codes.CashCode	
+		SELECT     Cash.tbPayment.PaidOn AS StartOn, 0 As VatDue, ( Cash.tbPayment.PaidOutValue * -1) + Cash.tbPayment.PaidInValue AS VatPaid
+		FROM         Cash.tbPayment INNER JOIN
+							  vat_codes ON Cash.tbPayment.CashCode = vat_codes.CashCode	
 	), vat_ordered AS
 	(
 		SELECT ROW_NUMBER() OVER (ORDER BY StartOn, VatDue) AS RowNumber,
@@ -52,5 +50,3 @@ AS
 	SELECT RowNumber, StartOn, VatDue, VatPaid, Balance
 	FROM vat_statement
 	WHERE StartOn >= (SELECT MIN(StartOn) FROM App.tbYearPeriod p JOIN App.tbYear y ON p.YearNumber = y.YearNumber  WHERE y.CashStatusCode < 3);
-
-

@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Cash.proc_VatBalance(@Balance money output)
+﻿CREATE   PROCEDURE Cash.proc_VatBalance(@Balance decimal(18, 5) output)
  AS
   	SET NOCOUNT, XACT_ABORT ON;
 

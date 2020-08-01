@@ -34,12 +34,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_255116D2AFC176AAF74DE809CE5FEF8D"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -47,6 +41,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_0F3F2EDFEA900D5F9EC07C31DCAE5C5E"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_255116D2AFC176AAF74DE809CE5FEF8D"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -148,7 +148,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.27.1.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.28.3.0, Culture=neutral, PublicKeyToken=cb281103e4e604b8, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_0F3F2EDFEA900D5F9EC07C31DCAE5C5E"
@@ -273,15 +273,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Trade Control Node Configurator"
-        "ProductCode" = "8:{DA4150C6-0804-4B31-AC4E-221233863AA7}"
-        "PackageCode" = "8:{72FBE38D-5A15-4134-B7BE-44594E942AF2}"
+        "ProductCode" = "8:{2D4B9BDA-5DBD-4E4A-BABE-E48FA7E91C21}"
+        "PackageCode" = "8:{44E0D9EF-D8F0-4677-8F42-1126440EBB07}"
         "UpgradeCode" = "8:{87530140-719B-40FB-88AF-371486179C12}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:3.27.1"
+        "ProductVersion" = "8:3.28.3"
         "Manufacturer" = "8:Trade Control"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
