@@ -502,7 +502,7 @@ namespace TradeControl.Node
                 if (!IsTCNode)
                     return;
 
-                foreach (string candidate in Properties.Settings.Default.SqlUpgradeScripts)
+                foreach (string candidate in Properties.Settings.Default.SqlScripts)
                 {
                     string[] parse = candidate.Split('_');
                     string versionString = string.Concat(parse[parse.Length - 3], '.', parse[parse.Length - 2], '.', parse[parse.Length - 1]);

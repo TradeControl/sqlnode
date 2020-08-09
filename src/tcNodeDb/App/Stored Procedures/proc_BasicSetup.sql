@@ -18,9 +18,7 @@ DECLARE
 	@FinancialYear SMALLINT = DATEPART(YEAR, CURRENT_TIMESTAMP);
 
 	IF EXISTS (SELECT * FROM App.tbOptions WHERE UnitOfCharge <> 'BTC') AND (@CoinTypeCode <> 2)
-		SET @CoinTypeCode = 2
-	ELSE IF @CoinTypeCode = 2
-		SET @CoinTypeCode = 1;
+		SET @CoinTypeCode = 2;
 
 	IF DATEPART(MONTH, CURRENT_TIMESTAMP) < @FinancialMonth
 		 SET @FinancialYear -= 1;

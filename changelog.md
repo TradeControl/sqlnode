@@ -114,8 +114,13 @@ Implements the data logic of the [Trade Control Bitcoin Wallet](https://github.c
 - [x] unit of charge changes to demo data 
 - [x] remove the UOC from the installer for upgrades before 3.27.1
  
+### 3.28.4
 
+[sql](src/tcNode/scripts/tc_upgrade_3_28_4.sql)
 
+- [x] increase the decimal places of the UnitCharge to 7 in [Tasks](src/tcNodeDb/Task/Tables/tbTask.sql)
+- [x] _App.proc_BasicSetup_ creating a miner account for fiat currencies resulting in Services Demo failure
+- [x] _App.proc_DemoServices_ cleardown - exclude miner 
 
 
 

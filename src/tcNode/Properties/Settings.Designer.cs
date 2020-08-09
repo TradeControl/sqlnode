@@ -88,13 +88,14 @@ namespace TradeControl.Node.Properties {
   <string>tc_upgrade_3_28_1</string>
   <string>tc_upgrade_3_28_2</string>
   <string>tc_upgrade_3_28_3</string>
+  <string>tc_upgrade_3_28_4</string>
 </ArrayOfString>")]
-        public global::System.Collections.Specialized.StringCollection SqlUpgradeScripts {
+        public global::System.Collections.Specialized.StringCollection SqlScripts {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["SqlUpgradeScripts"]));
+                return ((global::System.Collections.Specialized.StringCollection)(this["SqlScripts"]));
             }
             set {
-                this["SqlUpgradeScripts"] = value;
+                this["SqlScripts"] = value;
             }
         }
         
