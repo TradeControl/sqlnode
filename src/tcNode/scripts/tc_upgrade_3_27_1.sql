@@ -133,6 +133,9 @@ ALTER TABLE App.tbOptions WITH NOCHECK ADD
 	UnitOfCharge nvarchar(5) NULL,
 	CONSTRAINT FK_App_tbUoc_UnitOfCharge FOREIGN KEY (UnitOfCharge) REFERENCES App.tbUoc (UnitOfCharge);
 go
+UPDATE App.tbOptions
+SET UnitOfCharge = 'GBP'
+go
 ALTER TABLE Activity.tbActivity
 	DROP COLUMN DefaultText;
 go

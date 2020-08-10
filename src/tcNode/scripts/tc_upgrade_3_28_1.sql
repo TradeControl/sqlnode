@@ -2745,8 +2745,10 @@ go
 IF NOT OBJECT_ID('Org.vwPaymentCode') IS NULL
 	DROP VIEW Org.vwPaymentCode;
 go
+DISABLE TRIGGER Cash.Cash_tbPayment_TriggerInsert ON Cash.tbPayment;
+go
 IF NOT OBJECT_ID('Org.tbPayment') IS NULL
-BEGIN
+BEGIN	
 	INSERT INTO Cash.tbPayment
 							 (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, TaxInValue, TaxOutValue, PaymentReference, InsertedBy, InsertedOn, UpdatedBy, 
 							 UpdatedOn)
@@ -2754,6 +2756,8 @@ BEGIN
 							 UpdatedOn
 	FROM            Org.tbPayment AS tbPayment_1;
 END
+go
+ENABLE TRIGGER Cash.Cash_tbPayment_TriggerInsert ON Cash.tbPayment;
 go
 IF NOT OBJECT_ID('Org.tbPayment') IS NULL
 	DROP TABLE Org.tbPayment;
