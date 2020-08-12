@@ -1,6 +1,4 @@
-﻿
-
-CREATE   VIEW Task.vwProfit 
+﻿CREATE VIEW Task.vwProfit 
 AS
 	WITH orders AS
 	(
@@ -103,10 +101,9 @@ AS
 			JOIN App.tbMonth mn ON mn.MonthNumber = yearperiod.MonthNumber
 		)
 		SELECT StartOn, AccountCode, TaskCode, YearNumber, [Description], [Period], ActivityCode, CashCode,
-			TaskTitle, AccountName, CashDescription, TaskStatus, TotalCharge, InvoicedCharge, InvoicedChargePaid,
-			CAST(TotalCost AS decimal(18, 5)) TotalCost, InvoicedCost, InvoicedCostPaid, CAST(Profit AS decimal(18, 5)) Profit,
-			CAST(UninvoicedCharge AS decimal(18, 5)) UninvoicedCharge, CAST(UnpaidCharge AS decimal(18, 5)) UnpaidCharge,
-			CAST(UninvoicedCost AS decimal(18, 5)) UninvoicedCost, CAST(UnpaidCost AS decimal(18, 5)) UnpaidCost,
+			TaskTitle, AccountName, CashDescription, TaskStatus, CAST(TotalCharge as float) TotalCharge, CAST(InvoicedCharge as float) InvoicedCharge, CAST(InvoicedChargePaid as float) InvoicedChargePaid,
+			CAST(TotalCost AS float) TotalCost, CAST(InvoicedCost as float) InvoicedCost, CAST(InvoicedCostPaid as float) InvoicedCostPaid, CAST(Profit AS float) Profit,
+			CAST(UninvoicedCharge AS float) UninvoicedCharge, CAST(UnpaidCharge AS float) UnpaidCharge,
+			CAST(UninvoicedCost AS float) UninvoicedCost, CAST(UnpaidCost AS float) UnpaidCost,
 			ActionOn, ActionedOn, PaymentOn
 		FROM profits;
-

@@ -19,7 +19,7 @@ AS
 		GROUP BY VatStartOn
 	), vat_adjustments AS
 	(
-		SELECT VatStartOn AS PayTo, SUM(VatAdjustment) AS VatAdjustment
+		SELECT VatStartOn AS PayTo, CAST(SUM(VatAdjustment) as float) AS VatAdjustment
 		FROM vatPeriod p 
 		GROUP BY VatStartOn
 	)

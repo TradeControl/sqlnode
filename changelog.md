@@ -122,6 +122,10 @@ Implements the data logic of the [Trade Control Bitcoin Wallet](https://github.c
 - [x] _App.proc_BasicSetup_ creating a miner account for fiat currencies resulting in Services Demo failure
 - [x] _App.proc_DemoServices_ cleardown - exclude miner 
 
+### 3.28.5
 
+[sql](src/tcNode/scripts/tc_upgrade_3_28_5.sql)
+
+- [x] fix for [client app](https://github.com/tradecontrol/tc-office) converting calculated decimal fields to short text. Reconnect required.
 
 

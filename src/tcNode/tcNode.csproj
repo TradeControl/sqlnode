@@ -120,6 +120,7 @@
     <Content Include="scripts\tc_upgrade_3_28_2.sql" />
     <Content Include="scripts\tc_upgrade_3_28_3.sql" />
     <Content Include="scripts\tc_upgrade_3_28_4.sql" />
+    <Content Include="scripts\tc_upgrade_3_28_5.sql" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

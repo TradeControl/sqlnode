@@ -1,6 +1,5 @@
 ﻿CREATE VIEW Cash.vwTaxVatSummary
 AS
-
 	WITH vat_transactions AS
 	(	
 		SELECT  (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY p.StartOn DESC) AS StartOn,  
@@ -48,8 +47,9 @@ AS
 		GROUP BY StartOn, TaxCode
 	)
 	SELECT   StartOn, 
-		TaxCode, HomeSales, HomePurchases, ExportSales, ExportPurchases, HomeSalesVat, HomePurchasesVat, ExportSalesVat, ExportPurchasesVat
-			, (HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS VatDue
+		TaxCode, CAST(HomeSales as float) HomeSales, CAST(HomePurchases as float) HomePurchases, CAST(ExportSales as float) ExportSales, CAST(ExportPurchases as float) ExportPurchases, 
+		CAST(HomeSalesVat as float) HomeSalesVat, CAST(HomePurchasesVat as float) HomePurchasesVat, CAST(ExportSalesVat as float) ExportSalesVat, CAST(ExportPurchasesVat as float) ExportPurchasesVat,
+		CAST((HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) as float) VatDue
 	FROM vatcode_summary;
 
 
