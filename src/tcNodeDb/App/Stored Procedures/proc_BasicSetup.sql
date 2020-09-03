@@ -26,14 +26,13 @@ DECLARE
 	DECLARE 
 		@AccountCode NVARCHAR(10),
 		@CashAccountCode NVARCHAR(10),
-		@Year SMALLINT = @FinancialYear;
+		@Year SMALLINT = @FinancialYear - 1;
 
 	SET NOCOUNT, XACT_ABORT ON;
 
 
 	BEGIN TRY
 		BEGIN TRAN
-
 		INSERT INTO [App].[tbBucket] ([Period], [BucketId], [BucketDescription], [AllowForecasts])
 		VALUES (0, 'Overdue', 'Overdue Orders', 0)
 		, (1, 'Current', 'Current Week', 0)
@@ -69,20 +68,21 @@ DECLARE
 		;
 
 		INSERT INTO [Cash].[tbCategory] ([CategoryCode], [Category], [CategoryTypeCode], [CashModeCode], [CashTypeCode], [DisplayOrder], [IsEnabled])
-		VALUES ('BA', 'Bank Accounts', 0, 2, 2, 8, 1)
-		, ('BP', 'Bank Payments', 0, 0, 0, 9, 1)
-		, ('BR', 'Bank Receipts', 0, 1, 0, 10, 1)
-		, ('DC', 'Direct Cost', 0, 0, 0, 2, 1)
-		, ('DI', 'Dividends', 0, 0, 0, 11, -1)
-		, ('DR', 'Drawings', 0, 2, 0, 15, 0)
-		, ('IC', 'Indirect Cost', 0, 0, 0, 3, 1)
-		, ('IP', 'Intercompany Payment', 0, 0, 2, 12, 1)
-		, ('IR', 'Intercompany Receipt', 0, 1, 2, 13, 1)
-		, ('IV', 'Investment', 0, 2, 0, 16, 0)
-		, ('SA', 'Sales', 0, 1, 0, 1, 1)
-		, ('SI', 'Startup Investment', 0, 1, 0, 17, 1)
-		, ('TA', 'Taxes', 0, 0, 1, 6, 1)
-		, ('WA', 'Wages', 0, 0, 0, 5, 1)
+		VALUES ('AS', 'Assets', 0, 1, 2, 70, 0)
+		, ('BA', 'Bank Accounts', 0, 2, 2, 80, 1)
+		, ('BP', 'Bank Payments', 0, 0, 0, 90, 1)
+		, ('BR', 'Bank Receipts', 0, 1, 0, 100, 1)
+		, ('DC', 'Direct Cost', 0, 0, 0, 20, 1)
+		, ('DI', 'Dividends', 0, 0, 0, 110, -1)
+		, ('DR', 'Drawings', 0, 2, 0, 150, 0)
+		, ('IC', 'Indirect Cost', 0, 0, 0, 30, 1)
+		, ('IP', 'Intercompany Payment', 0, 0, 2, 120, 1)
+		, ('IR', 'Intercompany Receipt', 0, 1, 2, 130, 1)
+		, ('IV', 'Investment', 0, 2, 0, 160, 0)
+		, ('LI', 'Liabilities', 0, 0, 2, 71, 0)
+		, ('SA', 'Sales', 0, 1, 0, 10, 1)
+		, ('TA', 'Taxes', 0, 0, 1, 60, 1)
+		, ('WA', 'Wages', 0, 0, 0, 50, 1)
 		;
 
 		INSERT INTO [Cash].[tbCategory] ([CategoryCode], [Category], [CategoryTypeCode], [CashModeCode], [CashTypeCode], [DisplayOrder], [IsEnabled])
@@ -145,6 +145,9 @@ DECLARE
 		, ('602', 'Taxes (General)', 'TA', 'N/A', 1)
 		, ('603', 'Taxes (Corporation)', 'TA', 'N/A', 1)
 		, ('604', 'Employers NI', 'TA', 'N/A', 1)
+		, ('700', 'Stock Movement', 'AS', 'N/A', 0)
+		, ('701', 'Depreciation', 'AS', 'N/A', 0)
+		, ('702', 'Dept Repayment', 'LI', 'N/A', 0)
 		;
 
 		IF @CoinTypeCode < 2
@@ -186,7 +189,7 @@ DECLARE
 			--crypto
 			EXEC Org.proc_DefaultAccountCode @AccountName = 'BITCOIN MINER', @AccountCode = @AccountCode OUTPUT
 			INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationStatusCode, OrganisationTypeCode, TaxCode)
-			VALUES (@AccountCode, 'Bitcoin Miner', 1, 7, 'N/A');
+			VALUES (@AccountCode, 'BITCOIN MINER', 1, 7, 'N/A');
 
 			UPDATE App.tbOptions
 			SET MinerAccountCode = @AccountCode;
@@ -195,23 +198,60 @@ DECLARE
 		END
 
 		EXEC Org.proc_DefaultAccountCode @AccountName = @CurrentAccount, @AccountCode = @CashAccountCode OUTPUT
-		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, OpeningBalance, SortCode, AccountNumber, CashCode, CoinTypeCode)
-		VALUES        (@CashAccountCode, @AccountCode, @CurrentAccount, 0, @CA_SortCode, @CA_AccountNumber, '301', @CoinTypeCode)
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, OpeningBalance, SortCode, AccountNumber, CashCode)
+		VALUES        (@CashAccountCode, @AccountCode, @CurrentAccount, 0, @CA_SortCode, @CA_AccountNumber, '301')
 
 		IF (LEN(@ReserveAccount) > 0)
 		BEGIN
 			EXEC Org.proc_DefaultAccountCode @AccountName = @ReserveAccount, @AccountCode = @CashAccountCode OUTPUT
-			INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, OpeningBalance, SortCode, AccountNumber, CoinTypeCode)
-			VALUES        (@CashAccountCode, @AccountCode, @ReserveAccount, 0, @RA_SortCode, @RA_AccountNumber, @CoinTypeCode)
+			INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, OpeningBalance, SortCode, AccountNumber)
+			VALUES        (@CashAccountCode, @AccountCode, @ReserveAccount, 0, @RA_SortCode, @RA_AccountNumber)
 		END
+
+		SELECT @AccountCode = (SELECT AccountCode FROM App.tbOptions)
 
 		IF (LEN(@DummyAccount) > 0)
 		BEGIN
-			SELECT @AccountCode = (SELECT AccountCode FROM App.tbOptions)
 			EXEC Org.proc_DefaultAccountCode @AccountName = @DummyAccount, @AccountCode = @CashAccountCode OUTPUT
-			INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, DummyAccount, CoinTypeCode)
-			VALUES        (@CashAccountCode, @AccountCode, @DummyAccount, 1, @CoinTypeCode)
+			INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode)
+			VALUES        (@CashAccountCode, @AccountCode, @DummyAccount, 1)
 		END
+
+		--capital 
+		DECLARE @CapitalAccount NVARCHAR(50);
+
+		SET @CapitalAccount = 'PREMISES';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 50, '701', 1)
+
+		SET @CapitalAccount = 'FIXTURES AND FITTINGS';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 40, '701', 1)
+
+		SET @CapitalAccount = 'PLANT AND MACHINERY';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 30, '701', 1)
+
+		SET @CapitalAccount = 'VEHICLES';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 20, '701', 1)
+
+		SET @CapitalAccount = 'STOCK';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 10, '700', 1)
+
+		SET @CapitalAccount = 'LONGTERM LIABILITIES';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 50, '702', 1)
+
+		UPDATE App.tbOptions
+		SET CoinTypeCode = @CoinTypeCode;
 
 		--TIME PERIODS
 		WHILE (@Year < DATEPART(YEAR, CURRENT_TIMESTAMP) + 2)
@@ -290,3 +330,4 @@ DECLARE
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog
 	END CATCH
+

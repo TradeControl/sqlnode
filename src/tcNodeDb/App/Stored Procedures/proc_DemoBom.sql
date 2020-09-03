@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE App.proc_DemoBom
+﻿CREATE PROCEDURE App.proc_DemoBom
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,
@@ -329,21 +329,24 @@ AS
 		SET IsEnabled = 1
 		WHERE CashCode = '214';
 
+		DECLARE @PaymentCode NVARCHAR(20), @CashAccountCode NVARCHAR(10);
+		EXEC Cash.proc_CurrentAccount @CashAccountCode OUTPUT;
 
 		IF @ExchangeRate = 1
 		BEGIN
-			DECLARE @PaymentCode NVARCHAR(20);
+			
 			EXEC Cash.proc_NextPaymentCode @PaymentCode OUTPUT
 			INSERT INTO Cash.tbPayment (CashAccountCode, PaymentCode, UserId, AccountCode, CashCode, TaxCode, PaidInValue)
-			SELECT DISTINCT
-				CashAccountCode,
+			SELECT TOP 1
+				@CashAccountCode CashAccountCode,
 				@PaymentCode AS PaymentCode, 
 				@UserId AS UserId,
 				AccountCode,
 				'214' AS CashCode,
 				'T0' AS TaxCode,
 				(SELECT ABS(ROUND(MIN(Balance), -3)) + 1000	FROM Cash.vwStatement) AS PaidInValue
-			FROM Org.tbAccount WHERE NOT CashCode IS NULL
+			FROM Org.tbAccount 
+			WHERE CashAccountCode = @CashAccountCode
 
 			EXEC Cash.proc_PaymentPost;
 		END

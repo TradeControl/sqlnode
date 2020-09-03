@@ -6,7 +6,7 @@ AS
 		FROM            Org.tbAccount LEFT OUTER JOIN
 								 Cash.tbCode ON Org.tbAccount.CashCode = Cash.tbCode.CashCode 
 		WHERE        (Org.tbAccount.AccountCode <> (SELECT AccountCode FROM App.tbOptions))
-			AND (Cash.tbCode.CashCode IS NULL) AND (Org.tbAccount.DummyAccount = 0)
+			AND (Cash.tbCode.CashCode IS NULL) AND (Org.tbAccount.AccountTypeCode = 0)
 	), last_payment AS
 	(
 		SELECT MAX( payments.PaidOn) AS TransactOn
@@ -44,8 +44,8 @@ AS
 		WHERE payments.PaymentStatusCode = 2
 	)
 	SELECT RowNumber, TransactOn, entry_type.CashEntryTypeCode, entry_type.CashEntryType, ReferenceCode, unbalanced_reserves.AccountCode, unbalanced_reserves.AccountName,
-		PayOut, PayIn,
-		SUM(PayIn + (PayOut * -1)) OVER (ORDER BY RowNumber) AS Balance,
+		CAST(PayOut as float) PayOut, CAST(PayIn as float) PayIn,
+		CAST(SUM(PayIn + (PayOut * -1)) OVER (ORDER BY RowNumber) as float) Balance,
 		CashCode, CashDescription
 	FROM unbalanced_reserves 
 		JOIN Cash.tbEntryType entry_type ON unbalanced_reserves.CashEntryTypeCode = entry_type.CashEntryTypeCode

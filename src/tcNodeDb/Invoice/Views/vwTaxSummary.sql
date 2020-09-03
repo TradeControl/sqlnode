@@ -12,8 +12,8 @@ AS
 		GROUP BY InvoiceNumber, TaxCode
 		HAVING        (NOT (TaxCode IS NULL))
 	)
-	SELECT        InvoiceNumber, TaxCode, SUM(InvoiceValueTotal) AS InvoiceValueTotal, SUM(TaxValueTotal) AS TaxValueTotal, 
-	 CASE WHEN SUM(InvoiceValueTotal) <> 0 THEN SUM(TaxValueTotal) / SUM(InvoiceValueTotal) ELSE 0 END AS TaxRate
+	SELECT        InvoiceNumber, TaxCode, CAST(SUM(InvoiceValueTotal) as decimal(18, 5)) AS InvoiceValueTotal, CAST(SUM(TaxValueTotal) as decimal(18, 5)) AS TaxValueTotal, 
+	 CASE WHEN SUM(InvoiceValueTotal) <> 0 THEN CAST((SUM(TaxValueTotal) / SUM(InvoiceValueTotal)) as decimal(18, 5)) ELSE 0 END AS TaxRate
 	FROM            base
 	GROUP BY InvoiceNumber, TaxCode;
 

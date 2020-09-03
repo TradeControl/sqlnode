@@ -527,5 +527,63 @@ namespace TradeControl.Node.Properties {
                 return ResourceManager.GetString("tc_upgrade_3_28_5", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script
+        ///Release: 3.29.1
+        ///
+        ///Date: 14 August 2020
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/tc-nodecore
+        ///
+        ///Instructions:
+        ///This script should be applied by the TC Node Configuration app.
+        ///It inserts  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_29_1 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_29_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script
+        ///Release: 3.29.2
+        ///
+        ///Date: 14 August 2020
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/tc-nodecore
+        ///
+        ///Instructions:
+        ///This script should be applied by the TC Node Configuration app.
+        ///It inserts  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_29_2 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_29_2", resourceCulture);
+            }
+        }
     }
 }

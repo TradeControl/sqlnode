@@ -3,7 +3,7 @@ AS
 	WITH company AS
 	(
 		SELECT 0 AS SummaryId, SUM( Org.tbAccount.CurrentBalance) AS CompanyBalance 
-		FROM Org.tbAccount WHERE ( Org.tbAccount.AccountClosed = 0) AND (Org.tbAccount.DummyAccount = 0)
+		FROM Org.tbAccount WHERE ( Org.tbAccount.AccountClosed = 0) AND (Org.tbAccount.AccountTypeCode = 0)
 	), corp_tax_invoiced AS
 	(
 		SELECT TOP (1)  0 AS SummaryId, Balance AS CorpTaxBalance 

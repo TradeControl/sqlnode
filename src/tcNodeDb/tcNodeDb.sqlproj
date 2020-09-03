@@ -6,8 +6,8 @@
     <Name>tcNodeDb</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
-    <ProjectGuid>{99524862-ac46-430b-a59d-a4bd33b83f3c}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <ProjectGuid>{6fc4350a-9e39-4bfb-8111-0b991134a505}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -137,6 +137,7 @@
     <Build Include="App\Tables\tbCalendarHoliday.sql" />
     <Build Include="App\Tables\tbCodeExclusion.sql" />
     <Build Include="App\Tables\tbDoc.sql" />
+    <Build Include="Org\Tables\tbAccountType.sql" />
     <Build Include="App\Tables\tbDocClass.sql" />
     <Build Include="App\Tables\tbUoc.sql" />
     <Build Include="App\Tables\tbDocSpool.sql" />
@@ -145,6 +146,7 @@
     <Build Include="Activity\Tables\tbMirror.sql" />
     <Build Include="App\Tables\tbEventLog.sql" />
     <Build Include="App\Tables\tbEventType.sql" />
+    <Build Include="Cash\Tables\tbAssetType.sql" />
     <Build Include="App\Tables\tbInstall.sql" />
     <Build Include="Cash\Tables\tbPaymentStatus.sql" />
     <Build Include="Cash\Tables\tbPayment.sql" />
@@ -254,7 +256,6 @@
     <Build Include="Cash\Views\vwSummary.sql" />
     <Build Include="App\Views\vwHomeAccount.sql" />
     <Build Include="Cash\Views\vwBankAccounts.sql" />
-    <Build Include="Cash\Views\vwAccountPeriodClosingBalance.sql" />
     <Build Include="App\Views\vwGraphBankBalance.sql" />
     <Build Include="Usr\Views\vwUserMenus.sql" />
     <Build Include="Invoice\Views\vwChangeLog.sql" />
@@ -286,21 +287,32 @@
     <Build Include="App\Views\vwMonths.sql" />
     <Build Include="App\Views\vwPeriodEndListing.sql" />
     <Build Include="App\Views\vwTaxCodes.sql" />
+    <Build Include="Org\Views\vwCashAccountAssets.sql" />
     <Build Include="App\Views\vwTaxCodeTypes.sql" />
     <Build Include="App\Views\vwWarehouseOrg.sql" />
     <Build Include="App\Views\vwWarehouseTask.sql" />
     <Build Include="App\Views\vwYearPeriod.sql" />
     <Build Include="Cash\Views\vwAccountRebuild.sql" />
+    <Build Include="Cash\Views\vwCategoryCapital.sql" />
     <Build Include="Cash\Views\vwBudget.sql" />
     <Build Include="Cash\Views\vwBudgetDataEntry.sql" />
+    <Build Include="Cash\Views\vwCurrentAccount.sql" />
     <Build Include="Cash\Views\vwCashFlowTypes.sql" />
+    <Build Include="Cash\Views\vwReserveAccount.sql" />
     <Build Include="Cash\Views\vwCategoryBudget.sql" />
+    <Build Include="Cash\Views\vwBalanceSheetPeriods.sql" />
     <Build Include="Cash\Views\vwCategoryCodesExpressions.sql" />
+    <Build Include="Cash\Views\vwBalanceStartOn.sql" />
     <Build Include="Cash\Views\vwCategoryCodesTotals.sql" />
+    <Build Include="Org\Views\vwAssetStatement.sql" />
     <Build Include="Cash\Views\vwCategoryCodesTrade.sql" />
+    <Build Include="Cash\Views\vwBalanceSheetOrgs.sql" />
     <Build Include="Cash\Views\vwCategoryExpressions.sql" />
+    <Build Include="Cash\Views\vwBalanceSheetAccounts.sql" />
     <Build Include="Cash\Views\vwCategoryTotalCandidates.sql" />
+    <Build Include="Cash\Views\vwBalanceSheetAssets.sql" />
     <Build Include="Cash\Views\vwCategoryTotals.sql" />
+    <Build Include="Cash\Views\vwBalanceSheet.sql" />
     <Build Include="Cash\Views\vwCategoryTrade.sql" />
     <Build Include="Cash\Views\vwCodeLookup.sql" />
     <Build Include="Cash\Views\vwExternalCodesLookup.sql" />
@@ -350,8 +362,6 @@
     <Build Include="Org\Views\vwAccountSources.sql" />
     <Build Include="Org\Views\vwAreaCodes.sql" />
     <Build Include="Org\Views\vwBalanceOutstanding.sql" />
-    <Build Include="Org\Views\vwCashAccounts.sql" />
-    <Build Include="Org\Views\vwCashAccountsLive.sql" />
     <Build Include="Org\Views\vwCompanyHeader.sql" />
     <Build Include="Org\Views\vwCompanyLogo.sql" />
     <Build Include="Org\Views\vwContacts.sql" />
@@ -397,13 +407,13 @@
     <Build Include="Org\Functions\fnContactFileAs.sql" />
     <Build Include="Task\Functions\fnEmailAddress.sql" />
     <Build Include="Task\Functions\fnIsExpense.sql" />
+    <Build Include="Cash\Functions\fnFlowCategory.sql" />
     <Build Include="App\Functions\fnBuckets.sql" />
     <Build Include="Cash\Functions\fnTaxTypeDueDates.sql" />
     <Build Include="App\Functions\fnActivePeriod.sql" />
     <Build Include="Org\Functions\fnKeyNamespace.sql" />
     <Build Include="Cash\Functions\fnFlowBankBalances.sql" />
     <Build Include="Cash\Functions\fnFlowCategoriesByType.sql" />
-    <Build Include="Cash\Functions\fnFlowCategory.sql" />
     <Build Include="Cash\Functions\fnFlowCategoryCashCodes.sql" />
     <Build Include="Cash\Functions\fnFlowCategoryTotalCodes.sql" />
     <Build Include="Invoice\Functions\fnEditCreditCandidates.sql" />
@@ -541,11 +551,5 @@
     <Build Include="Security\Org.sql" />
     <Build Include="Security\Task.sql" />
     <Build Include="Security\Usr.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 </Project>

@@ -307,8 +307,8 @@
                                 <TextBox x:Name="tbRA_SortCode" Grid.Row="9" Grid.Column="1" MaxLength="10" Text="00-00-00" Margin="5" FontWeight="Bold" />
                                 <Label Margin="5" Grid.Row="10" Content="Reserve Account No.:" />
                                 <TextBox x:Name="tbRA_AccountNumber" Grid.Row="10" Grid.Column="1" MaxLength="20" Text="00000002" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="11" Content="Capital Account:" />
-                                <TextBox x:Name="tbDummyAccount" Grid.Row="11" Grid.Column="1" MaxLength="20" Text="CAPITAL ACCOUNT" Margin="5" FontWeight="Bold" />
+                                <Label Margin="5" Grid.Row="11" Content="Dummy Account:" />
+                                <TextBox x:Name="tbDummyAccount" Grid.Row="11" Grid.Column="1" MaxLength="20" Text="ADJUSTMENTS" Margin="5" FontWeight="Bold" />
                                 <Label Margin="5" Grid.Row="12" Content="Info:" VerticalAlignment="Top"  />
                                 <TextBlock x:Name="lbBasicSetupStatus" Margin="10" Grid.Row="12" Grid.Column="1" Text="Data source not found" Foreground="#FFEA1111" TextWrapping="Wrap" />
 

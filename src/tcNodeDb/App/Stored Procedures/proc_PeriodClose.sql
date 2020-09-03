@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE App.proc_PeriodClose
+﻿CREATE PROCEDURE App.proc_PeriodClose
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -34,6 +33,27 @@ AS
 				InvoiceTax = invoice_summary.TaxValue
 			FROM    Cash.tbPeriod 
 				JOIN invoice_summary ON Cash.tbPeriod.CashCode = invoice_summary.CashCode AND Cash.tbPeriod.StartOn = invoice_summary.StartOn;
+
+			WITH asset_entries AS
+			(
+				SELECT payment.CashCode, 
+					(SELECT TOP 1 StartOn FROM App.tbYearPeriod WHERE (StartOn <= payment.PaidOn) ORDER BY StartOn DESC) AS StartOn,
+					(PaidInValue - PaidOutValue) AssetValue
+				FROM Cash.tbPayment payment
+					JOIN Org.tbAccount account ON payment.CashAccountCode = account.CashAccountCode
+				WHERE account.AccountTypeCode = 2 AND payment.IsProfitAndLoss <> 0 AND PaidOn >= @StartOn
+			), asset_summary AS
+			(
+				SELECT CashCode, StartOn, SUM(AssetValue) AssetValue
+				FROM asset_entries
+				WHERE StartOn = @StartOn
+				GROUP BY CashCode, StartOn				
+			)
+			UPDATE Cash.tbPeriod
+			SET InvoiceValue = AssetValue
+			FROM  Cash.tbPeriod 
+				JOIN asset_summary 
+					ON Cash.tbPeriod.CashCode = asset_summary.CashCode AND Cash.tbPeriod.StartOn = asset_summary.StartOn;		
 	
 			UPDATE App.tbYearPeriod
 			SET CashStatusCode = 2

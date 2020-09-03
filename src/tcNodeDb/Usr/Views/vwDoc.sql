@@ -1,12 +1,11 @@
-﻿CREATE   VIEW Usr.vwDoc
+﻿CREATE VIEW Usr.vwDoc
 AS
 	WITH bank AS 
 	(
-		SELECT        TOP (1) (SELECT AccountCode FROM App.tbOptions) AS AccountCode, CONCAT(Org.tbOrg.AccountName, SPACE(1), Org.tbAccount.CashAccountName) AS BankAccount, Org.tbAccount.SortCode AS BankSortCode, 
-															  Org.tbAccount.AccountNumber AS BankAccountNumber
-									 FROM            Org.tbAccount INNER JOIN
-															  Org.tbOrg ON Org.tbAccount.AccountCode = Org.tbOrg.AccountCode
-									 WHERE        (NOT (Org.tbAccount.CashCode IS NULL))
+		SELECT TOP (1) (SELECT AccountCode FROM App.tbOptions) AS AccountCode, CONCAT(Org.tbOrg.AccountName, SPACE(1), Org.tbAccount.CashAccountName) AS BankAccount, Org.tbAccount.SortCode AS BankSortCode, Org.tbAccount.AccountNumber AS BankAccountNumber
+		FROM Org.tbAccount 
+			INNER JOIN Org.tbOrg ON Org.tbAccount.AccountCode = Org.tbOrg.AccountCode
+		WHERE (NOT (Org.tbAccount.CashCode IS NULL)) AND (Org.tbAccount.AccountTypeCode = 0)
 	)
     SELECT        TOP (1) company.AccountName AS CompanyName, Org.tbAddress.Address AS CompanyAddress, company.PhoneNumber AS CompanyPhoneNumber,  
                               company.EmailAddress AS CompanyEmailAddress, company.WebSite AS CompanyWebsite, company.CompanyNumber, company.VatNumber, company.Logo, bank_details.BankAccount, 

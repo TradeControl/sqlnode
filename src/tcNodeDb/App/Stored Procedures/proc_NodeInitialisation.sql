@@ -127,7 +127,7 @@ AS
 		INSERT INTO Cash.tbType (CashTypeCode, CashType)
 		VALUES (0, 'TRADE')
 		, (1, 'EXTERNAL')
-		, (2, 'BANK');
+		, (2, 'MONEY');
 
 		INSERT INTO Invoice.tbStatus (InvoiceStatusCode, InvoiceStatus)
 		VALUES (1, 'Invoiced')
@@ -266,7 +266,7 @@ AS
 		, (3014, 'This entry cannot be rescheduled', 0)
 		, (3015, 'Dummy accounts should not be assigned a cash code', 0)
 		, (3016, 'Operations cannot end before they have been started', 0)
-		, (3017, 'Cash codes must be of catagory type BANK', 0)
+		, (3017, 'Cash codes must be of catagory type MONEY', 0)
 		, (3018, 'The balance for this account is zero. Check for unposted payments.', 0);
 
 		/***************** BUSINESS DATA *****************************************/
@@ -323,6 +323,7 @@ AS
 		, (1, 52, 6, 7, 'Status Graphs', 4, 'Trader', 'Cash_StatusGraphs', 0)
 		, (1, 53, 2, 4, 'Service Event Log', 2, 'Trader', 'App_EventLog', 1)
 		, (1, 55, 4, 4, 'Budget', 4, 'Trader', 'Cash_Budget', 0)
+		, (1, 62, 4, 5, 'Assets', 4, 'Trader', 'Cash_Assets', 0)
 		, (1, 66, 6, 9, 'Audit Accruals - Corporation Tax', 5, 'Trader', 'Cash_CorpTaxAuditAccruals', 4)
 		, (1, 67, 6, 8, 'Audit Accruals - VAT', 5, 'Trader', 'Cash_VatAuditAccruals', 4)
 		, (1, 68, 5, 7, 'Network Allocations', 4, 'Trader', 'Task_Allocation', 0)
@@ -333,8 +334,8 @@ AS
 		BEGIN
 			INSERT INTO Usr.tbMenuEntry (MenuId, EntryId, FolderId, ItemId, ItemText, Command, ProjectName, Argument, OpenMode)
 			VALUES 
-				(1, 39, 5, 4, 'Payment Entry', 4, 'Trader', 'Cash_PaymentEntry', 0)
-				, (1, 54, 5, 5, 'Transfers', 4, 'Trader', 'Cash_Transfer', 0)
+				(1, 54, 5, 5, 'Transfers', 4, 'Trader', 'Cash_Transfer', 0)
+				, (1, 39, 5, 4, 'Payment Entry', 4, 'Trader', 'Cash_PaymentEntry', 0)
 		END
 
 		SET IDENTITY_INSERT Usr.tbMenuEntry OFF;

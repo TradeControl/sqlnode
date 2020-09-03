@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Cash.vwTaxVatAuditAccruals
+﻿CREATE VIEW Cash.vwTaxVatAuditAccruals
 AS
 SELECT       App.tbYear.YearNumber, CONCAT(App.tbYear.Description, ' ', App.tbMonth.MonthName) AS YearPeriod, vat_accruals.StartOn, Task.tbTask.ActionOn, Task.tbTask.TaskTitle, Task.tbTask.TaskCode, Cash.tbCode.CashCode, 
                          Cash.tbCode.CashDescription, Activity.tbActivity.ActivityCode, Task.tbStatus.TaskStatus, Task.tbStatus.TaskStatusCode, vat_accruals.TaxCode, vat_accruals.TaxRate, vat_accruals.TotalValue, 
@@ -18,3 +18,4 @@ FROM            Cash.vwTaxVatAccruals AS vat_accruals INNER JOIN
                          Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode AND Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode AND Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode INNER JOIN
                          Cash.tbCode ON Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode AND 
                          Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode
+

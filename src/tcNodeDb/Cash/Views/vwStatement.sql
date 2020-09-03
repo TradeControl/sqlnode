@@ -182,7 +182,7 @@ AS
 		SELECT SUM( Org.tbAccount.CurrentBalance) AS OpeningBalance
 		FROM         Org.tbAccount INNER JOIN
 							  Cash.tbCode ON Org.tbAccount.CashCode = Cash.tbCode.CashCode
-		WHERE     ( Org.tbAccount.AccountClosed = 0) AND (Org.tbAccount.DummyAccount = 0)
+		WHERE     ( Org.tbAccount.AccountClosed = 0) AND (Org.tbAccount.AccountTypeCode = 0)
 	), statement_data AS
 	(
 		SELECT 
@@ -208,4 +208,3 @@ AS
 		JOIN Org.tbOrg org ON cs.AccountCode = org.AccountCode
 		JOIN Cash.tbEntryType et ON cs.CashEntryTypeCode = et.CashEntryTypeCode
 		LEFT OUTER JOIN Cash.tbCode cc ON cs.CashCode = cc.CashCode;
-

@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Cash.vwTaxVatAccruals
+﻿CREATE VIEW Cash.vwTaxVatAccruals
 AS
 	WITH task_invoiced_quantity AS
 	(
@@ -29,14 +29,14 @@ AS
 	), task_dataset AS
 	(
 		SELECT StartOn, TaskCode, TaxCode, QuantityRemaining, TotalValue, TaxValue, TaxRate,
-					CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 1 THEN TotalValue ELSE 0 END) ELSE 0 END AS HomeSales, 
-					CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 0 THEN TotalValue ELSE 0 END) ELSE 0 END AS HomePurchases, 
-					CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 1 THEN TotalValue ELSE 0 END) ELSE 0 END AS ExportSales, 
-					CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 0 THEN TotalValue ELSE 0 END) ELSE 0 END AS ExportPurchases, 
-					CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 1 THEN TaxValue ELSE 0 END) ELSE 0 END AS HomeSalesVat, 
-					CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 0 THEN TaxValue ELSE 0 END) ELSE 0 END AS HomePurchasesVat, 
-					CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 1 THEN TaxValue ELSE 0 END) ELSE 0 END AS ExportSalesVat, 
-					CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 0 THEN TaxValue ELSE 0 END)  ELSE 0 END AS ExportPurchasesVat
+					CAST(CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 1 THEN TotalValue ELSE 0 END) ELSE 0 END as float) AS HomeSales, 
+					CAST(CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 0 THEN TotalValue ELSE 0 END) ELSE 0 END as float) AS HomePurchases, 
+					CAST(CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 1 THEN TotalValue ELSE 0 END) ELSE 0 END as float) AS ExportSales, 
+					CAST(CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 0 THEN TotalValue ELSE 0 END) ELSE 0 END as float) AS ExportPurchases, 
+					CAST(CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 1 THEN TaxValue ELSE 0 END) ELSE 0 END as float) AS HomeSalesVat, 
+					CAST(CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 0 THEN TaxValue ELSE 0 END) ELSE 0 END as float) AS HomePurchasesVat, 
+					CAST(CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 1 THEN TaxValue ELSE 0 END) ELSE 0 END as float) AS ExportSalesVat, 
+					CAST(CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 0 THEN TaxValue ELSE 0 END)  ELSE 0 END as float) AS ExportPurchasesVat
 		FROM task_transactions
 	)
 	SELECT task_dataset.*,
@@ -45,3 +45,4 @@ AS
 		JOIN App.tbYearPeriod AS year_period ON task_dataset.StartOn = year_period.StartOn INNER JOIN
                          App.tbYear ON year_period.YearNumber = App.tbYear.YearNumber INNER JOIN
                          App.tbMonth ON year_period.MonthNumber = App.tbMonth.MonthNumber;
+

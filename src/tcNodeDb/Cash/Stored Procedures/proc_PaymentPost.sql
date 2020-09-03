@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE Cash.proc_PaymentPost 
+﻿CREATE PROCEDURE Cash.proc_PaymentPost 
 AS
     SET NOCOUNT, XACT_ABORT ON;
 
@@ -7,11 +7,14 @@ AS
 
 		DECLARE curMisc cursor local for
 			SELECT        Cash.tbPayment.PaymentCode
-			FROM            Cash.tbPayment INNER JOIN
-									 Cash.tbCode ON Cash.tbPayment.CashCode = Cash.tbCode.CashCode INNER JOIN
-									 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-			WHERE        (Cash.tbPayment.PaymentStatusCode = 0) 
+			FROM            Cash.tbPayment 
+				INNER JOIN Cash.tbCode ON Cash.tbPayment.CashCode = Cash.tbCode.CashCode 
+				INNER JOIN Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+				INNER JOIN Org.tbAccount ON Org.tbAccount.CashAccountCode = Cash.tbPayment.CashAccountCode
+			WHERE (Org.tbAccount.AccountTypeCode < 2)
+				AND (Cash.tbPayment.PaymentStatusCode = 0) 
 				AND Cash.tbPayment.UserId = (SELECT UserId FROM Usr.vwCredentials)
+
 			ORDER BY Cash.tbPayment.AccountCode, Cash.tbPayment.PaidOn
 
 		DECLARE curInv cursor local for
@@ -51,4 +54,3 @@ AS
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
 	END CATCH
-

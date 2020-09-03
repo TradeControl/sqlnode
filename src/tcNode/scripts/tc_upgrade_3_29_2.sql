@@ -1,4 +1,713 @@
-ï»¿CREATE PROCEDURE App.proc_DemoServices
+/**************************************************************************************
+Trade Control
+Upgrade script
+Release: 3.29.2
+
+Date: 14 August 2020
+Author: IAM
+
+Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+
+You may obtain a copy of the License at
+
+	https://www.gnu.org/licenses/gpl-3.0.en.html
+
+Change log:
+
+	https://github.com/tradecontrol/tc-nodecore
+
+Instructions:
+This script should be applied by the TC Node Configuration app.
+It inserts the upgade into App.tbInstall.
+
+
+***********************************************************************************/
+go
+CREATE OR ALTER PROCEDURE App.proc_NodeInitialisation
+(
+	@AccountCode NVARCHAR(10),
+	@BusinessName NVARCHAR(255),
+	@FullName NVARCHAR(100),
+	@BusinessAddress NVARCHAR(MAX),
+	@EmailAddress NVARCHAR(255),
+	@PhoneNumber NVARCHAR(50),
+	@CompanyNumber NVARCHAR(20),
+	@VatNumber NVARCHAR(20),
+	@CalendarCode NVARCHAR(10),
+	@UnitOfCharge NVARCHAR(5)
+)
+AS
+   	SET NOCOUNT, XACT_ABORT ON;
+
+	BEGIN TRY
+
+		BEGIN TRAN
+
+		/***************** CONTROL DATA *****************************************/
+		INSERT INTO App.tbEventType (EventTypeCode, EventType)
+		VALUES (0, 'Error')
+		, (1, 'Warning')
+		, (2, 'Information');
+	
+		INSERT INTO Activity.tbAttributeType (AttributeTypeCode, AttributeType)
+		VALUES (0, 'Order')
+		, (1, 'Quote');
+
+		INSERT INTO Activity.tbSyncType (SyncTypeCode, SyncType)
+		VALUES (0, 'SYNC')
+		, (1, 'ASYNC')
+		, (2, 'CALL-OFF');
+
+		INSERT INTO App.tbBucketInterval (BucketIntervalCode, BucketInterval)
+		VALUES (0, 'Day')
+		, (1, 'Week')
+		, (2, 'Month');
+
+		INSERT INTO App.tbBucketType (BucketTypeCode, BucketType)
+		VALUES (0, 'Default')
+		, (1, 'Sunday')
+		, (2, 'Monday')
+		, (3, 'Tuesday')
+		, (4, 'Wednesday')
+		, (5, 'Thursday')
+		, (6, 'Friday')
+		, (7, 'Saturday')
+		, (8, 'Month');
+
+		INSERT INTO App.tbCodeExclusion (ExcludedTag)
+		VALUES ('Limited')
+		, ('Ltd')
+		, ('PLC');
+
+		INSERT INTO App.tbDocClass (DocClassCode, DocClass)
+		VALUES (0, 'Product')
+		, (1, 'Money');
+
+		INSERT INTO App.tbDocType (DocTypeCode, DocType, DocClassCode)
+		VALUES (0, 'Quotation', 0)
+		, (1, 'Sales Order', 0)
+		, (2, 'Enquiry', 0)
+		, (3, 'Purchase Order', 0)
+		, (4, 'Sales Invoice', 1)
+		, (5, 'Credit Note', 1)
+		, (6, 'Debit Note', 1);
+
+		INSERT INTO App.tbMonth (MonthNumber, MonthName)
+		VALUES (1, 'JAN')
+		, (2, 'FEB')
+		, (3, 'MAR')
+		, (4, 'APR')
+		, (5, 'MAY')
+		, (6, 'JUN')
+		, (7, 'JUL')
+		, (8, 'AUG')
+		, (9, 'SEP')
+		, (10, 'OCT')
+		, (11, 'NOV')
+		, (12, 'DEC');
+
+		INSERT INTO App.tbRecurrence (RecurrenceCode, Recurrence)
+		VALUES (0, 'On Demand')
+		, (1, 'Monthly')
+		, (2, 'Quarterly')
+		, (3, 'Bi-annual')
+		, (4, 'Yearly');
+
+		INSERT INTO App.tbRounding (RoundingCode, Rounding)
+		VALUES (0, 'Round')
+		, (1, 'Truncate');
+
+
+		INSERT INTO Cash.tbCategoryType (CategoryTypeCode, CategoryType)
+		VALUES (0, 'Cash Code')
+		, (1, 'Total')
+		, (2, 'Expression');
+
+		INSERT INTO Cash.tbEntryType (CashEntryTypeCode, CashEntryType)
+		VALUES (0, 'Payment')
+		, (1, 'Invoice')
+		, (2, 'Order')
+		, (3, 'Quote')
+		, (4, 'Corporation Tax')
+		, (5, 'Vat')
+		, (6, 'Forecast');
+
+		INSERT INTO Cash.tbMode (CashModeCode, CashMode)
+		VALUES (0, 'Expense')
+		, (1, 'Income')
+		, (2, 'Neutral');
+
+		INSERT INTO Cash.tbStatus (CashStatusCode, CashStatus)
+		VALUES (0, 'Forecast')
+		, (1, 'Current')
+		, (2, 'Closed')
+		, (3, 'Archived');
+
+		INSERT INTO Cash.tbTaxType (TaxTypeCode, TaxType, MonthNumber, RecurrenceCode, OffsetDays)
+		VALUES (0, 'Corporation Tax', 12, 4, 0)
+		, (1, 'Vat', 4, 2, 31)
+		, (2, 'N.I.', 4, 1, 0)
+		, (3, 'General', 4, 0, 0);
+
+		INSERT INTO Cash.tbType (CashTypeCode, CashType)
+		VALUES (0, 'TRADE')
+		, (1, 'EXTERNAL')
+		, (2, 'MONEY');
+
+		INSERT INTO Invoice.tbStatus (InvoiceStatusCode, InvoiceStatus)
+		VALUES (1, 'Invoiced')
+		, (2, 'Partially Paid')
+		, (3, 'Paid')
+		, (0, 'Pending');
+
+		INSERT INTO Invoice.tbType (InvoiceTypeCode, InvoiceType, CashModeCode, NextNumber)
+		VALUES (0, 'Sales Invoice', 1, 10000)
+		, (1, 'Credit Note', 0, 20000)
+		, (2, 'Purchase Invoice', 0, 30000)
+		, (3, 'Debit Note', 1, 40000);
+
+		IF NOT EXISTS (SELECT * FROM Cash.tbPaymentStatus)
+		BEGIN
+			INSERT INTO Cash.tbPaymentStatus (PaymentStatusCode, PaymentStatus)
+			VALUES (0, 'Unposted')
+			, (1, 'Payment')
+			, (2, 'Transfer');
+		END
+
+		INSERT INTO Org.tbStatus (OrganisationStatusCode, OrganisationStatus)
+		VALUES (0, 'Pending')
+		, (1, 'Active')
+		, (2, 'Hot')
+		, (3, 'Dead');
+
+		INSERT INTO Task.tbOpStatus (OpStatusCode, OpStatus)
+		VALUES (0, 'Pending')
+		, (1, 'In-progress')
+		, (2, 'Complete');
+
+		INSERT INTO Task.tbStatus (TaskStatusCode, TaskStatus)
+		VALUES (0, 'Pending')
+		, (1, 'Open')
+		, (2, 'Closed')
+		, (3, 'Charged')
+		, (4, 'Cancelled')
+		, (5, 'Archive');
+
+		INSERT INTO Usr.tbMenuCommand (Command, CommandText)
+		VALUES (0, 'Folder')
+		, (1, 'Link')
+		, (2, 'Form In Read Mode')
+		, (3, 'Form In Add Mode')
+		, (4, 'Form In Edit Mode')
+		, (5, 'Report');
+
+		INSERT INTO Usr.tbMenuOpenMode (OpenMode, OpenModeDescription)
+		VALUES (0, 'Normal')
+		, (1, 'Datasheet')
+		, (2, 'Default Printing')
+		, (3, 'Direct Printing')
+		, (4, 'Print Preview')
+		, (5, 'Email RTF')
+		, (6, 'Email HTML')
+		, (7, 'Email Snapshot')
+		, (8, 'Email PDF');
+
+		INSERT INTO App.tbRegister (RegisterName, NextNumber)
+		VALUES ('Expenses', 40000)
+		, ('Event Log', 1)
+		, ('Project', 30000)
+		, ('Purchase Order', 20000)
+		, ('Sales Order', 10000);
+
+		INSERT INTO App.tbDoc (DocTypeCode, ReportName, OpenMode, Description)
+		VALUES (0, 'Task_QuotationStandard', 2, 'Standard Quotation')
+		, (0, 'Task_QuotationTextual', 2, 'Textual Quotation')
+		, (1, 'Task_SalesOrder', 2, 'Standard Sales Order')
+		, (2, 'Task_PurchaseEnquiryDeliveryStandard', 2, 'Standard Transport Enquiry')
+		, (2, 'Task_PurchaseEnquiryDeliveryTextual', 2, 'Textual Transport Enquiry')
+		, (2, 'Task_PurchaseEnquiryStandard', 2, 'Standard Purchase Enquiry')
+		, (2, 'Task_PurchaseEnquiryTextual', 2, 'Textual Purchase Enquiry')
+		, (3, 'Task_PurchaseOrder', 2, 'Standard Purchase Order')
+		, (3, 'Task_PurchaseOrderDelivery', 2, 'Purchase Order for Delivery')
+		, (4, 'Invoice_Sales', 2, 'Standard Sales Invoice')
+		, (4, 'Invoice_SalesLetterhead', 2, 'Sales Invoice for Letterhead Paper')
+		, (5, 'Invoice_CreditNote', 2, 'Standard Credit Note')
+		, (5, 'Invoice_CreditNoteLetterhead', 2, 'Credit Note for Letterhead Paper')
+		, (6, 'Invoice_DebitNote', 2, 'Standard Debit Note')
+		, (6, 'Invoice_DebitNoteLetterhead', 2, 'Debit Note for Letterhead Paper');
+
+		INSERT INTO Org.tbType (OrganisationTypeCode, CashModeCode, OrganisationType)
+		VALUES (0, 0, 'Non-Approved Supplier')
+		, (1, 1, 'Customer')
+		, (2, 1, 'Prospect')
+		, (4, 1, 'Company')
+		, (5, 0, 'Bank')
+		, (7, 0, 'Other')
+		, (8, 0, 'Approved Supplier')
+		, (9, 0, 'Employee');
+
+		INSERT INTO App.tbText (TextId, Message, Arguments)
+		VALUES (1003, 'Enter new menu name', 0)
+		, (1004, 'Team Menu', 0)
+		, (1005, 'Ok to delete <1>', 1)
+		, (1006, 'Documents cannot be converted into folders. Either delete the document or create a new folder elsewhere on the menu. Press esc key to undo changes.', 0)
+		, (1007, '<Menu Item Text>', 0)
+		, (1008, 'Documents cannot have other menu items added to them. Please select a folder then try again.', 0)
+		, (1009, 'The root cannot be deleted. Please modify the text or remove the menu itself.', 0)
+		, (1189, 'Error <1>', 1)
+		, (1190, '<1> Source: <2>  (err <3>) <4>', 4)
+		, (1192, 'Server error listing:', 0)
+		, (1193, 'days', 0)
+		, (1194, 'Ok to delete the selected task and all tasks upon which it depends?', 0)
+		, (1208, 'A/No: <3>, Ref.: <2>, Title: <4>, Status: <6>. Dear <1>, <5> <7>', 7)
+		, (1209, 'Yours sincerely, <1> <2> T: <3> M: <4> W: <5>', 5)
+		, (1210, 'Okay to cancel invoice <1>?', 1)
+		, (1211, 'Invoice <1> cannot be cancelled because there are payments assigned to it.  Use the debit/credit facility if this account is not properly reconciled.', 1)
+		, (1212, 'Invoices are outstanding against account <1>.	By specifying a cash code, invoices will not be matched. Cash codes should only be entered for miscellaneous charges.', 1)
+		, (1213, 'Account <1> has no invoices outstanding for this payment and therefore cannot be posted. Please specify a cash code so that one can be automatically generated.', 1)
+		, (1214, 'Invoiced', 0)
+		, (1215, 'Ordered', 0)
+		, (1217, 'Order charge differs from the invoice. Reconcile <1>?', 1)
+		, (1218, 'Raise invoice and pay expenses now?', 0)
+		, (1219, 'Reserve Balance', 0)
+		, (2002, 'Only administrators have access to the system configuration features of this application.', 0)
+		, (2003, 'You are not a registered user of this system. Please contact the Administrator if you believe you should have access.', 0)
+		, (2004, 'The primary key you have entered contains invalid characters. Digits and letters should be used for these keys. Please amend accordingly or press Esc to cancel.', 0)
+		, (2136, 'You have attempted to execute an Application.Run command with an invalid string. The run string is <1>. The error is <2>', 2)
+		, (2188, '<1>', 1)
+		, (2206, 'Reminder: You are due for a period end close down.  Please follow the relevant procedures to complete this task. Once all financial data has been consolidated, use the Administrator to move onto the next period.', 0)
+		, (2312, 'The system is not setup correctly. Make sure you have completed the initialisation procedures then try again.', 0)
+		, (3002, 'Periods not generated successfully. Contact support.', 0)
+		, (3003, 'Okay to close down the active period? Before proceeding make sure that you have entered and checked your cash details. All invoices and cash transactions will be transferred into the Cash Flow analysis module.', 0)
+		, (3004, 'Margin', 0)
+		, (3005, 'Opening Balance', 0)
+		, (3006, 'Rebuild executed successfully', 0)
+		, (3007, 'Ok to rebuild cash accounts? Make sure no transactions are being processed, as this will re-set and update all your invoices.', 0)
+		, (3009, 'Charged', 0)
+		, (3010, 'Service', 0)
+		, (3011, 'Ok to rebuild cash flow history for account <1>? This would normally be required when payments or invoices have been retrospectively revised, or opening balances altered.', 1)
+		, (3012, 'Ok to raise an invoice for this task? Use the Invoicing program to create specific invoice types with multiple tasks and additional charges.', 0)
+		, (3013, 'Current Balance', 0)
+		, (3014, 'This entry cannot be rescheduled', 0)
+		, (3015, 'Dummy accounts should not be assigned a cash code', 0)
+		, (3016, 'Operations cannot end before they have been started', 0)
+		, (3017, 'Cash codes must be of catagory type MONEY', 0)
+		, (3018, 'The balance for this account is zero. Check for unposted payments.', 0);
+
+		/***************** BUSINESS DATA *****************************************/
+
+		INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationTypeCode, OrganisationStatusCode, PhoneNumber, EmailAddress, CompanyNumber, VatNumber)
+		VALUES (@AccountCode, @BusinessName, 4, 1, @PhoneNumber, @EmailAddress, @CompanyNumber, @VatNumber);
+
+		EXEC Org.proc_AddContact @AccountCode = @AccountCode, @ContactName = @FullName;
+		EXEC Org.proc_AddAddress @AccountCode = @AccountCode, @Address = @BusinessAddress;
+
+		INSERT INTO App.tbCalendar (CalendarCode, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday)
+		VALUES (@CalendarCode, 1, 1, 1, 1, 1, 0, 0)
+		;
+
+		INSERT INTO Usr.tbUser (UserId, UserName, LogonName, IsAdministrator, IsEnabled, CalendarCode, EmailAddress, PhoneNumber)
+		VALUES (CONCAT(LEFT(@FullName, 1), SUBSTRING(@FullName, CHARINDEX(' ', @FullName) + 1, 1)), @FullName, 
+			SUSER_NAME() , 1, 1, @CalendarCode, @EmailAddress, @PhoneNumber)
+
+		INSERT INTO App.tbOptions (Identifier, IsInitialised, AccountCode, RegisterName, DefaultPrintMode, BucketIntervalCode, BucketTypeCode, TaxHorizon, IsAutoOffsetDays, UnitOfCharge)
+		VALUES ('TC', 0, @AccountCode, 'Event Log', 2, 1, 1, 730, 0, @UnitOfCharge);
+
+		SET IDENTITY_INSERT Usr.tbMenu ON;
+		INSERT INTO Usr.tbMenu (MenuId, MenuName)
+		VALUES (1, 'Administrator')
+		SET IDENTITY_INSERT Usr.tbMenu OFF;
+
+		SET IDENTITY_INSERT Usr.tbMenuEntry ON;
+		INSERT INTO Usr.tbMenuEntry (MenuId, EntryId, FolderId, ItemId, ItemText, Command, ProjectName, Argument, OpenMode)
+		VALUES (1, 1, 1, 0, 'Administrator', 0, '', 'Root', 0)
+		, (1, 2, 2, 0, 'Settings', 0, 'Trader', '', 0)
+		, (1, 4, 2, 1, 'Administration', 4, 'Trader', 'App_Admin', 0)
+		, (1, 5, 2, 2, 'SQL Connect', 4, 'Trader', 'Sys_SQLConnect', 0)
+		, (1, 16, 2, 5, 'Definitions', 4, 'Trader', 'App_Definition', 0)
+		, (1, 23, 4, 0, 'Maintenance', 0, 'Trader', '', 0)
+		, (1, 25, 4, 1, 'Organisations', 4, 'Trader', 'Org_Maintenance', 0)
+		, (1, 29, 4, 2, 'Activities', 4, 'Trader', 'Activity_Edit', 0)
+		, (1, 30, 5, 0, 'Work Flow', 0, 'Trader', '', 0)
+		, (1, 32, 5, 1, 'Task Explorer', 4, 'Trader', 'Task_Explorer', 0)
+		, (1, 33, 5, 2, 'Document Manager', 4, 'Trader', 'App_DocManager', 0)
+		, (1, 34, 5, 3, 'Raise Invoices', 4, 'Trader', 'Invoice_Raise', 0)
+		, (1, 35, 6, 0, 'Information', 0, 'Trader', '', 0)
+		, (1, 37, 6, 1, 'Organisation Enquiry', 2, 'Trader', 'Org_Enquiry', 0)
+		, (1, 38, 6, 2, 'Invoice Register', 4, 'Trader', 'Invoice_Register', 0)
+		, (1, 40, 6, 3, 'Cash Statements', 4, 'Trader', 'Org_PaymentAccount', 0)
+		, (1, 41, 6, 4, 'Data Warehouse', 4, 'Trader', 'App_Warehouse', 0)
+		, (1, 42, 6, 5, 'Company Statement', 4, 'Trader', 'Cash_Statement', 0)
+		, (1, 43, 4, 3, 'Organisation Datasheet', 4, 'Trader', 'Org_Maintenance', 1)
+		, (1, 44, 6, 6, 'Job Profit Status by Month', 4, 'Trader', 'Task_ProfitStatus', 0)
+		, (1, 46, 5, 6, 'Expenses', 3, 'Trader', 'Task_Expenses', 0)
+		, (1, 47, 1, 1, 'Settings', 1, '', '2', 0)
+		, (1, 49, 1, 3, 'Maintenance', 1, '', '4', 0)
+		, (1, 50, 1, 4, 'Work Flow', 1, '', '5', 0)
+		, (1, 51, 1, 5, 'Information', 1, '', '6', 0)
+		, (1, 52, 6, 7, 'Status Graphs', 4, 'Trader', 'Cash_StatusGraphs', 0)
+		, (1, 53, 2, 4, 'Service Event Log', 2, 'Trader', 'App_EventLog', 1)
+		, (1, 55, 4, 4, 'Budget', 4, 'Trader', 'Cash_Budget', 0)
+		, (1, 62, 4, 5, 'Assets', 4, 'Trader', 'Cash_Assets', 0)
+		, (1, 66, 6, 9, 'Audit Accruals - Corporation Tax', 5, 'Trader', 'Cash_CorpTaxAuditAccruals', 4)
+		, (1, 67, 6, 8, 'Audit Accruals - VAT', 5, 'Trader', 'Cash_VatAuditAccruals', 4)
+		, (1, 68, 5, 7, 'Network Allocations', 4, 'Trader', 'Task_Allocation', 0)
+		, (1, 69, 5, 8, 'Network Invoices', 4, 'Trader', 'Invoice_Mirror', 0)
+		;
+
+		IF @UnitOfCharge <> 'BTC'
+		BEGIN
+			INSERT INTO Usr.tbMenuEntry (MenuId, EntryId, FolderId, ItemId, ItemText, Command, ProjectName, Argument, OpenMode)
+			VALUES 
+				(1, 54, 5, 5, 'Transfers', 4, 'Trader', 'Cash_Transfer', 0)
+				, (1, 39, 5, 4, 'Payment Entry', 4, 'Trader', 'Cash_PaymentEntry', 0)
+		END
+
+		SET IDENTITY_INSERT Usr.tbMenuEntry OFF;
+
+		INSERT INTO Usr.tbMenuUser (UserId, MenuId)
+		SELECT (SELECT UserId FROM Usr.tbUser) AS UserId, (SELECT MenuId FROM Usr.tbMenu) AS MenuId;
+
+		COMMIT TRAN
+  	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER PROCEDURE App.proc_BasicSetup
+(	
+	@FinancialMonth SMALLINT = 4,
+	@CoinTypeCode SMALLINT,
+	@GovAccountName NVARCHAR(255),
+	@BankName NVARCHAR(255),
+	@BankAddress NVARCHAR(MAX),
+	@DummyAccount NVARCHAR(50), 
+	@CurrentAccount NVARCHAR(50),
+	@CA_SortCode NVARCHAR(10),
+	@CA_AccountNumber NVARCHAR(20),
+	@ReserveAccount NVARCHAR(50), 
+	@RA_SortCode NVARCHAR(10),
+	@RA_AccountNumber NVARCHAR(20)
+)
+AS
+DECLARE 
+	@FinancialYear SMALLINT = DATEPART(YEAR, CURRENT_TIMESTAMP);
+
+	IF EXISTS (SELECT * FROM App.tbOptions WHERE UnitOfCharge <> 'BTC') AND (@CoinTypeCode <> 2)
+		SET @CoinTypeCode = 2;
+
+	IF DATEPART(MONTH, CURRENT_TIMESTAMP) < @FinancialMonth
+		 SET @FinancialYear -= 1;
+
+	DECLARE 
+		@AccountCode NVARCHAR(10),
+		@CashAccountCode NVARCHAR(10),
+		@Year SMALLINT = @FinancialYear - 1;
+
+	SET NOCOUNT, XACT_ABORT ON;
+
+
+	BEGIN TRY
+		BEGIN TRAN
+		INSERT INTO [App].[tbBucket] ([Period], [BucketId], [BucketDescription], [AllowForecasts])
+		VALUES (0, 'Overdue', 'Overdue Orders', 0)
+		, (1, 'Current', 'Current Week', 0)
+		, (2, 'Week 2', 'Week Two', 0)
+		, (3, 'Week 3', 'Week Three', 0)
+		, (4, 'Week 4', 'Week Four', 0)
+		, (8, 'Next Month', 'Next Month', 0)
+		, (16, '2 Months', '2 Months', 1)
+		, (52, 'Forward', 'Forward Orders', 1)
+		;
+		INSERT INTO [App].[tbUom] ([UnitOfMeasure])
+		VALUES ('copies')
+		, ('days')
+		, ('each')
+		, ('hrs')
+		, ('kilo')
+		, ('miles')
+		, ('mins')
+		, ('pallets')
+		, ('units')
+		;
+
+		DECLARE @Decimals smallint = CASE @CoinTypeCode WHEN 2 THEN 2 ELSE 3 END
+
+		INSERT INTO [App].[tbTaxCode] ([TaxCode], [TaxRate], [TaxDescription], [TaxTypeCode], [RoundingCode], [Decimals])
+		VALUES ('INT', 0, 'Interest Tax', 3, 0, @Decimals)
+		, ('N/A', 0, 'Untaxed', 3, 0, @Decimals)
+		, ('NI1', 0, 'Directors National Insurance', 2, 0, @Decimals)
+		, ('NI2', 0.121, 'Employees National Insurance', 2, 0, @Decimals)
+		, ('T0', 0, 'Zero Rated VAT', 1, 0, @Decimals)
+		, ('T1', 0.2, 'Standard VAT Rate', 1, 0, @Decimals)
+		, ('T9', 0, 'TBC', 1, 0, @Decimals)
+		;
+
+		INSERT INTO [Cash].[tbCategory] ([CategoryCode], [Category], [CategoryTypeCode], [CashModeCode], [CashTypeCode], [DisplayOrder], [IsEnabled])
+		VALUES ('AS', 'Assets', 0, 1, 2, 70, 0)
+		, ('BA', 'Bank Accounts', 0, 2, 2, 80, 1)
+		, ('BP', 'Bank Payments', 0, 0, 0, 90, 1)
+		, ('BR', 'Bank Receipts', 0, 1, 0, 100, 1)
+		, ('DC', 'Direct Cost', 0, 0, 0, 20, 1)
+		, ('DI', 'Dividends', 0, 0, 0, 110, -1)
+		, ('DR', 'Drawings', 0, 2, 0, 150, 0)
+		, ('IC', 'Indirect Cost', 0, 0, 0, 30, 1)
+		, ('IP', 'Intercompany Payment', 0, 0, 2, 120, 1)
+		, ('IR', 'Intercompany Receipt', 0, 1, 2, 130, 1)
+		, ('IV', 'Investment', 0, 2, 0, 160, 0)
+		, ('LI', 'Liabilities', 0, 0, 2, 71, 0)
+		, ('SA', 'Sales', 0, 1, 0, 10, 1)
+		, ('TA', 'Taxes', 0, 0, 1, 60, 1)
+		, ('WA', 'Wages', 0, 0, 0, 50, 1)
+		;
+
+		INSERT INTO [Cash].[tbCategory] ([CategoryCode], [Category], [CategoryTypeCode], [CashModeCode], [CashTypeCode], [DisplayOrder], [IsEnabled])
+		VALUES ('GP', 'Gross Profit', 1, 2, 0, 1, 1)
+		, ('NP', 'Net Profit', 1, 2, 0, 2, 1)
+		, ('VAT', 'Vat Cash Codes', 1, 2, 0, 3, 1)
+		, ('WR', 'Wages Ratio', 2, 2, 0, 0, 1)
+		, ('GM', 'Gross Margin', 2, 2, 0, 1, 1)
+
+		INSERT INTO [Cash].[tbCategoryExp] ([CategoryCode], [Expression], [Format])
+		VALUES ('WR', 'IF([Sales]=0,0,(ABS([Wages])/[Sales]))', '0%')
+		, ('GM', 'IF([Sales]=0,0,([Gross Profit]/[Sales]))', '0%')
+		;
+		INSERT INTO [Cash].[tbCategoryTotal] ([ParentCode], [ChildCode])
+		VALUES ('GP', 'DC')
+		, ('GP', 'SA')
+		, ('GP', 'WA')
+		, ('NP', 'GP')
+		, ('NP', 'IC')
+		, ('VAT', 'DC')
+		, ('VAT', 'IC')
+		, ('VAT', 'SA')
+		;
+
+		INSERT INTO [Cash].[tbCode] ([CashCode], [CashDescription], [CategoryCode], [TaxCode], [IsEnabled])
+		VALUES ('101', 'Sales - Carriage', 'SA', 'T1', 1)
+		, ('102', 'Sales - Export', 'SA', 'T1', 1)
+		, ('103', 'Sales - Home', 'SA', 'T1', 1)
+		, ('104', 'Sales - Consultancy', 'SA', 'T1', 1)
+		, ('200', 'Direct Purchase', 'DC', 'T1', 1)
+		, ('201', 'Company Administration', 'IC', 'T1', 1)
+		, ('202', 'Communications', 'IC', 'T1', 1)
+		, ('203', 'Entertaining', 'IC', 'N/A', 1)
+		, ('204', 'Office Equipment', 'IC', 'T1', 1)
+		, ('205', 'Office Rent', 'IC', 'T0', 1)
+		, ('206', 'Professional Fees', 'IC', 'T1', 1)
+		, ('207', 'Postage', 'IC', 'T1', 1)
+		, ('208', 'Sundry', 'IC', 'T1', 1)
+		, ('209', 'Stationery', 'IC', 'T1', 1)
+		, ('210', 'Subcontracting', 'IC', 'T1', 1)
+		, ('211', 'Systems', 'IC', 'T9', 1)
+		, ('212', 'Travel - Car Mileage', 'IC', 'N/A', 1)
+		, ('213', 'Travel - General', 'IC', 'N/A', 1)
+		, ('214', 'Company Loan', 'IV', 'N/A', 1)
+		, ('215', 'Directors Loan', 'IV', 'N/A', 1)
+		, ('216', 'Directors Expenses reimbursement', 'IC', 'N/A', 1)
+		, ('217', 'Office Expenses (General)', 'IC', 'N/A', 1)
+		, ('218', 'Subsistence', 'IC', 'N/A', 1)
+		, ('250', 'Commission', 'DC', 'T1', 1)
+		, ('301', 'Company Cash', 'BA', 'N/A', 1)
+		, ('302', 'Bank Charges', 'BP', 'N/A', 1)
+		, ('303', 'Account Payment', 'IP', 'N/A', 1)
+		, ('304', 'Bank Interest', 'BR', 'N/A', 1)
+		, ('305', 'Transfer Receipt', 'IR', 'N/A', 1)
+		, ('401', 'Dividends', 'DI', 'N/A', -1)
+		, ('402', 'Salaries', 'WA', 'NI1', 1)
+		, ('403', 'Pensions', 'WA', 'N/A', 1)
+		, ('501', 'Charitable Donation', 'IC', 'N/A', 1)
+		, ('601', 'VAT', 'TA', 'N/A', 1)
+		, ('602', 'Taxes (General)', 'TA', 'N/A', 1)
+		, ('603', 'Taxes (Corporation)', 'TA', 'N/A', 1)
+		, ('604', 'Employers NI', 'TA', 'N/A', 1)
+		, ('700', 'Stock Movement', 'AS', 'N/A', 0)
+		, ('701', 'Depreciation', 'AS', 'N/A', 0)
+		, ('702', 'Dept Repayment', 'LI', 'N/A', 0)
+		;
+
+		IF @CoinTypeCode < 2
+		BEGIN
+			INSERT INTO [Cash].[tbCode] ([CashCode], [CashDescription], [CategoryCode], [TaxCode], [IsEnabled])
+			VALUES ('219', 'Miner Fees', 'IC', 'N/A', 1);
+		
+			UPDATE App.tbOptions
+			SET MinerFeeCode = '219';
+		END
+
+		--ASSIGN NET PROFIT CALCULATION
+		UPDATE App.tbOptions
+		SET NetProfitCode = 'NP', VatCategoryCode = 'VAT';
+
+		--SET HOME TAX CODE
+		UPDATE Org.tbOrg
+		SET TaxCode = 'T1'
+		WHERE AccountCode = (SELECT AccountCode FROM App.tbOptions)
+
+		--CREATE GOV
+		EXEC Org.proc_DefaultAccountCode @AccountName = @GovAccountName, @AccountCode = @AccountCode OUTPUT
+		INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationStatusCode, OrganisationTypeCode, TaxCode)
+			VALUES (@AccountCode, @GovAccountName, 1, 7, 'N/A');
+
+		--BANK ACCOUNTS / WALLETS
+
+		IF @CoinTypeCode = 2
+		BEGIN
+			--fiat
+			EXEC Org.proc_DefaultAccountCode @AccountName = @BankName, @AccountCode = @AccountCode OUTPUT	
+			INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationStatusCode, OrganisationTypeCode, TaxCode)
+			VALUES (@AccountCode, @BankName, 1, 5, 'T0');
+
+			EXEC Org.proc_AddAddress @AccountCode = @AccountCode, @Address = @BankAddress;
+		END
+		ELSE
+		BEGIN
+			--crypto
+			EXEC Org.proc_DefaultAccountCode @AccountName = 'BITCOIN MINER', @AccountCode = @AccountCode OUTPUT
+			INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationStatusCode, OrganisationTypeCode, TaxCode)
+			VALUES (@AccountCode, 'BITCOIN MINER', 1, 7, 'N/A');
+
+			UPDATE App.tbOptions
+			SET MinerAccountCode = @AccountCode;
+
+			SELECT @AccountCode = AccountCode FROM App.tbOptions 
+		END
+
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CurrentAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, OpeningBalance, SortCode, AccountNumber, CashCode)
+		VALUES        (@CashAccountCode, @AccountCode, @CurrentAccount, 0, @CA_SortCode, @CA_AccountNumber, '301')
+
+		IF (LEN(@ReserveAccount) > 0)
+		BEGIN
+			EXEC Org.proc_DefaultAccountCode @AccountName = @ReserveAccount, @AccountCode = @CashAccountCode OUTPUT
+			INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, OpeningBalance, SortCode, AccountNumber)
+			VALUES        (@CashAccountCode, @AccountCode, @ReserveAccount, 0, @RA_SortCode, @RA_AccountNumber)
+		END
+
+		SELECT @AccountCode = (SELECT AccountCode FROM App.tbOptions)
+
+		IF (LEN(@DummyAccount) > 0)
+		BEGIN
+			EXEC Org.proc_DefaultAccountCode @AccountName = @DummyAccount, @AccountCode = @CashAccountCode OUTPUT
+			INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode)
+			VALUES        (@CashAccountCode, @AccountCode, @DummyAccount, 1)
+		END
+
+		--capital 
+		DECLARE @CapitalAccount NVARCHAR(50);
+
+		SET @CapitalAccount = 'PREMISES';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 50, '701', 1)
+
+		SET @CapitalAccount = 'FIXTURES AND FITTINGS';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 40, '701', 1)
+
+		SET @CapitalAccount = 'PLANT AND MACHINERY';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 30, '701', 1)
+
+		SET @CapitalAccount = 'VEHICLES';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 20, '701', 1)
+
+		SET @CapitalAccount = 'STOCK';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 10, '700', 1)
+
+		SET @CapitalAccount = 'LONGTERM LIABILITIES';
+		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
+		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 50, '702', 1)
+
+		UPDATE App.tbOptions
+		SET CoinTypeCode = @CoinTypeCode;
+
+		--TIME PERIODS
+		WHILE (@Year < DATEPART(YEAR, CURRENT_TIMESTAMP) + 2)
+		BEGIN
+		
+			INSERT INTO App.tbYear (YearNumber, StartMonth, CashStatusCode, Description)
+			VALUES (@Year, @FinancialMonth, 0, 
+						CASE WHEN @FinancialMonth > 1 THEN CONCAT(@Year, '-', @Year - ROUND(@Year, -2) + 1) ELSE CONCAT(@Year, '.') END
+					);
+			SET @Year += 1;
+		END
+
+		EXEC Cash.proc_GeneratePeriods;
+
+		UPDATE App.tbYearPeriod
+		SET CorporationTaxRate = 0.2;
+
+		UPDATE App.tbYearPeriod
+		SET CashStatusCode = 2
+		WHERE StartOn < DATEADD(MONTH, -1, CURRENT_TIMESTAMP)
+
+		IF EXISTS(SELECT * FROM App.tbYearPeriod WHERE CashStatusCode = 3)
+			WITH current_month AS
+			(
+				SELECT MAX(StartOn) AS StartOn
+				FROM App.tbYearPeriod
+				WHERE CashStatusCode = 2
+			)
+			UPDATE App.tbYearPeriod
+			SET CashStatusCode = 1
+			FROM App.tbYearPeriod JOIN current_month ON App.tbYearPeriod.StartOn = current_month.StartOn;	
+		ELSE
+			WITH current_month AS
+			(
+				SELECT MIN(StartOn) AS StartOn
+				FROM App.tbYearPeriod
+				WHERE CashStatusCode = 0
+			)
+			UPDATE App.tbYearPeriod
+			SET CashStatusCode = 1
+			FROM App.tbYearPeriod JOIN current_month ON App.tbYearPeriod.StartOn = current_month.StartOn;
+	
+	
+		WITH current_month AS
+		(
+			SELECT YearNumber
+			FROM App.tbYearPeriod
+			WHERE CashStatusCode = 1
+		)
+		UPDATE App.tbYear
+		SET CashStatusCode = 1
+		FROM App.tbYear JOIN current_month ON App.tbYear.YearNumber = current_month.YearNumber;
+
+		UPDATE App.tbYear
+		SET CashStatusCode = 2
+		WHERE YearNumber < 	(SELECT YearNumber FROM App.tbYear	WHERE CashStatusCode = 1);
+
+		--ASSIGN CASH CODES AND GOV TO TAX TYPES
+		UPDATE Cash.tbTaxType
+		SET AccountCode = @AccountCode, CashCode = '603', MonthNumber = (SELECT DATEPART(MONTH, DATEADD(MONTH, 8, MIN(StartOn))) FROM App.tbYear JOIN App.tbYearPeriod ON App.tbYear.YearNumber = App.tbYearPeriod.YearNumber WHERE App.tbYear.CashStatusCode = 1)
+		WHERE TaxTypeCode = 0;
+
+		UPDATE Cash.tbTaxType
+		SET AccountCode = @AccountCode, CashCode = '601', MonthNumber = @FinancialMonth
+		WHERE TaxTypeCode = 1;
+
+		UPDATE Cash.tbTaxType
+		SET AccountCode = @AccountCode, CashCode = '604', MonthNumber = @FinancialMonth
+		WHERE TaxTypeCode = 2;
+
+		UPDATE Cash.tbTaxType
+		SET AccountCode = @AccountCode, CashCode = '602', MonthNumber = @FinancialMonth
+		WHERE TaxTypeCode = 3;
+		COMMIT TRAN
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog
+	END CATCH
+go
+ALTER PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,
@@ -500,7 +1209,7 @@ AS
 		, (CONCAT(@UserId, '_30002'), @UserId, 'TELPRO', null, 'Monthly Telecom Charges', null, 'Project', 0, @UserId, '20191231', null, '20191231', null, 1, null, null, 0, 0.0000, 'CDCUST_001', 'CDCUST_001', 0, 1)
 		, (CONCAT(@UserId, '_40000'), @UserId, 'BUSOWN', null, '142 miles travel Client visit', null, 'Employee Transport', 2, @UserId, '20190110', '20190708', '20190131', null, 142, '212', 'T0', 0.45, 63.9000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40003'), @UserId, 'BUSOWN', null, 'Car parking Client visit 10/1', null, 'Car Parking / Tolls', 2, @UserId, '20190110', '20190708', '20190131', null, 1, '213', 'T1', 4, 4.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40004'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190131', '20190708', '20190131', null, 4, '205', 'T0', 4, 16.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40004'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190131', '20190708', '20190131', null, 4, '205', 'T0', 4, 16.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40005'), @UserId, 'BUSOWN', null, 'Wages', null, 'Wages monthly payment', 2, @UserId, '20190131', '20190708', '20190131', null, 1, '402', 'NI1', 1000, 1000.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40006'), @UserId, 'BUSOWN', null, 'Wages', null, 'Wages monthly payment', 2, @UserId, '20190228', '20190708', '20190228', null, 1, '402', 'NI1', 1000, 1000.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40007'), @UserId, 'BUSOWN', null, 'Wages', null, 'Wages monthly payment', 2, @UserId, '20190329', '20190708', '20190329', null, 1, '402', 'NI1', 1000, 1000.0000, null, null, 0, 1)
@@ -515,18 +1224,18 @@ AS
 		, (CONCAT(@UserId, '_40016'), @UserId, 'BUSOWN', null, 'Wages', null, 'Wages monthly payment', 0, @UserId, '20191231', null, '20191231', null, 1, '402', 'NI1', 1000, 1000.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40017'), @UserId, 'BUSOWN', null, '185 miles press pass book sections', null, 'Employee Transport', 2, @UserId, '20190215', '20190708', '20190228', null, 185, '212', 'T0', 0.45, 83.2500, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40018'), @UserId, 'BUSOWN', null, '24 First Class postage stamps', null, 'Postage', 2, @UserId, '20190208', '20190708', '20190228', null, 1, '207', 'T0', 19.2, 19.2000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40019'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190228', '20190708', '20190228', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40019'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190228', '20190708', '20190228', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40020'), @UserId, 'BUSOWN', null, '178 miles visiting AB Ltd', null, 'Employee Transport', 2, @UserId, '20190302', '20190708', '20190329', null, 178, '212', 'T0', 0.45, 80.1000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40021'), @UserId, 'BUSOWN', null, 'Dartford Crossing x 2', null, 'Car Parking / Tolls', 2, @UserId, '20190302', '20190708', '20190329', null, 1, '213', 'T0', 5, 5.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40022'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 5 weeks', null, 'Office Rent', 2, @UserId, '20190329', '20190708', '20190329', null, 1, '205', 'T0', 20, 20.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40022'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 5 weeks', null, 'Office Rent', 2, @UserId, '20190329', '20190708', '20190329', null, 1, '205', 'T0', 20, 20.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40023'), @UserId, 'BUSOWN', null, 'Business mileage April 19 total 340 miles', null, 'Employee Transport', 2, @UserId, '20190430', '20190708', '20190430', null, 340, '212', 'T0', 0.45, 153.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40024'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190430', '20190708', '20190430', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40024'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190430', '20190708', '20190430', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40025'), @UserId, 'BUSOWN', null, 'Business mileage May 19 total 395 miles', null, 'Employee Transport', 2, @UserId, '20190531', '20190708', '20190531', null, 395, '212', 'T0', 0.45, 177.7500, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40026'), @UserId, 'BUSOWN', null, '6 reams of office paper', null, 'Stationery - General', 2, @UserId, '20190531', '20190708', '20190531', null, 1, '209', 'T1', 18, 18.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40027'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190531', '20190708', '20190531', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40027'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190531', '20190708', '20190531', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40028'), @UserId, 'BUSOWN', null, 'Business mileage June 19 412miles', null, 'Employee Transport', 2, @UserId, '20190628', '20190708', '20190628', null, 412, '212', 'T0', 0.45, 185.4000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40029'), @UserId, 'BUSOWN', null, 'Car parking Client visit 10/6', null, 'Car Parking / Tolls', 2, @UserId, '20190610', '20190708', '20190628', null, 1, '213', 'T1', 5, 5.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40030'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190628', '20190708', '20190628', null, 1, '205', 'T0', 12, 12.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40030'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190628', '20190708', '20190628', null, 1, '205', 'T0', 12, 12.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40031'), @UserId, 'TELPRO', null, 'Telecom Charge', null, 'Communications monthly charge', 2, @UserId, '20190125', '20190125', '20190125', null, 1, '202', 'T1', 40, 40.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40032'), @UserId, 'TELPRO', null, 'Telecom Charge', null, 'Communications monthly charge', 2, @UserId, '20190226', '20190226', '20190226', null, 1, '202', 'T1', 39.6, 39.6000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40033'), @UserId, 'TELPRO', null, 'Telecom Charge', null, 'Communications monthly charge', 2, @UserId, '20190326', '20190326', '20190326', null, 1, '202', 'T1', 43.12, 43.1200, null, null, 0, 1)
@@ -1310,3 +2019,561 @@ CommitTran:
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
 	END CATCH
+go
+ALTER PROCEDURE App.proc_DemoBom
+(
+	@CreateOrders BIT = 0,
+	@InvoiceOrders BIT = 0,
+	@PayInvoices BIT = 0
+)
+AS
+	 SET NOCOUNT, XACT_ABORT ON;
+	 
+	 BEGIN TRY
+	
+		IF NOT EXISTS (SELECT * FROM Usr.vwCredentials WHERE IsAdministrator <> 0)
+		BEGIN
+			DECLARE @Msg NVARCHAR(100) = CONCAT('Access Denied: User ', SUSER_SNAME(), ' is not an administrsator');
+			RAISERROR ('%s', 13, 1, @Msg);
+		END
+	
+		DECLARE @ExchangeRate float = CASE (SELECT UnitOfCharge FROM App.tbOptions) 
+										WHEN 'BTC' THEN 0.135 
+										ELSE 1 
+										END				
+
+		BEGIN TRAN
+
+		-->>>>>>>>>>>>> RESET >>>>>>>>>>>>>>>>>>>>>>>>>>>
+		DELETE FROM Cash.tbPayment;
+		DELETE FROM Invoice.tbInvoice;
+		DELETE FROM Task.tbFlow;
+		DELETE FROM Task.tbTask;
+		DELETE FROM Activity.tbFlow;
+		DELETE FROM Activity.tbActivity;
+
+		--WITH sys_accounts AS
+		--(
+		--	SELECT AccountCode FROM App.tbOptions
+		--	UNION
+		--	SELECT DISTINCT AccountCode FROM Org.tbAccount
+		--	UNION
+		--	SELECT DISTINCT AccountCode FROM Cash.tbTaxType
+		--), candidates AS
+		--(
+		--	SELECT AccountCode
+		--	FROM Org.tbOrg
+		--	EXCEPT
+		--	SELECT AccountCode 
+		--	FROM sys_accounts
+		--)
+		--DELETE Org.tbOrg 
+		--FROM Org.tbOrg JOIN candidates ON Org.tbOrg.AccountCode = candidates.AccountCode;
+		
+		UPDATE App.tbOptions
+		SET IsAutoOffsetDays = 0;
+
+		EXEC App.proc_SystemRebuild;
+		--<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+		IF NOT EXISTS( SELECT * FROM App.tbRegister WHERE RegisterName = 'Works Order')
+			INSERT INTO App.tbRegister (RegisterName, NextNumber)
+			SELECT 'Works Order', (SELECT MAX(NextNumber) + 10000 FROM App.tbRegister) AS NextNumber;
+
+		INSERT INTO Activity.tbActivity (ActivityCode, TaskStatusCode, ActivityDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
+		VALUES ('M/00/70/00', 1, 'PIGEON HOLE SHELF ASSEMBLY CLEAR', 'each', '103', 1.67 * @ExchangeRate, 1, 'Sales Order')
+		, ('M/100/70/00', 1, 'PIGEON HOLE SUB SHELF CLEAR', 'each', NULL, 0.0000, 0, 'Works Order')
+		, ('M/101/70/00', 1, 'PIGEON HOLE BACK DIVIDER', 'each', NULL, 0.0000, 0, 'Works Order')
+		, ('M/97/70/00', 1, 'SHELF DIVIDER (WIDE FOOT)', 'each', NULL, 0.0000, 0, 'Works Order')
+		, ('M/99/70/00', 1, 'SHELF DIVIDER (NARROW FOOT)', 'each', NULL, 0.0000, 0, 'Works Order')
+		, ('PALLET/01', 1, 'EURO 3 1200 x 800 4 WAY', 'each', '200', 2.4 * @ExchangeRate, 1, 'Purchase Order')
+		, ('BOX/41', 1, 'PIGEON ASSY 125KTB S WALL 404x220x90', 'each', '200', 0.05 * @ExchangeRate, 1, 'Purchase Order')
+		, ('BOX/99', 1, 'INTERNAL USE ANY BLACK,BLUE,RED ANY', 'each', NULL, 0.0000, 0, 'Works Order')
+		, ('PC/999', 1, 'CALIBRE 303EP CLEAR UL94-V2', 'kilo', '200', 0.22 * @ExchangeRate, 1, 'Purchase Order')
+		, ('INSERT/09', 1, 'HEAT-LOK SHK B M3.5 HEADED BRASS 8620035-80', 'each', '200', 0.005 * @ExchangeRate, 1, 'Purchase Order')
+		, ('PROJECT', 0, NULL, 'each', NULL, 0, 0, 'Works Order')
+		, ('DELIVERY', 1, NULL, 'each', '200', 0, 1, 'Purchase Order')
+		;
+		INSERT INTO Activity.tbAttribute (ActivityCode, Attribute, PrintOrder, AttributeTypeCode, DefaultText)
+		VALUES ('M/00/70/00', 'Colour', 20, 0, 'CLEAR')
+		, ('M/00/70/00', 'Colour Number', 10, 0, '-')
+		, ('M/00/70/00', 'Count Type', 50, 0, 'Weigh Count')
+		, ('M/00/70/00', 'Drawing Issue', 40, 0, '1')
+		, ('M/00/70/00', 'Drawing Number', 30, 0, '321554')
+		, ('M/00/70/00', 'Label Type', 70, 0, 'Assembly Card')
+		, ('M/00/70/00', 'Mould Tool Specification', 110, 1, NULL)
+		, ('M/00/70/00', 'Pack Type', 60, 0, 'Despatched')
+		, ('M/00/70/00', 'Quantity/Box', 80, 0, '100')
+		, ('M/100/70/00', 'Cavities', 170, 0, '1')
+		, ('M/100/70/00', 'Colour', 20, 0, 'CLEAR')
+		, ('M/100/70/00', 'Colour Number', 10, 0, '-')
+		, ('M/100/70/00', 'Count Type', 50, 0, 'Weigh Count')
+		, ('M/100/70/00', 'Drawing Issue', 40, 0, '1')
+		, ('M/100/70/00', 'Drawing Number', 30, 0, '321554-01')
+		, ('M/100/70/00', 'Impressions', 180, 0, '1')
+		, ('M/100/70/00', 'Label Type', 70, 0, 'Route Card')
+		, ('M/100/70/00', 'Location', 150, 0, 'STORES')
+		, ('M/100/70/00', 'Pack Type', 60, 0, 'Assembled')
+		, ('M/100/70/00', 'Part Weight', 160, 0, '175g')
+		, ('M/100/70/00', 'Quantity/Box', 80, 0, '100')
+		, ('M/100/70/00', 'Tool Number', 190, 0, '1437')
+		, ('M/101/70/00', 'Cavities', 170, 0, '2')
+		, ('M/101/70/00', 'Colour', 20, 0, 'CLEAR')
+		, ('M/101/70/00', 'Colour Number', 10, 0, '-')
+		, ('M/101/70/00', 'Count Type', 50, 0, 'Weigh Count')
+		, ('M/101/70/00', 'Drawing Issue', 40, 0, '1')
+		, ('M/101/70/00', 'Drawing Number', 30, 0, '321554-02')
+		, ('M/101/70/00', 'Impressions', 180, 0, '2')
+		, ('M/101/70/00', 'Label Type', 70, 0, 'Route Card')
+		, ('M/101/70/00', 'Location', 150, 0, 'STORES')
+		, ('M/101/70/00', 'Pack Type', 60, 0, 'Assembled')
+		, ('M/101/70/00', 'Part Weight', 160, 0, '61g')
+		, ('M/101/70/00', 'Quantity/Box', 80, 0, '100')
+		, ('M/101/70/00', 'Tool Number', 190, 0, '1439')
+		, ('M/97/70/00', 'Cavities', 170, 0, '4')
+		, ('M/97/70/00', 'Colour', 20, 0, 'CLEAR')
+		, ('M/97/70/00', 'Colour Number', 10, 0, '-')
+		, ('M/97/70/00', 'Count Type', 50, 0, 'Weigh Count')
+		, ('M/97/70/00', 'Drawing Issue', 40, 0, '1')
+		, ('M/97/70/00', 'Drawing Number', 30, 0, '321554A')
+		, ('M/97/70/00', 'Impressions', 180, 0, '4')
+		, ('M/97/70/00', 'Label Type', 70, 0, 'Route Card')
+		, ('M/97/70/00', 'Location', 150, 0, 'STORES')
+		, ('M/97/70/00', 'Pack Type', 60, 0, 'Assembled')
+		, ('M/97/70/00', 'Part Weight', 160, 0, '171g')
+		, ('M/97/70/00', 'Quantity/Box', 80, 0, '100')
+		, ('M/97/70/00', 'Tool Number', 190, 0, '1440')
+		, ('M/99/70/00', 'Cavities', 170, 0, '1')
+		, ('M/99/70/00', 'Colour', 20, 0, 'CLEAR')
+		, ('M/99/70/00', 'Colour Number', 10, 0, '-')
+		, ('M/99/70/00', 'Count Type', 50, 0, 'Weigh Count')
+		, ('M/99/70/00', 'Drawing Issue', 40, 0, '1')
+		, ('M/99/70/00', 'Drawing Number', 30, 0, '321554A')
+		, ('M/99/70/00', 'Impressions', 180, 0, '1')
+		, ('M/99/70/00', 'Label Type', 70, 0, 'Route Card')
+		, ('M/99/70/00', 'Location', 150, 0, 'STORES')
+		, ('M/99/70/00', 'Pack Type', 60, 0, 'Assembled')
+		, ('M/99/70/00', 'Part Weight', 160, 0, '171g')
+		, ('M/99/70/00', 'Quantity/Box', 80, 0, '100')
+		, ('M/99/70/00', 'Tool Number', 190, 0, '1441')
+		, ('PC/999', 'Colour', 50, 0, 'CLEAR')
+		, ('PC/999', 'Grade', 20, 0, '303EP')
+		, ('PC/999', 'Location', 60, 0, 'R2123-9')
+		, ('PC/999', 'Material Type', 10, 0, 'PC')
+		, ('PC/999', 'Name', 30, 0, 'Calibre')
+		, ('PC/999', 'SG', 40, 0, '1.21')
+		;
+		INSERT INTO Activity.tbOp (ActivityCode, OperationNumber, SyncTypeCode, Operation, Duration, OffsetDays)
+		VALUES ('M/00/70/00', 10, 0, 'ASSEMBLE', 0.5, 3)
+		, ('M/00/70/00', 20, 0, 'QUALITY CHECK', 0, 0)
+		, ('M/00/70/00', 30, 0, 'PACK', 0, 1)
+		, ('M/00/70/00', 40, 2, 'DELIVER', 0, 1)
+		, ('M/100/70/00', 10, 0, 'MOULD', 10, 2)
+		, ('M/100/70/00', 20, 1, 'INSERTS', 0, 0)
+		, ('M/100/70/00', 30, 0, 'QUALITY CHECK', 0, 0)
+		, ('M/101/70/00', 10, 0, 'MOULD', 10, 0)
+		, ('M/101/70/00', 20, 0, 'QUALITY CHECK', 0, 0)
+		, ('M/97/70/00', 10, 0, 'MOULD', 10, 2)
+		, ('M/97/70/00', 20, 0, 'QUALITY CHECK', 0, 0)
+		, ('M/99/70/00', 10, 0, 'MOULD', 0, 2)
+		, ('M/99/70/00', 20, 0, 'QUALITY CHECK', 0, 0)
+		;
+		INSERT INTO Activity.tbFlow (ParentCode, StepNumber, ChildCode, SyncTypeCode, OffsetDays, UsedOnQuantity)
+		VALUES ('M/00/70/00', 10, 'M/100/70/00', 1, 0, 8)
+		, ('M/00/70/00', 20, 'M/101/70/00', 1, 0, 4)
+		, ('M/00/70/00', 30, 'M/97/70/00', 1, 0, 3)
+		, ('M/00/70/00', 40, 'M/99/70/00', 0, 0, 2)
+		, ('M/00/70/00', 50, 'BOX/41', 1, 0, 1)
+		, ('M/00/70/00', 60, 'PALLET/01', 1, 0, 0.01)
+		, ('M/00/70/00', 70, 'DELIVERY', 2, 1, 0)
+		, ('M/100/70/00', 10, 'BOX/99', 1, 0, 0.01)
+		, ('M/100/70/00', 20, 'PC/999', 1, 0, 0.175)
+		, ('M/101/70/00', 10, 'BOX/99', 1, 0, 0.01)
+		, ('M/101/70/00', 20, 'PC/999', 1, 0, 0.061)
+		, ('M/97/70/00', 10, 'BOX/99', 1, 0, 0.01)
+		, ('M/97/70/00', 20, 'PC/999', 1, 0, 0.172)
+		, ('M/99/70/00', 10, 'BOX/99', 1, 0, 0.01)
+		, ('M/99/70/00', 20, 'PC/999', 1, 0, 0.171)
+		, ('M/100/70/00', 30, 'INSERT/09', 1, 0, 2)
+		;
+
+		IF (NOT EXISTS(SELECT * FROM Org.tbOrg WHERE AccountCode = 'TFCSPE'))
+		BEGIN
+			INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationTypeCode, OrganisationStatusCode, TaxCode, AddressCode, PaymentTerms, ExpectedDays, PaymentDays, PayDaysFromMonthEnd, PayBalance, NumberOfEmployees, CompanyNumber, VatNumber, Turnover, OpeningBalance, EUJurisdiction)
+			VALUES 
+			  ('PACSER', 'PACKING SERVICES', 8, 1, 'T1', 'PACSER_001', 'EOM', 10, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('PALSUP', 'PALLET SUPPLIER', 8, 1, 'T1', 'PALSUP_001', 'COD', 0, -10, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('PLAPRO', 'PLASTICS PROVIDER', 8, 1, 'T1', 'PLAPRO_001', '30 days from invoice', 15, 30, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('TFCSPE', 'FASTENER SPECIALIST', 8, 1, 'T1', 'TFCSPE_001', 'EOM', 0, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('STOBOX', 'STORAGE BOXES', 1, 1, 'T1', 'STOBOX_001', '60 days from invoice', 5, 60, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			, ('HAULOG', 'HAULIER LOGISTICS', 8, 1, 'T1', 'HAULOG_001', 'EOM', 0, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
+			;
+			INSERT INTO Org.tbAddress (AddressCode, AccountCode, Address)
+			VALUES ('STOBOX_001', 'STOBOX', 'SURREY GU24 9BJ')
+			, ('PACSER_001', 'PACSER', 'FAREHAM, HAMPSHIRE	PO15 5RZ')
+			, ('PLAPRO_001', 'PLAPRO', 'WARRINGTON, CHESHIRE WA1 4RA')
+			, ('PALSUP_001', 'PALSUP', 'HAMPSHIRE PO13 9NY')
+			, ('TFCSPE_001', 'TFCSPE', 'ESSEX CO4 9TZ')
+			, ('HAULOG_001', 'HAULOG', 'BERKSHIRE SL3 0BH')
+			;
+		END
+
+		-- ***************************************************************************
+		IF @CreateOrders = 0
+			GOTO CommitTran;
+		-- ***************************************************************************
+
+		DECLARE @UserId NVARCHAR(10) = (SELECT UserId FROM Usr.vwCredentials),
+			@TaskCode NVARCHAR(20),
+			@ParentTaskCode NVARCHAR(20), 
+			@ToTaskCode NVARCHAR(20),
+			@Quantity DECIMAL(18, 4) = 100;
+
+		EXEC Task.proc_NextCode 'PROJECT', @ParentTaskCode OUTPUT
+		INSERT INTO Task.tbTask
+								 (TaskCode, UserId, AccountCode, TaskTitle, ActivityCode, TaskStatusCode, ActionById)
+		VALUES        (@ParentTaskCode,@UserId, 'STOBOX', N'PIGEON HOLE SHELF ASSEMBLY', N'PROJECT', 0,@UserId)
+	
+		EXEC Task.proc_NextCode 'M/00/70/00', @TaskCode OUTPUT
+		
+		INSERT INTO Task.tbTask
+				(TaskCode, UserId, AccountCode, TaskTitle, ContactName, ActivityCode, TaskStatusCode, ActionById, TaskNotes, Quantity, CashCode, TaxCode, UnitCharge, AddressCodeFrom, AddressCodeTo, SecondReference, Printed)
+		SELECT @TaskCode,@UserId, 'STOBOX', ActivityDescription, 'Francis Brown', ActivityCode, 1,@UserId, ActivityDescription, @Quantity, '103', 'T1', UnitCharge, 'STOBOX_001', 'STOBOX_001', N'12354/2', 0		
+		FROM Activity.tbActivity
+		WHERE ActivityCode = 'M/00/70/00';
+
+		EXEC Task.proc_Configure @TaskCode;
+		EXEC Task.proc_AssignToParent @TaskCode, @ParentTaskCode;
+
+	
+		UPDATE Task.tbTask
+		SET AccountCode = 'PACSER', ContactName = 'John OGroats', AddressCodeFrom = 'PACSER_001', AddressCodeTo = 'PACSER_001'
+		WHERE ActivityCode = 'BOX/41';
+
+		UPDATE Task.tbTask
+		SET AccountCode = 'TFCSPE', ContactName = 'Gary Granger', AddressCodeFrom = 'TFCSPE_001', AddressCodeTo = 'TFCSPE_001'
+		WHERE ActivityCode = 'INSERT/09';
+
+		UPDATE Task.tbTask
+		SET AccountCode = 'PALSUP', ContactName = 'Allan Rain', AddressCodeFrom = 'PALSUP_001', AddressCodeTo = 'PALSUP_001', CashCode = NULL, UnitCharge = 0
+		WHERE ActivityCode = 'PALLET/01';
+
+		UPDATE Task.tbTask
+		SET AccountCode = 'PLAPRO', ContactName = 'Kim Burnell', AddressCodeFrom = 'PLAPRO_001', AddressCodeTo = 'PLAPRO_001'
+		WHERE ActivityCode = 'PC/999';
+		
+		UPDATE Task.tbTask
+		SET AccountCode = 'HAULOG', ContactName = 'John Iron',  AddressCodeFrom = 'HOME_001', AddressCodeTo = 'STOBOX_001', Quantity = 1, UnitCharge = 25.0 * @ExchangeRate, TotalCharge = 25.0 * @ExchangeRate
+		WHERE ActivityCode = 'DELIVERY';
+
+		UPDATE Task.tbTask
+		SET AccountCode = (SELECT AccountCode FROM App.tbOptions), ContactName = (SELECT UserName FROM Usr.vwCredentials)
+		WHERE (CashCode IS NULL) AND (AccountCode <> 'PALSUP');
+
+		EXEC Task.proc_Schedule @TaskCode;
+
+		--forward orders
+		DECLARE @Month SMALLINT = 1;
+
+		WHILE (@Month < 5)
+		BEGIN
+
+			EXEC Task.proc_Copy @FromTaskCode = @TaskCode, 
+					@ToTaskCode = @ToTaskCode OUTPUT;
+
+			UPDATE Task.tbTask
+			SET ActionOn = DATEADD(MONTH, @Month, ActionOn)
+			WHERE TaskCode = @ToTaskCode;
+
+			EXEC Task.proc_Schedule @ToTaskCode;
+
+			SET @TaskCode = @ToTaskCode;
+			SET @Month += 1;
+		END
+
+		--order the pallets
+		EXEC Task.proc_NextCode 'PALLET/01', @TaskCode OUTPUT
+		
+		INSERT INTO Task.tbTask
+				(TaskCode, UserId, AccountCode, TaskTitle, ActivityCode, TaskStatusCode, ActionById)
+		VALUES        (@TaskCode,@UserId, 'PALSUP', N'PALLETS', 'PALLET/01', 1, @UserId);
+
+		WITH demand AS
+		(
+			SELECT ActivityCode, ROUND(SUM(Quantity), -1) AS Quantity, MIN(ActionOn) AS ActionOn
+			FROM Task.tbTask project 
+			WHERE ActivityCode = 'PALLET/01' AND TaskCode <> @TaskCode
+			GROUP BY ActivityCode
+		)
+		UPDATE task
+		SET 
+			TaskNotes = activity.ActivityDescription, 
+			Quantity = demand.Quantity,
+			ActionOn = demand.ActionOn,
+			CashCode = activity.CashCode, 
+			TaxCode = org.TaxCode, 
+			UnitCharge = activity.UnitCharge, 
+			AddressCodeFrom = org.AddressCode, 
+			AddressCodeTo = org.AddressCode, 
+			Printed = activity.Printed
+		FROM Task.tbTask task
+			JOIN Org.tbOrg org ON task.AccountCode = org.AccountCode
+			JOIN Activity.tbActivity activity ON task.ActivityCode = activity.ActivityCode
+			JOIN demand ON task.ActivityCode = demand.ActivityCode
+		WHERE TaskCode = @TaskCode;
+
+		EXEC Task.proc_Configure @TaskCode;
+		EXEC Task.proc_AssignToParent @TaskCode, @ParentTaskCode;
+
+		UPDATE Task.tbFlow
+		SET StepNumber = 0
+		WHERE (ChildTaskCode = @TaskCode);
+
+		--identify ordered boms
+		WITH unique_id AS
+		(
+			SELECT TaskCode, ActivityCode, ROW_NUMBER() OVER (PARTITION BY ActivityCode ORDER BY ActionOn) AS RowNo
+			FROM Task.tbTask
+		)
+		UPDATE task
+		SET 
+			TaskTitle = CONCAT(TaskTitle, ' ', unique_id.RowNo)
+		FROM Task.tbTask task
+			JOIN unique_id ON task.TaskCode = unique_id.TaskCode
+		WHERE task.ActivityCode = 'M/00/70/00';
+
+		--borrow some money
+		UPDATE Cash.tbCategory
+		SET IsEnabled = 1
+		WHERE CategoryCode = 'IV';
+
+		UPDATE Cash.tbCode
+		SET IsEnabled = 1
+		WHERE CashCode = '214';
+
+		DECLARE @PaymentCode NVARCHAR(20), @CashAccountCode NVARCHAR(10);
+		EXEC Cash.proc_CurrentAccount @CashAccountCode OUTPUT;
+
+		IF @ExchangeRate = 1
+		BEGIN
+			
+			EXEC Cash.proc_NextPaymentCode @PaymentCode OUTPUT
+			INSERT INTO Cash.tbPayment (CashAccountCode, PaymentCode, UserId, AccountCode, CashCode, TaxCode, PaidInValue)
+			SELECT TOP 1
+				@CashAccountCode CashAccountCode,
+				@PaymentCode AS PaymentCode, 
+				@UserId AS UserId,
+				AccountCode,
+				'214' AS CashCode,
+				'T0' AS TaxCode,
+				(SELECT ABS(ROUND(MIN(Balance), -3)) + 1000	FROM Cash.vwStatement) AS PaidInValue
+			FROM Org.tbAccount 
+			WHERE CashAccountCode = @CashAccountCode
+
+			EXEC Cash.proc_PaymentPost;
+		END
+
+		-- ***************************************************************************
+		IF @InvoiceOrders = 0
+			GOTO CommitTran;
+		-- ***************************************************************************
+		
+		DECLARE 
+			@InvoiceTypeCode SMALLINT,
+			@InvoiceNumber NVARCHAR(10),
+			@InvoicedOn DATETIME = CAST(CURRENT_TIMESTAMP AS DATE);
+
+		DECLARE cur_tasks CURSOR LOCAL FOR
+			WITH parent AS
+			(
+				SELECT DISTINCT FIRST_VALUE(TaskCode) OVER (PARTITION BY ActivityCode ORDER BY ActionOn) AS TaskCode
+				FROM Task.tbTask task
+				WHERE task.ActivityCode = 'M/00/70/00'
+			), candidates AS
+			(
+				SELECT child.ParentTaskCode, child.ChildTaskCode
+					, 1 AS Depth
+				FROM Task.tbFlow child 
+					JOIN parent ON child.ParentTaskCode = parent.TaskCode
+					JOIN Task.tbTask task ON child.ChildTaskCode = task.TaskCode
+
+				UNION ALL
+
+				SELECT child.ParentTaskCode, child.ChildTaskCode
+					, parent.Depth + 1 AS Depth
+				FROM Task.tbFlow child 
+					JOIN candidates parent ON child.ParentTaskCode = parent.ChildTaskCode
+					JOIN Task.tbTask task ON child.ChildTaskCode = task.TaskCode
+			), selected AS
+			(
+				SELECT TaskCode
+				FROM parent
+
+				UNION
+
+				SELECT ChildTaskCode AS TaskCode
+				FROM candidates
+
+				UNION
+
+				SELECT TaskCode
+				FROM Task.tbTask 
+				WHERE ActivityCode = 'PALLET/01'
+			)
+			SELECT task.TaskCode, CASE category.CashModeCode WHEN 0 THEN 2 ELSE 0 END AS InvoiceTypeCode
+			FROM selected
+				JOIN Task.tbTask task ON selected.TaskCode = task.TaskCode
+				JOIN Cash.tbCode cash_code ON task.CashCode = cash_code.CashCode
+				JOIN Cash.tbCategory category ON cash_code.CategoryCode = category.CategoryCode;
+
+		OPEN cur_tasks
+		FETCH NEXT FROM cur_tasks INTO @TaskCode, @InvoiceTypeCode;
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			IF @PayInvoices = 0
+			BEGIN
+				EXEC Invoice.proc_Raise @TaskCode = @TaskCode, @InvoiceTypeCode = @InvoiceTypeCode, @InvoicedOn = @InvoicedOn, @InvoiceNumber = @InvoiceNumber OUTPUT
+				EXEC Invoice.proc_Accept @InvoiceNumber;
+			END
+			ELSE
+				EXEC Task.proc_Pay @TaskCode = @TaskCode, @Post = 1, @PaymentCode = @PaymentCode OUTPUT;
+
+			FETCH NEXT FROM cur_tasks INTO @TaskCode, @InvoiceTypeCode;
+		END
+
+		CLOSE cur_tasks;
+		DEALLOCATE cur_tasks;
+
+CommitTran:
+			
+		COMMIT TRAN;
+
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER VIEW App.vwGraphBankBalance
+AS
+	WITH last_entries AS
+	(
+		SELECT     CashAccountCode, StartOn, MAX(EntryNumber) AS LastEntry
+		FROM         Cash.vwAccountStatement
+		GROUP BY CashAccountCode, StartOn
+		HAVING      (NOT (StartOn IS NULL))
+	), closing_balance AS
+	(
+		SELECT        Org.tbAccount.CashAccountCode, Org.tbAccount.CashCode, last_entries.StartOn, SUM(Cash.vwAccountStatement.PaidBalance) AS ClosingBalance
+		FROM            last_entries INNER JOIN
+								 Cash.vwAccountStatement ON last_entries.CashAccountCode = Cash.vwAccountStatement.CashAccountCode AND 
+								 last_entries.StartOn = Cash.vwAccountStatement.StartOn AND 
+								 last_entries.LastEntry = Cash.vwAccountStatement.EntryNumber INNER JOIN
+								 Org.tbAccount ON last_entries.CashAccountCode = Org.tbAccount.CashAccountCode
+		WHERE Org.tbAccount.AccountTypeCode = 0
+		GROUP BY Org.tbAccount.CashAccountCode, Org.tbAccount.CashCode, last_entries.StartOn
+	)
+	SELECT        Format(closing_balance.StartOn, 'yyyy-MM') AS PeriodOn, SUM(closing_balance.ClosingBalance) AS SumOfClosingBalance
+	FROM            closing_balance INNER JOIN
+							 Cash.tbCode ON closing_balance.CashCode = Cash.tbCode.CashCode
+	WHERE        (closing_balance.StartOn > DATEADD(m, - 6, CURRENT_TIMESTAMP))
+	GROUP BY Format(closing_balance.StartOn, 'yyyy-MM');
+go
+DROP VIEW IF EXISTS Cash.vwAccountPeriodClosingBalance
+go
+ALTER VIEW Cash.vwTaxVatAccruals
+AS
+	WITH task_invoiced_quantity AS
+	(
+		SELECT        Invoice.tbTask.TaskCode, SUM(Invoice.tbTask.Quantity) AS InvoiceQuantity
+		FROM            Invoice.tbTask INNER JOIN
+								 Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 0) OR
+								 (Invoice.tbInvoice.InvoiceTypeCode = 2)
+		GROUP BY Invoice.tbTask.TaskCode
+	), task_transactions AS
+	(
+		SELECT  (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= Task.tbTask.ActionOn) ORDER BY p.StartOn DESC) AS StartOn,  
+				Task.tbTask.TaskCode, Task.tbTask.TaxCode,
+				Task.tbTask.Quantity - ISNULL(task_invoiced_quantity.InvoiceQuantity, 0) AS QuantityRemaining,
+				Task.tbTask.UnitCharge * (Task.tbTask.Quantity - ISNULL(task_invoiced_quantity.InvoiceQuantity, 0)) AS TotalValue, 
+				Task.tbTask.UnitCharge * (Task.tbTask.Quantity - ISNULL(task_invoiced_quantity.InvoiceQuantity, 0)) * App.tbTaxCode.TaxRate AS TaxValue,
+				App.tbTaxCode.TaxRate,
+				Org.tbOrg.EUJurisdiction,
+				Cash.tbCategory.CashModeCode
+		FROM    Task.tbTask INNER JOIN
+				Org.tbOrg ON Task.tbTask.AccountCode = Org.tbOrg.AccountCode INNER JOIN
+				Cash.tbCode ON Task.tbTask.CashCode = Cash.tbCode.CashCode INNER JOIN
+				Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode INNER JOIN
+				App.tbTaxCode ON Task.tbTask.TaxCode = App.tbTaxCode.TaxCode LEFT OUTER JOIN
+				task_invoiced_quantity ON Task.tbTask.TaskCode = task_invoiced_quantity.TaskCode
+		WHERE        (App.tbTaxCode.TaxTypeCode = 1) AND (Task.tbTask.TaskStatusCode > 0) AND (Task.tbTask.TaskStatusCode < 3) AND (App.tbTaxCode.TaxTypeCode = 1)
+			AND (Task.tbTask.ActionOn <= (SELECT DATEADD(d, TaxHorizon, CURRENT_TIMESTAMP) FROM App.tbOptions))
+	), task_dataset AS
+	(
+		SELECT StartOn, TaskCode, TaxCode, QuantityRemaining, TotalValue, TaxValue, TaxRate,
+					CAST(CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 1 THEN TotalValue ELSE 0 END) ELSE 0 END as float) AS HomeSales, 
+					CAST(CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 0 THEN TotalValue ELSE 0 END) ELSE 0 END as float) AS HomePurchases, 
+					CAST(CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 1 THEN TotalValue ELSE 0 END) ELSE 0 END as float) AS ExportSales, 
+					CAST(CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 0 THEN TotalValue ELSE 0 END) ELSE 0 END as float) AS ExportPurchases, 
+					CAST(CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 1 THEN TaxValue ELSE 0 END) ELSE 0 END as float) AS HomeSalesVat, 
+					CAST(CASE WHEN EUJurisdiction = 0 THEN (CASE CashModeCode WHEN 0 THEN TaxValue ELSE 0 END) ELSE 0 END as float) AS HomePurchasesVat, 
+					CAST(CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 1 THEN TaxValue ELSE 0 END) ELSE 0 END as float) AS ExportSalesVat, 
+					CAST(CASE WHEN EUJurisdiction != 0 THEN (CASE CashModeCode WHEN 0 THEN TaxValue ELSE 0 END)  ELSE 0 END as float) AS ExportPurchasesVat
+		FROM task_transactions
+	)
+	SELECT task_dataset.*,
+		 (HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS VatDue
+	FROM task_dataset
+		JOIN App.tbYearPeriod AS year_period ON task_dataset.StartOn = year_period.StartOn INNER JOIN
+                         App.tbYear ON year_period.YearNumber = App.tbYear.YearNumber INNER JOIN
+                         App.tbMonth ON year_period.MonthNumber = App.tbMonth.MonthNumber;
+
+go
+ALTER VIEW Cash.vwTaxVatAuditAccruals
+AS
+SELECT       App.tbYear.YearNumber, CONCAT(App.tbYear.Description, ' ', App.tbMonth.MonthName) AS YearPeriod, vat_accruals.StartOn, Task.tbTask.ActionOn, Task.tbTask.TaskTitle, Task.tbTask.TaskCode, Cash.tbCode.CashCode, 
+                         Cash.tbCode.CashDescription, Activity.tbActivity.ActivityCode, Task.tbStatus.TaskStatus, Task.tbStatus.TaskStatusCode, vat_accruals.TaxCode, vat_accruals.TaxRate, vat_accruals.TotalValue, 
+                         vat_accruals.TaxValue, vat_accruals.QuantityRemaining, Activity.tbActivity.UnitOfMeasure, vat_accruals.HomePurchases, vat_accruals.ExportSales, vat_accruals.ExportPurchases, vat_accruals.HomeSalesVat, 
+                         vat_accruals.HomePurchasesVat, vat_accruals.ExportSalesVat, vat_accruals.ExportPurchasesVat, vat_accruals.VatDue, vat_accruals.HomeSales
+FROM            Cash.vwTaxVatAccruals AS vat_accruals INNER JOIN
+                         App.tbYearPeriod AS year_period ON vat_accruals.StartOn = year_period.StartOn INNER JOIN
+                         App.tbYear ON year_period.YearNumber = App.tbYear.YearNumber INNER JOIN
+                         App.tbMonth ON year_period.MonthNumber = App.tbMonth.MonthNumber INNER JOIN
+                         Task.tbTask ON vat_accruals.TaskCode = Task.tbTask.TaskCode INNER JOIN
+                         Task.tbStatus ON Task.tbTask.TaskStatusCode = Task.tbStatus.TaskStatusCode AND Task.tbTask.TaskStatusCode = Task.tbStatus.TaskStatusCode AND 
+                         Task.tbTask.TaskStatusCode = Task.tbStatus.TaskStatusCode AND Task.tbTask.TaskStatusCode = Task.tbStatus.TaskStatusCode AND Task.tbTask.TaskStatusCode = Task.tbStatus.TaskStatusCode AND 
+                         Task.tbTask.TaskStatusCode = Task.tbStatus.TaskStatusCode INNER JOIN
+                         Org.tbOrg ON Task.tbTask.AccountCode = Org.tbOrg.AccountCode AND Task.tbTask.AccountCode = Org.tbOrg.AccountCode AND Task.tbTask.AccountCode = Org.tbOrg.AccountCode AND 
+                         Task.tbTask.AccountCode = Org.tbOrg.AccountCode AND Task.tbTask.AccountCode = Org.tbOrg.AccountCode AND Task.tbTask.AccountCode = Org.tbOrg.AccountCode INNER JOIN
+                         Activity.tbActivity ON Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode AND Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode AND Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode AND 
+                         Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode AND Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode AND Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode INNER JOIN
+                         Cash.tbCode ON Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode AND 
+                         Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode
+
+go
+ALTER VIEW Invoice.vwRegisterDetail
+AS
+	WITH register AS
+	(
+		SELECT     StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, 
+							  InvoicedOn, Quantity, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, 
+							  InvoiceType
+		FROM         Invoice.vwRegisterTasks
+		UNION
+		SELECT     StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, 
+							  InvoicedOn, 0 Quantity, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, 
+							  InvoiceType
+		FROM         Invoice.vwRegisterItems
+	)
+	SELECT StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, InvoiceType,
+		CAST(Quantity as float) Quantity, CAST(InvoiceValue as float) InvoiceValue, CAST(TaxValue as float) TaxValue, 
+		CAST(PaidValue as float) PaidValue, CAST(PaidTaxValue as float) PaidTaxValue, 
+		CAST((InvoiceValue + TaxValue) - (PaidValue + PaidTaxValue) as float) UnpaidValue
+	FROM register;
+go
+
+
+
+
+

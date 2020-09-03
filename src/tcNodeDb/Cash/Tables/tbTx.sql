@@ -36,32 +36,27 @@ BEGIN
 
 		WITH payment AS
 		(
-			SELECT PaymentAddress, 0 Balance, 2 TxStatusCode
+			SELECT PaymentAddress
 			FROM inserted tx
 		), balance_base AS
 		(
-			SELECT tx.PaymentAddress, SUM(tx.MoneyIn) Balance, MIN(tx.TxStatusCode) TxStatusCode 
+			SELECT tx.PaymentAddress, tx.TxStatusCode, SUM(CASE WHEN tx.TxStatusCode > 0 THEN tx.MoneyIn ELSE 0 END) Balance
 			FROM Cash.tbTx tx JOIN payment ON tx.PaymentAddress = payment.PaymentAddress
-			WHERE tx.TxStatusCode > 0
-			GROUP BY tx.PaymentAddress
-			UNION
-			SELECT PaymentAddress, Balance, TxStatusCode
-			FROM payment
+			GROUP BY tx.PaymentAddress, tx.TxStatusCode
 		), tx_balance AS
 		(
-			SELECT  PaymentAddress, SUM(Balance) Balance, MIN(TxStatusCode) TxStatusCode, COUNT(*) TxCount
+			SELECT  PaymentAddress, MIN(TxStatusCode) TxStatusCode, SUM(Balance) Balance
 			FROM balance_base
 			GROUP BY PaymentAddress
 		)
 		UPDATE change
 		SET	ChangeStatusCode =	CASE
-									WHEN tx_balance.TxCount = 1 THEN 0
-									WHEN tx_balance.Balance > 0 THEN TxStatusCode
-									ELSE 2 
+									WHEN tx_balance.TxStatusCode = 2 THEN tx_balance.TxStatusCode
+									WHEN tx_balance.Balance > 0 THEN 1
+									ELSE tx_balance.TxStatusCode
 								END 
 		FROM tx_balance
 			JOIN Cash.tbChange change ON tx_balance.PaymentAddress = change.PaymentAddress;		
-
 
 	END TRY
 	BEGIN CATCH
@@ -84,24 +79,20 @@ BEGIN
 			FROM deleted tx
 		), balance_base AS
 		(
-			SELECT change.PaymentAddress, SUM(change.MoneyIn) Balance
-			FROM Cash.tbTx change JOIN payment ON change.PaymentAddress = payment.PaymentAddress
-			WHERE change.TxStatusCode = 1
-			GROUP BY change.PaymentAddress
-			UNION
-			SELECT PaymentAddress, Balance
-			FROM payment
+			SELECT tx.PaymentAddress, tx.TxStatusCode, SUM(CASE WHEN tx.TxStatusCode > 0 THEN tx.MoneyIn ELSE 0 END) Balance
+			FROM Cash.tbTx tx JOIN payment ON tx.PaymentAddress = payment.PaymentAddress
+			GROUP BY tx.PaymentAddress, tx.TxStatusCode
 		), tx_balance AS
 		(
-			SELECT  PaymentAddress, SUM(Balance) Balance, COUNT(*) TxCount
+			SELECT  PaymentAddress, MIN(TxStatusCode) TxStatusCode, SUM(Balance) Balance
 			FROM balance_base
 			GROUP BY PaymentAddress
 		)
 		UPDATE change
-		SET ChangeStatusCode =	CASE
-									WHEN tx_balance.TxCount = 1 THEN 0
-									WHEN tx_balance.Balance > 0 THEN 1 
-									ELSE 2 
+		SET	ChangeStatusCode =	CASE
+									WHEN tx_balance.TxStatusCode = 2 THEN tx_balance.TxStatusCode
+									WHEN tx_balance.Balance > 0 THEN 1
+									ELSE tx_balance.TxStatusCode
 								END 
 		FROM tx_balance
 			JOIN Cash.tbChange change ON tx_balance.PaymentAddress = change.PaymentAddress;	

@@ -13,22 +13,22 @@ The following record logs changes to Trade Control, first released on **2019.09.
 - [x] trigger new current balance when OpeningBalance updated 
 - [x] include opening balance in the current balance in new accounts
 - [x] cast EntryNumber to int on cash account listing
-- [x] include ActivityCode in _Invoice.vwSalesInvoiceSpool__
-- [x] exclude vat entries from _Cash.vwStatement_ for un-registered businesses
-- [x] forward invoices with multiple lines not totaling in _Cash.proc_FlowCashCodeValues__
+- [x] include ActivityCode in [Invoice.vwSalesInvoiceSpool](src/tcNodeDb/Invoice/Views/vwSalesInvoiceSpool.sql)
+- [x] exclude vat entries from [Cash.vwStatement](src/tcNodeDb/Cash/Views/vwStatement.sql) for un-registered businesses
+- [x] forward invoices with multiple lines not totaling in [Cash.proc_FlowCashCodeValues](src/tcNodeDb/Cash/Stored%20Procedures/proc_FlowCashCodeValues.sql)
 
 ### 3.24.3
 
 [sql](src/tcNode/scripts/tc_upgrade_3_24_3.sql)
 
-- [x] _Task.proc_Configure_ inserting empty contacts into Org.tbContact
+- [x] [Task.proc_Configure](src/tcNodeDb/Task/Stored%20Procedures/proc_Configure.sql) inserting empty contacts into Org.tbContact
 
 ### 3.24.4
 
 [sql](src/tcNode/scripts/tc_upgrade_3_24_4.sql)
 
 - [x] remove obsolete field Cash.tbCode.OpeningBalance
-- [x] invoiced vat not showing on _Cash.vwStatement_ when no payments have been made 
+- [x] invoiced vat not showing on [Cash.vwStatement](src/tcNodeDb/Cash/Views/vwStatement.sql) when no payments have been made 
 - [x] move _TradeControl.Node.Config.exe_ error log to _Documents\Trade Control_ folder.
 - [x] code signing Sectigo RSA tcNodeConfigSetup 
 
@@ -37,15 +37,15 @@ The following record logs changes to Trade Control, first released on **2019.09.
 [sql](src/tcNode/scripts/tc_upgrade_3_24_5.sql)
 
 - [x] remove obsolete field IndustrySector from Org.tbOrg
-- [x] early vat payment handling on _Cash.vwStatement_
-- [x] _App.proc_BasicSetup_ year periods creation fix for < StartMonth
+- [x] early vat payment handling on [Cash.vwStatement](src/tcNodeDb/Cash/Views/vwStatement.sql)
+- [x] [App.proc_BasicSetup](src/tcNodeDb/App/Stored%20Procedures/proc_BasicSetup.sql) year periods creation fix for < StartMonth
 - [x] set historical year periods to closed instead of archived
 - [x] error reporting in setup app terminating executing process on log write failure
 
 ### 3.24.6
 
-- [x] remove obsolete IndustrySector code from the Services demo _App.proc_DemoServices_
-- [x] extract the _TCNodeConfig_ class into a separate library for use in the [Network project](https://github.com/tradecontrol/tc-network).
+- [x] remove obsolete IndustrySector code from the Services demo [App.proc_DemoServices](src/tcNodeDb/App/Stored%20Procedures/proc_DemoServices.sql)
+- [x] extract the [TCNodeConfig](src/tcNode/TCNodeConfig.cs) class into a separate library for use in the [Network project](https://github.com/tradecontrol/tc-network).
 
 ### 3.25.1
 
@@ -54,8 +54,8 @@ The following record logs changes to Trade Control, first released on **2019.09.
 A script to facilitate event processing by the [Trade Control Network](https://github.com/tradecontrol/tc-network)
 
 - [x] transmission status enumerated type for networking Orgs and triggering contract deployment
-- [x] _Task.tbChangeLog_ table maintained by the _Task.tbTask_ insert, update and delete triggers 
-- [x] _Invoice.tbChangeLog_ table maintained by the _Invoice.tbInvoice_ insert, update and delete triggers
+- [x] [Task.tbChangeLog](src/tcNodeDb/Task/Tables/tbChangeLog.sql) table maintained by the [Task.tbTask](src/tcNodeDb/Task/Tables/tbTask.sql) insert, update and delete triggers 
+- [x] [Invoice.tbChangeLog](src/tcNodeDb/Invoice/Tables/tbChangeLog.sql) table maintained by the [Invoice.tbInvoice](src/tcNodeDb/Invoice/Tables/tbInvoice.sql) insert, update and delete triggers
 - [x] Cleardown procedures for the Service Event Log and the new Change Logs. 
 - [x] remove obsolete function _Cash.fnFlowCashCodeValues()_
 
@@ -88,7 +88,7 @@ Release 3.27.1 supports the first full release of the [Trade Control Network](ht
 - [x] re-create views to assign ```DECIMAL(18,5)``` type to outputs
 - [x] move payment tables, functions and procedures from Org to Cash schema
 - [x] add rounding decimals to tax codes 
-- [x] procedure _Cash.proc_PaymentPostReconcile_ to ensure wallet -> cash account -> invoice synchronisation
+- [x] procedure [Cash.proc_PaymentPostReconcile](src/tcNodeDb/Cash/Stored%20Procedures/proc_PaymentPostReconcile.sql) to ensure wallet -> cash account -> invoice synchronisation
 
 ### 3.28.2
 
@@ -119,13 +119,37 @@ Implements the data logic of the [Trade Control Bitcoin Wallet](https://github.c
 [sql](src/tcNode/scripts/tc_upgrade_3_28_4.sql)
 
 - [x] increase the decimal places of the UnitCharge to 7 in [Tasks](src/tcNodeDb/Task/Tables/tbTask.sql)
-- [x] _App.proc_BasicSetup_ creating a miner account for fiat currencies resulting in Services Demo failure
-- [x] _App.proc_DemoServices_ cleardown - exclude miner 
+- [x] [App.proc_BasicSetup](src/tcNodeDb/App/Stored%20Procedures/proc_BasicSetup.sql) creating a miner account for fiat currencies resulting in Services Demo failure
+- [x] [App.proc_DemoServices](src/tcNodeDb/App/Stored%20Procedures/proc_DemoServices.sql) cleardown - exclude miner 
 
 ### 3.28.5
 
 [sql](src/tcNode/scripts/tc_upgrade_3_28_5.sql)
 
 - [x] fix for [client app](https://github.com/tradecontrol/tc-office) converting calculated decimal fields to short text. Reconnect required.
+
+
+### 3.29.1
+
+Implements the data logic of the Trade Control [Balance Sheet](https://github.com/tradecontrol/tc-office#demos)
+
+[sql](src/tcNode/scripts/tc_upgrade_3_29_1.sql)
+
+- [x] [cash account type](src/tcNodeDb/Org/Tables/tbAccountType.sql) - Cash, Dummy, Asset
+- [x] add account type and [liquidity](src/tcNodeDb/Org/Tables/tbAccount.sql) to the cash accounts
+- [x] exclude asset accounts from all views, functions and procedures related to trading
+- [x] global [coin type](src/tcNodeDb/Cash/Tables/tbCoinType.sql) in [options](src/tcNodeDb/App/Tables/tbOptions.sql)
+- [x] prohibit asset payment entries from generating invoices in [Cash.proc_PaymentPost](src/tcNodeDb/Cash/Stored%20Procedures/proc_PaymentPost.sql)
+- [x] add asset statements to [period end closedown](src/tcNodeDb/App/Stored%20Procedures/proc_PeriodClose.sql)
+- [x] [asset type](src/tcNodeDb/Cash/Tables/tbAssetType.sql) - Debtors, Creditors, Bank, Cash, Cash Accounts, Capital
+- [x] [Cash.fnFlowBankBalances](src/tcNodeDb/Cash/Functions/fnFlowBankBalances.sql) not projecting the balance over periods where there are no transactions
+- [x] [balance sheet periods](src/tcNodeDb/Cash/Views/vwBalanceSheetPeriods.sql), [organisation statement](src/tcNodeDb/Org/Views/vwAssetStatement.sql), [debtors and creditors](src/tcNodeDb/Cash/Views/vwBalanceSheetOrgs.sql), [bank/wallet accounts](src/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql), [asset accounts](src/tcNodeDb/Cash/Views/vwBalanceSheetAssets.sql)  
+- [x] [the balance sheet](src/tcNodeDb/Cash/Views/vwBalanceSheet.sql) 
+
+### 3.29.2
+
+[sql](src/tcNode/scripts/tc_upgrade_3_29_2.sql)
+
+- [x] node initialisation, setup and demos to incorporate balance sheet assets 
 
 

@@ -51,5 +51,3 @@ AS
 		CAST(HomeSalesVat as float) HomeSalesVat, CAST(HomePurchasesVat as float) HomePurchasesVat, CAST(ExportSalesVat as float) ExportSalesVat, CAST(ExportPurchasesVat as float) ExportPurchasesVat,
 		CAST((HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) as float) VatDue
 	FROM vatcode_summary;
-
-
