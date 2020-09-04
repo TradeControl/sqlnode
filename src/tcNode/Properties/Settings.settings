@@ -34,6 +34,7 @@
   &lt;string&gt;tc_upgrade_3_28_5&lt;/string&gt;
   &lt;string&gt;tc_upgrade_3_29_1&lt;/string&gt;
   &lt;string&gt;tc_upgrade_3_29_2&lt;/string&gt;
+  &lt;string&gt;tc_upgrade_3_29_3&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
     <Setting Name="tcNodeConnectionString" Type="(Connection string)" Scope="Application">

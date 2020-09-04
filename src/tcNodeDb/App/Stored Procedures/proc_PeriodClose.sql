@@ -19,20 +19,37 @@ AS
 			FROM            Cash.tbPeriod 
 			WHERE        (Cash.tbPeriod.StartOn = @StartOn);
 
-			WITH invoice_summary AS
+			WITH invoice_entries AS
 			(
-				SELECT        Invoice.vwRegisterDetail.CashCode, Invoice.vwRegisterDetail.StartOn, ABS(SUM(Invoice.vwRegisterDetail.InvoiceValue)) AS InvoiceValue, ABS(SUM(Invoice.vwRegisterDetail.TaxValue)) AS TaxValue
-				FROM            Invoice.vwRegisterDetail 
-						JOIN Cash.tbCode ON Invoice.vwRegisterDetail.CashCode = Cash.tbCode.CashCode 
-						JOIN Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-				WHERE Invoice.vwRegisterDetail.StartOn = @StartOn
-				GROUP BY Invoice.vwRegisterDetail.StartOn, Invoice.vwRegisterDetail.CashCode
+				SELECT invoices.CashCode, invoices.StartOn, categories.CashModeCode, SUM(invoices.InvoiceValue) InvoiceValue, SUM(invoices.TaxValue) TaxValue
+				FROM  Invoice.vwRegisterDetail invoices
+					JOIN Cash.tbCode cash_codes ON invoices.CashCode = cash_codes.CashCode 
+					JOIN Cash.tbCategory categories ON cash_codes.CategoryCode = categories .CategoryCode
+				WHERE StartOn = @StartOn
+				GROUP BY invoices.CashCode, invoices.StartOn, categories.CashModeCode
+			), invoice_summary AS
+			(
+				SELECT CashCode, StartOn,
+					CASE CashModeCode 
+						WHEN 0 THEN
+							InvoiceValue * -1
+						ELSE 
+							InvoiceValue
+					END AS InvoiceValue,
+					CASE CashModeCode 
+						WHEN 0 THEN
+							TaxValue * -1
+						ELSE 
+							TaxValue
+					END AS TaxValue						
+				FROM invoice_entries
 			)
 			UPDATE Cash.tbPeriod
 			SET InvoiceValue = invoice_summary.InvoiceValue, 
 				InvoiceTax = invoice_summary.TaxValue
 			FROM    Cash.tbPeriod 
-				JOIN invoice_summary ON Cash.tbPeriod.CashCode = invoice_summary.CashCode AND Cash.tbPeriod.StartOn = invoice_summary.StartOn;
+				JOIN invoice_summary 
+					ON Cash.tbPeriod.CashCode = invoice_summary.CashCode AND Cash.tbPeriod.StartOn = invoice_summary.StartOn;
 
 			WITH asset_entries AS
 			(

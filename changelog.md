@@ -152,4 +152,8 @@ Implements the data logic of the Trade Control [Balance Sheet](https://github.co
 
 - [x] node initialisation, setup and demos to incorporate balance sheet assets 
 
+### 3.29.3
 
+[sql](src/tcNode/scripts/tc_upgrade_3_29_3.sql)
+
+- [x] fix for neutral cash mode signing error on P&L
