@@ -19,7 +19,7 @@ CTEs require that the previous statement be terminated by a semicolon, but not f
 The view *Cash.vwTaxCorpStatement* is a good example of how all these things come together. It returns a transaction level statement of a business's corporation tax obligations. In other words, each time a Company Statement is refreshed, the dataset is recalculated from all associated Cash Codes and their individual transactions.
 
 
-```
+``` sql
 CREATE OR ALTER VIEW Cash.vwTaxCorpStatement
 AS
 	WITH tax_dates AS
@@ -55,7 +55,7 @@ AS
 
 The Cash Codes associated with corporation tax are configured by the user. View *Cash.vwTaxCorpTotalsByPeriod* retrieves them from the recursive CTE view:
 
-```
+``` sql
 CREATE OR ALTER VIEW App.vwCorpTaxCashCodes
 AS
 	WITH category_relations AS
@@ -88,7 +88,7 @@ AS
 
 TC is a recursive application: Activities, Tasks and Cash Categories are its key components and they are all recursive. Organisations, in the pre-release versions of TC, were also expressed recursively, but this confused the users and was therefore replaced with the current simplified form. In CL 2000, recursion had to be expressed through a combination of self-calling procedures and cursors. Legacy procedures that use this technique can be obtained from the following code:
 
-```
+``` sql
 WITH cms AS
 (	
 	SELECT 
@@ -105,7 +105,7 @@ WHERE referenced_object = referencing_object;
 ```
 By way of example, *Task.proc_Delete*, with error handling removed, is written like this:
 
-```
+``` sql
 CREATE OR ALTER PROCEDURE Task.proc_Delete (@TaskCode nvarchar(20))
 AS
 	DECLARE @ChildTaskCode nvarchar(20)
@@ -141,7 +141,7 @@ AS
 ```
 
 It is identical to the CL 2000 version and is retained because there is enforced integrity checking on the work flow. To code this procedure using a CTE recursion equivalent would require something like the following code, where **UNION ALL** is the recursive operator:
-```
+``` sql
 DECLARE @TaskCode nvarchar(20) = 'IM_10011';
 
 	BEGIN TRANSACTION;
@@ -221,7 +221,7 @@ Version 3 has a straight forward set of procedures to trap and log errors. These
 
 Errors are written to the Event Log table, whith **EventTypeCode** set to ERROR.
 
-```
+``` sql
 CREATE TABLE App.tbEventLog (
 	LogCode nvarchar(20) NOT NULL,
 	LoggedOn datetime NOT NULL CONSTRAINT DF_App_tbLog_LoggedOn  DEFAULT getdate(),
@@ -240,7 +240,7 @@ CREATE TABLE App.tbEventLog (
 
 A general procedure is defined for adding any kind of event to the log file (of EventType Information, Warning or Error), by assigning a unique [Log Code](#Identity-Codes) from the register specified in **App.tbOptions**.
 
-```
+``` sql
 CREATE OR ALTER PROCEDURE App.proc_EventLog (@EventMessage NVARCHAR(MAX), @EventTypeCode SMALLINT = 0, @LogCode NVARCHAR(20) = NULL OUTPUT)
 AS
 	SET XACT_ABORT, NOCOUNT ON;
@@ -290,7 +290,7 @@ AS
 
 The code that traps the error rolls back any pending transactions, calls _App.proc_EventLog_ and then bubbles the error message:
 
-```
+``` sql
 CREATE OR ALTER PROCEDURE App.proc_ErrorLog 
 AS
 DECLARE 
@@ -319,7 +319,7 @@ DECLARE
 
 This method provides a standard template for error trapping throughout:
 
-```
+``` sql
 CREATE OR ALTER PROCEDURE App.proc_Name
 AS
     SET NOCOUNT, XACT_ABORT ON;
@@ -339,7 +339,7 @@ For triggers, the **XACT_ABORT** setting is not required.
 
 Tables that are not [Enumerated Types](#enumerated-types) have four additional columns that record when and who inserted or updated the record. The insert columns are set by the fields default.
 
-```
+``` sql
 [InsertedBy] [nvarchar](50) NOT NULL CONSTRAINT DF_SchemaName_TableName_InsertedBy DEFAULT SUSER_SNAME(),
 [InsertedOn] [datetime] NOT NULL CONSTRAINT DF_SchemaName_TableName_InsertedOn DEFAULT GETDATE(),
 [UpdatedBy] [nvarchar](50) NOT NULL  CONSTRAINT DF_SchemaName_TableName_UpdatedBy DEFAULT SUSER_SNAME(),
@@ -349,7 +349,7 @@ Tables that are not [Enumerated Types](#enumerated-types) have four additional c
 
 Updates are set inside the table triggers:
 
-```
+``` sql
 CREATE OR ALTER TRIGGER Activity.Activity_tbActivity_TriggerUpdate
    ON  Activity.tbActivity
    AFTER UPDATE, INSERT
