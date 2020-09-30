@@ -7,8 +7,6 @@
     [TotalValue]    DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbItem_TotalValue] DEFAULT ((0)) NOT NULL,
     [InvoiceValue]  DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbItem_InvoiceValue] DEFAULT ((0)) NOT NULL,
     [TaxValue]      DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbItem_TaxValue] DEFAULT ((0)) NOT NULL,
-    [PaidValue]     DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbItem_PaidValue] DEFAULT ((0)) NOT NULL,
-    [PaidTaxValue]  DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbItem_PaidTaxValue] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Invoice_tbItem] PRIMARY KEY CLUSTERED ([InvoiceNumber] ASC, [CashCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Invoice_tbItem_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]),
     CONSTRAINT [FK_Invoice_tbItem_Cash_tbCode] FOREIGN KEY ([CashCode]) REFERENCES [Cash].[tbCode] ([CashCode]) ON UPDATE CASCADE,
@@ -59,9 +57,9 @@ AS
 
 		UPDATE item
 		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
-				WHEN 0 THEN item.InvoiceValue * App.tbTaxCode.TaxRate
-				WHEN 1 THEN item.InvoiceValue * App.tbTaxCode.TaxRate 
-				END
+				WHEN 0 THEN ROUND(item.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+				WHEN 1 THEN ROUND(item.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) 
+			END
 		FROM Invoice.tbItem item 
 			INNER JOIN inserted ON inserted.InvoiceNumber = item.InvoiceNumber
 					 AND inserted.CashCode = item.CashCode

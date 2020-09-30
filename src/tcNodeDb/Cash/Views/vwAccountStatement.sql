@@ -9,23 +9,12 @@
 		UNION
 		SELECT        
 			CashAccountCode, 
-			CASE WHEN OpeningBalance< 0 THEN (SELECT TOP 1 CashCode FROM Cash.vwBankCashCodes WHERE CashModeCode = 0)
-				WHEN OpeningBalance > 0 THEN  (SELECT TOP 1 CashCode FROM Cash.vwBankCashCodes WHERE CashModeCode = 1)
-				ELSE 
-					(SELECT TOP 1 CashCode FROM
-						(SELECT CashCode 
-						FROM Cash.vwBankCashCodes 
-						WHERE CashModeCode = 2
-						EXCEPT
-						SELECT CashCode
-						FROM Org.tbAccount
-						WHERE AccountTypeCode <> 0) codes)
-				END AS CashCode, 
+			COALESCE(CashCode, (SELECT TOP 1 CashCode FROM Cash.vwBankCashCodes WHERE CashModeCode = 2)) CashCode,
 			0 AS EntryNumber, 
 			(SELECT CAST(Message AS NVARCHAR(30)) FROM App.tbText WHERE TextId = 3005) AS PaymentCode, 
 			DATEADD(HOUR, - 1, (SELECT MIN(PaidOn) FROM Cash.tbPayment WHERE CashAccountCode = cash_account.CashAccountCode)) AS PaidOn, OpeningBalance AS Paid
 		FROM            Org.tbAccount cash_account 								 
-		WHERE        (AccountClosed = 0) AND (AccountTypeCode = 0)
+		WHERE        (AccountClosed = 0) 
 	), running_balance AS
 	(
 		SELECT CashAccountCode, CashCode, EntryNumber, PaymentCode, PaidOn, 
@@ -35,8 +24,8 @@
 	(
 		SELECT     Cash.tbPayment.PaymentCode, Cash.tbPayment.CashAccountCode, Usr.tbUser.UserName, Cash.tbPayment.AccountCode, 
 							  Org.tbOrg.AccountName, Cash.tbPayment.CashCode, Cash.tbCode.CashDescription, App.tbTaxCode.TaxDescription, 
-							  Cash.tbPayment.PaidInValue, Cash.tbPayment.PaidOutValue, Cash.tbPayment.TaxInValue, 
-							  Cash.tbPayment.TaxOutValue, Cash.tbPayment.PaymentReference, Cash.tbPayment.InsertedBy, Cash.tbPayment.InsertedOn, 
+							  Cash.tbPayment.PaidInValue, Cash.tbPayment.PaidOutValue, 
+							  Cash.tbPayment.PaymentReference, Cash.tbPayment.InsertedBy, Cash.tbPayment.InsertedOn, 
 							  Cash.tbPayment.UpdatedBy, Cash.tbPayment.UpdatedOn, Cash.tbPayment.TaxCode
 		FROM         Cash.tbPayment INNER JOIN
 							  Usr.tbUser ON Cash.tbPayment.UserId = Usr.tbUser.UserId INNER JOIN
@@ -46,11 +35,9 @@
 	)
 	SELECT running_balance.CashAccountCode, (SELECT TOP 1 StartOn FROM App.tbYearPeriod	WHERE (StartOn <= running_balance.PaidOn) ORDER BY StartOn DESC) AS StartOn, 
 							running_balance.EntryNumber, running_balance.PaymentCode, running_balance.PaidOn, 
-							payments.AccountName, payments.PaymentReference, payments.PaidInValue, 
-							payments.PaidOutValue, CAST(running_balance.PaidBalance as decimal(18,5)) PaidBalance, payments.TaxInValue, 
-							payments.TaxOutValue, payments.CashCode, 
-							payments.CashDescription, payments.TaxDescription, payments.UserName, 
+							payments.AccountName, payments.PaymentReference, COALESCE(payments.PaidInValue, 0) PaidInValue, 
+							COALESCE(payments.PaidOutValue, 0) PaidOutValue, CAST(running_balance.PaidBalance as decimal(18,5)) PaidBalance, 
+							payments.CashCode, payments.CashDescription, payments.TaxDescription, payments.UserName, 
 							payments.AccountCode, payments.TaxCode
 	FROM   running_balance LEFT OUTER JOIN
 							payments ON running_balance.PaymentCode = payments.PaymentCode;	
-

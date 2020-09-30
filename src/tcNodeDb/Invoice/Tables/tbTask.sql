@@ -8,8 +8,6 @@
     [TotalValue]    DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_TotalValue] DEFAULT ((0)) NOT NULL,
     [InvoiceValue]  DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_InvoiceValue] DEFAULT ((0)) NOT NULL,
     [TaxValue]      DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_TaxValue] DEFAULT ((0)) NOT NULL,
-    [PaidValue]     DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_PaidValue] DEFAULT ((0)) NOT NULL,
-    [PaidTaxValue]  DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbTask_PaidTaxValue] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Invoice_tbTask] PRIMARY KEY CLUSTERED ([InvoiceNumber] ASC, [TaskCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Invoice_tbTask_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]),
     CONSTRAINT [FK_Invoice_tbTask_Cash_tbCode] FOREIGN KEY ([CashCode]) REFERENCES [Cash].[tbCode] ([CashCode]),
@@ -83,8 +81,9 @@ AS
 
 		UPDATE task
 		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
-				WHEN 0 THEN task.InvoiceValue * App.tbTaxCode.TaxRate
-				WHEN 1 THEN task.InvoiceValue * App.tbTaxCode.TaxRate END
+				WHEN 0 THEN ROUND(task.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+				WHEN 1 THEN ROUND(task.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) 
+			END
 		FROM Invoice.tbTask task 
 			INNER JOIN inserted ON inserted.InvoiceNumber = task.InvoiceNumber
 					 AND inserted.TaskCode = task.TaskCode

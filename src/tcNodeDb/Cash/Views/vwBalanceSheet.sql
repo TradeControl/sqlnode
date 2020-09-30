@@ -1,12 +1,18 @@
-﻿CREATE   VIEW Cash.vwBalanceSheet
+﻿CREATE VIEW Cash.vwBalanceSheet
 AS
 	WITH balance_sheets AS
 	(
+
 		SELECT AssetCode, AssetName, CashModeCode, AssetTypeCode, StartOn, Balance FROM Cash.vwBalanceSheetOrgs
 		UNION
 		SELECT AssetCode, AssetName, CashModeCode, AssetTypeCode, StartOn, Balance FROM Cash.vwBalanceSheetAccounts
 		UNION 
 		SELECT AssetCode, AssetName, CashModeCode, AssetTypeCode, StartOn, Balance FROM Cash.vwBalanceSheetAssets
+		UNION 
+		SELECT AssetCode, AssetName, CashModeCode, AssetTypeCode, StartOn, Balance FROM Cash.vwBalanceSheetTax
+		UNION
+		SELECT AssetCode, AssetName, CashModeCode, AssetTypeCode, StartOn, Balance FROM Cash.vwBalanceSheetVat
+
 	), balance_sheet_unordered AS
 	(
 		SELECT 
@@ -55,3 +61,4 @@ AS
 			Balance
 		END AS Balance
 	FROM balance_sheet_grouped
+

@@ -1,5 +1,5 @@
 ﻿/**************************************************************************************
-Trade Control Node Configuration
+Trade Control Node 
 
 Date: 1.8.19
 
@@ -9,21 +9,15 @@ Trade Control by Trade Control Ltd is licensed under GNU General Public License 
 
 **************************************************************************************/
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Trade Control Node Library")]
-[assembly: AssemblyDescription("Installs and upgrades database instances")]
+[assembly: AssemblyTitle("Trade Control Node")]
+[assembly: AssemblyDescription("Modelling the business entity in Sql Server")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Trade Control")]
-[assembly: AssemblyProduct("TradeControl.Node")]
+[assembly: AssemblyCompany("Trade Control Ltd")]
+[assembly: AssemblyProduct("Trade Control")]
 [assembly: AssemblyCopyright("Copyright © Trade Control 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-
-[assembly: ComVisible(false)]
-
-[assembly: Guid("e0b55ebe-7f5e-4703-b983-a43bb9e3b8d7")]
 
 [assembly: AssemblyVersion("3.30.2.0")]
 [assembly: AssemblyFileVersion("3.30.2.0")]

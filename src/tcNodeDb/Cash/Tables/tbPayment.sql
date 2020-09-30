@@ -9,8 +9,6 @@
     [PaidOn]            DATETIME        CONSTRAINT [DF_Cash_tbPayment_PaidOn] DEFAULT (CONVERT([date],getdate())) NOT NULL,
     [PaidInValue]       DECIMAL (18, 5) CONSTRAINT [DF_Cash_tbPayment_PaidInValue] DEFAULT ((0)) NOT NULL,
     [PaidOutValue]      DECIMAL (18, 5) CONSTRAINT [DF_Cash_tbPayment_PaidOutValue] DEFAULT ((0)) NOT NULL,
-    [TaxInValue]        DECIMAL (18, 5) CONSTRAINT [DF_Cash_tbPayment_TaxInValue] DEFAULT ((0)) NOT NULL,
-    [TaxOutValue]       DECIMAL (18, 5) CONSTRAINT [DF_Cash_tbPayment_TaxOutValue] DEFAULT ((0)) NOT NULL,
     [PaymentReference]  NVARCHAR (50)   NULL,
     [InsertedBy]        NVARCHAR (50)   CONSTRAINT [DF_Cash_tbPayment_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
     [InsertedOn]        DATETIME        CONSTRAINT [DF_Cash_tbPayment_InsertedOn] DEFAULT (getdate()) NOT NULL,

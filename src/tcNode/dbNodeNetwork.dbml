@@ -35,7 +35,7 @@
       <Association Name="tbOrg_tbOption" Member="tbOptions" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbOption" />
       <Association Name="tbOrg_tbAllocation" Member="tbAllocations" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbAllocation" />
       <Association Name="tbOrg_tbInvoice" Member="tbInvoices" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbInvoice" />
-      <Association Name="tbOrg_tbMirror" Member="tbInvoiceMirrors" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbInvoiceMirror" />
+      <Association Name="tbOrg_tbInvoiceMirror" Member="tbInvoiceMirrors" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbInvoiceMirror" />
     </Type>
   </Table>
   <Table Name="App.tbEth" Member="tbEths">
@@ -155,8 +155,6 @@
       <Column Name="TotalValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="ItemReference" Type="System.String" DbType="NText" CanBeNull="true" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
       <Association Name="tbInvoice_tbInvoiceItem" Member="tbInvoice" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="tbInvoice" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
@@ -169,8 +167,6 @@
       <Column Name="TotalValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="CashCode" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
@@ -186,25 +182,7 @@
       <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="InvoiceQuantity" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
-    </Type>
-  </Table>
-  <Table Name="Invoice.tbTask" Member="vwInvoiceDeploymentTasks">
-    <Type Name="vwInvoiceDeploymentTask">
-      <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="TaskCode" Type="System.String" DbType="NVarChar(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="TotalValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="InvoiceValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="PaidValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="PaidTaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
-      <Column Name="CashCode" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
-      <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
-      <Column Name="Quantity" Type="System.Decimal" DbType="Decimal(18,4) NOT NULL" CanBeNull="false" />
-      <Association Name="tbInvoice_vwInvoiceDeploymentTask" Member="tbInvoice" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="tbInvoice" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
     </Type>
   </Table>
   <Table Name="Invoice.tbMirrorItem" Member="tbMirrorItems">
@@ -216,7 +194,7 @@
       <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
-      <Association Name="tbMirror_tbMirrorItem" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="tbInvoiceMirror_tbMirrorItem" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
     </Type>
   </Table>
   <Table Name="Invoice.tbMirrorTask" Member="tbMirrorTasks">
@@ -228,7 +206,7 @@
       <Column Name="TaxValue" Type="System.Decimal" DbType="Decimal(18,5) NOT NULL" CanBeNull="false" />
       <Column Name="TaxCode" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion" CanBeNull="true" IsVersion="true" />
-      <Association Name="tbMirror_tbMirrorTask" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="tbInvoiceMirror_tbMirrorTask" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
     </Type>
   </Table>
   <Table Name="Invoice.tbInvoice" Member="tbInvoices">
@@ -252,7 +230,6 @@
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
       <Association Name="tbInvoice_tbInvoiceItem" Member="tbInvoiceItems" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="tbInvoiceItem" />
       <Association Name="tbInvoice_tbInvoiceTask" Member="tbInvoiceTasks" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="tbInvoiceTask" />
-      <Association Name="tbInvoice_vwInvoiceDeploymentTask" Member="vwInvoiceDeploymentTasks" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="vwInvoiceDeploymentTask" />
       <Association Name="tbInvoice_tbMirrorReference" Member="tbMirrorReferences" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="tbMirrorReference" />
       <Association Name="tbOrg_tbInvoice" Member="tbOrg" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbOrg" IsForeignKey="true" />
     </Type>
@@ -262,7 +239,7 @@
       <Column Name="ContractAddress" Type="System.String" DbType="NVarChar(42) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="InvoiceNumber" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
       <Association Name="tbInvoice_tbMirrorReference" Member="tbInvoice" ThisKey="InvoiceNumber" OtherKey="InvoiceNumber" Type="tbInvoice" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
-      <Association Name="tbMirror_tbMirrorReference" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="tbInvoiceMirror_tbMirrorReference" Member="tbInvoiceMirror" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbInvoiceMirror" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
     </Type>
   </Table>
   <Table Name="Invoice.tbMirror" Member="tbInvoiceMirrors">
@@ -283,10 +260,10 @@
       <Column Name="InsertedOn" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="RowVer" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
       <Column Name="PaymentAddress" Type="System.String" DbType="NVarChar(42)" CanBeNull="true" />
-      <Association Name="tbMirror_tbMirrorItem" Member="tbMirrorItems" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorItem" />
-      <Association Name="tbMirror_tbMirrorTask" Member="tbMirrorTasks" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorTask" />
-      <Association Name="tbMirror_tbMirrorReference" Member="tbMirrorReference" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorReference" Cardinality="One" />
-      <Association Name="tbOrg_tbMirror" Member="tbOrg" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbOrg" IsForeignKey="true" />
+      <Association Name="tbInvoiceMirror_tbMirrorItem" Member="tbMirrorItems" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorItem" />
+      <Association Name="tbInvoiceMirror_tbMirrorTask" Member="tbMirrorTasks" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorTask" />
+      <Association Name="tbInvoiceMirror_tbMirrorReference" Member="tbMirrorReference" ThisKey="ContractAddress" OtherKey="ContractAddress" Type="tbMirrorReference" Cardinality="One" />
+      <Association Name="tbOrg_tbInvoiceMirror" Member="tbOrg" ThisKey="AccountCode" OtherKey="AccountCode" Type="tbOrg" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="Invoice.vwNetworkDeployments" Member="vwInvoiceDeployments">

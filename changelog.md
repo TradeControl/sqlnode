@@ -157,3 +157,37 @@ Implements the data logic of the Trade Control [Balance Sheet](https://github.co
 [sql](src/tcNode/scripts/tc_upgrade_3_29_3.sql)
 
 - [x] fix for neutral cash mode signing error on P&L
+
+### 3.29.4
+
+[sql](src/tcNode/scripts/tc_upgrade_3_29_4.sql)
+
+- [x] set all UnitCharge fields to ```decimal(18, 7)```
+- [x] assert UnitCharge in related views
+
+### 3.30.1
+
+[Balance Sheet](https://github.com/tradecontrol/tc-office#demos) consolidation.
+
+[sql](src/tcNode/scripts/tc_upgrade_3_30_1.sql)
+
+- [x] fix [Cash Statement](src/tcNodeDb/Cash/Views/vwAccountStatement.sql) - opening balance manual override not included on asset type cash accounts
+- [x] fix [Debtors and Creditors](src/tcNodeDb/Org/Views/vwAssetBalances.sql) - replace account polarity with transaction polarity
+- [x] fix [Organisation Statements](src/tcNodeDb/Org/Views/vwStatement.sql) with ```UNION ALL``` to include all transctions
+- [x] derive the [Asset Statement](src/tcNodeDb/Org/Views/vwAssetStatement.sql) from the Organisation Statement and add financial periods
+- [x] separate out [organisation balances](src/tcNodeDb/Cash/Views/vwBalanceSheetOrgs.sql) from the balance sheet for audit reports
+- [x] views for balance sheet auditing
+- [x] [include corporation tax](src/tcNodeDb/Cash/Views/vwBalanceSheetTax.sql) from the [Tax Statement](src/tcNodeDb/Cash/Views/vwTaxCorpStatement.sql)
+- [x] offset the inclusion of debtor/creditor tax by [adding the closing balances](src/tcNodeDb/Cash/Views/vwBalanceSheetVat.sql) of the [VAT Statement](src/tcNodeDb/Cash/Views/vwTaxVatStatement.sql)
+
+### 3.30.2
+
+Paid tax and invoice status simplification.
+
+[sql](src/tcNode/scripts/tc_upgrade_3_30_2.sql)
+
+- [x] remove TaxPaidIn and TaxPaidOut from [Cash.tbPayment](src/tcNodeDb/Cash/Tables/tbPayment.sql)
+- [x] replace Cash.proc_PaymentPostPaidIn/Out with [Invoice.vwStatusLive](src/tcNodeDb/Invoice/Views/vwStatusLive.sql)
+- [x] remove PaidTaxValue and PaidValue from [Invoice.tbItem](src/tcNodeDb/Invoice/Tables/tbItem.sql) and [Invoice.tbTask](src/tcNodeDb/Invoice/Tables/tbTask.sql) 
+- [x] optimise rebuild procedures [System Rebuild](src/tcNodeDb/App/Stored%20Procedures/proc_SystemRebuild.sql) and [Organisation Rebuild](src/tcNodeDb/Org/Stored%20Procedures/proc_Rebuild.sql)
+

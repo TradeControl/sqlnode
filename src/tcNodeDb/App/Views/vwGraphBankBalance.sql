@@ -22,4 +22,3 @@ AS
 							 Cash.tbCode ON closing_balance.CashCode = Cash.tbCode.CashCode
 	WHERE        (closing_balance.StartOn > DATEADD(m, - 6, CURRENT_TIMESTAMP))
 	GROUP BY Format(closing_balance.StartOn, 'yyyy-MM');
-

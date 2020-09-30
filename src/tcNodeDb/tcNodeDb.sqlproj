@@ -6,7 +6,7 @@
     <Name>tcNodeDb</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
-    <ProjectGuid>{6fc4350a-9e39-4bfb-8111-0b991134a505}</ProjectGuid>
+    <ProjectGuid>{4d93f11e-2699-49ed-bbc7-776697c366df}</ProjectGuid>
     <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
@@ -314,13 +314,21 @@
     <Build Include="Cash\Views\vwCategoryTotals.sql" />
     <Build Include="Cash\Views\vwBalanceSheet.sql" />
     <Build Include="Cash\Views\vwCategoryTrade.sql" />
+    <Build Include="Org\Views\vwAssetBalances.sql" />
     <Build Include="Cash\Views\vwCodeLookup.sql" />
+    <Build Include="Org\Views\vwBalanceSheetAudit.sql" />
     <Build Include="Cash\Views\vwExternalCodesLookup.sql" />
+    <Build Include="Org\Views\vwAssetStatementAudit.sql" />
     <Build Include="Cash\Views\vwFlowTaxType.sql" />
+    <Build Include="Org\Views\vwStatementReport.sql" />
     <Build Include="Cash\Views\vwPeriods.sql" />
+    <Build Include="Cash\Views\vwBalanceSheetTax.sql" />
     <Build Include="Cash\Views\vwStatementReserves.sql" />
+    <Build Include="Cash\Views\vwBalanceSheetVat.sql" />
     <Build Include="Cash\Views\vwTaxVatAuditInvoices.sql" />
+    <Build Include="Org\Views\vwCurrentBalance.sql" />
     <Build Include="Cash\Views\vwTransferCodeLookup.sql" />
+    <Build Include="Invoice\Views\vwStatusLive.sql" />
     <Build Include="Cash\Views\vwTransfersUnposted.sql" />
     <Build Include="Cash\Views\vwVATCodes.sql" />
     <Build Include="Invoice\Views\vwAgedDebtPurchases.sql" />
@@ -344,7 +352,6 @@
     <Build Include="Invoice\Views\vwDocTask.sql" />
     <Build Include="Invoice\Views\vwItems.sql" />
     <Build Include="Task\Views\vwAllocationSvD.sql" />
-    <Build Include="Invoice\Views\vwOutstanding.sql" />
     <Build Include="Invoice\Views\vwRegisterPurchasesOverdue.sql" />
     <Build Include="App\Views\vwVersion.sql" />
     <Build Include="Invoice\Views\vwRegisterSalesOverdue.sql" />
@@ -525,9 +532,7 @@
     <Build Include="Task\Stored Procedures\proc_NextOperationNumber.sql" />
     <Build Include="Cash\Stored Procedures\proc_PaymentPostReconcile.sql" />
     <Build Include="Task\Stored Procedures\proc_Op.sql" />
-    <Build Include="Cash\Stored Procedures\proc_PaymentPostPaidIn.sql" />
     <Build Include="Task\Stored Procedures\proc_Parent.sql" />
-    <Build Include="Cash\Stored Procedures\proc_PaymentPostPaidOut.sql" />
     <Build Include="Task\Stored Procedures\proc_Pay.sql" />
     <Build Include="Cash\Stored Procedures\proc_PaymentPostInvoiced.sql" />
     <Build Include="Task\Stored Procedures\proc_Project.sql" />
@@ -551,5 +556,11 @@
     <Build Include="Security\Org.sql" />
     <Build Include="Security\Task.sql" />
     <Build Include="Security\Usr.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 </Project>

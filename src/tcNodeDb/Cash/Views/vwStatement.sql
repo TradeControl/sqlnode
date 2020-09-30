@@ -91,34 +91,33 @@ AS
 			CROSS JOIN vat_taxcode
 	)
 	--unpaid invoices
-	, invoices_unpaid_items AS
+	, candidate_cash_codes AS
 	(
-		SELECT     Invoice.tbInvoice.AccountCode, Invoice.tbItem.CashCode, Invoice.tbInvoice.ExpectedOn AS TransactOn, 1 AS CashEntryTypeCode, Invoice.tbItem.InvoiceNumber AS ReferenceCode, 
-							  SUM(CASE WHEN InvoiceTypeCode = 0 OR
-							  InvoiceTypeCode = 3 THEN ( Invoice.tbItem.InvoiceValue + Invoice.tbItem.TaxValue) - ( Invoice.tbItem.PaidValue + Invoice.tbItem.PaidTaxValue) 
-							  ELSE 0 END) AS PayIn, SUM(CASE WHEN InvoiceTypeCode = 1 OR
-							  InvoiceTypeCode = 2 THEN ( Invoice.tbItem.InvoiceValue + Invoice.tbItem.TaxValue) - ( Invoice.tbItem.PaidValue + Invoice.tbItem.PaidTaxValue) 
-							  ELSE 0 END) AS PayOut
-		FROM         Invoice.tbItem INNER JOIN
-							  Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
-							  Cash.tbCode ON Invoice.tbItem.CashCode = Cash.tbCode.CashCode INNER JOIN
-							  Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-		WHERE  (InvoiceStatusCode < 3) AND (( Invoice.tbItem.InvoiceValue + Invoice.tbItem.TaxValue) - ( Invoice.tbItem.PaidValue + Invoice.tbItem.PaidTaxValue) > 0)
-		GROUP BY Invoice.tbItem.InvoiceNumber, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.ExpectedOn, Invoice.tbItem.CashCode
-	), invoices_unpaid_tasks AS
+		SELECT invoice_tasks.InvoiceNumber, 0 OrderBy, 
+			FIRST_VALUE(CashCode) OVER (PARTITION BY invoice_tasks.InvoiceNumber ORDER BY CashCode) CashCode
+		FROM Invoice.tbTask invoice_tasks 
+			JOIN Invoice.tbInvoice invoices ON invoices.InvoiceNumber = invoice_tasks.InvoiceNumber
+		WHERE  (InvoiceStatusCode < 3)
+		UNION
+		SELECT invoice_items.InvoiceNumber, 1 OrderBy, 
+			FIRST_VALUE(CashCode) OVER (PARTITION BY invoice_items.InvoiceNumber ORDER BY CashCode) CashCode
+		FROM Invoice.tbItem invoice_items 
+			JOIN Invoice.tbInvoice invoices ON invoices.InvoiceNumber = invoice_items.InvoiceNumber
+		WHERE  (InvoiceStatusCode < 3)
+	), cash_codes AS
 	(
-		SELECT     Invoice.tbInvoice.AccountCode, Invoice.tbTask.CashCode, Invoice.tbInvoice.ExpectedOn AS TransactOn, 1 AS CashEntryTypeCode, Invoice.tbTask.InvoiceNumber AS ReferenceCode, 
-							  SUM(CASE WHEN InvoiceTypeCode = 0 OR
-							  InvoiceTypeCode = 3 THEN ( Invoice.tbTask.InvoiceValue + Invoice.tbTask.TaxValue) - ( Invoice.tbTask.PaidValue + Invoice.tbTask.PaidTaxValue) 
-							  ELSE 0 END) AS PayIn, SUM(CASE WHEN InvoiceTypeCode = 1 OR
-							  InvoiceTypeCode = 2 THEN ( Invoice.tbTask.InvoiceValue + Invoice.tbTask.TaxValue) - ( Invoice.tbTask.PaidValue + Invoice.tbTask.PaidTaxValue) 
-							  ELSE 0 END) AS PayOut
-		FROM         Invoice.tbTask INNER JOIN
-							  Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
-							  Cash.tbCode ON Invoice.tbTask.CashCode = Cash.tbCode.CashCode INNER JOIN
-							  Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-		WHERE  (InvoiceStatusCode < 3) AND  (( Invoice.tbTask.InvoiceValue + Invoice.tbTask.TaxValue) - ( Invoice.tbTask.PaidValue + Invoice.tbTask.PaidTaxValue) > 0)
-		GROUP BY Invoice.tbTask.InvoiceNumber, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.ExpectedOn, Invoice.tbTask.CashCode
+		SELECT InvoiceNumber,
+			FIRST_VALUE(CashCode) OVER (PARTITION BY InvoiceNumber ORDER BY OrderBy) CashCode
+		FROM candidate_cash_codes
+	), invoices_outstanding AS
+	(
+		SELECT  invoices.AccountCode, cash_codes.CashCode CashCode, invoices.ExpectedOn AS TransactOn, 1 AS CashEntryTypeCode, invoices.InvoiceNumber AS ReferenceCode, 
+					CASE CashModeCode WHEN 1 THEN InvoiceValue + TaxValue - (PaidValue + PaidTaxValue) ELSE 0 END AS PayIn, 
+					CASE CashModeCode WHEN 0 THEN (InvoiceValue + TaxValue) - (PaidValue + PaidTaxValue) ELSE 0 END AS PayOut
+		FROM  Invoice.tbInvoice invoices
+			JOIN Invoice.tbType invoice_type ON invoices.InvoiceTypeCode = invoice_type.InvoiceTypeCode
+			JOIN cash_codes ON invoices.InvoiceNumber = cash_codes.InvoiceNumber
+		WHERE  (InvoiceStatusCode < 3) AND ((InvoiceValue + TaxValue - PaidValue + PaidTaxValue) > 0)
 	), task_invoiced_quantity AS
 	(
 		SELECT        Invoice.tbTask.TaskCode, SUM(Invoice.tbTask.Quantity) AS InvoiceQuantity
@@ -166,9 +165,7 @@ AS
 		UNION
 		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM vat_accruals
 		UNION
-		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM invoices_unpaid_items
-		UNION 
-		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM invoices_unpaid_tasks
+		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM invoices_outstanding
 		UNION 
 		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM tasks_confirmed
 		UNION

@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE App.proc_NodeInitialisation
+﻿CREATE PROCEDURE App.proc_NodeInitialisation
 (
 	@AccountCode NVARCHAR(10),
 	@BusinessName NVARCHAR(255),
@@ -328,6 +328,7 @@ AS
 		, (1, 67, 6, 8, 'Audit Accruals - VAT', 5, 'Trader', 'Cash_VatAuditAccruals', 4)
 		, (1, 68, 5, 7, 'Network Allocations', 4, 'Trader', 'Task_Allocation', 0)
 		, (1, 69, 5, 8, 'Network Invoices', 4, 'Trader', 'Invoice_Mirror', 0)
+		, (1, 70, 6, 10, 'Audit Balance Sheet - Orgs', 5, 'Trader', 'Org_BalanceSheetAudit', 4)
 		;
 
 		IF @UnitOfCharge <> 'BTC'

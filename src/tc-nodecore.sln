@@ -30,7 +30,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcNodeSetup", "tcNodeSetup\
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "tcNodeInstaller", "tcNodeInstaller\tcNodeInstaller.vdproj", "{5A947FDB-FB3C-4E56-9D27-208A217F1D6A}"
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcNodeDb", "tcNodeDb\tcNodeDb.sqlproj", "{6FC4350A-9E39-4BFB-8111-0B991134A505}"
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcNodeDb", "tcNodeDb\tcNodeDb.sqlproj", "{4D93F11E-2699-49ED-BBC7-776697C366DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,12 +50,12 @@ Global
 		{5A947FDB-FB3C-4E56-9D27-208A217F1D6A}.Debug|Any CPU.Build.0 = Debug
 		{5A947FDB-FB3C-4E56-9D27-208A217F1D6A}.Release|Any CPU.ActiveCfg = Release
 		{5A947FDB-FB3C-4E56-9D27-208A217F1D6A}.Release|Any CPU.Build.0 = Release
-		{6FC4350A-9E39-4BFB-8111-0B991134A505}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6FC4350A-9E39-4BFB-8111-0B991134A505}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6FC4350A-9E39-4BFB-8111-0B991134A505}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{6FC4350A-9E39-4BFB-8111-0B991134A505}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6FC4350A-9E39-4BFB-8111-0B991134A505}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6FC4350A-9E39-4BFB-8111-0B991134A505}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{4D93F11E-2699-49ED-BBC7-776697C366DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D93F11E-2699-49ED-BBC7-776697C366DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D93F11E-2699-49ED-BBC7-776697C366DF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4D93F11E-2699-49ED-BBC7-776697C366DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D93F11E-2699-49ED-BBC7-776697C366DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D93F11E-2699-49ED-BBC7-776697C366DF}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

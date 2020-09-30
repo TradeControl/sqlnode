@@ -161,7 +161,7 @@ ALTER TABLE Task.tbChangeLog DROP COLUMN
 go
 ALTER TABLE Task.tbChangeLog WITH NOCHECK ADD
 	Quantity decimal(18, 4) NOT NULL CONSTRAINT DF_Task_tbChangeLog_Quantity DEFAULT (0),
-	UnitCharge decimal(18, 6) NOT NULL CONSTRAINT DF_Task_tbChangeLog_UnitCharge DEFAULT (0);
+	UnitCharge decimal(18, 7) NOT NULL CONSTRAINT DF_Task_tbChangeLog_UnitCharge DEFAULT (0);
 go
 UPDATE Task.tbChangeLog
 SET Quantity = QuantityStore, UnitCharge = UnitChargeStore

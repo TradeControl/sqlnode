@@ -12,7 +12,7 @@
     [UpdatedBy]          NVARCHAR (50)   CONSTRAINT [DF_Task_tbChangeLog_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
     [RowVer]             ROWVERSION      NOT NULL,
     [Quantity]           DECIMAL (18, 4) CONSTRAINT [DF_Task_tbChangeLog_Quantity] DEFAULT ((0)) NOT NULL,
-    [UnitCharge]         DECIMAL (18, 6) CONSTRAINT [DF_Task_tbChangeLog_UnitCharge] DEFAULT ((0)) NOT NULL,
+    [UnitCharge]         DECIMAL (18, 7) CONSTRAINT [DF_Task_tbChangeLog_UnitCharge] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Task_tbChangeLog] PRIMARY KEY CLUSTERED ([TaskCode] ASC, [LogId] DESC),
     CONSTRAINT [FK_Task_tbChangeLog_TrasmitStatusCode] FOREIGN KEY ([TransmitStatusCode]) REFERENCES [Org].[tbTransmitStatus] ([TransmitStatusCode])
 );

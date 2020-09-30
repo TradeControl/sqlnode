@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE Cash.proc_PaymentPostMisc
+﻿CREATE PROCEDURE Cash.proc_PaymentPostMisc
 	(
 	@PaymentCode nvarchar(20) 
 	)
@@ -41,79 +41,68 @@
 
 		UPDATE    Invoice.tbType
 		SET              NextNumber = @NextNumber + 1
-		WHERE     (InvoiceTypeCode = @InvoiceTypeCode)
+		WHERE     (InvoiceTypeCode = @InvoiceTypeCode);
 
-		UPDATE    Cash.tbPayment
-		SET		PaymentStatusCode = 1,
-			TaxInValue = 
-				CASE TaxRate WHEN 0 THEN 0
-				ELSE
-				(
-					CASE App.tbTaxCode.RoundingCode 
-						WHEN 0 THEN ROUND(Cash.tbPayment.PaidInValue - ( Cash.tbPayment.PaidInValue / (1 + App.tbTaxCode.TaxRate)), Decimals) 
-						WHEN 1 THEN ROUND(Cash.tbPayment.PaidInValue - ( Cash.tbPayment.PaidInValue / (1 + App.tbTaxCode.TaxRate)), Decimals, 1) 
-					END
-				)
-				END, 
-			TaxOutValue = 
-				CASE TaxRate WHEN 0 THEN 0
-				ELSE
-				(
-					CASE App.tbTaxCode.RoundingCode 
-						WHEN 0 THEN ROUND(Cash.tbPayment.PaidOutValue - ( Cash.tbPayment.PaidOutValue / (1 + App.tbTaxCode.TaxRate)), Decimals) 
-						WHEN 1 THEN ROUND(Cash.tbPayment.PaidOutValue - ( Cash.tbPayment.PaidOutValue / (1 + App.tbTaxCode.TaxRate)), Decimals, 1) 
-					END
-				)
-				END
-		FROM         Cash.tbPayment INNER JOIN
-							  App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode
-		WHERE     (PaymentCode = @PaymentCode)
-
+		WITH payment AS
+		(
+			SELECT UserId, AccountCode, PaidOn, PaidInValue, PaidOutValue,
+					CASE TaxRate WHEN 0 THEN 0
+					ELSE
+					(
+						CASE App.tbTaxCode.RoundingCode 
+							WHEN 0 THEN ROUND(Cash.tbPayment.PaidInValue - ( Cash.tbPayment.PaidInValue / (1 + App.tbTaxCode.TaxRate)), Decimals) 
+							WHEN 1 THEN ROUND(Cash.tbPayment.PaidInValue - ( Cash.tbPayment.PaidInValue / (1 + App.tbTaxCode.TaxRate)), Decimals, 1) 
+						END
+					)
+					END TaxInValue, 			 
+					CASE TaxRate WHEN 0 THEN 0
+					ELSE
+					(
+						CASE App.tbTaxCode.RoundingCode 
+							WHEN 0 THEN ROUND(Cash.tbPayment.PaidOutValue - ( Cash.tbPayment.PaidOutValue / (1 + App.tbTaxCode.TaxRate)), Decimals) 
+							WHEN 1 THEN ROUND(Cash.tbPayment.PaidOutValue - ( Cash.tbPayment.PaidOutValue / (1 + App.tbTaxCode.TaxRate)), Decimals, 1) 
+						END
+					)
+					END TaxOutValue
+			FROM Cash.tbPayment
+				INNER JOIN App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode
+			WHERE     (PaymentCode = @PaymentCode)
+		)
 		INSERT INTO Invoice.tbInvoice
 								 (InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, DueOn, ExpectedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, Printed)
-		SELECT        @InvoiceNumber AS InvoiceNumber, Cash.tbPayment.UserId, Cash.tbPayment.AccountCode, @InvoiceTypeCode AS InvoiceTypeCode, 3 AS InvoiceStatusCode, 
-								Cash.tbPayment.PaidOn, Cash.tbPayment.PaidOn AS DueOn, Cash.tbPayment.PaidOn AS ExpectedOn,
+		SELECT        @InvoiceNumber AS InvoiceNumber, payment.UserId, payment.AccountCode, @InvoiceTypeCode AS InvoiceTypeCode, 3 AS InvoiceStatusCode, 
+								payment.PaidOn, payment.PaidOn AS DueOn, payment.PaidOn AS ExpectedOn,
 								CASE WHEN PaidInValue > 0 THEN PaidInValue - TaxInValue
 									WHEN PaidOutValue > 0 THEN PaidOutValue - TaxOutValue
 								END AS InvoiceValue, 
-								CASE WHEN Cash.tbPayment.PaidInValue > 0 THEN Cash.tbPayment.TaxInValue 
-									WHEN Cash.tbPayment.PaidOutValue > 0 THEN Cash.tbPayment.TaxOutValue
+								CASE WHEN payment.PaidInValue > 0 THEN payment.TaxInValue 
+									WHEN payment.PaidOutValue > 0 THEN payment.TaxOutValue
 								END AS TaxValue, 
 								CASE WHEN PaidInValue > 0 THEN PaidInValue - TaxInValue
 									WHEN PaidOutValue > 0 THEN PaidOutValue - TaxOutValue
 								END AS PaidValue, 
-								CASE WHEN Cash.tbPayment.PaidInValue > 0 THEN Cash.tbPayment.TaxInValue 
-									WHEN Cash.tbPayment.PaidOutValue > 0 THEN Cash.tbPayment.TaxOutValue
+								CASE WHEN payment.PaidInValue > 0 THEN payment.TaxInValue 
+									WHEN payment.PaidOutValue > 0 THEN payment.TaxOutValue
 								END AS PaidTaxValue, 
 								1 AS Printed
-		FROM            Cash.tbPayment INNER JOIN
-								 App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode
-		WHERE        ( Cash.tbPayment.PaymentCode = @PaymentCode)
+		FROM payment;
 
-
+		WITH payment AS
+		(
+			SELECT CashCode, TaxCode
+			FROM Cash.tbPayment
+			WHERE (Cash.tbPayment.PaymentCode = @PaymentCode)
+		), invoice_header AS
+		(
+			SELECT InvoiceNumber, InvoiceValue, TaxValue
+			FROM Invoice.tbInvoice
+			WHERE InvoiceNumber = @InvoiceNumber
+		)
 		INSERT INTO Invoice.tbItem
-							(InvoiceNumber, CashCode, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, TaxCode)
-		SELECT     @InvoiceNumber AS InvoiceNumber, Cash.tbPayment.CashCode, 
-								CASE WHEN PaidInValue > 0 THEN PaidInValue - TaxInValue
-									WHEN PaidOutValue > 0 THEN PaidOutValue - TaxOutValue
-								END AS InvoiceValue, 
-								CASE WHEN Cash.tbPayment.PaidInValue > 0 THEN Cash.tbPayment.TaxInValue 
-									WHEN Cash.tbPayment.PaidOutValue > 0 THEN Cash.tbPayment.TaxOutValue
-								END AS TaxValue, 
-								CASE WHEN PaidInValue > 0 THEN PaidInValue - TaxInValue
-									WHEN PaidOutValue > 0 THEN PaidOutValue - TaxOutValue
-								END AS PaidValue, 
-								CASE WHEN Cash.tbPayment.PaidInValue > 0 THEN Cash.tbPayment.TaxInValue 
-									WHEN Cash.tbPayment.PaidOutValue > 0 THEN Cash.tbPayment.TaxOutValue
-								END AS PaidTaxValue, 
-							Cash.tbPayment.TaxCode
-		FROM         Cash.tbPayment INNER JOIN
-							  App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode
-		WHERE     ( Cash.tbPayment.PaymentCode = @PaymentCode)
-
-		UPDATE Invoice.tbItem
-		SET PaidValue = InvoiceValue, PaidTaxValue = TaxValue
-		WHERE InvoiceNumber = @InvoiceNumber
+							(InvoiceNumber, CashCode, InvoiceValue, TaxValue, TaxCode)
+		SELECT TOP 1 InvoiceNumber, CashCode, InvoiceValue, TaxValue, TaxCode
+		FROM payment
+			CROSS JOIN invoice_header;
 
 		UPDATE  Org.tbAccount
 		SET CurrentBalance = CASE WHEN PaidInValue > 0 THEN Org.tbAccount.CurrentBalance + PaidInValue ELSE Org.tbAccount.CurrentBalance - PaidOutValue END
@@ -121,10 +110,13 @@
 							  Cash.tbPayment ON Org.tbAccount.CashAccountCode = Cash.tbPayment.CashAccountCode
 		WHERE Cash.tbPayment.PaymentCode = @PaymentCode
 
+		UPDATE Cash.tbPayment
+		SET PaymentStatusCode = 1
+		WHERE (PaymentCode = @PaymentCode)
+
 		COMMIT TRANSACTION
 
   	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
 	END CATCH
-

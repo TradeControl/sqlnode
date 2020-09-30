@@ -1,4 +1,239 @@
-ï»¿CREATE PROCEDURE App.proc_DemoServices
+/**************************************************************************************
+Trade Control
+Upgrade script
+Release: 3.30.2
+
+Date: 24 September 2020
+Author: IAM
+
+Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+
+You may obtain a copy of the License at
+
+	https://www.gnu.org/licenses/gpl-3.0.en.html
+
+Change log:
+
+	https://github.com/tradecontrol/tc-nodecore
+
+Instructions:
+This script should be applied by the TC Node Configuration app.
+It inserts the upgade into App.tbInstall.
+
+***********************************************************************************/
+go
+ALTER VIEW Cash.vwAccountStatementListing
+AS
+	SELECT        App.tbYear.YearNumber, Org.tbOrg.AccountName AS Bank, Org.tbAccount.CashAccountCode, Org.tbAccount.CashAccountName, Org.tbAccount.SortCode, Org.tbAccount.AccountNumber, CONCAT(App.tbYear.Description, SPACE(1), 
+							 App.tbMonth.MonthName) AS PeriodName, Cash.vwAccountStatement.StartOn, CAST(Cash.vwAccountStatement.EntryNumber AS INT) EntryNumber, Cash.vwAccountStatement.PaymentCode, Cash.vwAccountStatement.PaidOn, 
+							 Cash.vwAccountStatement.AccountName, Cash.vwAccountStatement.PaymentReference, Cash.vwAccountStatement.PaidInValue, Cash.vwAccountStatement.PaidOutValue, 
+							 Cash.vwAccountStatement.PaidBalance, Cash.vwAccountStatement.CashCode, 
+							 Cash.vwAccountStatement.CashDescription, Cash.vwAccountStatement.TaxDescription, Cash.vwAccountStatement.UserName, Cash.vwAccountStatement.AccountCode, 
+							 Cash.vwAccountStatement.TaxCode
+	FROM            App.tbYearPeriod INNER JOIN
+							 App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber INNER JOIN
+							 Cash.vwAccountStatement INNER JOIN
+							 Org.tbAccount ON Cash.vwAccountStatement.CashAccountCode = Org.tbAccount.CashAccountCode INNER JOIN
+							 Org.tbOrg ON Org.tbAccount.AccountCode = Org.tbOrg.AccountCode ON App.tbYearPeriod.StartOn = Cash.vwAccountStatement.StartOn INNER JOIN
+							 App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber;
+go
+ALTER VIEW Org.vwStatusReport
+AS
+	SELECT        Org.vwDatasheet.AccountCode, Org.vwDatasheet.AccountName, Org.vwDatasheet.OrganisationType, Org.vwDatasheet.OrganisationStatus, Org.vwDatasheet.TaxDescription, Org.vwDatasheet.Address, 
+							 Org.vwDatasheet.AreaCode, Org.vwDatasheet.PhoneNumber, Org.vwDatasheet.EmailAddress, Org.vwDatasheet.WebSite, Org.vwDatasheet.IndustrySector, 
+							 Org.vwDatasheet.AccountSource, Org.vwDatasheet.PaymentTerms, Org.vwDatasheet.PaymentDays, Org.vwDatasheet.ExpectedDays, Org.vwDatasheet.NumberOfEmployees, Org.vwDatasheet.CompanyNumber, Org.vwDatasheet.VatNumber, 
+							 Org.vwDatasheet.Turnover, Org.vwDatasheet.OpeningBalance, Org.vwDatasheet.EUJurisdiction, Org.vwDatasheet.BusinessDescription, 
+							 Cash.tbPayment.PaymentCode, Usr.tbUser.UserName, App.tbTaxCode.TaxDescription AS PaymentTaxDescription, Org.tbAccount.CashAccountName, Cash.tbCode.CashDescription, Cash.tbPayment.UserId, 
+							 Cash.tbPayment.CashAccountCode, Cash.tbPayment.CashCode, Cash.tbPayment.TaxCode, Cash.tbPayment.PaidOn, Cash.tbPayment.PaidInValue, Cash.tbPayment.PaidOutValue, 
+							 Cash.tbPayment.InsertedBy, Cash.tbPayment.InsertedOn, Cash.tbPayment.UpdatedBy, Cash.tbPayment.UpdatedOn, Cash.tbPayment.PaymentReference
+	FROM            Cash.tbPayment INNER JOIN
+							 Usr.tbUser ON Cash.tbPayment.UserId = Usr.tbUser.UserId INNER JOIN
+							 Org.tbAccount ON Cash.tbPayment.CashAccountCode = Org.tbAccount.CashAccountCode INNER JOIN
+							 Cash.tbCode ON Cash.tbPayment.CashCode = Cash.tbCode.CashCode LEFT OUTER JOIN
+							 App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
+							 Org.vwDatasheet ON Cash.tbPayment.AccountCode = Org.vwDatasheet.AccountCode
+	WHERE        (Cash.tbPayment.PaymentStatusCode = 1);
+go
+ALTER VIEW Cash.vwTransfersUnposted
+AS
+	SELECT        PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference, InsertedBy, InsertedOn, 
+							 UpdatedBy, UpdatedOn, RowVer
+	FROM            Cash.tbPayment
+	WHERE        (PaymentStatusCode = 2)
+go
+ALTER VIEW Cash.vwPayments
+AS
+	SELECT        Cash.tbPayment.AccountCode, Cash.tbPayment.PaymentCode, Cash.tbPayment.UserId, Cash.tbPayment.PaymentStatusCode, Cash.tbPayment.CashAccountCode, Cash.tbPayment.CashCode, Cash.tbPayment.TaxCode, 
+							 Cash.tbPayment.PaidOn, Cash.tbPayment.PaidInValue, Cash.tbPayment.PaidOutValue, Cash.tbPayment.PaymentReference, Cash.tbPayment.InsertedBy, 
+							 Cash.tbPayment.InsertedOn, Cash.tbPayment.UpdatedBy, Cash.tbPayment.UpdatedOn, Usr.tbUser.UserName, App.tbTaxCode.TaxDescription, Org.tbAccount.CashAccountName, Cash.tbCode.CashDescription
+	FROM            Cash.tbPayment INNER JOIN
+							 Usr.tbUser ON Cash.tbPayment.UserId = Usr.tbUser.UserId INNER JOIN
+							 Org.tbAccount ON Cash.tbPayment.CashAccountCode = Org.tbAccount.CashAccountCode INNER JOIN
+							 Cash.tbCode ON Cash.tbPayment.CashCode = Cash.tbCode.CashCode LEFT OUTER JOIN
+							 App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode
+	WHERE        (Cash.tbPayment.PaymentStatusCode = 1);
+go
+ALTER VIEW Cash.vwPaymentsListing
+AS
+	SELECT Org.tbOrg.AccountCode, Org.tbOrg.AccountName, Org.tbType.OrganisationType, Org.tbStatus.OrganisationStatus, Cash.tbPayment.PaymentCode, Usr.tbUser.UserName, 
+							 App.tbTaxCode.TaxDescription AS PaymentTaxDescription, Org.tbAccount.CashAccountName, Cash.tbCode.CashDescription, Cash.tbPayment.UserId, Cash.tbPayment.CashAccountCode, Cash.tbPayment.CashCode, 
+							 Cash.tbPayment.TaxCode, CONCAT(YEAR(Cash.tbPayment.PaidOn), Format(MONTH(Cash.tbPayment.PaidOn), '00')) AS Period, Cash.tbPayment.PaidOn, Cash.tbPayment.PaidInValue, Cash.tbPayment.PaidOutValue, 
+							 Cash.tbPayment.InsertedBy, Cash.tbPayment.InsertedOn, Cash.tbPayment.UpdatedBy, Cash.tbPayment.UpdatedOn, Cash.tbPayment.PaymentReference
+	FROM            Cash.tbPayment INNER JOIN
+							 Usr.tbUser ON Cash.tbPayment.UserId = Usr.tbUser.UserId INNER JOIN
+							 Org.tbAccount ON Cash.tbPayment.CashAccountCode = Org.tbAccount.CashAccountCode INNER JOIN
+							 Cash.tbCode ON Cash.tbPayment.CashCode = Cash.tbCode.CashCode LEFT OUTER JOIN
+							 App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
+							 Org.tbOrg ON Cash.tbPayment.AccountCode = Org.tbOrg.AccountCode INNER JOIN
+							 Org.tbType ON Org.tbOrg.OrganisationTypeCode = Org.tbType.OrganisationTypeCode INNER JOIN
+							 Org.tbStatus ON Org.tbOrg.OrganisationStatusCode = Org.tbStatus.OrganisationStatusCode
+	WHERE        (Cash.tbPayment.PaymentStatusCode = 1);
+go
+ALTER VIEW Cash.vwPaymentsUnposted
+AS
+	SELECT        PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference, IsProfitAndLoss, InsertedBy, InsertedOn, 
+							 UpdatedBy, UpdatedOn, RowVer
+	FROM            Cash.tbPayment
+	WHERE        (PaymentStatusCode = 0);
+go
+CREATE OR ALTER VIEW Org.vwCurrentBalance
+AS
+	WITH current_balance AS
+	(
+		SELECT AccountCode, MAX(RowNumber) CurrentBalanceRow
+		FROM Org.vwStatement
+		GROUP BY AccountCode
+	)
+	SELECT org_statement.AccountCode, org_statement.Balance
+	FROM Org.vwStatement org_statement
+		JOIN current_balance ON org_statement.AccountCode = current_balance.AccountCode 
+			AND org_statement.RowNumber = current_balance.CurrentBalanceRow
+go
+CREATE OR ALTER VIEW Invoice.vwStatusLive
+AS
+	WITH nonzero_balance_orgs AS
+	(
+		SELECT AccountCode, Balance, CASE WHEN Balance > 0 THEN 0 ELSE 1 END CashModeCode 
+		FROM Org.vwCurrentBalance
+	), invoice_statement AS
+	(
+		SELECT nonzero_balance_orgs.AccountCode, 
+			RowNumber, InvoiceNumber, CashModeCode, TotalCharge, TaxValue,
+			CASE RowNumber 
+				WHEN 1 THEN nonzero_balance_orgs.Balance + TotalCharge
+			ELSE TotalCharge 
+			END Charge,
+			CASE RowNumber 
+				WHEN 1 THEN nonzero_balance_orgs.Balance 
+				ELSE 0 END OpeningBalance, 
+			CASE RowNumber
+				WHEN 1 THEN 
+					CASE CashModeCode 
+						WHEN 0 THEN
+							CASE WHEN TotalCharge > 0 THEN -1 ELSE 1 END
+						WHEN 1 THEN
+							CASE WHEN TotalCharge < 0 THEN -1 ELSE 1 END
+					END
+				ELSE 1
+			END Multiplier
+		FROM nonzero_balance_orgs
+			CROSS APPLY
+				(
+					SELECT InvoiceNumber,
+						ROW_NUMBER() OVER (ORDER BY InvoicedOn DESC) RowNumber,
+						CASE CashModeCode 
+							WHEN 0 THEN (InvoiceValue + TaxValue) * - 1  
+							WHEN 1 THEN (InvoiceValue + TaxValue)
+						END AS TotalCharge,
+						TaxValue
+					FROM Invoice.tbInvoice invoices
+						INNER JOIN Invoice.tbType ON invoices.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
+					WHERE AccountCode = nonzero_balance_orgs.AccountCode AND InvoiceValue <> 0
+				) invoices
+	), invoice_multiplier AS
+	(
+		SELECT AccountCode, RowNumber, InvoiceNumber, CashModeCode, TotalCharge, TaxValue, OpeningBalance, Charge,
+			MIN(Multiplier) OVER (PARTITION BY AccountCode ORDER BY RowNumber) Multiplier
+		FROM invoice_statement
+	), invoice_balances AS
+	(
+		SELECT  AccountCode, RowNumber, InvoiceNumber, CashModeCode, TotalCharge, TaxValue, OpeningBalance, Charge,
+			CAST(SUM(Charge * Multiplier) OVER (PARTITION BY AccountCode ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS float) AS Balance
+		FROM invoice_multiplier
+	), invoice_paid AS
+	(
+		SELECT AccountCode, RowNumber, InvoiceNumber, CashModeCode, TotalCharge,
+			ABS(TotalCharge) - TaxValue InvoiceValue, TaxValue, TaxValue / ABS(TotalCharge) TaxRate, 
+			OpeningBalance, Charge, Balance, 
+			CASE CashModeCode 
+				WHEN 0 THEN
+					CASE 
+						WHEN Balance >= 0 THEN 1
+						WHEN TotalCharge < Balance THEN 2
+						ELSE 3
+					END 
+				WHEN 1 THEN
+					CASE 
+						WHEN Balance <= 0 THEN 1
+						WHEN TotalCharge > Balance THEN 2
+						ELSE 3
+					END 
+			END InvoiceStatusCode,
+			CASE CashModeCode 
+				WHEN 0 THEN
+					CASE 
+						WHEN Balance >= 0 THEN 0
+						WHEN TotalCharge < Balance THEN TotalCharge - Balance
+						ELSE TotalCharge
+					END 
+				WHEN 1 THEN
+					CASE 
+						WHEN Balance <= 0 THEN 0
+						WHEN TotalCharge > Balance THEN TotalCharge - Balance
+						ELSE TotalCharge
+					END 
+			END TotalPaid		
+		FROM invoice_balances
+	)
+	, invoice_status AS
+	(
+		SELECT AccountCode, RowNumber, InvoiceNumber, CashModeCode, TotalCharge, InvoiceValue, TaxValue, TaxRate, OpeningBalance, Charge, Balance, TotalPaid,
+			MAX(InvoiceStatusCode) OVER (PARTITION BY AccountCode ORDER BY RowNumber) InvoiceStatusCode
+		FROM invoice_paid
+	)
+	SELECT AccountCode, RowNumber, InvoiceNumber, CashModeCode, TotalCharge, InvoiceValue, TaxValue, TaxRate, OpeningBalance, Charge, Balance, TotalPaid,
+		InvoiceStatusCode, 
+		CASE CashModeCode 
+			WHEN 0 THEN
+				CASE InvoiceStatusCode
+					WHEN 1 THEN 0
+					WHEN 2 THEN InvoiceValue + (TotalPaid / (1 + TaxRate)) 
+					ELSE InvoiceValue
+				END
+			WHEN 1 THEN
+				CASE InvoiceStatusCode
+					WHEN 1 THEN 0
+					WHEN 2 THEN InvoiceValue - (TotalPaid / (1 + TaxRate)) 
+					ELSE InvoiceValue
+				END
+		END PaidValue, 				
+		CASE CashModeCode 
+			WHEN 0 THEN
+				CASE InvoiceStatusCode						
+					WHEN 1 THEN 0
+					WHEN 2 THEN TaxValue +	(TotalPaid - (TotalPaid / (1 + TaxRate))) 
+					ELSE TaxValue
+				END
+			WHEN 1 THEN
+				CASE InvoiceStatusCode						
+					WHEN 1 THEN 0
+					WHEN 2 THEN TaxValue -(TotalPaid - (TotalPaid / (1 + TaxRate))) 
+					ELSE TaxValue
+				END
+		END PaidTaxValue
+	FROM invoice_status;
+go
+ALTER PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,
@@ -500,7 +735,7 @@ AS
 		, (CONCAT(@UserId, '_30002'), @UserId, 'TELPRO', null, 'Monthly Telecom Charges', null, 'Project', 0, @UserId, '20191231', null, '20191231', null, 1, null, null, 0, 0.0000, 'CDCUST_001', 'CDCUST_001', 0, 1)
 		, (CONCAT(@UserId, '_40000'), @UserId, 'BUSOWN', null, '142 miles travel Client visit', null, 'Employee Transport', 2, @UserId, '20190110', '20190708', '20190131', null, 142, '212', 'T0', 0.45, 63.9000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40003'), @UserId, 'BUSOWN', null, 'Car parking Client visit 10/1', null, 'Car Parking / Tolls', 2, @UserId, '20190110', '20190708', '20190131', null, 1, '213', 'T1', 4, 4.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40004'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190131', '20190708', '20190131', null, 4, '205', 'T0', 4, 16.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40004'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190131', '20190708', '20190131', null, 4, '205', 'T0', 4, 16.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40005'), @UserId, 'BUSOWN', null, 'Wages', null, 'Wages monthly payment', 2, @UserId, '20190131', '20190708', '20190131', null, 1, '402', 'NI1', 1000, 1000.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40006'), @UserId, 'BUSOWN', null, 'Wages', null, 'Wages monthly payment', 2, @UserId, '20190228', '20190708', '20190228', null, 1, '402', 'NI1', 1000, 1000.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40007'), @UserId, 'BUSOWN', null, 'Wages', null, 'Wages monthly payment', 2, @UserId, '20190329', '20190708', '20190329', null, 1, '402', 'NI1', 1000, 1000.0000, null, null, 0, 1)
@@ -515,18 +750,18 @@ AS
 		, (CONCAT(@UserId, '_40016'), @UserId, 'BUSOWN', null, 'Wages', null, 'Wages monthly payment', 0, @UserId, '20191231', null, '20191231', null, 1, '402', 'NI1', 1000, 1000.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40017'), @UserId, 'BUSOWN', null, '185 miles press pass book sections', null, 'Employee Transport', 2, @UserId, '20190215', '20190708', '20190228', null, 185, '212', 'T0', 0.45, 83.2500, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40018'), @UserId, 'BUSOWN', null, '24 First Class postage stamps', null, 'Postage', 2, @UserId, '20190208', '20190708', '20190228', null, 1, '207', 'T0', 19.2, 19.2000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40019'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190228', '20190708', '20190228', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40019'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190228', '20190708', '20190228', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40020'), @UserId, 'BUSOWN', null, '178 miles visiting AB Ltd', null, 'Employee Transport', 2, @UserId, '20190302', '20190708', '20190329', null, 178, '212', 'T0', 0.45, 80.1000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40021'), @UserId, 'BUSOWN', null, 'Dartford Crossing x 2', null, 'Car Parking / Tolls', 2, @UserId, '20190302', '20190708', '20190329', null, 1, '213', 'T0', 5, 5.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40022'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 5 weeks', null, 'Office Rent', 2, @UserId, '20190329', '20190708', '20190329', null, 1, '205', 'T0', 20, 20.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40022'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 5 weeks', null, 'Office Rent', 2, @UserId, '20190329', '20190708', '20190329', null, 1, '205', 'T0', 20, 20.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40023'), @UserId, 'BUSOWN', null, 'Business mileage April 19 total 340 miles', null, 'Employee Transport', 2, @UserId, '20190430', '20190708', '20190430', null, 340, '212', 'T0', 0.45, 153.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40024'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190430', '20190708', '20190430', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40024'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190430', '20190708', '20190430', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40025'), @UserId, 'BUSOWN', null, 'Business mileage May 19 total 395 miles', null, 'Employee Transport', 2, @UserId, '20190531', '20190708', '20190531', null, 395, '212', 'T0', 0.45, 177.7500, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40026'), @UserId, 'BUSOWN', null, '6 reams of office paper', null, 'Stationery - General', 2, @UserId, '20190531', '20190708', '20190531', null, 1, '209', 'T1', 18, 18.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40027'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190531', '20190708', '20190531', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40027'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190531', '20190708', '20190531', null, 1, '205', 'T0', 16, 16.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40028'), @UserId, 'BUSOWN', null, 'Business mileage June 19 412miles', null, 'Employee Transport', 2, @UserId, '20190628', '20190708', '20190628', null, 412, '212', 'T0', 0.45, 185.4000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40029'), @UserId, 'BUSOWN', null, 'Car parking Client visit 10/6', null, 'Car Parking / Tolls', 2, @UserId, '20190610', '20190708', '20190628', null, 1, '213', 'T1', 5, 5.0000, null, null, 0, 1)
-		, (CONCAT(@UserId, '_40030'), @UserId, 'BUSOWN', null, 'Rental for Home Office use Â£4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190628', '20190708', '20190628', null, 1, '205', 'T0', 12, 12.0000, null, null, 0, 1)
+		, (CONCAT(@UserId, '_40030'), @UserId, 'BUSOWN', null, 'Rental for Home Office use £4/week x 4 weeks', null, 'Office Rent', 2, @UserId, '20190628', '20190708', '20190628', null, 1, '205', 'T0', 12, 12.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40031'), @UserId, 'TELPRO', null, 'Telecom Charge', null, 'Communications monthly charge', 2, @UserId, '20190125', '20190125', '20190125', null, 1, '202', 'T1', 40, 40.0000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40032'), @UserId, 'TELPRO', null, 'Telecom Charge', null, 'Communications monthly charge', 2, @UserId, '20190226', '20190226', '20190226', null, 1, '202', 'T1', 39.6, 39.6000, null, null, 0, 1)
 		, (CONCAT(@UserId, '_40033'), @UserId, 'TELPRO', null, 'Telecom Charge', null, 'Communications monthly charge', 2, @UserId, '20190326', '20190326', '20190326', null, 1, '202', 'T1', 43.12, 43.1200, null, null, 0, 1)
@@ -1310,3 +1545,1143 @@ CommitTran:
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
 	END CATCH
+go
+ALTER PROCEDURE Cash.proc_PaymentAdd(@AccountCode nvarchar(10), @CashAccountCode AS nvarchar(10), @CashCode nvarchar(50), @PaidOn datetime, @ToPay decimal(18, 5), @PaymentReference nvarchar(50) = null, @PaymentCode nvarchar(20) output)
+AS
+	SET NOCOUNT, XACT_ABORT ON;
+	BEGIN TRY
+		
+		EXECUTE Cash.proc_NextPaymentCode  @PaymentCode OUTPUT
+
+		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
+		SELECT   @PaymentCode AS PaymentCode, 
+			(SELECT UserId FROM Usr.vwCredentials) AS UserId,
+			0 AS PaymentStatusCode,
+			@AccountCode AS AccountCode,
+			@CashAccountCode AS CashAccountCode,
+			@CashCode AS CashCode,
+			Cash.tbCode.TaxCode,
+			@PaidOn As PaidOn,
+			CASE WHEN @ToPay > 0 THEN @ToPay ELSE 0 END AS PaidInValue,
+			CASE WHEN @ToPay < 0 THEN ABS(@ToPay) ELSE 0 END AS PaidOutValue,
+			@PaymentReference PaymentReference
+		FROM Cash.tbCode 
+			INNER JOIN Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode 
+		WHERE        (Cash.tbCode.CashCode = @CashCode)
+
+
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER PROCEDURE Cash.proc_PaymentPostMisc
+	(
+	@PaymentCode nvarchar(20) 
+	)
+ AS
+ 	SET NOCOUNT, XACT_ABORT ON;
+
+	BEGIN TRY
+		DECLARE 
+			@InvoiceNumber nvarchar(20), 
+			@NextNumber int, 
+			@InvoiceTypeCode smallint;
+
+		IF NOT EXISTS (SELECT        Cash.tbPayment.PaymentCode
+						FROM            Cash.tbPayment INNER JOIN
+												 Cash.tbCode ON Cash.tbPayment.CashCode = Cash.tbCode.CashCode INNER JOIN
+												 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+						WHERE        (Cash.tbPayment.PaymentStatusCode <> 1)  
+							AND Cash.tbPayment.UserId = (SELECT UserId FROM Usr.vwCredentials))
+			RETURN 
+
+		SELECT @InvoiceTypeCode = CASE WHEN PaidInValue != 0 THEN 0 ELSE 2 END 
+		FROM         Cash.tbPayment
+		WHERE     (PaymentCode = @PaymentCode)
+	
+		SELECT @NextNumber = NextNumber
+		FROM Invoice.tbType
+		WHERE InvoiceTypeCode = @InvoiceTypeCode;
+		
+		SET @InvoiceNumber = FORMAT(@NextNumber, '000000') + '.' + (SELECT UserId FROM Usr.vwCredentials)
+
+		WHILE EXISTS (SELECT     InvoiceNumber
+					  FROM         Invoice.tbInvoice
+					  WHERE     (InvoiceNumber = @InvoiceNumber))
+			BEGIN
+			SET @NextNumber += @NextNumber 
+			SET @InvoiceNumber = FORMAT(@NextNumber, '000000') + '.' + (SELECT UserId FROM Usr.vwCredentials)
+			END
+		
+		BEGIN TRANSACTION
+
+		UPDATE    Invoice.tbType
+		SET              NextNumber = @NextNumber + 1
+		WHERE     (InvoiceTypeCode = @InvoiceTypeCode);
+
+		WITH payment AS
+		(
+			SELECT UserId, AccountCode, PaidOn, PaidInValue, PaidOutValue,
+					CASE TaxRate WHEN 0 THEN 0
+					ELSE
+					(
+						CASE App.tbTaxCode.RoundingCode 
+							WHEN 0 THEN ROUND(Cash.tbPayment.PaidInValue - ( Cash.tbPayment.PaidInValue / (1 + App.tbTaxCode.TaxRate)), Decimals) 
+							WHEN 1 THEN ROUND(Cash.tbPayment.PaidInValue - ( Cash.tbPayment.PaidInValue / (1 + App.tbTaxCode.TaxRate)), Decimals, 1) 
+						END
+					)
+					END TaxInValue, 			 
+					CASE TaxRate WHEN 0 THEN 0
+					ELSE
+					(
+						CASE App.tbTaxCode.RoundingCode 
+							WHEN 0 THEN ROUND(Cash.tbPayment.PaidOutValue - ( Cash.tbPayment.PaidOutValue / (1 + App.tbTaxCode.TaxRate)), Decimals) 
+							WHEN 1 THEN ROUND(Cash.tbPayment.PaidOutValue - ( Cash.tbPayment.PaidOutValue / (1 + App.tbTaxCode.TaxRate)), Decimals, 1) 
+						END
+					)
+					END TaxOutValue
+			FROM Cash.tbPayment
+				INNER JOIN App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode
+			WHERE     (PaymentCode = @PaymentCode)
+		)
+		INSERT INTO Invoice.tbInvoice
+								 (InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, DueOn, ExpectedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, Printed)
+		SELECT        @InvoiceNumber AS InvoiceNumber, payment.UserId, payment.AccountCode, @InvoiceTypeCode AS InvoiceTypeCode, 3 AS InvoiceStatusCode, 
+								payment.PaidOn, payment.PaidOn AS DueOn, payment.PaidOn AS ExpectedOn,
+								CASE WHEN PaidInValue > 0 THEN PaidInValue - TaxInValue
+									WHEN PaidOutValue > 0 THEN PaidOutValue - TaxOutValue
+								END AS InvoiceValue, 
+								CASE WHEN payment.PaidInValue > 0 THEN payment.TaxInValue 
+									WHEN payment.PaidOutValue > 0 THEN payment.TaxOutValue
+								END AS TaxValue, 
+								CASE WHEN PaidInValue > 0 THEN PaidInValue - TaxInValue
+									WHEN PaidOutValue > 0 THEN PaidOutValue - TaxOutValue
+								END AS PaidValue, 
+								CASE WHEN payment.PaidInValue > 0 THEN payment.TaxInValue 
+									WHEN payment.PaidOutValue > 0 THEN payment.TaxOutValue
+								END AS PaidTaxValue, 
+								1 AS Printed
+		FROM payment;
+
+		WITH payment AS
+		(
+			SELECT CashCode, TaxCode
+			FROM Cash.tbPayment
+			WHERE (Cash.tbPayment.PaymentCode = @PaymentCode)
+		), invoice_header AS
+		(
+			SELECT InvoiceNumber, InvoiceValue, TaxValue
+			FROM Invoice.tbInvoice
+			WHERE InvoiceNumber = @InvoiceNumber
+		)
+		INSERT INTO Invoice.tbItem
+							(InvoiceNumber, CashCode, InvoiceValue, TaxValue, TaxCode)
+		SELECT TOP 1 InvoiceNumber, CashCode, InvoiceValue, TaxValue, TaxCode
+		FROM payment
+			CROSS JOIN invoice_header;
+
+		UPDATE  Org.tbAccount
+		SET CurrentBalance = CASE WHEN PaidInValue > 0 THEN Org.tbAccount.CurrentBalance + PaidInValue ELSE Org.tbAccount.CurrentBalance - PaidOutValue END
+		FROM         Org.tbAccount INNER JOIN
+							  Cash.tbPayment ON Org.tbAccount.CashAccountCode = Cash.tbPayment.CashAccountCode
+		WHERE Cash.tbPayment.PaymentCode = @PaymentCode
+
+		UPDATE Cash.tbPayment
+		SET PaymentStatusCode = 1
+		WHERE (PaymentCode = @PaymentCode)
+
+		COMMIT TRANSACTION
+
+  	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER PROCEDURE Cash.proc_PaymentPostInvoiced (@PaymentCode nvarchar(20))
+AS
+	SET NOCOUNT, XACT_ABORT ON;
+
+	BEGIN TRY
+		DECLARE 
+			@AccountCode nvarchar(10)
+			, @PostValue decimal(18, 5);
+
+		SELECT   @PostValue = CASE WHEN PaidInValue = 0 THEN PaidOutValue ELSE PaidInValue * -1 END,
+			@AccountCode = Org.tbOrg.AccountCode
+		FROM         Cash.tbPayment INNER JOIN
+							  Org.tbOrg ON Cash.tbPayment.AccountCode = Org.tbOrg.AccountCode
+		WHERE     ( Cash.tbPayment.PaymentCode = @PaymentCode);
+
+		BEGIN TRANSACTION;
+
+		UPDATE Cash.tbPayment
+		SET PaymentStatusCode = 1
+		WHERE (PaymentCode = @PaymentCode);
+		
+		WITH invoice_status AS
+		(
+			SELECT InvoiceNumber, InvoiceStatusCode, PaidValue, PaidTaxValue
+			FROM Invoice.vwStatusLive
+			WHERE AccountCode = @AccountCode
+		)
+		UPDATE invoices
+		SET 
+			InvoiceStatusCode = invoice_status.InvoiceStatusCode,
+			PaidValue = invoice_status.PaidValue,
+			PaidTaxValue = invoice_status.PaidTaxValue
+		FROM Invoice.tbInvoice invoices	
+			JOIN invoice_status ON invoices.InvoiceNumber = invoice_status.InvoiceNumber
+		WHERE 
+			invoices.InvoiceStatusCode <> invoice_status.InvoiceStatusCode 
+			OR invoices.PaidValue <> invoice_status.PaidValue 
+			OR invoices.PaidTaxValue <> invoice_status.PaidTaxValue;
+
+		UPDATE  Org.tbAccount
+		SET CurrentBalance = Org.tbAccount.CurrentBalance + (@PostValue * -1)
+		FROM         Org.tbAccount INNER JOIN
+							  Cash.tbPayment ON Org.tbAccount.CashAccountCode = Cash.tbPayment.CashAccountCode
+		WHERE Cash.tbPayment.PaymentCode = @PaymentCode
+		
+		COMMIT TRANSACTION
+
+  	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+DROP PROCEDURE IF EXISTS Cash.proc_PaymentPostPaidIn;
+DROP PROCEDURE IF EXISTS Cash.proc_PaymentPostPaidOut;
+go
+ALTER PROCEDURE App.proc_SystemRebuild
+AS
+  	SET NOCOUNT, XACT_ABORT ON;
+
+	DECLARE @AccountCode nvarchar(10), @PaymentCode nvarchar(20);
+
+	BEGIN TRY
+		BEGIN TRANSACTION;
+
+		UPDATE Task.tbFlow
+		SET UsedOnQuantity = task.Quantity / parent_task.Quantity
+		FROM            Task.tbFlow AS flow 
+			JOIN Task.tbTask AS task ON flow.ChildTaskCode = task.TaskCode 
+			JOIN Task.tbTask AS parent_task ON flow.ParentTaskCode = parent_task.TaskCode
+			JOIN Cash.tbCode ON parent_task.CashCode = Cash.tbCode.CashCode
+		WHERE        (flow.UsedOnQuantity <> 0) AND (task.Quantity <> 0) 
+			AND (task.Quantity / parent_task.Quantity <> flow.UsedOnQuantity);
+
+		WITH parent_task AS
+		(
+			SELECT        ParentTaskCode
+			FROM            Task.tbFlow flow
+				JOIN Task.tbTask task ON flow.ParentTaskCode = task.TaskCode
+				JOIN Cash.tbCode cash ON task.CashCode = cash.CashCode
+		), task_flow AS
+		(
+			SELECT        flow.ParentTaskCode, flow.StepNumber, task.ActionOn,
+					LAG(task.ActionOn, 1, task.ActionOn) OVER (PARTITION BY flow.ParentTaskCode ORDER BY StepNumber) AS PrevActionOn
+			FROM Task.tbFlow flow
+				JOIN Task.tbTask task ON flow.ChildTaskCode = task.TaskCode
+				JOIN parent_task ON flow.ParentTaskCode = parent_task.ParentTaskCode
+		), step_disordered AS
+		(
+			SELECT ParentTaskCode 
+			FROM task_flow
+			WHERE ActionOn < PrevActionOn
+			GROUP BY ParentTaskCode
+		), step_ordered AS
+		(
+			SELECT flow.ParentTaskCode, flow.ChildTaskCode,
+				ROW_NUMBER() OVER (PARTITION BY flow.ParentTaskCode ORDER BY task.ActionOn, flow.StepNumber) * 10 AS StepNumber 
+			FROM step_disordered
+				JOIN Task.tbFlow flow ON step_disordered.ParentTaskCode = flow.ParentTaskCode
+				JOIN Task.tbTask task ON flow.ChildTaskCode = task.TaskCode
+		)
+		UPDATE flow
+		SET
+			StepNumber = step_ordered.StepNumber
+		FROM Task.tbFlow flow
+			JOIN step_ordered ON flow.ParentTaskCode = step_ordered.ParentTaskCode AND flow.ChildTaskCode = step_ordered.ChildTaskCode;
+
+		--invoices	
+		UPDATE Invoice.tbItem
+		SET 
+			InvoiceValue =  ROUND(Invoice.tbItem.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
+		FROM         Invoice.tbItem INNER JOIN
+								App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
+								Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0) AND Invoice.tbItem.TotalValue <> 0;
+
+		UPDATE Invoice.tbItem
+		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
+				WHEN 0 THEN ROUND(Invoice.tbItem.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+				WHEN 1 THEN ROUND( Invoice.tbItem.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) END
+		FROM         Invoice.tbItem INNER JOIN
+								App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode 
+								INNER JOIN Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0);
+                   
+		UPDATE Invoice.tbTask
+		SET InvoiceValue =  ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
+		FROM         Invoice.tbTask INNER JOIN
+								App.tbTaxCode ON Invoice.tbTask.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
+								Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0) AND Invoice.tbTask.TotalValue <> 0;
+
+		UPDATE Invoice.tbTask
+		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
+				WHEN 0 THEN ROUND(Invoice.tbTask.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+				WHEN 1 THEN ROUND( Invoice.tbTask.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) END,
+			InvoiceValue = CASE WHEN Invoice.tbTask.TotalValue = 0 
+								THEN Invoice.tbTask.InvoiceValue 
+								ELSE ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals) 
+							END
+		FROM         Invoice.tbTask INNER JOIN
+								App.tbTaxCode ON Invoice.tbTask.TaxCode = App.tbTaxCode.TaxCode 
+								INNER JOIN Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0);
+						   	
+	
+		WITH items AS
+		(
+			SELECT     Invoice.tbInvoice.InvoiceNumber, SUM( Invoice.tbItem.InvoiceValue) AS TotalInvoiceValue, SUM( Invoice.tbItem.TaxValue) AS TotalTaxValue
+			FROM         Invoice.tbItem INNER JOIN
+								Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+			GROUP BY Invoice.tbInvoice.InvoiceNumber
+		), tasks AS
+		(
+			SELECT     Invoice.tbInvoice.InvoiceNumber, SUM( Invoice.tbTask.InvoiceValue) AS TotalInvoiceValue, SUM( Invoice.tbTask.TaxValue) AS TotalTaxValue
+			FROM         Invoice.tbTask INNER JOIN
+								Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+			GROUP BY Invoice.tbInvoice.InvoiceNumber
+		), invoice_totals AS
+		(
+			SELECT invoices.InvoiceNumber, 
+				COALESCE(items.TotalInvoiceValue, 0) + COALESCE(tasks.TotalInvoiceValue, 0) TotalInvoiceValue,
+				COALESCE(items.TotalTaxValue, 0) + COALESCE(tasks.TotalTaxValue, 0) TotalTaxValue
+			FROM Invoice.tbInvoice invoices
+				LEFT OUTER JOIN tasks ON invoices.InvoiceNumber = tasks.InvoiceNumber
+				LEFT OUTER JOIN items ON invoices.InvoiceNumber = items.InvoiceNumber
+			WHERE ( invoices.InvoiceStatusCode > 0)
+		)
+		UPDATE invoices
+		SET InvoiceValue = TotalInvoiceValue, 
+			TaxValue = TotalTaxValue
+		FROM  Invoice.tbInvoice invoices 
+			JOIN invoice_totals ON invoices.InvoiceNumber = invoice_totals.InvoiceNumber
+		WHERE (InvoiceValue <> TotalInvoiceValue OR TaxValue <> TotalTaxValue);
+
+		WITH invoice_status AS
+		(
+			SELECT InvoiceNumber, InvoiceStatusCode, PaidValue, PaidTaxValue
+			FROM Invoice.vwStatusLive
+		)
+		UPDATE invoices
+		SET 
+			InvoiceStatusCode = invoice_status.InvoiceStatusCode,
+			PaidValue = invoice_status.PaidValue,
+			PaidTaxValue = invoice_status.PaidTaxValue
+		FROM Invoice.tbInvoice invoices	
+			JOIN invoice_status ON invoices.InvoiceNumber = invoice_status.InvoiceNumber
+		WHERE 
+			invoices.InvoiceStatusCode <> invoice_status.InvoiceStatusCode 
+			OR invoices.PaidValue <> invoice_status.PaidValue 
+			OR invoices.PaidTaxValue <> invoice_status.PaidTaxValue;		
+		--cash accounts
+		UPDATE Org.tbAccount
+		SET CurrentBalance = Cash.vwAccountRebuild.CurrentBalance
+		FROM         Cash.vwAccountRebuild INNER JOIN
+							Org.tbAccount ON Cash.vwAccountRebuild.CashAccountCode = Org.tbAccount.CashAccountCode;
+	
+		UPDATE Org.tbAccount
+		SET CurrentBalance = Org.tbAccount.OpeningBalance
+		FROM         Cash.vwAccountRebuild RIGHT OUTER JOIN
+							  Org.tbAccount ON Cash.vwAccountRebuild.CashAccountCode = Org.tbAccount.CashAccountCode
+		WHERE     (Cash.vwAccountRebuild.CashAccountCode IS NULL);
+
+		--CASH FLOW Initialize all
+		EXEC Cash.proc_GeneratePeriods;
+
+		UPDATE Cash.tbPeriod
+		SET InvoiceValue = 0, InvoiceTax = 0;
+		
+		WITH invoice_entries AS
+		(
+			SELECT invoices.CashCode, invoices.StartOn, categories.CashModeCode, SUM(invoices.InvoiceValue) InvoiceValue, SUM(invoices.TaxValue) TaxValue
+			FROM  Invoice.vwRegisterDetail invoices
+				JOIN Cash.tbCode cash_codes ON invoices.CashCode = cash_codes.CashCode 
+				JOIN Cash.tbCategory categories ON cash_codes.CategoryCode = categories .CategoryCode
+			WHERE   (StartOn < (SELECT StartOn FROM App.fnActivePeriod()))
+			GROUP BY invoices.CashCode, invoices.StartOn, categories.CashModeCode
+		), invoice_summary AS
+		(
+			SELECT CashCode, StartOn,
+				CASE CashModeCode 
+					WHEN 0 THEN
+						InvoiceValue * -1
+					ELSE 
+						InvoiceValue
+				END AS InvoiceValue,
+				CASE CashModeCode 
+					WHEN 0 THEN
+						TaxValue * -1
+					ELSE 
+						TaxValue
+				END AS TaxValue						
+			FROM invoice_entries
+		)
+		UPDATE Cash.tbPeriod
+		SET InvoiceValue = invoice_summary.InvoiceValue, 
+			InvoiceTax = invoice_summary.TaxValue
+		FROM    Cash.tbPeriod 
+			JOIN invoice_summary 
+				ON Cash.tbPeriod.CashCode = invoice_summary.CashCode AND Cash.tbPeriod.StartOn = invoice_summary.StartOn;
+
+		WITH asset_entries AS
+		(
+			SELECT payment.CashCode, 
+				(SELECT TOP 1 StartOn FROM App.tbYearPeriod WHERE (StartOn <= payment.PaidOn) ORDER BY StartOn DESC) AS StartOn,
+				CASE cash_category.CashModeCode
+					WHEN 0 THEN (PaidInValue + (PaidOutValue * -1)) * -1
+					WHEN 1 THEN PaidInValue + (PaidOutValue * -1)
+				END AssetValue
+			FROM Cash.tbPayment payment
+				JOIN Org.tbAccount account ON payment.CashAccountCode = account.CashAccountCode
+				JOIN Cash.tbCode cash_code ON account.CashCode = cash_code.CashCode
+				JOIN Cash.tbCategory cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
+			WHERE account.AccountTypeCode = 2 AND payment.IsProfitAndLoss <> 0 AND PaidOn < (SELECT StartOn FROM App.fnActivePeriod())
+		), asset_summary AS
+		(
+			SELECT CashCode, StartOn, SUM(AssetValue) AssetValue
+			FROM asset_entries
+			GROUP BY CashCode, StartOn
+		)
+		UPDATE Cash.tbPeriod
+		SET InvoiceValue = AssetValue
+		FROM  Cash.tbPeriod 
+			JOIN asset_summary 
+				ON Cash.tbPeriod.CashCode = asset_summary.CashCode AND Cash.tbPeriod.StartOn = asset_summary.StartOn;		
+            
+
+		COMMIT TRANSACTION
+
+		DECLARE @Msg NVARCHAR(MAX);
+		SELECT @Msg = Message FROM App.tbText WHERE TextId = 3006;
+		EXEC App.proc_EventLog @EventMessage = @Msg, @EventTypeCode = 2;
+
+  	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER PROCEDURE Org.proc_Rebuild(@AccountCode NVARCHAR(10))
+AS
+  	SET NOCOUNT, XACT_ABORT ON;
+
+	DECLARE @PaymentCode nvarchar(20);
+
+	BEGIN TRY
+		BEGIN TRANSACTION;
+
+		UPDATE Invoice.tbItem
+		SET 
+			InvoiceValue =  ROUND(Invoice.tbItem.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
+		FROM         Invoice.tbItem INNER JOIN
+								App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
+								Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0) AND Invoice.tbItem.TotalValue <> 0
+			AND (Invoice.tbInvoice.AccountCode = @AccountCode);
+
+		UPDATE Invoice.tbItem
+		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
+				WHEN 0 THEN ROUND(Invoice.tbItem.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+				WHEN 1 THEN ROUND( Invoice.tbItem.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) END
+		FROM         Invoice.tbItem INNER JOIN
+								App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode 
+								INNER JOIN Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0)
+			AND (Invoice.tbInvoice.AccountCode = @AccountCode);
+                   
+		UPDATE Invoice.tbTask
+		SET InvoiceValue =  ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
+		FROM         Invoice.tbTask INNER JOIN
+								App.tbTaxCode ON Invoice.tbTask.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
+								Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0) AND Invoice.tbTask.TotalValue <> 0
+			AND (Invoice.tbInvoice.AccountCode = @AccountCode);
+
+		UPDATE Invoice.tbTask
+		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
+				WHEN 0 THEN ROUND(Invoice.tbTask.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+				WHEN 1 THEN ROUND( Invoice.tbTask.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) END,
+			InvoiceValue = CASE WHEN Invoice.tbTask.TotalValue = 0 
+								THEN Invoice.tbTask.InvoiceValue 
+								ELSE ROUND(Invoice.tbTask.TotalValue / (1 + App.tbTaxCode.TaxRate), 2) 
+							END
+		FROM         Invoice.tbTask INNER JOIN
+								App.tbTaxCode ON Invoice.tbTask.TaxCode = App.tbTaxCode.TaxCode 
+								INNER JOIN Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0)
+			AND (Invoice.tbInvoice.AccountCode = @AccountCode);
+						   	
+		WITH items AS
+		(
+			SELECT     Invoice.tbInvoice.InvoiceNumber, SUM( Invoice.tbItem.InvoiceValue) AS TotalInvoiceValue, SUM( Invoice.tbItem.TaxValue) AS TotalTaxValue
+			FROM         Invoice.tbItem INNER JOIN
+								Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+			GROUP BY Invoice.tbInvoice.InvoiceNumber
+		), tasks AS
+		(
+			SELECT     Invoice.tbInvoice.InvoiceNumber, SUM( Invoice.tbTask.InvoiceValue) AS TotalInvoiceValue, SUM( Invoice.tbTask.TaxValue) AS TotalTaxValue
+			FROM         Invoice.tbTask INNER JOIN
+								Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+			GROUP BY Invoice.tbInvoice.InvoiceNumber
+		), invoice_totals AS
+		(
+			SELECT invoices.InvoiceNumber, 
+				COALESCE(items.TotalInvoiceValue, 0) + COALESCE(tasks.TotalInvoiceValue, 0) TotalInvoiceValue,
+				COALESCE(items.TotalTaxValue, 0) + COALESCE(tasks.TotalTaxValue, 0) TotalTaxValue
+			FROM Invoice.tbInvoice invoices
+				LEFT OUTER JOIN tasks ON invoices.InvoiceNumber = tasks.InvoiceNumber
+				LEFT OUTER JOIN items ON invoices.InvoiceNumber = items.InvoiceNumber
+			WHERE ( invoices.InvoiceStatusCode > 0)
+		)
+		UPDATE invoices
+		SET InvoiceValue = TotalInvoiceValue, 
+			TaxValue = TotalTaxValue
+		FROM  Invoice.tbInvoice invoices 
+			JOIN invoice_totals ON invoices.InvoiceNumber = invoice_totals.InvoiceNumber
+		WHERE AccountCode = @AccountCode AND (InvoiceValue <> TotalInvoiceValue OR TaxValue <> TotalTaxValue);
+
+
+
+		WITH invoice_status AS
+		(
+			SELECT InvoiceNumber, InvoiceStatusCode, PaidValue, PaidTaxValue
+			FROM Invoice.vwStatusLive
+			WHERE AccountCode = @AccountCode
+		)
+		UPDATE invoices
+		SET 
+			InvoiceStatusCode = invoice_status.InvoiceStatusCode,
+			PaidValue = invoice_status.PaidValue,
+			PaidTaxValue = invoice_status.PaidTaxValue
+		FROM Invoice.tbInvoice invoices	
+			JOIN invoice_status ON invoices.InvoiceNumber = invoice_status.InvoiceNumber
+		WHERE 
+			invoices.InvoiceStatusCode <> invoice_status.InvoiceStatusCode 
+			OR invoices.PaidValue <> invoice_status.PaidValue 
+			OR invoices.PaidTaxValue <> invoice_status.PaidTaxValue;
+
+		COMMIT TRANSACTION
+
+		DECLARE @Msg NVARCHAR(MAX);
+		SELECT @Msg = CONCAT(@AccountCode, ' ', Message) FROM App.tbText WHERE TextId = 3006;
+		EXEC App.proc_EventLog @EventMessage = @Msg, @EventTypeCode = 2;
+
+  	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER TRIGGER Invoice.Invoice_tbTask_TriggerInsert
+ON Invoice.tbTask
+FOR INSERT, UPDATE
+AS
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+
+		UPDATE task
+		SET InvoiceValue = inserted.TotalValue / (1 + TaxRate),
+			TaxValue = inserted.TotalValue - inserted.TotalValue / (1 + TaxRate)
+		FROM inserted 
+			INNER JOIN Invoice.tbTask task ON inserted.InvoiceNumber = task.InvoiceNumber 
+					AND inserted.TaskCode = task.TaskCode
+				INNER JOIN App.tbTaxCode ON inserted.TaxCode = App.tbTaxCode.TaxCode 
+		WHERE inserted.TotalValue <> 0;
+
+		UPDATE task
+		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
+				WHEN 0 THEN ROUND(task.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+				WHEN 1 THEN ROUND(task.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) 
+			END
+		FROM Invoice.tbTask task 
+			INNER JOIN inserted ON inserted.InvoiceNumber = task.InvoiceNumber
+					 AND inserted.TaskCode = task.TaskCode
+				INNER JOIN App.tbTaxCode ON task.TaxCode = App.tbTaxCode.TaxCode
+		WHERE inserted.TotalValue = 0; 
+
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER TRIGGER Invoice.Invoice_tbItem_TriggerInsert
+ON Invoice.tbItem
+FOR INSERT, UPDATE
+AS
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+
+		UPDATE item
+		SET InvoiceValue = inserted.TotalValue / (1 + TaxRate),
+			TaxValue = inserted.TotalValue - inserted.TotalValue / (1 + TaxRate)
+		FROM inserted 
+			INNER JOIN Invoice.tbItem item ON inserted.InvoiceNumber = item.InvoiceNumber 
+					AND inserted.CashCode = item.CashCode
+				INNER JOIN App.tbTaxCode ON inserted.TaxCode = App.tbTaxCode.TaxCode 
+		WHERE inserted.TotalValue <> 0;
+
+		UPDATE item
+		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
+				WHEN 0 THEN ROUND(item.InvoiceValue * App.tbTaxCode.TaxRate, Decimals)
+				WHEN 1 THEN ROUND(item.InvoiceValue * App.tbTaxCode.TaxRate, Decimals, 1) 
+			END
+		FROM Invoice.tbItem item 
+			INNER JOIN inserted ON inserted.InvoiceNumber = item.InvoiceNumber
+					 AND inserted.CashCode = item.CashCode
+				INNER JOIN App.tbTaxCode ON item.TaxCode = App.tbTaxCode.TaxCode
+		WHERE inserted.TotalValue = 0; 
+
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER VIEW Invoice.vwRegisterItems
+AS
+	SELECT       (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY p.StartOn DESC) AS StartOn,  
+					Invoice.tbInvoice.InvoiceNumber, Invoice.tbItem.CashCode AS TaskCode, Cash.tbCode.CashCode, Cash.tbCode.CashDescription, 
+							 Invoice.tbItem.TaxCode, App.tbTaxCode.TaxDescription, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbInvoice.InvoicedOn, 
+							 CASE WHEN Invoice.tbType.CashModeCode = 0 THEN Invoice.tbItem.InvoiceValue * - 1 ELSE Invoice.tbItem.InvoiceValue END AS InvoiceValue, 
+							 CASE WHEN Invoice.tbType.CashModeCode = 0 THEN Invoice.tbItem.TaxValue * - 1 ELSE Invoice.tbItem.TaxValue END AS TaxValue, 
+							 Invoice.tbInvoice.PaymentTerms, Invoice.tbInvoice.Printed, 
+							 Org.tbOrg.AccountName, Usr.tbUser.UserName, Invoice.tbStatus.InvoiceStatus, Invoice.tbType.CashModeCode, Invoice.tbType.InvoiceType
+	FROM            Invoice.tbInvoice INNER JOIN
+							 Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode INNER JOIN
+							 Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode INNER JOIN
+							 Invoice.tbStatus ON Invoice.tbInvoice.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode INNER JOIN
+							 Usr.tbUser ON Invoice.tbInvoice.UserId = Usr.tbUser.UserId INNER JOIN
+							 Invoice.tbItem ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbItem.InvoiceNumber INNER JOIN
+							 Cash.tbCode ON Invoice.tbItem.CashCode = Cash.tbCode.CashCode LEFT OUTER JOIN
+							 App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode;
+go
+ALTER VIEW Invoice.vwRegisterTasks
+AS
+	SELECT (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY p.StartOn DESC) AS StartOn,  
+			Invoice.tbInvoice.InvoiceNumber, InvoiceTask.TaskCode, Task.TaskTitle, Cash.tbCode.CashCode, Cash.tbCode.CashDescription, 
+							 InvoiceTask.TaxCode, App.tbTaxCode.TaxDescription, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, 
+							 Invoice.tbInvoice.InvoicedOn, InvoiceTask.Quantity,
+							 CASE WHEN Invoice.tbType.CashModeCode = 0 THEN InvoiceTask.InvoiceValue * - 1 ELSE InvoiceTask.InvoiceValue END AS InvoiceValue, 
+							 CASE WHEN Invoice.tbType.CashModeCode = 0 THEN InvoiceTask.TaxValue * - 1 ELSE InvoiceTask.TaxValue END AS TaxValue, 
+							 Invoice.tbInvoice.PaymentTerms, Invoice.tbInvoice.Printed, 
+							 Org.tbOrg.AccountName, Usr.tbUser.UserName, Invoice.tbStatus.InvoiceStatus, Invoice.tbType.CashModeCode, Invoice.tbType.InvoiceType
+	FROM            Invoice.tbInvoice INNER JOIN
+							 Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode INNER JOIN
+							 Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode INNER JOIN
+							 Invoice.tbStatus ON Invoice.tbInvoice.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode INNER JOIN
+							 Usr.tbUser ON Invoice.tbInvoice.UserId = Usr.tbUser.UserId INNER JOIN
+							 Invoice.tbTask AS InvoiceTask ON Invoice.tbInvoice.InvoiceNumber = InvoiceTask.InvoiceNumber INNER JOIN
+							 Cash.tbCode ON InvoiceTask.CashCode = Cash.tbCode.CashCode INNER JOIN
+							 Task.tbTask AS Task ON InvoiceTask.TaskCode = Task.TaskCode AND InvoiceTask.TaskCode = Task.TaskCode LEFT OUTER JOIN
+							 App.tbTaxCode ON InvoiceTask.TaxCode = App.tbTaxCode.TaxCode;
+go
+ALTER VIEW Invoice.vwRegisterDetail
+AS
+	WITH register AS
+	(
+		SELECT     StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, 
+							  InvoicedOn, Quantity, InvoiceValue, TaxValue, PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, 
+							  InvoiceType
+		FROM         Invoice.vwRegisterTasks
+		UNION
+		SELECT     StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, 
+							  InvoicedOn, 0 Quantity, InvoiceValue, TaxValue, PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, 
+							  InvoiceType
+		FROM         Invoice.vwRegisterItems
+	)
+	SELECT StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, InvoiceType,
+		CAST(Quantity as float) Quantity, CAST(InvoiceValue as float) InvoiceValue, CAST(TaxValue as float) TaxValue
+	FROM register;
+go
+ALTER VIEW Invoice.vwHistoryPurchaseItems
+AS
+	SELECT        CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS PeriodName, App.tbYearPeriod.YearNumber, Invoice.vwRegisterDetail.StartOn, Invoice.vwRegisterDetail.InvoiceNumber, 
+							 Invoice.vwRegisterDetail.TaskCode, Invoice.vwRegisterDetail.CashCode, Invoice.vwRegisterDetail.CashDescription, Invoice.vwRegisterDetail.TaxCode, Invoice.vwRegisterDetail.TaxDescription, 
+							 Invoice.vwRegisterDetail.AccountCode, Invoice.vwRegisterDetail.InvoiceTypeCode, Invoice.vwRegisterDetail.InvoiceStatusCode, Invoice.vwRegisterDetail.InvoicedOn, Invoice.vwRegisterDetail.InvoiceValue, 
+							 Invoice.vwRegisterDetail.TaxValue, Invoice.vwRegisterDetail.PaymentTerms, Invoice.vwRegisterDetail.Printed, 
+							 Invoice.vwRegisterDetail.AccountName, Invoice.vwRegisterDetail.UserName, Invoice.vwRegisterDetail.InvoiceStatus, Invoice.vwRegisterDetail.CashModeCode, Invoice.vwRegisterDetail.InvoiceType
+	FROM            Invoice.vwRegisterDetail INNER JOIN
+							 App.tbYearPeriod ON Invoice.vwRegisterDetail.StartOn = App.tbYearPeriod.StartOn INNER JOIN
+							 App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber INNER JOIN
+							 App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
+	WHERE        (Invoice.vwRegisterDetail.InvoiceTypeCode > 1);
+go
+ALTER VIEW Invoice.vwHistorySalesItems
+AS
+	SELECT        App.tbYearPeriod.YearNumber, CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS PeriodName, Invoice.vwRegisterDetail.StartOn, Invoice.vwRegisterDetail.InvoiceNumber, 
+							 Invoice.vwRegisterDetail.TaskCode, Invoice.vwRegisterDetail.CashCode, Invoice.vwRegisterDetail.CashDescription, Invoice.vwRegisterDetail.TaxCode, Invoice.vwRegisterDetail.AccountCode, Invoice.vwRegisterDetail.InvoicedOn, 
+							 Invoice.vwRegisterDetail.InvoiceValue, Invoice.vwRegisterDetail.TaxValue, Invoice.vwRegisterDetail.PaymentTerms, 
+							 Invoice.vwRegisterDetail.AccountName, Invoice.vwRegisterDetail.InvoiceStatus, Invoice.vwRegisterDetail.InvoiceType, Invoice.vwRegisterDetail.InvoiceTypeCode, 
+							 Invoice.vwRegisterDetail.InvoiceStatusCode
+	FROM            Invoice.vwRegisterDetail INNER JOIN
+							 App.tbYearPeriod ON Invoice.vwRegisterDetail.StartOn = App.tbYearPeriod.StartOn INNER JOIN
+							 App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber INNER JOIN
+							 App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
+	WHERE        (Invoice.vwRegisterDetail.InvoiceTypeCode < 2);
+go
+ALTER VIEW Invoice.vwRegisterPurchaseTasks
+AS
+	SELECT        StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, InvoiceValue, TaxValue
+							 PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, InvoiceType
+	FROM            Invoice.vwRegisterDetail
+	WHERE        (InvoiceTypeCode > 1);
+go
+ALTER VIEW Invoice.vwRegisterSaleTasks
+AS
+	SELECT        StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, InvoiceValue, TaxValue
+							 PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, InvoiceType
+	FROM            Invoice.vwRegisterDetail
+	WHERE        (InvoiceTypeCode < 2);
+go
+ALTER VIEW Org.vwSalesInvoices
+AS
+	SELECT        Invoice.tbInvoice.AccountCode, tbInvoiceTask.InvoiceNumber, tbInvoiceTask.TaskCode, Task.tbTask.ContactName, Invoice.tbInvoice.InvoicedOn, tbInvoiceTask.Quantity, tbInvoiceTask.InvoiceValue, tbInvoiceTask.TaxValue, 
+							 tbInvoiceTask.CashCode, tbInvoiceTask.TaxCode, Invoice.tbStatus.InvoiceStatus, Task.tbTask.TaskNotes, Cash.tbCode.CashDescription, Invoice.tbInvoice.InvoiceStatusCode, Task.tbTask.TaskTitle, Org.tbOrg.AccountName, 
+							 Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbType.InvoiceType, Invoice.tbInvoice.PaidTaxValue, Invoice.tbInvoice.PaidValue
+	FROM            Invoice.tbInvoice INNER JOIN
+							 Invoice.tbTask AS tbInvoiceTask ON Invoice.tbInvoice.InvoiceNumber = tbInvoiceTask.InvoiceNumber INNER JOIN
+							 Task.tbTask ON tbInvoiceTask.TaskCode = Task.tbTask.TaskCode INNER JOIN
+							 Cash.tbCode ON tbInvoiceTask.CashCode = Cash.tbCode.CashCode INNER JOIN
+							 Invoice.tbStatus ON Invoice.tbInvoice.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode INNER JOIN
+							 Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode INNER JOIN
+							 Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
+	WHERE        (Invoice.tbInvoice.InvoiceStatusCode > 0) AND (Invoice.tbInvoice.InvoiceTypeCode = 0)
+go
+ALTER VIEW Org.vwPurchaseInvoices
+AS
+	SELECT        Invoice.tbInvoice.AccountCode, tbInvoiceTask.InvoiceNumber, tbInvoiceTask.TaskCode, Task.tbTask.ContactName, Invoice.tbInvoice.InvoicedOn, tbInvoiceTask.Quantity, tbInvoiceTask.InvoiceValue, tbInvoiceTask.TaxValue, 
+							 tbInvoiceTask.CashCode, tbInvoiceTask.TaxCode, Invoice.tbStatus.InvoiceStatus, Task.tbTask.TaskNotes, Cash.tbCode.CashDescription, Invoice.tbInvoice.InvoiceStatusCode, Task.tbTask.TaskTitle, Org.tbOrg.AccountName, 
+							 Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbType.InvoiceType, Invoice.tbInvoice.PaidValue, Invoice.tbInvoice.PaidTaxValue
+	FROM            Invoice.tbInvoice INNER JOIN
+							 Invoice.tbTask AS tbInvoiceTask ON Invoice.tbInvoice.InvoiceNumber = tbInvoiceTask.InvoiceNumber INNER JOIN
+							 Task.tbTask ON tbInvoiceTask.TaskCode = Task.tbTask.TaskCode INNER JOIN
+							 Cash.tbCode ON tbInvoiceTask.CashCode = Cash.tbCode.CashCode INNER JOIN
+							 Invoice.tbStatus ON Invoice.tbInvoice.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode INNER JOIN
+							 Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode INNER JOIN
+							 Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
+	WHERE        (Invoice.tbInvoice.InvoiceStatusCode > 0) AND (Invoice.tbInvoice.InvoiceTypeCode > 1)
+go
+ALTER VIEW Org.vwInvoiceItems
+AS
+SELECT        Invoice.tbInvoice.AccountCode, Invoice.tbItem.InvoiceNumber, Invoice.tbItem.CashCode, Invoice.tbInvoice.InvoicedOn, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbStatus.InvoiceStatus, 
+                         Cash.tbCode.CashDescription, Org.tbOrg.AccountName, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbType.InvoiceType, Invoice.tbItem.TaxCode, Invoice.tbItem.TaxValue, 
+                         Invoice.tbItem.InvoiceValue, Invoice.tbInvoice.PaidValue, Invoice.tbInvoice.PaidTaxValue, Invoice.tbItem.ItemReference
+FROM            Invoice.tbInvoice INNER JOIN
+                         Invoice.tbStatus ON Invoice.tbInvoice.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode INNER JOIN
+                         Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode INNER JOIN
+                         Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode INNER JOIN
+                         Invoice.tbItem ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbItem.InvoiceNumber INNER JOIN
+                         Cash.tbCode ON Invoice.tbItem.CashCode = Cash.tbCode.CashCode
+WHERE        (Invoice.tbInvoice.InvoiceStatusCode > 0);
+go
+ALTER VIEW Invoice.vwRegisterExpenses
+ AS
+	SELECT     Invoice.vwRegisterTasks.StartOn, Invoice.vwRegisterTasks.InvoiceNumber, Invoice.vwRegisterTasks.TaskCode, App.tbYearPeriod.YearNumber, 
+						  App.tbYear.Description, App.tbMonth.MonthName + ' ' + LTRIM(STR(YEAR( App.tbYearPeriod.StartOn))) AS Period, Invoice.vwRegisterTasks.TaskTitle, 
+						  Invoice.vwRegisterTasks.CashCode, Invoice.vwRegisterTasks.CashDescription, Invoice.vwRegisterTasks.TaxCode, Invoice.vwRegisterTasks.TaxDescription, 
+						  Invoice.vwRegisterTasks.AccountCode, Invoice.vwRegisterTasks.InvoiceTypeCode, Invoice.vwRegisterTasks.InvoiceStatusCode, Invoice.vwRegisterTasks.InvoicedOn, 
+						  Invoice.vwRegisterTasks.InvoiceValue, Invoice.vwRegisterTasks.TaxValue, 
+						  Invoice.vwRegisterTasks.PaymentTerms, Invoice.vwRegisterTasks.Printed, Invoice.vwRegisterTasks.AccountName, Invoice.vwRegisterTasks.UserName, 
+						  Invoice.vwRegisterTasks.InvoiceStatus, Invoice.vwRegisterTasks.CashModeCode, Invoice.vwRegisterTasks.InvoiceType
+	FROM         Invoice.vwRegisterTasks INNER JOIN
+						  App.tbYearPeriod ON Invoice.vwRegisterTasks.StartOn = App.tbYearPeriod.StartOn INNER JOIN
+						  App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber INNER JOIN
+						  App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
+	WHERE     (Task.fnIsExpense(Invoice.vwRegisterTasks.TaskCode) = 1)
+go
+ALTER VIEW Invoice.vwNetworkDeploymentItems
+AS
+	SELECT Invoice.tbItem.InvoiceNumber, Invoice.tbItem.CashCode ChargeCode, 
+		CASE WHEN LEN(COALESCE(CAST(Invoice.tbItem.ItemReference AS NVARCHAR), '')) > 0 THEN Invoice.tbItem.ItemReference ELSE Cash.tbCode.CashDescription END ChargeDescription, 
+			Invoice.tbItem.InvoiceValue, Invoice.tbItem.TaxValue, 0 AS InvoiceQuantity, Invoice.tbItem.TaxCode
+	FROM  Invoice.tbItem 
+		INNER JOIN Cash.tbCode ON Invoice.tbItem.CashCode = Cash.tbCode.CashCode;
+go
+ALTER PROCEDURE Invoice.proc_Total 
+	(
+	@InvoiceNumber nvarchar(20)
+	)
+  AS
+   	SET NOCOUNT, XACT_ABORT ON;
+
+	BEGIN TRY
+
+		WITH totals AS
+		(
+			SELECT InvoiceNumber, SUM(InvoiceValue) AS InvoiceValue, 
+				SUM(TaxValue) AS TaxValue
+			FROM         Invoice.tbTask
+			GROUP BY InvoiceNumber
+			HAVING      (InvoiceNumber = @InvoiceNumber)
+			UNION
+			SELECT InvoiceNumber, SUM(InvoiceValue) AS InvoiceValue, 
+				SUM(TaxValue) AS TaxValue
+			FROM         Invoice.tbItem
+			GROUP BY InvoiceNumber
+			HAVING      (InvoiceNumber = @InvoiceNumber)
+		), grand_total AS
+		(
+			SELECT InvoiceNumber, ISNULL(SUM(InvoiceValue), 0) AS InvoiceValue, 
+				ISNULL(SUM(TaxValue), 0) AS TaxValue
+			FROM totals
+			GROUP BY InvoiceNumber
+		) 
+		UPDATE    Invoice.tbInvoice
+		SET InvoiceValue = grand_total.InvoiceValue, TaxValue = grand_total.TaxValue
+		FROM Invoice.tbInvoice INNER JOIN grand_total ON Invoice.tbInvoice.InvoiceNumber = grand_total.InvoiceNumber;
+		
+  	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER VIEW Cash.vwStatement
+AS
+	--invoiced taxes
+	WITH corp_taxcode AS
+	(
+		SELECT TOP (1) AccountCode, CashCode 
+		FROM Cash.tbTaxType WHERE (TaxTypeCode = 0)
+	), corptax_invoiced_entries AS
+	(
+		SELECT AccountCode, CashCode, StartOn, TaxDue, Balance,
+			ROW_NUMBER() OVER (ORDER BY StartOn) AS RowNumber 
+		FROM Cash.vwTaxCorpStatement CROSS JOIN corp_taxcode
+		WHERE (Balance <> 0) AND (StartOn >= (SELECT MIN(StartOn) FROM App.tbYearPeriod WHERE CashStatusCode < 2)) --AND (TaxDue > 0) 
+	), corptax_invoiced_owing AS
+	(
+		SELECT AccountCode, CashCode, StartOn AS TransactOn, 4 AS CashEntryTypeCode, 
+			(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 1214) ReferenceCode, 0 AS PayIn,
+			CASE RowNumber WHEN 1 THEN Balance ELSE TaxDue END AS PayOut
+		FROM corptax_invoiced_entries
+	), vat_taxcode AS
+	(
+		SELECT TOP (1) AccountCode, CashCode 
+		FROM Cash.tbTaxType WHERE (TaxTypeCode = 1)
+	), vat_totals AS
+	(
+		SELECT ROW_NUMBER() OVER (ORDER BY RowNumber DESC) AS Id, StartOn AS TransactOn, VatDue,
+			CASE WHEN VatPaid  < 0 OR Balance <= 0 THEN NULL ELSE 1 END IsLive
+		FROM Cash.vwTaxVatStatement
+		--WHERE VatDue <> 0
+	), vat_invoiced_owing AS
+	(
+		SELECT AccountCode, CashCode, TransactOn, 5 AS CashEntryTypeCode, 
+			(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 1214) ReferenceCode, 
+			CASE WHEN VatDue < 0 THEN ABS(VatDue) ELSE 0 END AS PayIn,
+			CASE WHEN VatDue >= 0 THEN VatDue ELSE 0 END AS PayOut
+		FROM vat_totals CROSS JOIN vat_taxcode
+		WHERE Id <  COALESCE((SELECT TOP 1 t.Id FROM vat_totals t WHERE t.IsLive IS NULL ORDER BY Id), (SELECT MIN(Id) + 1 FROM vat_totals))
+		--(SELECT TOP 1 t.Id FROM vat_totals t WHERE t.IsLive IS NULL ORDER BY Id)
+	)
+	--uninvoiced taxes
+	,  corptax_dates AS
+	(
+		SELECT PayOn, PayFrom, PayTo FROM Cash.fnTaxTypeDueDates(0)
+	), corptax_accrual_entries AS
+	(
+		SELECT StartOn, SUM(TaxDue) AS TaxDue
+		FROM Cash.vwTaxCorpAccruals
+		GROUP BY StartOn
+	), corptax_accrual_candidates AS
+	(
+			SELECT (SELECT PayOn FROM corptax_dates WHERE corptax_accrual_entries.StartOn >= PayFrom AND corptax_accrual_entries.StartOn < PayTo) AS TransactOn, TaxDue			
+		FROM corptax_accrual_entries 
+	), corptax_accrual_totals AS
+	(
+		SELECT TransactOn, SUM(TaxDue) AS TaxDue
+		FROM corptax_accrual_candidates
+		GROUP BY TransactOn
+	)	
+	, corptax_accruals AS
+	(	
+		SELECT AccountCode, CashCode, TransactOn, 4 AS CashEntryTypeCode, 
+				(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 1215) ReferenceCode, 
+				CASE WHEN TaxDue < 0 THEN ABS(TaxDue) ELSE 0 END AS PayIn,
+				CASE WHEN TaxDue >= 0 THEN TaxDue ELSE 0 END AS PayOut
+		FROM corptax_accrual_totals CROSS JOIN corp_taxcode
+	), vat_dates AS
+	(
+		SELECT PayOn, PayFrom, PayTo FROM Cash.fnTaxTypeDueDates(1)
+	), vat_accrual_entries AS
+	(
+		SELECT StartOn, SUM(VatDue) AS TaxDue 
+		FROM Cash.vwTaxVatAccruals vat_audit
+		WHERE vat_audit.VatDue <> 0
+		GROUP BY StartOn
+	), vat_accrual_candidates AS
+	(
+		SELECT (SELECT PayOn FROM vat_dates WHERE vat_accrual_entries.StartOn >= PayFrom AND vat_accrual_entries.StartOn < PayTo) AS TransactOn, TaxDue			
+		FROM vat_accrual_entries 
+	), vat_accrual_totals AS
+	(
+		SELECT TransactOn, SUM(TaxDue) AS TaxDue
+		FROM vat_accrual_candidates
+		GROUP BY TransactOn
+	), vat_accruals AS
+	(
+		SELECT vat_taxcode.AccountCode, vat_taxcode.CashCode, TransactOn, 5 AS CashEntryTypeCode, 
+				(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 1215) ReferenceCode,
+				CASE WHEN TaxDue < 0 THEN ABS(TaxDue) ELSE 0 END AS PayIn,
+				CASE WHEN TaxDue >= 0 THEN TaxDue ELSE 0 END AS PayOut
+		FROM vat_accrual_totals
+			CROSS JOIN vat_taxcode
+	)
+	--unpaid invoices
+	, candidate_cash_codes AS
+	(
+		SELECT invoice_tasks.InvoiceNumber, 0 OrderBy, 
+			FIRST_VALUE(CashCode) OVER (PARTITION BY invoice_tasks.InvoiceNumber ORDER BY CashCode) CashCode
+		FROM Invoice.tbTask invoice_tasks 
+			JOIN Invoice.tbInvoice invoices ON invoices.InvoiceNumber = invoice_tasks.InvoiceNumber
+		WHERE  (InvoiceStatusCode < 3)
+		UNION
+		SELECT invoice_items.InvoiceNumber, 1 OrderBy, 
+			FIRST_VALUE(CashCode) OVER (PARTITION BY invoice_items.InvoiceNumber ORDER BY CashCode) CashCode
+		FROM Invoice.tbItem invoice_items 
+			JOIN Invoice.tbInvoice invoices ON invoices.InvoiceNumber = invoice_items.InvoiceNumber
+		WHERE  (InvoiceStatusCode < 3)
+	), cash_codes AS
+	(
+		SELECT InvoiceNumber,
+			FIRST_VALUE(CashCode) OVER (PARTITION BY InvoiceNumber ORDER BY OrderBy) CashCode
+		FROM candidate_cash_codes
+	), invoices_outstanding AS
+	(
+		SELECT  invoices.AccountCode, cash_codes.CashCode CashCode, invoices.ExpectedOn AS TransactOn, 1 AS CashEntryTypeCode, invoices.InvoiceNumber AS ReferenceCode, 
+					CASE CashModeCode WHEN 1 THEN InvoiceValue + TaxValue - (PaidValue + PaidTaxValue) ELSE 0 END AS PayIn, 
+					CASE CashModeCode WHEN 0 THEN (InvoiceValue + TaxValue) - (PaidValue + PaidTaxValue) ELSE 0 END AS PayOut
+		FROM  Invoice.tbInvoice invoices
+			JOIN Invoice.tbType invoice_type ON invoices.InvoiceTypeCode = invoice_type.InvoiceTypeCode
+			JOIN cash_codes ON invoices.InvoiceNumber = cash_codes.InvoiceNumber
+		WHERE  (InvoiceStatusCode < 3) AND ((InvoiceValue + TaxValue - PaidValue + PaidTaxValue) > 0)
+	), task_invoiced_quantity AS
+	(
+		SELECT        Invoice.tbTask.TaskCode, SUM(Invoice.tbTask.Quantity) AS InvoiceQuantity
+		FROM            Invoice.tbTask INNER JOIN
+								 Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+		WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 0) OR
+								 (Invoice.tbInvoice.InvoiceTypeCode = 2)
+		GROUP BY Invoice.tbTask.TaskCode
+	), tasks_confirmed AS
+	(
+		SELECT        TOP (100) PERCENT Task.tbTask.TaskCode AS ReferenceCode, Task.tbTask.AccountCode, Task.tbTask.PaymentOn AS TransactOn, Task.tbTask.PaymentOn, 2 AS CashEntryTypeCode, 
+								 CASE WHEN Cash.tbCategory.CashModeCode = 0 THEN (Task.tbTask.UnitCharge + Task.tbTask.UnitCharge * App.tbTaxCode.TaxRate) * (Task.tbTask.Quantity - ISNULL(task_invoiced_quantity.InvoiceQuantity, 
+								 0)) ELSE 0 END AS PayOut, CASE WHEN Cash.tbCategory.CashModeCode = 1 THEN (Task.tbTask.UnitCharge + Task.tbTask.UnitCharge * App.tbTaxCode.TaxRate) 
+								 * (Task.tbTask.Quantity - ISNULL(task_invoiced_quantity.InvoiceQuantity, 0)) ELSE 0 END AS PayIn, Cash.tbCode.CashCode
+		FROM            App.tbTaxCode INNER JOIN
+								 Task.tbTask ON App.tbTaxCode.TaxCode = Task.tbTask.TaxCode INNER JOIN
+								 Cash.tbCode ON Task.tbTask.CashCode = Cash.tbCode.CashCode INNER JOIN
+								 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode LEFT OUTER JOIN
+								 task_invoiced_quantity ON Task.tbTask.TaskCode = task_invoiced_quantity.TaskCode
+		WHERE        (Task.tbTask.TaskStatusCode > 0) AND (Task.tbTask.TaskStatusCode < 3) AND (Task.tbTask.Quantity - ISNULL(task_invoiced_quantity.InvoiceQuantity, 0) > 0)
+	)
+	--interbank transfers
+	, transfer_current_account AS
+	(
+		SELECT        Org.tbAccount.CashAccountCode
+		FROM            Org.tbAccount INNER JOIN
+								 Cash.tbCode ON Org.tbAccount.CashCode = Cash.tbCode.CashCode INNER JOIN
+								 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode AND Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+		WHERE        (Cash.tbCategory.CashTypeCode = 2)
+	), transfer_accruals AS
+	(
+		SELECT        Cash.tbPayment.AccountCode, Cash.tbPayment.CashCode, Cash.tbPayment.PaidOn AS TransactOn, Cash.tbPayment.PaymentCode AS ReferenceCode, 
+			6 AS CashEntryTypeCode, Cash.tbPayment.PaidInValue AS PayIn, Cash.tbPayment.PaidOutValue AS PayOut
+		FROM            transfer_current_account INNER JOIN
+								 Cash.tbPayment ON transfer_current_account.CashAccountCode = Cash.tbPayment.CashAccountCode
+		WHERE        (Cash.tbPayment.PaymentStatusCode = 2)
+	)
+	, statement_unsorted AS
+	(
+		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM corptax_invoiced_owing
+		UNION
+		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM vat_invoiced_owing
+		UNION
+		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM corptax_accruals
+		UNION
+		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM vat_accruals
+		UNION
+		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM invoices_outstanding
+		UNION 
+		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM tasks_confirmed
+		UNION
+		SELECT AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM transfer_accruals
+	), statement_sorted AS
+	(
+		SELECT ROW_NUMBER() OVER(ORDER BY TransactOn, CashEntryTypeCode DESC) AS RowNumber,
+		 AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM statement_unsorted			
+	), opening_balance AS
+	(	
+		SELECT SUM( Org.tbAccount.CurrentBalance) AS OpeningBalance
+		FROM         Org.tbAccount INNER JOIN
+							  Cash.tbCode ON Org.tbAccount.CashCode = Cash.tbCode.CashCode
+		WHERE     ( Org.tbAccount.AccountClosed = 0) AND (Org.tbAccount.AccountTypeCode = 0)
+	), statement_data AS
+	(
+		SELECT 
+			0 AS RowNumber,
+			(SELECT TOP (1) AccountCode FROM App.tbOptions) AS AccountCode,
+			NULL AS CashCode,
+			NULL AS TransactOn,    
+			(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 3013) AS ReferenceCode,	
+			1 AS CashEntryTypeCode,
+			PayIn = (SELECT OpeningBalance FROM opening_balance),
+			0 AS PayOut
+		UNION 
+		SELECT RowNumber, AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM statement_sorted
+	), company_statement AS
+	(
+		SELECT RowNumber, AccountCode, CashCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut,
+			SUM(PayIn + (PayOut * -1)) OVER (ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance
+		FROM statement_data
+	)
+	SELECT RowNumber, cs.AccountCode, org.AccountName, cs.CashCode, cc.CashDescription,
+			TransactOn, ReferenceCode, cs.CashEntryTypeCode, et.CashEntryType, CAST(PayIn AS decimal(18, 5)) PayIn, CAST(PayOut AS decimal(18, 5)) PayOut, CAST(Balance AS decimal(18, 5)) Balance
+	FROM company_statement cs 
+		JOIN Org.tbOrg org ON cs.AccountCode = org.AccountCode
+		JOIN Cash.tbEntryType et ON cs.CashEntryTypeCode = et.CashEntryTypeCode
+		LEFT OUTER JOIN Cash.tbCode cc ON cs.CashCode = cc.CashCode;
+go
+ALTER VIEW Task.vwProfit 
+AS
+	WITH orders AS
+	(
+		SELECT        task.TaskCode, task.Quantity, task.UnitCharge,
+									 (SELECT        TOP (1) StartOn
+									   FROM            App.tbYearPeriod AS p
+									   WHERE        (StartOn <= task.ActionOn)
+									   ORDER BY StartOn DESC) AS StartOn
+		FROM            Task.tbFlow RIGHT OUTER JOIN
+								 Task.tbTask ON Task.tbFlow.ParentTaskCode = Task.tbTask.TaskCode AND Task.tbFlow.ParentTaskCode = Task.tbTask.TaskCode AND Task.tbFlow.ParentTaskCode = Task.tbTask.TaskCode RIGHT OUTER JOIN
+								 Task.tbTask AS task INNER JOIN
+								 Cash.tbCode AS cashcode ON task.CashCode = cashcode.CashCode INNER JOIN
+								 Cash.tbCategory AS category ON category.CategoryCode = cashcode.CategoryCode ON Task.tbFlow.ChildTaskCode = task.TaskCode AND Task.tbFlow.ChildTaskCode = task.TaskCode
+		WHERE        (category.CashModeCode = 1) AND (task.TaskStatusCode BETWEEN 1 AND 3) AND 
+			(task.ActionOn >= (SELECT        MIN(StartOn)
+											FROM            App.tbYearPeriod p JOIN
+																	  App.tbYear y ON p.YearNumber = y.YearNumber
+											WHERE        y.CashStatusCode < 3)) AND	
+			((Task.tbFlow.ParentTaskCode IS NULL) OR (Task.tbTask.CashCode IS NULL))
+
+	), invoices AS
+	(
+		SELECT tasks.TaskCode, ISNULL(invoice.InvoiceValue, 0) AS InvoiceValue, ISNULL(invoice.InvoicePaid, 0) AS InvoicePaid 
+		FROM Task.tbTask tasks LEFT OUTER JOIN 
+			(
+				SELECT Invoice.tbTask.TaskCode, 
+					SUM(CASE CashModeCode WHEN 0 THEN Invoice.tbTask.InvoiceValue * -1 ELSE Invoice.tbTask.InvoiceValue END) AS InvoiceValue, 
+					CASE InvoiceStatusCode WHEN 3 THEN 
+						SUM(CASE CashModeCode WHEN 0 THEN Invoice.tbTask.InvoiceValue * -1 ELSE Invoice.tbTask.InvoiceValue END)
+					ELSE 0
+					END AS InvoicePaid
+				FROM Invoice.tbTask 
+					INNER JOIN Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
+					INNER JOIN Invoice.tbType ON Invoice.tbType.InvoiceTypeCode = Invoice.tbInvoice.InvoiceTypeCode 
+				GROUP BY Invoice.tbTask.TaskCode, Invoice.tbInvoice.InvoiceStatusCode
+			) invoice 
+		ON tasks.TaskCode = invoice.TaskCode
+	), task_flow AS
+	(
+		SELECT orders.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
+			CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(orders.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE task.Quantity END AS Quantity
+		FROM Task.tbFlow child 
+			JOIN orders ON child.ParentTaskCode = orders.TaskCode
+			JOIN Task.tbTask task ON child.ChildTaskCode = task.TaskCode
+
+		UNION ALL
+
+		SELECT parent.TaskCode, child.ParentTaskCode, child.ChildTaskCode, 
+			CASE WHEN child.UsedOnQuantity <> 0 THEN CAST(parent.Quantity * child.UsedOnQuantity AS decimal(18, 4)) ELSE task.Quantity END AS Quantity
+		FROM Task.tbFlow child 
+			JOIN task_flow parent ON child.ParentTaskCode = parent.ChildTaskCode
+			JOIN Task.tbTask task ON child.ChildTaskCode = task.TaskCode
+
+	), tasks AS
+	(
+		SELECT task_flow.TaskCode, task.Quantity,
+				CASE category.CashModeCode 
+					WHEN NULL THEN 0 
+					WHEN 0 THEN task.UnitCharge * -1 
+					ELSE task.UnitCharge 
+				END AS UnitCharge,
+				invoices.InvoiceValue, invoices.InvoicePaid
+		FROM task_flow
+			JOIN Task.tbTask task ON task_flow.ChildTaskCode = task.TaskCode
+			JOIN invoices ON invoices.TaskCode = task.TaskCode
+			LEFT OUTER JOIN Cash.tbCode cashcode ON cashcode.CashCode = task.CashCode 
+			LEFT OUTER JOIN Cash.tbCategory category ON category.CategoryCode = cashcode.CategoryCode
+	)
+	, task_costs AS
+	(
+		SELECT TaskCode, ROUND(SUM(Quantity * UnitCharge), 2) AS TotalCost, 
+				ROUND(SUM(InvoiceValue), 2) AS InvoicedCost, ROUND(SUM(InvoicePaid), 2) AS InvoicedCostPaid
+		FROM tasks
+		GROUP BY TaskCode
+		UNION
+		SELECT TaskCode, 0 AS TotalCost, 0 AS InvoicedCost, 0 AS InvoicedCostPaid
+		FROM orders LEFT OUTER JOIN Task.tbFlow AS flow ON orders.TaskCode = flow.ParentTaskCode
+		WHERE (flow.ParentTaskCode IS NULL)
+	), profits AS
+	(
+		SELECT orders.StartOn, task.AccountCode, orders.TaskCode, 
+			yearperiod.YearNumber, yr.Description, 
+			CONCAT(mn.MonthName, ' ', YEAR(yearperiod.StartOn)) AS Period,
+			task.ActivityCode, cashcode.CashCode, task.TaskTitle, org.AccountName, cashcode.CashDescription,
+			taskstatus.TaskStatus, task.TotalCharge, invoices.InvoiceValue AS InvoicedCharge,
+			invoices.InvoicePaid AS InvoicedChargePaid,
+			task_costs.TotalCost, task_costs.InvoicedCost, task_costs.InvoicedCostPaid,
+			task.TotalCharge + task_costs.TotalCost AS Profit,
+			task.TotalCharge - invoices.InvoiceValue AS UninvoicedCharge,
+			invoices.InvoiceValue - invoices.InvoicePaid AS UnpaidCharge,
+			task_costs.TotalCost - task_costs.InvoicedCost AS UninvoicedCost,
+			task_costs.InvoicedCost - task_costs.InvoicedCostPaid AS UnpaidCost,
+			task.ActionOn, task.ActionedOn, task.PaymentOn
+		FROM orders 
+			JOIN Task.tbTask task ON task.TaskCode = orders.TaskCode
+			JOIN invoices ON invoices.TaskCode = task.TaskCode
+			JOIN task_costs ON orders.TaskCode = task_costs.TaskCode	
+			JOIN Cash.tbCode cashcode ON task.CashCode = cashcode.CashCode
+			JOIN Task.tbStatus taskstatus ON taskstatus.TaskStatusCode = task.TaskStatusCode
+			JOIN Org.tbOrg org ON org.AccountCode = task.AccountCode
+			JOIN App.tbYearPeriod yearperiod ON yearperiod.StartOn = orders.StartOn
+			JOIN App.tbYear yr ON yr.YearNumber = yearperiod.YearNumber
+			JOIN App.tbMonth mn ON mn.MonthNumber = yearperiod.MonthNumber
+		)
+		SELECT StartOn, AccountCode, TaskCode, YearNumber, [Description], [Period], ActivityCode, CashCode,
+			TaskTitle, AccountName, CashDescription, TaskStatus, CAST(TotalCharge as float) TotalCharge, CAST(InvoicedCharge as float) InvoicedCharge, CAST(InvoicedChargePaid as float) InvoicedChargePaid,
+			CAST(TotalCost AS float) TotalCost, CAST(InvoicedCost as float) InvoicedCost, CAST(InvoicedCostPaid as float) InvoicedCostPaid, CAST(Profit AS float) Profit,
+			CAST(UninvoicedCharge AS float) UninvoicedCharge, CAST(UnpaidCharge AS float) UnpaidCharge,
+			CAST(UninvoicedCost AS float) UninvoicedCost, CAST(UnpaidCost AS float) UnpaidCost,
+			ActionOn, ActionedOn, PaymentOn
+		FROM profits;
+go
+DROP VIEW IF EXISTS Invoice.vwOutstanding;
+go
+ALTER TABLE Cash.tbPayment DROP 
+	CONSTRAINT DF_Cash_tbPayment_TaxInValue, DF_Cash_tbPayment_TaxOutValue,
+	COLUMN TaxInValue, TaxOutValue
+go
+ALTER TABLE Invoice.tbItem DROP
+	CONSTRAINT DF_Invoice_tbItem_PaidValue, DF_Invoice_tbItem_PaidTaxValue,
+	COLUMN PaidValue, PaidTaxValue
+go
+ALTER TABLE Invoice.tbTask DROP
+	CONSTRAINT DF_Invoice_tbTask_PaidValue, DF_Invoice_tbTask_PaidTaxValue,
+	COLUMN PaidValue, PaidTaxValue
+go
+

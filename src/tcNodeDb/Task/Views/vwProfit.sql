@@ -25,12 +25,15 @@ AS
 		FROM Task.tbTask tasks LEFT OUTER JOIN 
 			(
 				SELECT Invoice.tbTask.TaskCode, 
-					 SUM(CASE CashModeCode WHEN 0 THEN Invoice.tbTask.InvoiceValue * -1 ELSE Invoice.tbTask.InvoiceValue END) AS InvoiceValue, 
-					 SUM(CASE CashModeCode WHEN 0 THEN Invoice.tbTask.PaidValue * -1 ELSE Invoice.tbTask.PaidValue END) AS InvoicePaid
+					SUM(CASE CashModeCode WHEN 0 THEN Invoice.tbTask.InvoiceValue * -1 ELSE Invoice.tbTask.InvoiceValue END) AS InvoiceValue, 
+					CASE InvoiceStatusCode WHEN 3 THEN 
+						SUM(CASE CashModeCode WHEN 0 THEN Invoice.tbTask.InvoiceValue * -1 ELSE Invoice.tbTask.InvoiceValue END)
+					ELSE 0
+					END AS InvoicePaid
 				FROM Invoice.tbTask 
 					INNER JOIN Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
 					INNER JOIN Invoice.tbType ON Invoice.tbType.InvoiceTypeCode = Invoice.tbInvoice.InvoiceTypeCode 
-				GROUP BY Invoice.tbTask.TaskCode
+				GROUP BY Invoice.tbTask.TaskCode, Invoice.tbInvoice.InvoiceStatusCode
 			) invoice 
 		ON tasks.TaskCode = invoice.TaskCode
 	), task_flow AS
