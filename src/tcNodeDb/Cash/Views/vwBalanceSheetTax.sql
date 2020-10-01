@@ -4,7 +4,7 @@ AS
 		CAST(0 as smallint) CashModeCode,  
 		CAST(1 as smallint) AssetTypeCode,  
 		DATEADD(MONTH, 1, DATEADD(DAY, (DATEPART(DAY, StartOn) * -1) + 1, StartOn)) StartOn, 		
-		Balance * -1 Balance 
+		CASE WHEN Balance < 0 THEN 0 ELSE Balance END Balance 
 	FROM Cash.vwTaxCorpStatement
 		CROSS JOIN
 		(

@@ -1,4 +1,277 @@
-﻿CREATE PROCEDURE App.proc_BasicSetup
+/**************************************************************************************
+Trade Control
+Upgrade script
+Release: 3.30.3
+
+Date: 1 October 2020
+Author: IAM
+
+Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+
+You may obtain a copy of the License at
+
+	https://www.gnu.org/licenses/gpl-3.0.en.html
+
+Change log:
+
+	https://github.com/tradecontrol/tc-nodecore
+
+Instructions:
+This script should be applied by the Node Configuration app.
+
+***********************************************************************************/
+go
+ALTER PROCEDURE Cash.proc_PaymentPostReconcile
+	(
+	@PaymentCode nvarchar(20),
+	@PostValue decimal(18, 5),
+	@CashCode nvarchar(50),
+	@TaxCode nvarchar(5),
+	@InvoiceTypeCode smallint
+	)
+ AS
+ 	SET NOCOUNT, XACT_ABORT ON;
+
+	BEGIN TRY
+		DECLARE 
+			@InvoiceNumber nvarchar(20)
+			, @NextNumber int;
+
+		SELECT @NextNumber = NextNumber
+		FROM Invoice.tbType
+		WHERE InvoiceTypeCode = @InvoiceTypeCode;
+		
+		SET @InvoiceNumber = FORMAT(@NextNumber, '000000') + '.' + (SELECT UserId FROM Usr.vwCredentials)
+
+		WHILE EXISTS (SELECT     InvoiceNumber
+					  FROM         Invoice.tbInvoice
+					  WHERE     (InvoiceNumber = @InvoiceNumber))
+			BEGIN
+			SET @NextNumber += @NextNumber 
+			SET @InvoiceNumber = FORMAT(@NextNumber, '000000') + '.' + (SELECT UserId FROM Usr.vwCredentials)
+			END
+
+		UPDATE    Invoice.tbType
+		SET              NextNumber = @NextNumber + 1
+		WHERE     (InvoiceTypeCode = @InvoiceTypeCode)
+
+		INSERT INTO Invoice.tbInvoice
+								 (InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, DueOn, ExpectedOn, Printed)
+		SELECT        @InvoiceNumber AS InvoiceNumber, Cash.tbPayment.UserId, Cash.tbPayment.AccountCode, @InvoiceTypeCode AS InvoiceTypeCode, 3 AS InvoiceStatusCode, 
+								Cash.tbPayment.PaidOn, Cash.tbPayment.PaidOn AS DueOn, Cash.tbPayment.PaidOn AS ExpectedOn, 1 AS Printed
+		FROM            Cash.tbPayment 
+		WHERE        ( Cash.tbPayment.PaymentCode = @PaymentCode)
+
+		INSERT INTO Invoice.tbItem (InvoiceNumber, CashCode, TotalValue, TaxCode)
+		VALUES (@InvoiceNumber, @CashCode, @PostValue, @TaxCode)
+
+		EXEC Invoice.proc_Total @InvoiceNumber
+
+  	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER PROCEDURE Invoice.proc_Pay
+	(
+	@InvoiceNumber nvarchar(20),
+	@PaidOn datetime,
+	@Post bit = 1,
+	@PaymentCode nvarchar(20) NULL OUTPUT
+	)
+AS
+ 	SET NOCOUNT, XACT_ABORT ON;
+
+	BEGIN TRY
+	DECLARE 
+		@PaidOut decimal(18, 5) = 0
+		, @PaidIn decimal(18, 5) = 0
+		, @BalanceOutstanding decimal(18, 5) = 0
+		, @InvoiceOutstanding decimal(18, 5) = 0
+		, @CashModeCode smallint
+		, @AccountCode nvarchar(10)
+		, @CashAccountCode nvarchar(10)
+		, @InvoiceStatusCode smallint
+		, @UserId nvarchar(10)
+		, @PaymentReference nvarchar(20)
+		, @PayBalance BIT
+
+		SELECT 
+			@CashModeCode = Invoice.tbType.CashModeCode, 
+			@AccountCode = Invoice.tbInvoice.AccountCode, 
+			@PayBalance = Org.tbOrg.PayBalance,
+			@InvoiceStatusCode = Invoice.tbInvoice.InvoiceStatusCode,
+			@InvoiceOutstanding = InvoiceValue + TaxValue - PaidValue - PaidTaxValue
+		FROM Invoice.tbInvoice 
+			INNER JOIN Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
+			INNER JOIN Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode
+		WHERE     ( Invoice.tbInvoice.InvoiceNumber = @InvoiceNumber)
+	
+		EXEC Org.proc_BalanceOutstanding @AccountCode, @BalanceOutstanding OUTPUT
+		IF @BalanceOutstanding = 0 
+		BEGIN
+			DECLARE @Msg NVARCHAR(MAX);
+			SELECT @Msg = Message FROM App.tbText WHERE TextId = 3018;
+			RAISERROR (@Msg, 10, 1)
+		END
+		ELSE IF @InvoiceStatusCode > 2
+			RETURN 1
+
+		SELECT @UserId = UserId FROM Usr.vwCredentials	
+		SET @PaidOn = CAST(@PaidOn AS DATE)
+
+		SET @PaymentCode = CONCAT(@UserId, '_', FORMAT(@PaidOn, 'yyyymmdd_hhmmss'))
+
+		WHILE EXISTS (SELECT * FROM Cash.tbPayment WHERE PaymentCode = @PaymentCode)
+			BEGIN
+			SET @PaidOn = DATEADD(s, 1, @PaidOn)
+			SET @PaymentCode = CONCAT(@UserId, '_', FORMAT(@PaidOn, 'yyyymmdd_hhmmss'))
+			END
+			
+		IF @PayBalance = 0
+			BEGIN	
+			SET @PaymentReference = @InvoiceNumber
+														
+			IF @CashModeCode = 0
+				BEGIN
+				SET @PaidOut = @InvoiceOutstanding
+				SET @PaidIn = 0
+				END
+			ELSE
+				BEGIN
+				SET @PaidIn = @InvoiceOutstanding
+				SET @PaidOut = 0
+				END
+			END
+		ELSE
+			BEGIN
+			SET @PaidIn = CASE WHEN @BalanceOutstanding > 0 THEN @BalanceOutstanding ELSE 0 END
+			SET @PaidOut = CASE WHEN @BalanceOutstanding < 0 THEN ABS(@BalanceOutstanding) ELSE 0 END
+			END
+	
+		EXEC Cash.proc_CurrentAccount @CashAccountCode OUTPUT
+
+		BEGIN TRANSACTION
+
+		IF @PaidIn + @PaidOut > 0
+			BEGIN			
+
+			INSERT INTO Cash.tbPayment
+								  (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
+			VALUES     (@PaymentCode,@UserId, 0, @AccountCode, @CashAccountCode, @PaidOn, @PaidIn, @PaidOut, @PaymentReference)		
+		
+			IF @Post <> 0
+				EXEC Cash.proc_PaymentPostInvoiced @PaymentCode			
+			END
+		
+		IF @@TRANCOUNT > 0
+			COMMIT TRANSACTION
+
+  	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER VIEW App.vwCorpTaxCashCodes
+AS
+	WITH category_relations AS
+	(
+		SELECT Cash.tbCategoryTotal.ParentCode, Cash.tbCategoryTotal.ChildCode, 
+			Cash.tbCategory.CategoryTypeCode, Cash.tbCode.CashCode, Cash.tbCategory.CashTypeCode, Cash.tbCategory.CashModeCode
+		FROM  Cash.tbCategoryTotal 
+			INNER JOIN Cash.tbCategory ON Cash.tbCategoryTotal.ChildCode = Cash.tbCategory.CategoryCode 
+			LEFT OUTER JOIN Cash.tbCode ON Cash.tbCategory.CategoryCode = Cash.tbCode.CategoryCode
+	), cashcode_candidates AS
+	(
+		SELECT     ChildCode, CashCode, CashTypeCode, CashModeCode
+		FROM category_relations
+		WHERE     ( CategoryTypeCode = 1) AND ( ParentCode = (SELECT NetProfitCode FROM App.tbOptions))
+
+		UNION ALL
+
+		SELECT     category_relations.ChildCode, category_relations.CashCode, category_relations.CashTypeCode, category_relations.CashModeCode
+		FROM  category_relations JOIN cashcode_candidates ON category_relations.ParentCode = cashcode_candidates.ChildCode
+	), cashcode_selected AS
+	(
+		SELECT CashCode, CashTypeCode, CashModeCode FROM cashcode_candidates
+		UNION
+		SELECT CashCode, CashTypeCode, CashModeCode FROM category_relations WHERE ParentCode = (SELECT NetProfitCode FROM App.tbOptions)
+	)
+	SELECT CashCode, CashTypeCode, CashModeCode
+	FROM cashcode_selected WHERE NOT CashCode IS NULL;
+go
+ALTER VIEW Cash.vwTaxCorpTotalsByPeriod
+AS
+	WITH invoiced_tasks AS
+	(
+		SELECT (SELECT TOP (1) StartOn FROM App.tbYearPeriod WHERE (StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY StartOn DESC) AS StartOn,  
+								 CASE WHEN Invoice.tbType.CashModeCode = 0 THEN Invoice.tbTask.InvoiceValue * - 1 ELSE Invoice.tbTask.InvoiceValue END AS InvoiceValue
+		FROM            Invoice.tbTask INNER JOIN
+								 App.vwCorpTaxCashCodes CashCodes  ON Invoice.tbTask.CashCode = CashCodes.CashCode INNER JOIN
+								 Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
+								 Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
+		WHERE CashTypeCode = 0
+	), invoiced_items AS
+	(
+		SELECT (SELECT TOP (1) StartOn FROM App.tbYearPeriod WHERE (StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY StartOn DESC) AS StartOn,  
+							  CASE WHEN Invoice.tbType.CashModeCode = 0 THEN Invoice.tbItem.InvoiceValue * - 1 ELSE Invoice.tbItem.InvoiceValue END AS InvoiceValue
+		FROM         Invoice.tbItem INNER JOIN
+							  App.vwCorpTaxCashCodes CashCodes ON Invoice.tbItem.CashCode = CashCodes.CashCode INNER JOIN
+							  Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
+							  Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
+		WHERE CashTypeCode = 0
+	), assets AS
+	(
+		SELECT cash_codes.CashCode, financial_periods.StartOn, 
+			CASE cash_codes.CashModeCode WHEN 0 THEN financial_periods.InvoiceValue * -1 ELSE financial_periods.InvoiceValue END AssetValue
+		FROM App.vwCorpTaxCashCodes cash_codes
+			JOIN Cash.tbPeriod financial_periods
+				ON cash_codes.CashCode = financial_periods.CashCode
+		WHERE cash_codes.CashTypeCode = 2
+	), netprofits AS	
+	(
+		SELECT StartOn, SUM(InvoiceValue) NetProfit 
+		FROM invoiced_tasks 
+		GROUP BY StartOn
+		
+		UNION
+		
+		SELECT StartOn, SUM(InvoiceValue) NetProfit 
+		FROM invoiced_items 
+		GROUP BY StartOn
+
+		UNION
+
+		SELECT StartOn, SUM(AssetValue) NetProfit
+		FROM assets
+		GROUP BY StartOn
+	)
+	, netprofit_consolidated AS
+	(
+		SELECT StartOn, SUM(NetProfit) AS NetProfit FROM netprofits GROUP BY StartOn
+	)
+	SELECT App.tbYearPeriod.StartOn, netprofit_consolidated.NetProfit, 
+							netprofit_consolidated.NetProfit * App.tbYearPeriod.CorporationTaxRate + App.tbYearPeriod.TaxAdjustment AS CorporationTax, 
+							App.tbYearPeriod.TaxAdjustment
+	FROM         netprofit_consolidated INNER JOIN
+							App.tbYearPeriod ON netprofit_consolidated.StartOn = App.tbYearPeriod.StartOn;
+go 
+ALTER VIEW Cash.vwBalanceSheetTax
+AS
+	SELECT tax_type.AssetCode, tax_type.AssetName, 
+		CAST(0 as smallint) CashModeCode,  
+		CAST(1 as smallint) AssetTypeCode,  
+		DATEADD(MONTH, 1, DATEADD(DAY, (DATEPART(DAY, StartOn) * -1) + 1, StartOn)) StartOn, 		
+		CASE WHEN Balance < 0 THEN 0 ELSE Balance END Balance 
+	FROM Cash.vwTaxCorpStatement
+		CROSS JOIN
+		(
+			SELECT UPPER(LEFT(TaxType, 3)) AssetCode, UPPER(TaxType) AssetName
+			FROM Cash.tbTaxType
+			WHERE TaxTypeCode = 0
+		) tax_type;
+go
+ALTER PROCEDURE App.proc_BasicSetup
 (	
 	@FinancialMonth SMALLINT = 4,
 	@CoinTypeCode SMALLINT,
@@ -33,7 +306,7 @@ DECLARE
 
 	BEGIN TRY
 		BEGIN TRAN
-		INSERT INTO [App].[tbBucket] ([Period], [BucketId], [BucketDescription], [AllowForecasts])
+		INSERT INTO App.tbBucket (Period, BucketId, BucketDescription, AllowForecasts)
 		VALUES (0, 'Overdue', 'Overdue Orders', 0)
 		, (1, 'Current', 'Current Week', 0)
 		, (2, 'Week 2', 'Week Two', 0)
@@ -43,7 +316,7 @@ DECLARE
 		, (16, '2 Months', '2 Months', 1)
 		, (52, 'Forward', 'Forward Orders', 1)
 		;
-		INSERT INTO [App].[tbUom] ([UnitOfMeasure])
+		INSERT INTO App.tbUom (UnitOfMeasure)
 		VALUES ('copies')
 		, ('days')
 		, ('each')
@@ -57,7 +330,7 @@ DECLARE
 
 		DECLARE @Decimals smallint = CASE @CoinTypeCode WHEN 2 THEN 2 ELSE 3 END
 
-		INSERT INTO [App].[tbTaxCode] ([TaxCode], [TaxRate], [TaxDescription], [TaxTypeCode], [RoundingCode], [Decimals])
+		INSERT INTO App.tbTaxCode (TaxCode, TaxRate, TaxDescription, TaxTypeCode, RoundingCode, Decimals)
 		VALUES ('INT', 0, 'Interest Tax', 3, 0, @Decimals)
 		, ('N/A', 0, 'Untaxed', 3, 0, @Decimals)
 		, ('NI1', 0, 'Directors National Insurance', 2, 0, @Decimals)
@@ -67,7 +340,7 @@ DECLARE
 		, ('T9', 0, 'TBC', 1, 0, @Decimals)
 		;
 
-		INSERT INTO [Cash].[tbCategory] ([CategoryCode], [Category], [CategoryTypeCode], [CashModeCode], [CashTypeCode], [DisplayOrder], [IsEnabled])
+		INSERT INTO Cash.tbCategory (CategoryCode, Category, CategoryTypeCode, CashModeCode, CashTypeCode, DisplayOrder, IsEnabled)
 		VALUES ('AS', 'Assets', 0, 1, 2, 70, 0)
 		, ('BA', 'Bank Accounts', 0, 2, 2, 80, 1)
 		, ('BP', 'Bank Payments', 0, 0, 0, 90, 1)
@@ -85,18 +358,18 @@ DECLARE
 		, ('WA', 'Wages', 0, 0, 0, 50, 1)
 		;
 
-		INSERT INTO [Cash].[tbCategory] ([CategoryCode], [Category], [CategoryTypeCode], [CashModeCode], [CashTypeCode], [DisplayOrder], [IsEnabled])
+		INSERT INTO Cash.tbCategory (CategoryCode, Category, CategoryTypeCode, CashModeCode, CashTypeCode, DisplayOrder, IsEnabled)
 		VALUES ('GP', 'Gross Profit', 1, 2, 0, 1, 1)
 		, ('NP', 'Net Profit', 1, 2, 0, 2, 1)
 		, ('VAT', 'Vat Cash Codes', 1, 2, 0, 3, 1)
 		, ('WR', 'Wages Ratio', 2, 2, 0, 0, 1)
 		, ('GM', 'Gross Margin', 2, 2, 0, 1, 1)
 
-		INSERT INTO [Cash].[tbCategoryExp] ([CategoryCode], [Expression], [Format])
-		VALUES ('WR', 'IF([Sales]=0,0,(ABS([Wages])/[Sales]))', '0%')
-		, ('GM', 'IF([Sales]=0,0,([Gross Profit]/[Sales]))', '0%')
+		INSERT INTO Cash.tbCategoryExp (CategoryCode, Expression, Format)
+		VALUES ('WR', 'IF(Sales=0,0,(ABS(Wages)/Sales))', '0%')
+		, ('GM', 'IF(Sales=0,0,(Gross Profit/Sales))', '0%')
 		;
-		INSERT INTO [Cash].[tbCategoryTotal] ([ParentCode], [ChildCode])
+		INSERT INTO Cash.tbCategoryTotal (ParentCode, ChildCode)
 		VALUES ('GP', 'DC')
 		, ('GP', 'SA')
 		, ('GP', 'WA')
@@ -107,7 +380,7 @@ DECLARE
 		, ('VAT', 'SA')
 		;
 
-		INSERT INTO [Cash].[tbCode] ([CashCode], [CashDescription], [CategoryCode], [TaxCode], [IsEnabled])
+		INSERT INTO Cash.tbCode (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
 		VALUES ('101', 'Sales - Carriage', 'SA', 'T1', 1)
 		, ('102', 'Sales - Export', 'SA', 'T1', 1)
 		, ('103', 'Sales - Home', 'SA', 'T1', 1)
@@ -152,7 +425,7 @@ DECLARE
 
 		IF @CoinTypeCode < 2
 		BEGIN
-			INSERT INTO [Cash].[tbCode] ([CashCode], [CashDescription], [CategoryCode], [TaxCode], [IsEnabled])
+			INSERT INTO Cash.tbCode (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
 			VALUES ('219', 'Miner Fees', 'IC', 'N/A', 1);
 		
 			UPDATE App.tbOptions
@@ -167,14 +440,6 @@ DECLARE
 		UPDATE Org.tbOrg
 		SET TaxCode = 'T1'
 		WHERE AccountCode = (SELECT AccountCode FROM App.tbOptions)
-
-		--CREATE GOV
-		EXEC Org.proc_DefaultAccountCode @AccountName = @GovAccountName, @AccountCode = @AccountCode OUTPUT
-		INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationStatusCode, OrganisationTypeCode, TaxCode)
-			VALUES (@AccountCode, @GovAccountName, 1, 7, 'N/A');
-
-		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode;
 
 		--BANK ACCOUNTS / WALLETS
 		IF @CoinTypeCode = 2
@@ -311,9 +576,14 @@ DECLARE
 		SET CashStatusCode = 2
 		WHERE YearNumber < 	(SELECT YearNumber FROM App.tbYear	WHERE CashStatusCode = 1);
 
-		--ASSIGN CASH CODES AND GOV TO TAX TYPES
+		--CREATE GOV
+		EXEC Org.proc_DefaultAccountCode @AccountName = @GovAccountName, @AccountCode = @AccountCode OUTPUT
+		INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationStatusCode, OrganisationTypeCode, TaxCode)
+			VALUES (@AccountCode, @GovAccountName, 1, 7, 'N/A');
+		
 		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '603', MonthNumber = (SELECT DATEPART(MONTH, DATEADD(MONTH, 8, MIN(StartOn))) FROM App.tbYear JOIN App.tbYearPeriod ON App.tbYear.YearNumber = App.tbYearPeriod.YearNumber WHERE App.tbYear.CashStatusCode = 1)
+		SET AccountCode = @AccountCode, CashCode = '603', 
+			MonthNumber = (SELECT DATEPART(MONTH, DATEADD(MONTH, 8, MIN(StartOn))) FROM App.tbYear JOIN App.tbYearPeriod ON App.tbYear.YearNumber = App.tbYearPeriod.YearNumber WHERE App.tbYear.CashStatusCode = 1)
 		WHERE TaxTypeCode = 0;
 
 		UPDATE Cash.tbTaxType
@@ -327,8 +597,16 @@ DECLARE
 		UPDATE Cash.tbTaxType
 		SET AccountCode = @AccountCode, CashCode = '602', MonthNumber = @FinancialMonth
 		WHERE TaxTypeCode = 3;
+
 		COMMIT TRAN
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog
 	END CATCH
+go
+
+
+
+
+
+

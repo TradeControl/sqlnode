@@ -173,7 +173,7 @@ Implements the data logic of the Trade Control [Balance Sheet](https://github.co
 
 - [x] fix [Cash Statement](src/tcNodeDb/Cash/Views/vwAccountStatement.sql) - opening balance manual override not included on asset type cash accounts
 - [x] fix [Debtors and Creditors](src/tcNodeDb/Org/Views/vwAssetBalances.sql) - replace account polarity with transaction polarity
-- [x] fix [Organisation Statements](src/tcNodeDb/Org/Views/vwStatement.sql) with ```UNION ALL``` to include all transctions
+- [x] fix [Organisation Statements](src/tcNodeDb/Org/Views/vwStatement.sql) - ```UNION ALL``` to include all transctions
 - [x] derive the [Asset Statement](src/tcNodeDb/Org/Views/vwAssetStatement.sql) from the Organisation Statement and add financial periods
 - [x] separate out [organisation balances](src/tcNodeDb/Cash/Views/vwBalanceSheetOrgs.sql) from the balance sheet for audit reports
 - [x] views for balance sheet auditing
@@ -191,3 +191,12 @@ Paid tax and invoice status simplification.
 - [x] remove PaidTaxValue and PaidValue from [Invoice.tbItem](src/tcNodeDb/Invoice/Tables/tbItem.sql) and [Invoice.tbTask](src/tcNodeDb/Invoice/Tables/tbTask.sql) 
 - [x] optimise rebuild procedures [System Rebuild](src/tcNodeDb/App/Stored%20Procedures/proc_SystemRebuild.sql) and [Organisation Rebuild](src/tcNodeDb/Org/Stored%20Procedures/proc_Rebuild.sql)
 
+### 3.30.3
+
+[sql](src/tcNode/scripts/tc_upgrade_3_30_3.sql)
+
+- [x] fix [Corporation Tax period totals](src/tcNodeDb/Cash/Views/vwTaxCorpTotalsByPeriod.sql) - include asset type net profits
+- [x] [zeroise corporation tax](src/tcNodeDb/Cash/Views/vwBalanceSheetTax.sql) due in loss making periods
+- [x] fix [Cash.proc_PaymentPostReconcile](src/tcNodeDb/Cash/Stored%20Procedures/proc_PaymentPostReconcile.sql) - obsolete invoice detail Paid Value inclusion
+- [x] fix [Invoice.proc_Pay](src/tcNodeDb/Invoice/Stored%20Procedures/proc_Pay.sql) - use header paid value
+- [x] fix [App.proc_BasicSetup](src/tcNodeDb/App/Stored%20Procedures/proc_BasicSetup.sql) - assign HMREV account to Cash.tbTaxType 

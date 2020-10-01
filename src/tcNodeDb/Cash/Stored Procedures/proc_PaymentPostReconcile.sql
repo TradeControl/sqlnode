@@ -42,10 +42,6 @@
 		INSERT INTO Invoice.tbItem (InvoiceNumber, CashCode, TotalValue, TaxCode)
 		VALUES (@InvoiceNumber, @CashCode, @PostValue, @TaxCode)
 
-		UPDATE Invoice.tbItem
-		SET PaidValue = InvoiceValue, PaidTaxValue = TaxValue
-		WHERE InvoiceNumber = @InvoiceNumber
-
 		EXEC Invoice.proc_Total @InvoiceNumber
 
   	END TRY

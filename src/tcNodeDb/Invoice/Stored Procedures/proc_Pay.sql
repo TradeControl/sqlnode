@@ -13,8 +13,7 @@ AS
 		@PaidOut decimal(18, 5) = 0
 		, @PaidIn decimal(18, 5) = 0
 		, @BalanceOutstanding decimal(18, 5) = 0
-		, @TaskOutstanding decimal(18, 5) = 0
-		, @ItemOutstanding decimal(18, 5) = 0
+		, @InvoiceOutstanding decimal(18, 5) = 0
 		, @CashModeCode smallint
 		, @AccountCode nvarchar(10)
 		, @CashAccountCode nvarchar(10)
@@ -27,7 +26,8 @@ AS
 			@CashModeCode = Invoice.tbType.CashModeCode, 
 			@AccountCode = Invoice.tbInvoice.AccountCode, 
 			@PayBalance = Org.tbOrg.PayBalance,
-			@InvoiceStatusCode = Invoice.tbInvoice.InvoiceStatusCode
+			@InvoiceStatusCode = Invoice.tbInvoice.InvoiceStatusCode,
+			@InvoiceOutstanding = InvoiceValue + TaxValue - PaidValue - PaidTaxValue
 		FROM Invoice.tbInvoice 
 			INNER JOIN Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
 			INNER JOIN Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode
@@ -57,28 +57,15 @@ AS
 		IF @PayBalance = 0
 			BEGIN	
 			SET @PaymentReference = @InvoiceNumber
-															
-			SELECT  @TaskOutstanding = SUM( Invoice.tbTask.InvoiceValue + Invoice.tbTask.TaxValue - Invoice.tbTask.PaidValue - Invoice.tbTask.PaidTaxValue)
-			FROM         Invoice.tbInvoice INNER JOIN
-								  Invoice.tbTask ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbTask.InvoiceNumber INNER JOIN
-								  Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
-			WHERE     ( Invoice.tbInvoice.InvoiceNumber = @InvoiceNumber)
-			GROUP BY Invoice.tbType.CashModeCode
-
-
-			SELECT @ItemOutstanding = SUM( Invoice.tbItem.InvoiceValue + Invoice.tbItem.TaxValue - Invoice.tbItem.PaidValue - Invoice.tbItem.PaidTaxValue)
-			FROM         Invoice.tbInvoice INNER JOIN
-								  Invoice.tbItem ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbItem.InvoiceNumber
-			WHERE     ( Invoice.tbInvoice.InvoiceNumber = @InvoiceNumber)
-
+														
 			IF @CashModeCode = 0
 				BEGIN
-				SET @PaidOut = ISNULL(@TaskOutstanding, 0) + ISNULL(@ItemOutstanding, 0)
+				SET @PaidOut = @InvoiceOutstanding
 				SET @PaidIn = 0
 				END
 			ELSE
 				BEGIN
-				SET @PaidIn = ISNULL(@TaskOutstanding, 0) + ISNULL(@ItemOutstanding, 0)
+				SET @PaidIn = @InvoiceOutstanding
 				SET @PaidOut = 0
 				END
 			END
