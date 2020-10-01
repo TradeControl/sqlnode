@@ -200,3 +200,5 @@ Paid tax and invoice status simplification.
 - [x] fix [Cash.proc_PaymentPostReconcile](src/tcNodeDb/Cash/Stored%20Procedures/proc_PaymentPostReconcile.sql) - obsolete invoice detail Paid Value inclusion
 - [x] fix [Invoice.proc_Pay](src/tcNodeDb/Invoice/Stored%20Procedures/proc_Pay.sql) - use header paid value
 - [x] fix [App.proc_BasicSetup](src/tcNodeDb/App/Stored%20Procedures/proc_BasicSetup.sql) - assign HMREV account to Cash.tbTaxType 
+- [x] fix [Cash.vwBalanceSheetVat](src/tcNodeDb/Cash/Views/vwBalanceSheetVat.sql) - select the correct balance for same day payments
+ 
