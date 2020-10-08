@@ -16,10 +16,7 @@ AS
 	)
 	, vat_results AS
 	(
-		SELECT VatStartOn AS StartOn,
-			SUM(HomeSales) AS HomeSales, SUM(HomePurchases) AS HomePurchases, SUM(ExportSales) AS ExportSales, SUM(ExportPurchases) AS ExportPurchases, 
-			SUM(HomeSalesVat) AS HomeSalesVat, SUM(HomePurchasesVat) AS HomePurchasesVat, 
-			SUM(ExportSalesVat) AS ExportSalesVat, SUM(ExportPurchasesVat) AS ExportPurchasesVat, SUM(VatDue) AS VatDue
+		SELECT VatStartOn AS StartOn, SUM(VatDue) AS VatDue
 		FROM Cash.vwTaxVatSummary vatCodeDue JOIN vatPeriod ON vatCodeDue.StartOn = vatPeriod.StartOn
 		GROUP BY VatStartOn
 	), vat_adjustments AS

@@ -173,10 +173,8 @@ DECLARE
 		INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationStatusCode, OrganisationTypeCode, TaxCode)
 			VALUES (@AccountCode, @GovAccountName, 1, 7, 'N/A');
 
-		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode;
-
 		--BANK ACCOUNTS / WALLETS
+
 		IF @CoinTypeCode = 2
 		BEGIN
 			--fiat
@@ -313,7 +311,7 @@ DECLARE
 
 		--ASSIGN CASH CODES AND GOV TO TAX TYPES
 		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '603', MonthNumber = (SELECT DATEPART(MONTH, DATEADD(MONTH, 8, MIN(StartOn))) FROM App.tbYear JOIN App.tbYearPeriod ON App.tbYear.YearNumber = App.tbYearPeriod.YearNumber WHERE App.tbYear.CashStatusCode = 1)
+		SET AccountCode = @AccountCode, CashCode = '603', MonthNumber = @FinancialMonth
 		WHERE TaxTypeCode = 0;
 
 		UPDATE Cash.tbTaxType

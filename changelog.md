@@ -202,3 +202,11 @@ Paid tax and invoice status simplification.
 - [x] fix [App.proc_BasicSetup](src/tcNodeDb/App/Stored%20Procedures/proc_BasicSetup.sql) - assign HMREV account to Cash.tbTaxType 
 - [x] fix [Cash.vwBalanceSheetVat](src/tcNodeDb/Cash/Views/vwBalanceSheetVat.sql) - select the correct balance for same day payments
  
+### 3.30.4
+
+[Balance Sheet](https://github.com/tradecontrol/tc-office#demos) finalisation.
+
+[sql](src/tcNode/scripts/tc_upgrade_3_30_4.sql)
+
+- [x] [App.proc_NodeInitialisation](src/tcNodeDb/App/Stored%20Procedures/proc_NodeInitialisation.sql) use Offset Days in Cash.tbTaxType for payment of corporation tax
+- [x] remove payment offset days from [Cash.vwBalanceSheetTax](src/tcNodeDb/Cash/Views/vwBalanceSheetTax.sql) and [Cash.vwBalanceSheetVat](src/tcNodeDb/Cash/Views/vwBalanceSheetVat.sql)

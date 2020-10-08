@@ -119,7 +119,7 @@ AS
 		, (3, 'Archived');
 
 		INSERT INTO Cash.tbTaxType (TaxTypeCode, TaxType, MonthNumber, RecurrenceCode, OffsetDays)
-		VALUES (0, 'Corporation Tax', 12, 4, 0)
+		VALUES (0, 'Corporation Tax', 12, 4, 275)
 		, (1, 'Vat', 4, 2, 31)
 		, (2, 'N.I.', 4, 1, 0)
 		, (3, 'General', 4, 0, 0);
