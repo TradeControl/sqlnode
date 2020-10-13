@@ -11,14 +11,16 @@ AS
 		SELECT AccountCode, StartOn
 		FROM Org.tbOrg orgs
 			CROSS JOIN financial_periods	
-	), org_statements AS
+	)
+	, org_statements AS
 	(
 		SELECT StartOn, 
 			AccountCode, os.RowNumber, TransactedOn, Balance,
 			MAX(RowNumber) OVER (PARTITION BY AccountCode, StartOn ORDER BY StartOn) LastRowNumber 
 		FROM Org.vwAssetStatement os
 		WHERE TransactedOn >= (SELECT StartOn FROM Cash.vwBalanceStartOn)
-	), org_balances AS
+	)
+	, org_balances AS
 	(
 		SELECT AccountCode, StartOn, Balance
 		FROM org_statements
@@ -55,7 +57,20 @@ AS
 			END
 			AS Balance
 		FROM org_grouped	
+	), org_entries AS
+	(
+		SELECT AccountCode, EntryNumber, StartOn, Balance * -1 AS Balance,
+			CASE 
+				WHEN Balance < 0 THEN 0 
+				ELSE 1
+			END AS AssetTypeCode, 
+			CASE WHEN Balance <> 0 THEN 1 ELSE IsEntry END AS IsEntry
+		FROM org_projected
 	)
-	SELECT AccountCode, StartOn, Balance * -1 AS Balance,
-		CASE WHEN Balance <= 0 THEN 0 ELSE 1 END AS AssetTypeCode
-	FROM org_projected;
+	SELECT AccountCode, StartOn, Balance, 
+		CASE 
+			WHEN Balance <> 0 THEN AssetTypeCode 
+			ELSE
+				COALESCE(LAG(AssetTypeCode) OVER (PARTITION BY AccountCode ORDER BY EntryNumber), 0)
+		END AssetTypeCode
+	FROM org_entries WHERE IsEntry = 1;

@@ -72,4 +72,3 @@ AS
 	SELECT asset_accounts.CashAccountCode AssetCode, CashAccountName AssetName, CashModeCode, 4 AssetTypeCode, StartOn, Balance
 	FROM asset_base
 		JOIN asset_accounts ON asset_base.CashAccountCode = asset_accounts.CashAccountCode;
-

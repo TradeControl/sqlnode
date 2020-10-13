@@ -96,4 +96,244 @@ AS
 	FROM asset_base
 		JOIN asset_accounts ON asset_base.CashAccountCode = asset_accounts.CashAccountCode;
 go
+ALTER TRIGGER Cash.Cash_tbPayment_TriggerUpdate
+ON Cash.tbPayment
+FOR UPDATE
+AS
+	SET NOCOUNT ON;
+	BEGIN TRY
+		UPDATE Cash.tbPayment
+		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+		FROM Cash.tbPayment INNER JOIN inserted AS i ON tbPayment.PaymentCode = i.PaymentCode;
+
+		IF UPDATE(PaidInValue) OR UPDATE(PaidOutValue)
+		BEGIN
+			IF EXISTS (SELECT * FROM inserted i
+					JOIN Org.tbAccount account ON i.CashAccountCode = account.CashAccountCode AND account.AccountTypeCode = 0
+				WHERE i.PaymentStatusCode = 1)
+			BEGIN
+				DECLARE @AccountCode NVARCHAR(10)
+				DECLARE org CURSOR LOCAL FOR 
+					SELECT i.AccountCode 
+					FROM inserted i
+						JOIN Org.tbAccount account ON i.CashAccountCode = account.CashAccountCode AND account.AccountTypeCode = 0
+					WHERE i.PaymentStatusCode = 1
+
+				OPEN org
+				FETCH NEXT FROM org INTO @AccountCode
+				WHILE (@@FETCH_STATUS = 0)
+					BEGIN		
+					EXEC Org.proc_Rebuild @AccountCode
+					FETCH NEXT FROM org INTO @AccountCode
+				END
+
+				CLOSE org
+				DEALLOCATE org
+			END
+		END
+
+		IF UPDATE(PaymentStatusCode) OR UPDATE(PaidInValue) OR UPDATE(PaidOutValue)
+		BEGIN
+			WITH assets AS
+			(
+				SELECT account.CashAccountCode FROM inserted i
+					JOIN Org.tbAccount account ON account.CashAccountCode = i.CashAccountCode
+				WHERE AccountTypeCode = 2
+			), balance AS
+			(
+				SELECT account.CashAccountCode, SUM(PaidInValue + (PaidOutValue * -1)) AS CurrentBalance
+				FROM Org.tbAccount account
+					JOIN assets ON account.CashAccountCode = assets.CashAccountCode
+					JOIN Cash.tbPayment payment ON account.CashAccountCode = payment.CashAccountCode
+				WHERE payment.PaymentStatusCode = 1
+				GROUP BY account.CashAccountCode
+			)
+			UPDATE account
+			SET CurrentBalance = balance.CurrentBalance + OpeningBalance
+			FROM Org.tbAccount account
+				JOIN balance ON account.CashAccountCode = balance.CashAccountCode;
+		END
+
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER TRIGGER Cash.Cash_tbPayment_TriggerInsert
+ON Cash.tbPayment
+FOR INSERT
+AS
+	SET NOCOUNT ON;
+	BEGIN TRY
+
+		UPDATE payment
+		SET PaymentStatusCode = 2
+		FROM inserted
+			JOIN Cash.tbPayment payment ON inserted.PaymentCode = payment.PaymentCode
+			JOIN Org.tbAccount account ON payment.CashAccountCode = account.CashAccountCode
+			JOIN Cash.tbCode ON inserted.CashCode = Cash.tbCode.CashCode 
+			JOIN Cash.tbCategory category ON Cash.tbCode.CategoryCode = category.CategoryCode
+		WHERE category.CashTypeCode = 2 AND inserted.PaymentStatusCode = 0 AND account.AccountTypeCode = 0;
+
+		WITH assets AS
+		(
+			SELECT account.CashAccountCode FROM inserted i
+				JOIN Org.tbAccount account ON account.CashAccountCode = i.CashAccountCode
+			WHERE AccountTypeCode = 2 AND PaymentStatusCode = 1
+		), balance AS
+		(
+			SELECT account.CashAccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
+			FROM Org.tbAccount account
+				JOIN assets ON account.CashAccountCode = assets.CashAccountCode
+				JOIN Cash.tbPayment payment ON account.CashAccountCode = payment.CashAccountCode
+			WHERE payment.PaymentStatusCode = 1
+			GROUP BY account.CashAccountCode
+		)
+		UPDATE account
+		SET CurrentBalance = balance.CurrentBalance + OpeningBalance
+		FROM Org.tbAccount account
+			JOIN balance ON account.CashAccountCode = balance.CashAccountCode;
+
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER VIEW Org.vwStatement 
+AS
+	WITH payment_data AS
+	(
+		SELECT Cash.tbPayment.AccountCode, Cash.tbPayment.PaidOn AS TransactedOn, 2 AS OrderBy, 
+						CASE WHEN LEN(COALESCE(Cash.tbPayment.PaymentReference, '')) = 0 THEN Cash.tbPayment.PaymentCode ELSE Cash.tbPayment.PaymentReference END AS Reference, 
+						Cash.tbPaymentStatus.PaymentStatus AS StatementType, 
+						CASE WHEN PaidInValue > 0 THEN PaidInValue ELSE PaidOutValue * - 1 END AS Charge
+		FROM Cash.tbPayment 
+			JOIN Org.tbAccount ON Cash.tbPayment.CashAccountCode = Org.tbAccount.CashAccountCode
+			JOIN Cash.tbPaymentStatus ON Cash.tbPayment.PaymentStatusCode = Cash.tbPaymentStatus.PaymentStatusCode
+		WHERE Org.tbAccount.AccountTypeCode < 2
+	), payments AS
+	(
+		SELECT     AccountCode, TransactedOn, OrderBy, Reference, StatementType, SUM(Charge) AS Charge
+		FROM     payment_data
+		GROUP BY AccountCode, TransactedOn, OrderBy, Reference, StatementType
+	), invoices AS
+	(
+		SELECT Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoicedOn AS TransactedOn, 1 AS OrderBy, Invoice.tbInvoice.InvoiceNumber AS Reference, Invoice.tbType.InvoiceType AS StatementType, 
+			CASE CashModeCode 
+				WHEN 0 THEN Invoice.tbInvoice.InvoiceValue + Invoice.tbInvoice.TaxValue 
+				WHEN 1 THEN (Invoice.tbInvoice.InvoiceValue + Invoice.tbInvoice.TaxValue) * - 1 
+			END AS Charge
+		FROM Invoice.tbInvoice 
+			JOIN Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
+	), transactions_union AS
+	(
+		SELECT     AccountCode, TransactedOn, OrderBy, Reference, StatementType, Charge
+		FROM         payments
+		UNION ALL
+		SELECT     AccountCode, TransactedOn, OrderBy, Reference, StatementType, Charge
+		FROM         invoices
+	), transactions AS
+	(
+		SELECT AccountCode, ROW_NUMBER() OVER (PARTITION BY AccountCode ORDER BY TransactedOn, OrderBy, Reference) AS RowNumber, 
+			TransactedOn, Reference, StatementType, Charge
+		FROM transactions_union
+	), opening_balance AS
+	(
+		SELECT AccountCode, 0 AS RowNumber, InsertedOn AS TransactedOn, NULL AS Reference, 
+			(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 3005) AS StatementType, OpeningBalance AS Charge
+		FROM Org.tbOrg org
+	), statement_data AS
+	( 
+		SELECT AccountCode, RowNumber, TransactedOn, Reference, StatementType, Charge FROM transactions
+		UNION
+		SELECT AccountCode, RowNumber, TransactedOn, Reference, StatementType, Charge FROM opening_balance
+	)
+	SELECT AccountCode, CAST(RowNumber AS INT) AS RowNumber, 
+		CASE RowNumber 
+			WHEN 0 THEN 
+				DATEADD(DAY, -1, COALESCE(LEAD(TransactedOn) OVER (PARTITION BY AccountCode ORDER BY RowNumber), 0)) 
+			ELSE 
+				TransactedOn 
+		END TransactedOn, 
+		Reference, StatementType, CAST(Charge as float) AS Charge, 
+		CAST(SUM(Charge) OVER (PARTITION BY AccountCode ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS float) AS Balance
+	FROM statement_data;
+go
+ALTER VIEW Org.vwAssetBalances
+AS
+	WITH financial_periods AS
+	(
+		SELECT pd.StartOn
+		FROM App.tbYear yr
+			JOIN App.tbYearPeriod pd ON yr.YearNumber = pd.YearNumber
+		WHERE (yr.CashStatusCode BETWEEN 1 AND 2)
+	), org_periods AS
+	(
+		SELECT AccountCode, StartOn
+		FROM Org.tbOrg orgs
+			CROSS JOIN financial_periods	
+	)
+	, org_statements AS
+	(
+		SELECT StartOn, 
+			AccountCode, os.RowNumber, TransactedOn, Balance,
+			MAX(RowNumber) OVER (PARTITION BY AccountCode, StartOn ORDER BY StartOn) LastRowNumber 
+		FROM Org.vwAssetStatement os
+		WHERE TransactedOn >= (SELECT StartOn FROM Cash.vwBalanceStartOn)
+	)
+	, org_balances AS
+	(
+		SELECT AccountCode, StartOn, Balance
+		FROM org_statements
+		WHERE RowNumber = LastRowNumber
+	)
+	, org_ordered AS
+	(
+		SELECT ROW_NUMBER() OVER (ORDER BY org_periods.AccountCode, org_periods.StartOn) EntryNumber,
+			org_periods.AccountCode, org_periods.StartOn, 
+			COALESCE(Balance, 0) Balance,
+			CASE WHEN org_balances.StartOn IS NULL THEN 0 ELSE 1 END IsEntry
+		FROM org_periods
+			LEFT OUTER JOIN org_balances 
+				ON org_periods.AccountCode = org_balances.AccountCode AND org_periods.StartOn = org_balances.StartOn
+	), org_ranked AS
+	(
+		SELECT *,
+			RANK() OVER (PARTITION BY AccountCode, IsEntry ORDER BY EntryNumber) RNK
+		FROM org_ordered
+	), org_grouped AS
+	(
+		SELECT EntryNumber, AccountCode, StartOn, IsEntry, Balance,
+			MAX(CASE IsEntry WHEN 0 THEN 0 ELSE RNK END) OVER (PARTITION BY AccountCode ORDER BY EntryNumber) RNK
+		FROM org_ranked
+	)
+	, org_projected AS
+	(
+		SELECT EntryNumber, AccountCode, StartOn, IsEntry,
+			CASE IsEntry WHEN 0 THEN
+				MAX(Balance) OVER (PARTITION BY AccountCode, RNK ORDER BY EntryNumber) +
+				MIN(Balance) OVER (PARTITION BY AccountCode, RNK ORDER BY EntryNumber) 
+			ELSE
+				Balance
+			END
+			AS Balance
+		FROM org_grouped	
+	), org_entries AS
+	(
+		SELECT AccountCode, EntryNumber, StartOn, Balance * -1 AS Balance,
+			CASE 
+				WHEN Balance < 0 THEN 0 
+				ELSE 1
+			END AS AssetTypeCode, 
+			CASE WHEN Balance <> 0 THEN 1 ELSE IsEntry END AS IsEntry
+		FROM org_projected
+	)
+	SELECT AccountCode, StartOn, Balance, 
+		CASE 
+			WHEN Balance <> 0 THEN AssetTypeCode 
+			ELSE
+				COALESCE(LAG(AssetTypeCode) OVER (PARTITION BY AccountCode ORDER BY EntryNumber), 0)
+		END AssetTypeCode
+	FROM org_entries WHERE IsEntry = 1;
+go
 

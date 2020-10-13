@@ -216,3 +216,6 @@ Paid tax and invoice status simplification.
 [sql](src/tcNode/scripts/tc_upgrade_3_30_5.sql)
 
 - [x] fix [Cash.vwBalanceSheetAssets](src/tcNodeDb/Cash/Views/vwBalanceSheetAssets.sql) - balance not carrying over when the last transaction is in an archived financial year
+- [x] fix [Cash.tbPayment](src/tcNodeDb/Cash/Tables/tbPayment.sql) - insert and update triggers not including cash account manual opening balance when calculating the current balance
+- [x] fix [Org.vwStatement](src/tcNodeDb/Org/Views/vwStatement.sql) - opening balance transaction date incorrect for historical organisation entries  
+- [x] fix [Org.vwAssetBalances](src/tcNodeDb/Org/Views/vwAssetBalances.sql) - Org.vwBalanceSheet re-applying asset charge algorithm when balance is zeroised

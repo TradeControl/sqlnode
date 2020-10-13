@@ -47,6 +47,14 @@ AS
 		UNION
 		SELECT AccountCode, RowNumber, TransactedOn, Reference, StatementType, Charge FROM opening_balance
 	)
-	SELECT AccountCode, CAST(RowNumber AS INT) AS RowNumber, TransactedOn, Reference, StatementType, CAST(Charge as float) AS Charge, 
+	SELECT AccountCode, CAST(RowNumber AS INT) AS RowNumber, 
+		CASE RowNumber 
+			WHEN 0 THEN 
+				DATEADD(DAY, -1, COALESCE(LEAD(TransactedOn) OVER (PARTITION BY AccountCode ORDER BY RowNumber), 0)) 
+			ELSE 
+				TransactedOn 
+		END TransactedOn, 
+		Reference, StatementType, CAST(Charge as float) AS Charge, 
 		CAST(SUM(Charge) OVER (PARTITION BY AccountCode ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS float) AS Balance
 	FROM statement_data;
+

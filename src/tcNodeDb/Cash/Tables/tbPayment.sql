@@ -145,7 +145,7 @@ AS
 			GROUP BY account.CashAccountCode
 		)
 		UPDATE account
-		SET CurrentBalance = balance.CurrentBalance
+		SET CurrentBalance = balance.CurrentBalance + OpeningBalance
 		FROM Org.tbAccount account
 			JOIN balance ON account.CashAccountCode = balance.CashAccountCode;
 
@@ -200,7 +200,7 @@ AS
 				WHERE AccountTypeCode = 2
 			), balance AS
 			(
-				SELECT account.CashAccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
+				SELECT account.CashAccountCode, SUM(PaidInValue + (PaidOutValue * -1)) AS CurrentBalance
 				FROM Org.tbAccount account
 					JOIN assets ON account.CashAccountCode = assets.CashAccountCode
 					JOIN Cash.tbPayment payment ON account.CashAccountCode = payment.CashAccountCode
@@ -208,7 +208,7 @@ AS
 				GROUP BY account.CashAccountCode
 			)
 			UPDATE account
-			SET CurrentBalance = balance.CurrentBalance
+			SET CurrentBalance = balance.CurrentBalance + OpeningBalance
 			FROM Org.tbAccount account
 				JOIN balance ON account.CashAccountCode = balance.CashAccountCode;
 		END
@@ -217,3 +217,4 @@ AS
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
 	END CATCH
+GO
