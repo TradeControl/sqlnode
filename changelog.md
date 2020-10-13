@@ -210,3 +210,9 @@ Paid tax and invoice status simplification.
 
 - [x] [App.proc_NodeInitialisation](src/tcNodeDb/App/Stored%20Procedures/proc_NodeInitialisation.sql) use Offset Days in Cash.tbTaxType for payment of corporation tax
 - [x] remove payment offset days from [Cash.vwBalanceSheetTax](src/tcNodeDb/Cash/Views/vwBalanceSheetTax.sql) and [Cash.vwBalanceSheetVat](src/tcNodeDb/Cash/Views/vwBalanceSheetVat.sql)
+
+### 3.30.5
+
+[sql](src/tcNode/scripts/tc_upgrade_3_30_5.sql)
+
+- [x] fix [Cash.vwBalanceSheetAssets](src/tcNodeDb/Cash/Views/vwBalanceSheetAssets.sql) - balance not carrying over when the last transaction is in an archived financial year

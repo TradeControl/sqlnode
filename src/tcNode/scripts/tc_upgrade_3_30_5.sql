@@ -1,4 +1,27 @@
-﻿CREATE   VIEW Cash.vwBalanceSheetAssets
+/**************************************************************************************
+Trade Control
+Upgrade script
+Release: 3.30.5
+
+Date: 12 October 2020
+Author: IAM
+
+Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+
+You may obtain a copy of the License at
+
+	https://www.gnu.org/licenses/gpl-3.0.en.html
+
+Change log:
+
+	https://github.com/tradecontrol/tc-nodecore
+
+Instructions:
+This script should be applied by the Node Configuration app.
+
+***********************************************************************************/
+go
+ALTER VIEW Cash.vwBalanceSheetAssets
 AS
 	WITH asset_statements AS
 	(
@@ -72,4 +95,5 @@ AS
 	SELECT asset_accounts.CashAccountCode AssetCode, CashAccountName AssetName, CashModeCode, 4 AssetTypeCode, StartOn, Balance
 	FROM asset_base
 		JOIN asset_accounts ON asset_base.CashAccountCode = asset_accounts.CashAccountCode;
+go
 
