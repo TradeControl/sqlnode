@@ -336,4 +336,96 @@ AS
 		END AssetTypeCode
 	FROM org_entries WHERE IsEntry = 1;
 go
+ALTER TRIGGER Invoice.Invoice_tbInvoice_TriggerUpdate
+ON Invoice.tbInvoice
+FOR UPDATE
+AS
+	SET NOCOUNT ON;
+
+	BEGIN TRY
+		IF UPDATE(Spooled)
+		BEGIN
+			INSERT INTO App.tbDocSpool (DocTypeCode, DocumentNumber)
+			SELECT     App.fnDocInvoiceType(i.InvoiceTypeCode) AS DocTypeCode, i.InvoiceNumber
+			FROM         inserted i 
+			WHERE     (i.Spooled <> 0)
+
+			DELETE App.tbDocSpool
+			FROM         inserted i INNER JOIN
+								  App.tbDocSpool ON i.InvoiceNumber = App.tbDocSpool.DocumentNumber
+			WHERE    (i.Spooled = 0) AND ( App.tbDocSpool.DocTypeCode > 3)
+		END
+
+
+		IF UPDATE(InvoicedOn) AND NOT UPDATE(DueOn)
+		BEGIN
+			UPDATE invoice
+			SET DueOn = App.fnAdjustToCalendar(CASE WHEN org.PayDaysFromMonthEnd <> 0 
+													THEN 
+														DATEADD(d, -1, DATEADD(m, 1, CONCAT(FORMAT(DATEADD(d, org.PaymentDays, i.InvoicedOn), 'yyyyMM'), '01')))												
+													ELSE
+														DATEADD(d, org.PaymentDays, invoice.InvoicedOn)	
+													END, 0)		
+				FROM Invoice.tbInvoice invoice
+					JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
+					JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode
+				WHERE i.InvoiceTypeCode = 0;
+		END;	
+
+		IF UPDATE(InvoicedOn) AND NOT UPDATE(ExpectedOn)
+		BEGIN
+			UPDATE invoice
+			SET ExpectedOn = App.fnAdjustToCalendar(CASE WHEN org.PayDaysFromMonthEnd <> 0 
+													THEN 
+														DATEADD(d, -1, DATEADD(m, 1, CONCAT(FORMAT(DATEADD(d, org.PaymentDays + org.ExpectedDays, i.InvoicedOn), 'yyyyMM'), '01')))												
+													ELSE
+														DATEADD(d, org.PaymentDays + org.ExpectedDays, invoice.InvoicedOn)	
+													END, 0)		
+				FROM Invoice.tbInvoice invoice
+					JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
+					JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode
+				WHERE i.InvoiceTypeCode = 0;
+		END;	
+		
+		WITH invoices AS
+		(
+			SELECT inserted.InvoiceNumber, inserted.AccountCode, inserted.InvoiceStatusCode, inserted.DueOn, inserted.InvoiceValue, inserted.TaxValue, inserted.PaidValue, inserted.PaidTaxValue FROM inserted JOIN deleted ON inserted.InvoiceNumber = deleted.InvoiceNumber WHERE inserted.InvoiceStatusCode = 1 AND deleted.InvoiceStatusCode = 0
+		)
+		INSERT INTO Invoice.tbChangeLog (InvoiceNumber, TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue)
+		SELECT InvoiceNumber, orgs.TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue
+		FROM invoices JOIN Org.tbOrg orgs ON invoices.AccountCode = orgs.AccountCode;
+
+		IF UPDATE(InvoiceStatusCode) OR UPDATE(DueOn) OR UPDATE(PaidValue) OR UPDATE(PaidTaxValue) OR UPDATE(InvoiceValue) OR UPDATE (TaxValue)
+		BEGIN
+			WITH candidates AS
+			(
+				SELECT InvoiceNumber, AccountCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue 
+				FROM inserted
+				WHERE EXISTS (SELECT * FROM Invoice.tbChangeLog WHERE InvoiceNumber = inserted.InvoiceNumber)
+			)
+			, logs AS
+			(
+				SELECT clog.LogId, clog.InvoiceNumber, clog.InvoiceStatusCode, clog.TransmitStatusCode, clog.DueOn, clog.InvoiceValue, clog.TaxValue, clog.PaidValue, clog.PaidTaxValue 
+				FROM Invoice.tbChangeLog clog
+				JOIN candidates ON clog.InvoiceNumber = candidates.InvoiceNumber AND LogId = (SELECT MAX(LogId) FROM Invoice.tbChangeLog WHERE InvoiceNumber = candidates.InvoiceNumber)		
+			)
+			INSERT INTO Invoice.tbChangeLog
+									 (InvoiceNumber, TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue)
+			SELECT candidates.InvoiceNumber, CASE orgs.TransmitStatusCode WHEN 1 THEN 2 ELSE 0 END TransmitStatusCode, candidates.InvoiceStatusCode,
+				candidates.DueOn, candidates.InvoiceValue, candidates.TaxValue, candidates.PaidValue, candidates.PaidTaxValue
+			FROM candidates 
+				JOIN Org.tbOrg orgs ON candidates.AccountCode = orgs.AccountCode 
+				JOIN logs ON candidates.InvoiceNumber = logs.InvoiceNumber
+			WHERE (logs.InvoiceStatusCode <> candidates.InvoiceStatusCode) 
+				OR (logs.TransmitStatusCode < 2)
+				OR (logs.DueOn <> candidates.DueOn) 
+				OR ((logs.InvoiceValue + logs.TaxValue + logs.PaidValue + logs.PaidTaxValue) 
+						<> (candidates.InvoiceValue + candidates.TaxValue + candidates.PaidValue + candidates.PaidTaxValue))
+		END
+	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+
 

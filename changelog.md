@@ -219,3 +219,4 @@ Paid tax and invoice status simplification.
 - [x] fix [Cash.tbPayment](src/tcNodeDb/Cash/Tables/tbPayment.sql) - insert and update triggers not including cash account manual opening balance when calculating the current balance
 - [x] fix [Org.vwStatement](src/tcNodeDb/Org/Views/vwStatement.sql) - opening balance transaction date incorrect for historical organisation entries  
 - [x] fix [Org.vwAssetBalances](src/tcNodeDb/Org/Views/vwAssetBalances.sql) - Org.vwBalanceSheet re-applying asset charge algorithm when balance is zeroised
+- [x] allow manual override of invoice calculated dates in [Invoice Update Trigger](src/tcNodeDb/Invoice/Tables/tbInvoice.sql)
