@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Cash.vwBalanceSheetAccounts
+﻿CREATE VIEW Cash.vwBalanceSheetAccounts
 AS
 	WITH account_statements AS
 	(
@@ -7,7 +7,7 @@ AS
 			StartOn, EntryNumber, PaidBalance
 		FROM Cash.vwAccountStatement account_statement
 			JOIN Org.tbAccount account ON account_statement.CashAccountCode = account.CashAccountCode
-		WHERE StartOn >= (SELECT StartOn FROM Cash.vwBalanceStartOn) AND account.AccountTypeCode < 2
+		WHERE StartOn >= (SELECT StartOn FROM Cash.vwBalanceStartOn) AND account.AccountTypeCode = 0
 	)
 	, account_last_tx AS
 	(

@@ -99,6 +99,7 @@ namespace TradeControl.Node.Properties {
   <string>tc_upgrade_3_30_3</string>
   <string>tc_upgrade_3_30_4</string>
   <string>tc_upgrade_3_30_5</string>
+  <string>tc_upgrade_3_30_6</string>
 </ArrayOfString>")]
         public global::System.Collections.Specialized.StringCollection SqlScripts {
             get {

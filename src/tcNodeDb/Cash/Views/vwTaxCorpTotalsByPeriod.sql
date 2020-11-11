@@ -8,7 +8,7 @@ AS
 								 App.vwCorpTaxCashCodes CashCodes  ON Invoice.tbTask.CashCode = CashCodes.CashCode INNER JOIN
 								 Invoice.tbInvoice ON Invoice.tbTask.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
 								 Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
-		WHERE CashTypeCode = 0
+		WHERE CashTypeCode < 3
 	), invoiced_items AS
 	(
 		SELECT (SELECT TOP (1) StartOn FROM App.tbYearPeriod WHERE (StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY StartOn DESC) AS StartOn,  
@@ -17,7 +17,7 @@ AS
 							  App.vwCorpTaxCashCodes CashCodes ON Invoice.tbItem.CashCode = CashCodes.CashCode INNER JOIN
 							  Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
 							  Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
-		WHERE CashTypeCode = 0
+		WHERE CashTypeCode < 3
 	), assets AS
 	(
 		SELECT cash_codes.CashCode, financial_periods.StartOn, 
@@ -53,4 +53,3 @@ AS
 							App.tbYearPeriod.TaxAdjustment
 	FROM         netprofit_consolidated INNER JOIN
 							App.tbYearPeriod ON netprofit_consolidated.StartOn = App.tbYearPeriod.StartOn;
-

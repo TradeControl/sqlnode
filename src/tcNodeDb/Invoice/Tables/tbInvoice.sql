@@ -115,25 +115,34 @@ AS
 		END
 
 
-		IF UPDATE(InvoicedOn)
+		IF UPDATE(InvoicedOn) AND NOT UPDATE(DueOn)
 		BEGIN
 			UPDATE invoice
-		SET DueOn = App.fnAdjustToCalendar(CASE WHEN org.PayDaysFromMonthEnd <> 0 
-												THEN 
-													DATEADD(d, -1, DATEADD(m, 1, CONCAT(FORMAT(DATEADD(d, org.PaymentDays, i.InvoicedOn), 'yyyyMM'), '01')))												
-												ELSE
-													DATEADD(d, org.PaymentDays, invoice.InvoicedOn)	
-												END, 0),
-			ExpectedOn = App.fnAdjustToCalendar(CASE WHEN org.PayDaysFromMonthEnd <> 0 
-												THEN 
-													DATEADD(d, -1, DATEADD(m, 1, CONCAT(FORMAT(DATEADD(d, org.PaymentDays + org.ExpectedDays, i.InvoicedOn), 'yyyyMM'), '01')))												
-												ELSE
-													DATEADD(d, org.PaymentDays + org.ExpectedDays, invoice.InvoicedOn)	
-												END, 0)		
-			FROM Invoice.tbInvoice invoice
-				JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
-				JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode
-			WHERE i.InvoiceTypeCode = 0;
+			SET DueOn = App.fnAdjustToCalendar(CASE WHEN org.PayDaysFromMonthEnd <> 0 
+													THEN 
+														DATEADD(d, -1, DATEADD(m, 1, CONCAT(FORMAT(DATEADD(d, org.PaymentDays, i.InvoicedOn), 'yyyyMM'), '01')))												
+													ELSE
+														DATEADD(d, org.PaymentDays, invoice.InvoicedOn)	
+													END, 0)		
+				FROM Invoice.tbInvoice invoice
+					JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
+					JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode
+				WHERE i.InvoiceTypeCode = 0;
+		END;	
+
+		IF UPDATE(InvoicedOn) AND NOT UPDATE(ExpectedOn)
+		BEGIN
+			UPDATE invoice
+			SET ExpectedOn = App.fnAdjustToCalendar(CASE WHEN org.PayDaysFromMonthEnd <> 0 
+													THEN 
+														DATEADD(d, -1, DATEADD(m, 1, CONCAT(FORMAT(DATEADD(d, org.PaymentDays + org.ExpectedDays, i.InvoicedOn), 'yyyyMM'), '01')))												
+													ELSE
+														DATEADD(d, org.PaymentDays + org.ExpectedDays, invoice.InvoicedOn)	
+													END, 0)		
+				FROM Invoice.tbInvoice invoice
+					JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
+					JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode
+				WHERE i.InvoiceTypeCode = 0;
 		END;	
 		
 		WITH invoices AS

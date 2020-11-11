@@ -220,3 +220,11 @@ Paid tax and invoice status simplification.
 - [x] fix [Org.vwStatement](src/tcNodeDb/Org/Views/vwStatement.sql) - opening balance transaction date incorrect for historical organisation entries  
 - [x] fix [Org.vwAssetBalances](src/tcNodeDb/Org/Views/vwAssetBalances.sql) - Org.vwBalanceSheet re-applying asset charge algorithm when balance is zeroised
 - [x] allow manual override of invoice calculated dates in [Invoice Update Trigger](src/tcNodeDb/Invoice/Tables/tbInvoice.sql)
+
+### 3.30.6
+
+[sql](src/tcNode/scripts/tc_upgrade_3_30_6.sql)
+
+- [x] allow manual override of DueOn and ExpectedOn dates in [Invoice.tbInvoice](src/tcNodeDb/Invoice/Tables/tbInvoice.sql)
+- [x] exclude dummy cash accounts from [Cash.vwBalanceSheetAccounts](src/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql) 
+- [x] include EXTERNAL Cash Types in [Cash.vwTaxCorpTotalsByPeriod](src/tcNodeDb/Cash/Views/vwTaxCorpTotalsByPeriod.sql)
