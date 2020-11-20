@@ -230,7 +230,8 @@ namespace TradeControl.Node.Properties {
         ///- Drop redundant column Cash.tbCode.OpeningBalance
         ///- Cash.vwStatement invoiced vat not carrying over before first payment
         ///
-        ///Instructions:        /// [rest of string was truncated]&quot;;.
+        ///Instructions:
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_4 {
             get {
@@ -255,7 +256,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -284,7 +285,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -313,7 +314,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -342,7 +343,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -371,7 +372,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -400,7 +401,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -429,7 +430,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -458,7 +459,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -487,7 +488,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -516,7 +517,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -545,7 +546,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -574,7 +575,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -603,7 +604,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -632,7 +633,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -661,7 +662,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -690,7 +691,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
@@ -719,7 +720,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the Node Configuration app.
@@ -749,7 +750,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the Node Configuration app.
@@ -779,7 +780,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the Node Configuration app.
@@ -809,7 +810,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Change log:
         ///
-        ///	https://github.com/tradecontrol/tc-nodecore
+        ///	https://github.com/tradecontrol/sqlnode
         ///
         ///Instructions:
         ///This script should be applied by the Node Configuration app.

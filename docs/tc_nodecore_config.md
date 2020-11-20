@@ -48,7 +48,7 @@ When you test the connection, a series of checks are applied to assess its curre
 
 The details below are all you need to install an instance that can be used by clients. However, if you have never used Trade Control before, it will be difficult to know how to proceed. Either you can accept these defaults and try out the demos; or enter the correct information, add yourself as a data user and then install a [basic setup](#basic-setup).
 
-Trade Control supports both fiat and bitcoin as your Unit of Account. If you select bitcoin, the configuration process will be slightly different. Consult the [bitcoin wallet](https://github.com/tradecontrol/tc-bitcoin) documentation for details.
+Trade Control supports both fiat and bitcoin as your Unit of Account. If you select bitcoin, the configuration process will be slightly different. Consult the [bitcoin wallet](https://github.com/tradecontrol/bitcoin) documentation for details.
 
 ![Business Details](../img/tc_config_business_details.jpg)
 
@@ -101,7 +101,7 @@ These settings are passed as parameters to the procedure _App.proc_BasicSetup_. 
 
 ### Demos
 
-You are now able to install the services or manufacturing demo. This is straight forward and explained in the [client documentation](https://github.com/tradecontrol/tc-office)
+You are now able to install the services or manufacturing demo. This is straight forward and explained in the [client documentation](https://github.com/tradecontrol/office)
 
 ## Licence
 

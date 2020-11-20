@@ -13,9 +13,9 @@ Trade Control is not a development product or a prototype. Its functionality is 
 
 ## Overview
 
-Trade Control has been created through the application of manufacturing system control techniques to the general problem of managing cash and business activity.  The result is a generic tool that provides real-time information regarding overall business performance and project management.  It is an alternative to asset-based accounting systems which have been designed by accountants to support double entry book-keeping and the legal obligation to present accounts. Trade Control is designed using the methods of Systems Engineering to satisfy the needs of production and work; money is subsequently mapped onto these processes.  Double-entry book-keeping error checks by balancing ledgers. Trade Control error checks against a cash account in the UoA of the presiding jurisdiction. It could be a bank or a [Bitcoin Wallet](https://github.com/tradecontrol/tc-bitcoin), although there are no jurisdictions that currently support the latter.
+Trade Control has been created through the application of manufacturing system control techniques to the general problem of managing cash and business activity.  The result is a generic tool that provides real-time information regarding overall business performance and project management.  It is an alternative to asset-based accounting systems which have been designed by accountants to support double entry book-keeping and the legal obligation to present accounts. Trade Control is designed using the methods of Systems Engineering to satisfy the needs of production and work; money is subsequently mapped onto these processes.  Double-entry book-keeping error checks by balancing ledgers. Trade Control error checks against a cash account in the UoA of the presiding jurisdiction. It could be a bank or a [Bitcoin Wallet](https://github.com/tradecontrol/bitcoin), although there are no jurisdictions that currently support the latter.
 
-Each instance is called a node because it is designed to be connected to other instances in a network. Inputs perfectly match outputs, so there are no native customer or supplier accounts; no sales, purchase or works orders. Instead demand and supply present a mirror interface and order types are modelled using a principle of cash polarity. Supply-chains are implemented in the [Network repository](https://github.com/tradecontrol/tc-network).
+Each instance is called a node because it is designed to be connected to other instances in a network. Inputs perfectly match outputs, so there are no native customer or supplier accounts; no sales, purchase or works orders. Instead demand and supply present a mirror interface and order types are modelled using a principle of cash polarity. Supply-chains are implemented in the [Network repository](https://github.com/tradecontrol/network).
 
 ### Background
 
@@ -31,11 +31,11 @@ If you have any interest in technological production, the author explains the un
 
 ### Related Components
 
-[Client](https://github.com/tradecontrol/tc-office)
+[Client](https://github.com/tradecontrol/office)
 
-[Ethereum Network](https://github.com/tradecontrol/tc-network)
+[Ethereum Network](https://github.com/tradecontrol/network)
 
-[Bitcoin Wallet](https://github.com/tradecontrol/tc-bitcoin)
+[Bitcoin Wallet](https://github.com/tradecontrol/bitcoin)
 
 ### Visual Studio Solution
 

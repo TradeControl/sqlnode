@@ -45,13 +45,13 @@ The following record logs changes to Trade Control, first released on **2019.09.
 ### 3.24.6
 
 - [x] remove obsolete IndustrySector code from the Services demo [App.proc_DemoServices](src/tcNodeDb/App/Stored%20Procedures/proc_DemoServices.sql)
-- [x] extract the [TCNodeConfig](src/tcNode/TCNodeConfig.cs) class into a separate library for use in the [Network project](https://github.com/tradecontrol/tc-network).
+- [x] extract the [TCNodeConfig](src/tcNode/TCNodeConfig.cs) class into a separate library for use in the [Network project](https://github.com/tradecontrol/network).
 
 ### 3.25.1
 
 [sql](src/tcNode/scripts/tc_upgrade_3_25_1.sql)
 
-A script to facilitate event processing by the [Trade Control Network](https://github.com/tradecontrol/tc-network)
+A script to facilitate event processing by the [Trade Control Network](https://github.com/tradecontrol/network)
 
 - [x] transmission status enumerated type for networking Orgs and triggering contract deployment
 - [x] [Task.tbChangeLog](src/tcNodeDb/Task/Tables/tbChangeLog.sql) table maintained by the [Task.tbTask](src/tcNodeDb/Task/Tables/tbTask.sql) insert, update and delete triggers 
@@ -68,7 +68,7 @@ A script to facilitate event processing by the [Trade Control Network](https://g
 
 ### 3.27.1
 
-Release 3.27.1 supports the first full release of the [Trade Control Network](https://github.com/tradecontrol/tc-network).  
+Release 3.27.1 supports the first full release of the [Trade Control Network](https://github.com/tradecontrol/network).  
 
 [sql](src/tcNode/scripts/tc_upgrade_3_27_1.sql)
 
@@ -92,7 +92,7 @@ Release 3.27.1 supports the first full release of the [Trade Control Network](ht
 
 ### 3.28.2
 
-Implements the data logic of the [Trade Control Bitcoin Wallet](https://github.com/tradecontrol/tc-bitcoin).  
+Implements the data logic of the [Trade Control Bitcoin Wallet](https://github.com/tradecontrol/bitcoin).  
 
 [sql](src/tcNode/scripts/tc_upgrade_3_28_2.sql)
 
@@ -126,12 +126,12 @@ Implements the data logic of the [Trade Control Bitcoin Wallet](https://github.c
 
 [sql](src/tcNode/scripts/tc_upgrade_3_28_5.sql)
 
-- [x] fix for [client app](https://github.com/tradecontrol/tc-office) converting calculated decimal fields to short text. Reconnect required.
+- [x] fix for [client app](https://github.com/tradecontrol/office) converting calculated decimal fields to short text. Reconnect required.
 
 
 ### 3.29.1
 
-Implements the data logic of the Trade Control [Balance Sheet](https://github.com/tradecontrol/tc-office#demos)
+Implements the data logic of the Trade Control [Balance Sheet](https://github.com/tradecontrol/office#demos)
 
 [sql](src/tcNode/scripts/tc_upgrade_3_29_1.sql)
 
@@ -167,7 +167,7 @@ Implements the data logic of the Trade Control [Balance Sheet](https://github.co
 
 ### 3.30.1
 
-[Balance Sheet](https://github.com/tradecontrol/tc-office#demos) consolidation.
+[Balance Sheet](https://github.com/tradecontrol/office#demos) consolidation.
 
 [sql](src/tcNode/scripts/tc_upgrade_3_30_1.sql)
 
@@ -204,7 +204,7 @@ Paid tax and invoice status simplification.
  
 ### 3.30.4
 
-[Balance Sheet](https://github.com/tradecontrol/tc-office#demos) finalisation.
+[Balance Sheet](https://github.com/tradecontrol/office#demos) finalisation.
 
 [sql](src/tcNode/scripts/tc_upgrade_3_30_4.sql)
 

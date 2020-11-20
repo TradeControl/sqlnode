@@ -285,7 +285,7 @@
         "Manufacturer" = "8:Trade Control"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:TC-Node Configuration"
+        "Title" = "8:Node Configuration"
         "Subject" = "8:"
         "ARPCONTACT" = "8:Ian Monnox"
         "Keywords" = "8:"
@@ -396,7 +396,7 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_89E78D15DEED4047B0FA69C7E7F1D12E"
             {
-            "Name" = "8:TC-Node Configuration"
+            "Name" = "8:Node Configuration"
             "Arguments" = "8:"
             "Description" = "8:Installs and maintains the Sql Server instance of a Trade Control node."
             "ShowCmd" = "3:1"

@@ -3,7 +3,7 @@ Trade Control Node
 
 Date: 1.8.19
 
-Documentation on github.com/tradecontrol/tc-nodecore
+Documentation on github.com/tradecontrol/sqlnode
 
 Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
 

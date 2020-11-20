@@ -3,7 +3,7 @@ Trade Control Node Configuration
 
 Date: 1.8.19
 
-Documentation on github.com/tradecontrol/tc-nodecore
+Documentation on github.com/tradecontrol/sqlnode
 
 Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
 
@@ -16,10 +16,10 @@ using System.Runtime.InteropServices;
 using System.Windows;
 
 [assembly: AssemblyTitle("Trade Control Sql Server Scripts")]
-[assembly: AssemblyDescription("Installs, configures and upgrades a TC-Node")]
+[assembly: AssemblyDescription("Installs, configures and upgrades a Node")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Trade Control")]
-[assembly: AssemblyProduct("TC-Node Configurator")]
+[assembly: AssemblyProduct("Node Configurator")]
 [assembly: AssemblyCopyright("Copyright © Trade Control 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

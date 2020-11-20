@@ -14,7 +14,7 @@ You may obtain a copy of the License at
 
 Change log:
 
-	https://github.com/tradecontrol/tc-nodecore
+	https://github.com/tradecontrol/sqlnode
 
 Instructions:
 This script should be applied by the TC Node Configuration app.
