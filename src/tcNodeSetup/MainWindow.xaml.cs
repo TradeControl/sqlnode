@@ -512,8 +512,8 @@ namespace TradeControl.Node
 
                     TestConnection();
 
-                    tabsMain.SelectedItem = pageDemos;
-                    tabsDemos.SelectedItem = pageBasicSetup;
+                    tabsMain.SelectedItem = pageTutorials;
+                    tabsTutorials.SelectedItem = pageBasicSetup;
                 }
                 else
                 {

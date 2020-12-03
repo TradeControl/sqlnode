@@ -72,7 +72,7 @@ ALTER TABLE Task.tbAllocation DROP
 	COLUMN	UnitCharge;
 go
 ALTER TABLE Task.tbAllocation WITH NOCHECK ADD
-	UnitCharge decimal(18, 7) NOT NULL;
+	UnitCharge decimal(18, 7) NOT NULL CONSTRAINT DF_Task_tbAllocation_UnitCharge DEFAULT (0);
 go
 UPDATE Task.tbAllocation
 SET UnitCharge = UnitChargeStore
@@ -90,7 +90,7 @@ ALTER TABLE Task.tbAllocationEvent DROP
 	COLUMN	UnitCharge;
 go
 ALTER TABLE Task.tbAllocationEvent WITH NOCHECK ADD
-	UnitCharge decimal(18, 7) NOT NULL;
+	UnitCharge decimal(18, 7) NOT NULL CONSTRAINT DF_tbAllocationEvent_UnitCharge DEFAULT (0);
 go
 UPDATE Task.tbAllocationEvent
 SET UnitCharge = UnitChargeStore

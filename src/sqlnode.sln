@@ -13,15 +13,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "img", "img", "{856686E2-D32
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C96737FC-9A30-4203-837B-8F7ADE497CBC}"
 	ProjectSection(SolutionItems) = preProject
-		..\changelog.md = ..\changelog.md
 		..\readme.md = ..\readme.md
 		..\docs\tc_coding_practice.md = ..\docs\tc_coding_practice.md
-		..\docs\tc_nodecore_config.md = ..\docs\tc_nodecore_config.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "installation", "installation", "{91D3D148-DEB2-4E46-B71A-BA4AF18DBE7B}"
 	ProjectSection(SolutionItems) = preProject
-		installation\tcNodeConfigSetup.zip = installation\tcNodeConfigSetup.zip
+		installation\tcNodeConfig.zip = installation\tcNodeConfig.zip
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcNode", "tcNode\tcNode.csproj", "{E0B55EBE-7F5E-4703-B983-A43BB9E3B8D7}"

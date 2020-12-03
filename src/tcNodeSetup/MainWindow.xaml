@@ -235,8 +235,8 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
-            <TabItem x:Name="pageDemos" Header="Demos">
-                <TabControl x:Name="tabsDemos" TabStripPlacement="Bottom" >
+            <TabItem x:Name="pageTutorials" Header="Tutorials" Height="22" VerticalAlignment="Top">
+                <TabControl x:Name="tabsTutorials" TabStripPlacement="Bottom" >
                     <TabItem x:Name="pageBasicSetup" Header="Basic Setup">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -329,7 +329,7 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <StackPanel>
-                                <Label Content="Services Demo" FontWeight="ExtraBold" FontSize="20" Margin="20,20,20,5"/>
+                                <Label Content="Services" FontWeight="ExtraBold" FontSize="20" Margin="20,20,20,5"/>
                                 <TextBlock x:Name="lbServicesStatus" Text="Data Source not found." Margin="20,0,20,20" TextWrapping="Wrap" Foreground="Red" />
 
                                 <Label Content="Options:" FontWeight="Bold" Margin="20,20,20,5" />
@@ -374,7 +374,7 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <StackPanel>
-                                <Label Content="Manufacturing Demo" FontWeight="ExtraBold" FontSize="20" Margin="20,20,20,5"/>
+                                <Label Content="Manufacturing" FontWeight="ExtraBold" FontSize="20" Margin="20,20,20,5"/>
                                 <TextBlock x:Name="lbManufacturingStatus" Text="Data Source not found." Margin="20,0,20,20" TextWrapping="Wrap" Foreground="Red" />
                                 <Label Content="Options:" FontWeight="Bold" Margin="20,20,20,5" />
                                 <StackPanel>
