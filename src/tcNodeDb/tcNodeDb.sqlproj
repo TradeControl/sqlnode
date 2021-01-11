@@ -556,6 +556,9 @@
     <Build Include="Security\Org.sql" />
     <Build Include="Security\Task.sql" />
     <Build Include="Security\Usr.sql" />
+    <Build Include="Invoice\Views\vwAccountsMode.sql" />
+    <Build Include="Invoice\Tables\tbEntry.sql" />
+    <Build Include="Invoice\Stored Procedures\proc_PostEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

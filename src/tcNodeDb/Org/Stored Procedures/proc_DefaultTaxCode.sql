@@ -1,5 +1,5 @@
 ﻿
-CREATE   PROCEDURE Org.proc_DefaultTaxCode 
+CREATE  PROCEDURE Org.proc_DefaultTaxCode 
 	(
 	@AccountCode nvarchar(10),
 	@TaxCode nvarchar(10) OUTPUT
@@ -8,15 +8,13 @@ CREATE   PROCEDURE Org.proc_DefaultTaxCode
    	SET NOCOUNT, XACT_ABORT ON;
 
 	BEGIN TRY
-		IF EXISTS(SELECT     Org.tbOrg.AccountCode
-				  FROM         Org.tbOrg INNER JOIN
-										App.tbOptions ON Org.tbOrg.AccountCode = App.tbOptions.AccountCode)
-			BEGIN
-			SELECT @TaxCode = Org.tbOrg.TaxCode
-				  FROM         Org.tbOrg INNER JOIN
-										App.tbOptions ON Org.tbOrg.AccountCode = App.tbOptions.AccountCode
-		
-			END	                              
+
+		IF EXISTS (SELECT * FROM Org.tbOrg o JOIN App.tbTaxCode t ON o.TaxCode = t.TaxCode WHERE AccountCode = @AccountCode)
+			SELECT @TaxCode = TaxCode FROM Org.tbOrg WHERE AccountCode = @AccountCode
+		ELSE IF EXISTS(SELECT * FROM  Org.tbOrg JOIN App.tbOptions ON Org.tbOrg.AccountCode = App.tbOptions.AccountCode)
+			SELECT @TaxCode = Org.tbOrg.TaxCode FROM  Org.tbOrg JOIN App.tbOptions ON Org.tbOrg.AccountCode = App.tbOptions.AccountCode		
+		ELSE
+			SET @TaxCode = ''
 
   	END TRY
 	BEGIN CATCH

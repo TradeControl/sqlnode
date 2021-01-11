@@ -230,8 +230,7 @@ namespace TradeControl.Node.Properties {
         ///- Drop redundant column Cash.tbCode.OpeningBalance
         ///- Cash.vwStatement invoiced vat not carrying over before first payment
         ///
-        ///Instructions:
-        /// [rest of string was truncated]&quot;;.
+        ///Instructions:        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_4 {
             get {
@@ -260,7 +259,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It  [rest of string was truncated]&quot;;.
+        ///It inse [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_5 {
             get {
@@ -289,7 +288,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It  [rest of string was truncated]&quot;;.
+        ///It inse [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_24_6 {
             get {
@@ -318,7 +317,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It [rest of string was truncated]&quot;;.
+        ///It ins [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_25_1 {
             get {
@@ -347,7 +346,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It in [rest of string was truncated]&quot;;.
+        ///It insert [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_26_1 {
             get {
@@ -376,7 +375,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inserts the [rest of string was truncated]&quot;;.
+        ///It inserts the upg [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_27_1 {
             get {
@@ -405,7 +404,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inserts th [rest of string was truncated]&quot;;.
+        ///It inserts the up [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_28_1 {
             get {
@@ -434,7 +433,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inserts th [rest of string was truncated]&quot;;.
+        ///It inserts the up [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_28_2 {
             get {
@@ -463,7 +462,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inserts th [rest of string was truncated]&quot;;.
+        ///It inserts the up [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_28_3 {
             get {
@@ -492,7 +491,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inserts  [rest of string was truncated]&quot;;.
+        ///It inserts the  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_28_4 {
             get {
@@ -521,7 +520,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inserts  [rest of string was truncated]&quot;;.
+        ///It inserts the  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_28_5 {
             get {
@@ -550,7 +549,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inserts  [rest of string was truncated]&quot;;.
+        ///It inserts the  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_29_1 {
             get {
@@ -579,7 +578,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inserts  [rest of string was truncated]&quot;;.
+        ///It inserts the  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_29_2 {
             get {
@@ -608,7 +607,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It insert [rest of string was truncated]&quot;;.
+        ///It inserts th [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_29_3 {
             get {
@@ -637,7 +636,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inser [rest of string was truncated]&quot;;.
+        ///It inserts t [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_29_4 {
             get {
@@ -666,7 +665,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inser [rest of string was truncated]&quot;;.
+        ///It inserts t [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_30_1 {
             get {
@@ -695,7 +694,7 @@ namespace TradeControl.Node.Properties {
         ///
         ///Instructions:
         ///This script should be applied by the TC Node Configuration app.
-        ///It inser [rest of string was truncated]&quot;;.
+        ///It inserts t [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_30_2 {
             get {
@@ -725,7 +724,7 @@ namespace TradeControl.Node.Properties {
         ///Instructions:
         ///This script should be applied by the Node Configuration app.
         ///
-        ///************ [rest of string was truncated]&quot;;.
+        ///**************** [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_30_3 {
             get {
@@ -755,7 +754,7 @@ namespace TradeControl.Node.Properties {
         ///Instructions:
         ///This script should be applied by the Node Configuration app.
         ///
-        ///************ [rest of string was truncated]&quot;;.
+        ///**************** [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_30_4 {
             get {
@@ -785,7 +784,7 @@ namespace TradeControl.Node.Properties {
         ///Instructions:
         ///This script should be applied by the Node Configuration app.
         ///
-        ///*********** [rest of string was truncated]&quot;;.
+        ///*************** [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_30_5 {
             get {
@@ -815,11 +814,41 @@ namespace TradeControl.Node.Properties {
         ///Instructions:
         ///This script should be applied by the Node Configuration app.
         ///
-        ///********** [rest of string was truncated]&quot;;.
+        ///************** [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_30_6 {
             get {
                 return ResourceManager.GetString("tc_upgrade_3_30_6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script
+        ///Release: 3.31.1
+        ///
+        ///Date: 6 January 2020
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/sqlnode
+        ///
+        ///Instructions:
+        ///This script should be applied by the Node Configuration app.
+        ///
+        ///**************** [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_31_1 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_31_1", resourceCulture);
             }
         }
     }
