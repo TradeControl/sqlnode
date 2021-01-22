@@ -1,7 +1,5 @@
 # Trade Control Node
 
-Modelling the physical and financial workflows of a business entity in Sql Server. 
-
 First published on 24 September 2019
 
 ## Documentation

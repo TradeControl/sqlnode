@@ -1,4 +1,124 @@
-﻿CREATE PROCEDURE App.proc_BasicSetup
+/**************************************************************************************
+Trade Control
+Upgrade script
+Release: 3.32.1
+
+Date: 20 January 2020
+Author: IAM
+
+Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+
+You may obtain a copy of the License at
+
+	https://www.gnu.org/licenses/gpl-3.0.en.html
+
+Change log:
+
+	https://github.com/tradecontrol/sqlnode
+
+Instructions:
+This script should be applied by the Node Configuration app.
+
+***********************************************************************************/
+go
+CREATE OR ALTER VIEW Invoice.vwCreditSpoolByItem
+AS
+	SELECT        credit_note.InvoiceNumber, Invoice.tbType.InvoiceType, credit_note.InvoiceStatusCode, Usr.tbUser.UserName, credit_note.AccountCode, Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, credit_note.InvoicedOn, 
+							 credit_note.InvoiceValue AS InvoiceValueTotal, credit_note.TaxValue AS TaxValueTotal, credit_note.PaymentTerms, credit_note.DueOn, credit_note.Notes, Org.tbOrg.EmailAddress, Org.tbAddress.Address AS InvoiceAddress, 
+							 tbInvoiceItem.CashCode, Cash.tbCode.CashDescription, tbInvoiceItem.ItemReference, tbInvoiceItem.TaxCode, tbInvoiceItem.InvoiceValue, tbInvoiceItem.TaxValue
+	FROM            Invoice.tbInvoice AS credit_note INNER JOIN
+							 Invoice.tbStatus ON credit_note.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode INNER JOIN
+							 Org.tbOrg ON credit_note.AccountCode = Org.tbOrg.AccountCode INNER JOIN
+							 Usr.tbUser ON credit_note.UserId = Usr.tbUser.UserId LEFT OUTER JOIN
+							 Org.tbAddress ON Org.tbOrg.AddressCode = Org.tbAddress.AddressCode INNER JOIN
+							 Invoice.tbItem AS tbInvoiceItem ON credit_note.InvoiceNumber = tbInvoiceItem.InvoiceNumber INNER JOIN
+							 Invoice.tbType ON credit_note.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode INNER JOIN
+							 Cash.tbCode ON tbInvoiceItem.CashCode = Cash.tbCode.CashCode
+	WHERE        (credit_note.InvoiceTypeCode = 1 OR
+							 credit_note.InvoiceTypeCode = 3) AND EXISTS
+								 (SELECT * FROM  App.tbDocSpool AS doc
+								   WHERE (DocTypeCode BETWEEN 5 AND 6) AND (UserName = SUSER_SNAME()) AND (credit_note.InvoiceNumber = DocumentNumber))
+							   
+go
+ALTER PROCEDURE Cash.proc_PaymentPostInvoiced (@PaymentCode nvarchar(20))
+AS
+	SET NOCOUNT, XACT_ABORT ON;
+
+	BEGIN TRY
+		DECLARE 
+			@AccountCode nvarchar(10)
+			, @PostValue decimal(18, 5)
+			, @CashCode nvarchar(50);
+
+		SELECT   @PostValue = CASE WHEN PaidInValue = 0 THEN PaidOutValue ELSE PaidInValue * -1 END,
+			@AccountCode = Org.tbOrg.AccountCode
+		FROM         Cash.tbPayment INNER JOIN
+							  Org.tbOrg ON Cash.tbPayment.AccountCode = Org.tbOrg.AccountCode
+		WHERE     ( Cash.tbPayment.PaymentCode = @PaymentCode);
+
+		IF NOT EXISTS (SELECT InvoiceNumber FROM Invoice.tbInvoice WHERE (InvoiceStatusCode BETWEEN 1 AND 2) AND (AccountCode = @AccountCode))
+			RETURN;
+
+		IF EXISTS (SELECT * FROM  Invoice.tbInvoice 
+						INNER JOIN Invoice.tbTask ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbTask.InvoiceNumber
+					WHERE        (Invoice.tbInvoice.AccountCode = @AccountCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3))
+		BEGIN
+			SELECT  @CashCode = Invoice.tbTask.CashCode
+			FROM  Invoice.tbInvoice 
+				INNER JOIN Invoice.tbTask ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbTask.InvoiceNumber
+			WHERE        (Invoice.tbInvoice.AccountCode = @AccountCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
+			GROUP BY Invoice.tbTask.CashCode;
+		END
+		ELSE IF EXISTS (SELECT * FROM Invoice.tbInvoice 
+							INNER JOIN Invoice.tbItem ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbItem.InvoiceNumber
+						WHERE        (Invoice.tbInvoice.AccountCode = @AccountCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
+						GROUP BY Invoice.tbItem.CashCode)
+		BEGIN
+			SELECT @CashCode = Invoice.tbItem.CashCode
+			FROM  Invoice.tbInvoice 
+				INNER JOIN Invoice.tbItem ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbItem.InvoiceNumber
+			WHERE        (Invoice.tbInvoice.AccountCode = @AccountCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
+			GROUP BY Invoice.tbItem.CashCode;
+		END
+
+		BEGIN TRANSACTION;
+
+		UPDATE Cash.tbPayment
+		SET PaymentStatusCode = 1, CashCode = @CashCode
+		WHERE (PaymentCode = @PaymentCode);
+		
+		WITH invoice_status AS
+		(
+			SELECT InvoiceNumber, InvoiceStatusCode, PaidValue, PaidTaxValue
+			FROM Invoice.vwStatusLive
+			WHERE AccountCode = @AccountCode
+		)
+		UPDATE invoices
+		SET 
+			InvoiceStatusCode = invoice_status.InvoiceStatusCode,
+			PaidValue = invoice_status.PaidValue,
+			PaidTaxValue = invoice_status.PaidTaxValue
+		FROM Invoice.tbInvoice invoices	
+			JOIN invoice_status ON invoices.InvoiceNumber = invoice_status.InvoiceNumber
+		WHERE 
+			invoices.InvoiceStatusCode <> invoice_status.InvoiceStatusCode 
+			OR invoices.PaidValue <> invoice_status.PaidValue 
+			OR invoices.PaidTaxValue <> invoice_status.PaidTaxValue;
+
+		UPDATE  Org.tbAccount
+		SET CurrentBalance = Org.tbAccount.CurrentBalance + (@PostValue * -1)
+		FROM         Org.tbAccount INNER JOIN
+							  Cash.tbPayment ON Org.tbAccount.CashAccountCode = Cash.tbPayment.CashAccountCode
+		WHERE Cash.tbPayment.PaymentCode = @PaymentCode
+		
+		COMMIT TRANSACTION
+
+  	END TRY
+	BEGIN CATCH
+		EXEC App.proc_ErrorLog;
+	END CATCH
+go
+ALTER PROCEDURE App.proc_BasicSetup
 (	
 	@FinancialMonth SMALLINT = 4,
 	@CoinTypeCode SMALLINT,
@@ -350,3 +470,5 @@ DECLARE
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog
 	END CATCH
+go
+

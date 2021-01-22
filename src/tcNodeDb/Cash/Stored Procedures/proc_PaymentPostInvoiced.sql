@@ -14,7 +14,7 @@ AS
 							  Org.tbOrg ON Cash.tbPayment.AccountCode = Org.tbOrg.AccountCode
 		WHERE     ( Cash.tbPayment.PaymentCode = @PaymentCode);
 
-		IF NOT EXISTS (SELECT InvoiceNumber FROM Invoice.tbInvoice WHERE (InvoiceStatusCode = 1) AND (AccountCode = @AccountCode))
+		IF NOT EXISTS (SELECT InvoiceNumber FROM Invoice.tbInvoice WHERE (InvoiceStatusCode BETWEEN 1 AND 2) AND (AccountCode = @AccountCode))
 			RETURN;
 
 		IF EXISTS (SELECT * FROM  Invoice.tbInvoice 
