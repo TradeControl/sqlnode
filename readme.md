@@ -4,7 +4,7 @@ First published on 24 September 2019
 
 ## Documentation
 
-- [overview](https://tradecontrol.github.io/app)
+- [overview](https://tradecontrol.github.io)
 - [installation](https://tradecontrol.github.io/tutorials/installing-sqlnode)
 - [coding practice](docs/tc_coding_practice.md)
 
