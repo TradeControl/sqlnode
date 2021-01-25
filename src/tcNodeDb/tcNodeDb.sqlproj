@@ -560,6 +560,7 @@
     <Build Include="Invoice\Tables\tbEntry.sql" />
     <Build Include="Invoice\Stored Procedures\proc_PostEntries.sql" />
     <Build Include="Invoice\Views\vwCreditSpoolByItem.sql" />
+    <Build Include="Invoice\Views\vwSalesInvoiceSpoolByItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

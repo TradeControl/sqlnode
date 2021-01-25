@@ -43,8 +43,10 @@ CREATE   PROCEDURE Invoice.proc_RaiseBlank
 		WHERE     (InvoiceTypeCode = @InvoiceTypeCode)
 	
 		INSERT INTO Invoice.tbInvoice
-								(InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode)
-		VALUES     (@InvoiceNumber, @UserId, @AccountCode, @InvoiceTypeCode, @InvoicedOn, 0)
+								(InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode, PaymentTerms)
+		 SELECT @InvoiceNumber, @UserId, @AccountCode, @InvoiceTypeCode, @InvoicedOn, 0, PaymentTerms
+		 FROM Org.tbOrg
+		 WHERE AccountCode = @AccountCode
 	
 		COMMIT TRANSACTION
 	
@@ -52,4 +54,3 @@ CREATE   PROCEDURE Invoice.proc_RaiseBlank
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog
 	END CATCH
-

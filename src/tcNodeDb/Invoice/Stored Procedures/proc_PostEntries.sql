@@ -5,20 +5,20 @@ AS
 	BEGIN TRY
 		DECLARE 
 			@AccountCode nvarchar(10)
-			, @CashCode nvarchar(50)
 			, @InvoiceTypeCode smallint
 			, @InvoiceNumber nvarchar(20);
 			
 		DECLARE c1 CURSOR LOCAL FOR
-			SELECT AccountCode, CashCode, InvoiceTypeCode
+			SELECT AccountCode, InvoiceTypeCode
 			FROM Invoice.tbEntry
-			WHERE UserId = (SELECT UserId FROM Usr.vwCredentials);
+			WHERE UserId = (SELECT UserId FROM Usr.vwCredentials)
+			GROUP BY AccountCode, InvoiceTypeCode;
 
 		OPEN c1;
 
 		BEGIN TRAN;
 
-		FETCH NEXT FROM c1 INTO @AccountCode, @CashCode, @InvoiceTypeCode;
+		FETCH NEXT FROM c1 INTO @AccountCode, @InvoiceTypeCode;
 		
 		WHILE (@@FETCH_STATUS = 0)
 		BEGIN
@@ -26,24 +26,25 @@ AS
 
 			WITH invoice_entry AS
 			(
-				SELECT @InvoiceNumber InvoiceNumber, InvoicedOn
+				SELECT @InvoiceNumber InvoiceNumber, MIN(InvoicedOn) InvoicedOn
 				FROM Invoice.tbEntry
-				WHERE AccountCode = @AccountCode AND CashCode = @CashCode
+				WHERE AccountCode = @AccountCode AND InvoiceTypeCode = @InvoiceTypeCode
 			)
 			UPDATE Invoice.tbInvoice
-			SET InvoicedOn = invoice_entry.InvoicedOn
+			SET 
+				InvoicedOn = invoice_entry.InvoicedOn,
+				Printed = CASE WHEN  @InvoiceTypeCode < 2 THEN 0 ELSE 1 END
 			FROM Invoice.tbInvoice invoice_header 
 				JOIN invoice_entry ON invoice_header.InvoiceNumber = invoice_entry.InvoiceNumber;
-
 
 			INSERT INTO Invoice.tbItem (InvoiceNumber, CashCode, TaxCode, ItemReference, TotalValue, InvoiceValue)
 			SELECT @InvoiceNumber InvoiceNumber, CashCode, TaxCode, ItemReference, TotalValue, InvoiceValue
 			FROM Invoice.tbEntry
-			WHERE AccountCode = @AccountCode AND CashCode = @CashCode
+			WHERE AccountCode = @AccountCode AND InvoiceTypeCode = @InvoiceTypeCode
 
 			EXEC Invoice.proc_Accept @InvoiceNumber;
 
-			FETCH NEXT FROM c1 INTO @AccountCode, @CashCode, @InvoiceTypeCode;
+			FETCH NEXT FROM c1 INTO @AccountCode, @InvoiceTypeCode;
 		END
 
 		DELETE FROM Invoice.tbEntry
