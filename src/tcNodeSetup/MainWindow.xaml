@@ -135,7 +135,7 @@
                         <Label Margin="5" Grid.Row="2" Content="Business Name:"  />
                         <TextBox Margin="5" Grid.Row="2" Grid.Column="1" Name="tbBusinessName" Text="THE BUSINESS" MaxLength="255" FontWeight="Bold"  />
                         <Label Margin="5" Grid.Row="3" Content="Business Address:"  />
-                        <TextBox Margin="5" Grid.Row="3" Grid.Column="1" Name="tbBusinessAddress" Text="PREMISIS" MaxLength="255" FontWeight="Bold"  />
+                        <TextBox Margin="5" Grid.Row="3" Grid.Column="1" Name="tbBusinessAddress" Text="PREMISES" MaxLength="255" FontWeight="Bold"  />
                         <Label Margin="5" Grid.Row="4" Content="Full Name:" />
                         <TextBox Margin="5" Grid.Row="4" Grid.Column="1" Name="tbFullName" Text="Administrator" MaxLength="100" FontWeight="Bold"  />
                         <Label Margin="5" Grid.Row="5" Content="Email Address:" />
