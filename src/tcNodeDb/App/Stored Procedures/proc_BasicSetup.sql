@@ -188,6 +188,23 @@ DECLARE
 		INSERT INTO Org.tbOrg (AccountCode, AccountName, OrganisationStatusCode, OrganisationTypeCode, TaxCode)
 			VALUES (@AccountCode, @GovAccountName, 1, 7, 'N/A');
 
+		--ASSIGN CASH CODES AND GOV TO TAX TYPES
+		UPDATE Cash.tbTaxType
+		SET AccountCode = @AccountCode, CashCode = '603', MonthNumber = @FinancialMonth
+		WHERE TaxTypeCode = 0;
+
+		UPDATE Cash.tbTaxType
+		SET AccountCode = @AccountCode, CashCode = '601', MonthNumber = @FinancialMonth
+		WHERE TaxTypeCode = 1;
+
+		UPDATE Cash.tbTaxType
+		SET AccountCode = @AccountCode, CashCode = '604', MonthNumber = @FinancialMonth
+		WHERE TaxTypeCode = 2;
+
+		UPDATE Cash.tbTaxType
+		SET AccountCode = @AccountCode, CashCode = '602', MonthNumber = @FinancialMonth
+		WHERE TaxTypeCode = 3;
+
 		--BANK ACCOUNTS / WALLETS
 
 		IF @CoinTypeCode = 2
@@ -329,22 +346,6 @@ DECLARE
 		SET CashStatusCode = 2
 		WHERE YearNumber < 	(SELECT YearNumber FROM App.tbYear	WHERE CashStatusCode = 1);
 
-		--ASSIGN CASH CODES AND GOV TO TAX TYPES
-		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '603', MonthNumber = @FinancialMonth
-		WHERE TaxTypeCode = 0;
-
-		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '601', MonthNumber = @FinancialMonth
-		WHERE TaxTypeCode = 1;
-
-		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '604', MonthNumber = @FinancialMonth
-		WHERE TaxTypeCode = 2;
-
-		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '602', MonthNumber = @FinancialMonth
-		WHERE TaxTypeCode = 3;
 		COMMIT TRAN
 	END TRY
 	BEGIN CATCH

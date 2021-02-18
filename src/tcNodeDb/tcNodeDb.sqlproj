@@ -390,16 +390,12 @@
     <Build Include="Invoice\Views\vwRegister.sql" />
     <Build Include="Org\Views\vwPaymentTerms.sql" />
     <Build Include="Invoice\Views\vwRegisterPurchases.sql" />
-    <Build Include="Org\Views\vwPurchaseInvoices.sql" />
     <Build Include="Invoice\Views\vwRegisterPurchaseTasks.sql" />
-    <Build Include="Org\Views\vwSalesInvoices.sql" />
     <Build Include="Invoice\Views\vwRegisterSales.sql" />
     <Build Include="Org\Views\vwStatement.sql" />
     <Build Include="Invoice\Views\vwRegisterSaleTasks.sql" />
     <Build Include="Org\Views\vwTypeLookup.sql" />
-    <Build Include="Org\Views\vwPurchases.sql" />
     <Build Include="Task\Views\vwActiveStatusCodes.sql" />
-    <Build Include="Org\Views\vwSales.sql" />
     <Build Include="Org\Functions\fnAccountKeyNamespace.sql" />
     <Build Include="Cash\Functions\fnChangeKeyPath.sql" />
     <Build Include="Cash\Functions\fnNamespaceBalance.sql" />
@@ -561,6 +557,10 @@
     <Build Include="Invoice\Stored Procedures\proc_PostEntries.sql" />
     <Build Include="Invoice\Views\vwCreditSpoolByItem.sql" />
     <Build Include="Invoice\Views\vwSalesInvoiceSpoolByItem.sql" />
+    <Build Include="Usr\Tables\tbInterface.sql" />
+    <Build Include="Usr\Tables\tbMenuView.sql" />
+    <Build Include="Usr\Views\vwUserMenuList.sql" />
+    <Build Include="Org\Views\vwInvoiceTasks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

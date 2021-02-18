@@ -3,7 +3,7 @@ Trade Control
 Upgrade script
 Release: 3.31.2
 
-Date: 15 January 2020
+Date: 15 January 2021
 Author: IAM
 
 Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 

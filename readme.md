@@ -1,6 +1,13 @@
 # Trade Control Node
 
-First published on 24 September 2019
+## Publications
+
+| Release | Published |
+| - | - |
+| Commercial | 18 February 2021 |
+| Beta | 24 September 2019 |
+
+- [change log](changelog.md)
 
 ## Documentation
 

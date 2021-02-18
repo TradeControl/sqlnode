@@ -43,7 +43,7 @@ AS
 		CAST(0 as smallint) CashModeCode,  
 		CAST(1 as smallint) AssetTypeCode,  
 		StartOn, 
-		CASE WHEN Balance < 0 THEN 0 ELSE Balance * -1 END Balance 
+		Balance * -1 Balance 
 	FROM vat_statement
 		CROSS JOIN
 		(
