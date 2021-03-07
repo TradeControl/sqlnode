@@ -828,7 +828,7 @@ namespace TradeControl.Node.Properties {
         ///Upgrade script
         ///Release: 3.31.1
         ///
-        ///Date: 6 January 2020
+        ///Date: 6 January 2021
         ///Author: IAM
         ///
         ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
@@ -858,7 +858,7 @@ namespace TradeControl.Node.Properties {
         ///Upgrade script
         ///Release: 3.31.2
         ///
-        ///Date: 15 January 2020
+        ///Date: 15 January 2021
         ///Author: IAM
         ///
         ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
@@ -888,7 +888,7 @@ namespace TradeControl.Node.Properties {
         ///Upgrade script
         ///Release: 3.32.1
         ///
-        ///Date: 20 January 2020
+        ///Date: 20 January 2021
         ///Author: IAM
         ///
         ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
@@ -918,7 +918,7 @@ namespace TradeControl.Node.Properties {
         ///Upgrade script
         ///Release: 3.33.1
         ///
-        ///Date: 1 February 2020
+        ///Date: 15 February 2021
         ///Author: IAM
         ///
         ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
@@ -934,11 +934,41 @@ namespace TradeControl.Node.Properties {
         ///Instructions:
         ///This script should be applied by the Node Configuration app.
         ///
-        ///*************** [rest of string was truncated]&quot;;.
+        ///************** [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_33_1 {
             get {
                 return ResourceManager.GetString("tc_upgrade_3_33_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script
+        ///Release: 3.34.1
+        ///
+        ///Date: 4 March 2021
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/sqlnode
+        ///
+        ///Instructions:
+        ///This script should be applied by the Node Configuration app.
+        ///
+        ///****************** [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_34_1 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_34_1", resourceCulture);
             }
         }
     }

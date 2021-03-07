@@ -561,6 +561,13 @@
     <Build Include="Usr\Tables\tbMenuView.sql" />
     <Build Include="Usr\Views\vwUserMenuList.sql" />
     <Build Include="Org\Views\vwInvoiceTasks.sql" />
+    <Build Include="Task\Tables\tbCostSet.sql" />
+    <Build Include="Task\Views\vwQuotes.sql" />
+    <Build Include="Task\Views\vwCostSet.sql" />
+    <Build Include="Task\Stored Procedures\proc_CostSetAdd.sql" />
+    <Build Include="Cash\Views\vwStatementBase.sql" />
+    <Build Include="Task\Views\vwCostSetTasks.sql" />
+    <Build Include="Cash\Views\vwStatementWhatIf.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

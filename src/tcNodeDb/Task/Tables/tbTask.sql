@@ -188,7 +188,7 @@ AS
 	END CATCH
 
 GO
-CREATE   TRIGGER Task.Task_tbTask_TriggerUpdate
+CREATE TRIGGER Task.Task_tbTask_TriggerUpdate
 ON Task.tbTask
 FOR UPDATE
 AS
@@ -202,7 +202,7 @@ AS
 		WHERE DATEDIFF(SECOND, CAST(i.ActionOn AS DATE), i.ActionOn) <> 0;
 
 		IF UPDATE(TaskStatusCode)
-			BEGIN
+		BEGIN
 			UPDATE ops
 			SET OpStatusCode = 2
 			FROM inserted JOIN Task.tbOp ops ON inserted.TaskCode = ops.TaskCode
@@ -240,14 +240,13 @@ AS
 			(
 				SELECT TaskCode, TaskStatusCode
 				FROM Task.tbTask inserted
-				WHERE NOT CashCode IS NULL AND TaskStatusCode > 1
+				WHERE NOT CashCode IS NULL
 			), task_flow AS
 			(
 				SELECT cascade_status.TaskStatusCode ParentStatusCode, child.ParentTaskCode, child.ChildTaskCode, child_task.TaskStatusCode
 				FROM Task.tbFlow child 
 					JOIN cascade_status ON child.ParentTaskCode = cascade_status.TaskCode
 					JOIN Task.tbTask child_task ON child.ChildTaskCode = child_task.TaskCode
-				WHERE CashCode IS NULL
 
 				UNION ALL
 
@@ -255,7 +254,6 @@ AS
 				FROM Task.tbFlow child 
 					JOIN task_flow parent ON child.ParentTaskCode = parent.ChildTaskCode
 					JOIN Task.tbTask child_task ON child.ChildTaskCode = child_task.TaskCode
-				WHERE CashCode IS NULL
 			)
 			UPDATE task
 			SET TaskStatusCode = CASE task_flow.ParentStatusCode WHEN 3 THEN 2 ELSE task_flow.ParentStatusCode END
@@ -289,10 +287,15 @@ AS
 			FROM Task.tbOp ops JOIN task_flow ON task_flow.ChildTaskCode = ops.TaskCode
 			WHERE ops.OpStatusCode < 2;
 
-			END
+			DELETE cost_set 
+			FROM inserted 
+				JOIN Task.tbCostSet cost_set ON inserted.TaskCode = cost_set.TaskCode
+			WHERE inserted.TaskStatusCode > 0;
+			
+		END
 
 		IF UPDATE(Quantity)
-			BEGIN
+		BEGIN
 			UPDATE flow
 			SET UsedOnQuantity = inserted.Quantity / parent_task.Quantity
 			FROM Task.tbFlow AS flow 
@@ -301,24 +304,24 @@ AS
 				JOIN Cash.tbCode ON parent_task.CashCode = Cash.tbCode.CashCode
 			WHERE (flow.UsedOnQuantity <> 0) AND (inserted.Quantity <> 0) 
 				AND (inserted.Quantity / parent_task.Quantity <> flow.UsedOnQuantity)
-			END
+		END
 
 		IF UPDATE(Quantity) OR UPDATE(UnitCharge)
-			BEGIN
+		BEGIN
 			UPDATE task
 			SET task.TotalCharge = i.Quantity * i.UnitCharge
 			FROM Task.tbTask task JOIN inserted i ON task.TaskCode = i.TaskCode
-			END
+		END
 
 		IF UPDATE(TotalCharge)
-			BEGIN
+		BEGIN
 			UPDATE task
 			SET task.UnitCharge = CASE i.TotalCharge + i.Quantity WHEN 0 THEN 0 ELSE i.TotalCharge / i.Quantity END
 			FROM Task.tbTask task JOIN inserted i ON task.TaskCode = i.TaskCode			
-			END
+		END
 
 		IF UPDATE(ActionOn)
-			BEGIN			
+		BEGIN			
 			WITH parent_task AS
 			(
 				SELECT        ParentTaskCode
@@ -378,7 +381,7 @@ AS
 				JOIN inserted i ON task.TaskCode = i.TaskCode
 				JOIN Org.tbOrg org ON i.AccountCode = org.AccountCode				
 			WHERE NOT task.CashCode IS NULL 
-			END
+		END
 
 		IF UPDATE (TaskTitle)
 		BEGIN

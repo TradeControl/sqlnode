@@ -25,7 +25,7 @@ CREATE TABLE Usr.tbInterface
 (
 	InterfaceCode smallint NOT NULL,
 	Interface nvarchar(30) NOT NULL,
-	CONSTRAINT PK_tbInterface PRIMARY KEY CLUSTERED (InterfaceCode)
+	CONSTRAINT PK_Usr_tbInterface PRIMARY KEY CLUSTERED (InterfaceCode)
 );
 go
 INSERT INTO Usr.tbInterface (InterfaceCode, Interface)
