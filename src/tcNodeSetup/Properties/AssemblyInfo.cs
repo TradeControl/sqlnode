@@ -31,5 +31,5 @@ using System.Windows;
     ResourceDictionaryLocation.SourceAssembly
 )]
 
-[assembly: AssemblyVersion("3.34.1.1")]
-[assembly: AssemblyFileVersion("3.34.1.1")]
+[assembly: AssemblyVersion("3.34.2.1")]
+[assembly: AssemblyFileVersion("3.34.2.1")]
