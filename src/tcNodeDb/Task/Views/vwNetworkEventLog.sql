@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Task.vwNetworkEventLog
+﻿CREATE VIEW Task.vwNetworkEventLog
 AS
 	SELECT        Task.tbAllocationEvent.ContractAddress, Task.tbAllocationEvent.LogId, Task.tbAllocationEvent.EventTypeCode, Task.tbAllocationEvent.TaskStatusCode, Task.tbAllocationEvent.ActionOn, Task.tbAllocationEvent.UnitCharge, 
 							 Task.tbAllocationEvent.TaxRate, Task.tbAllocationEvent.QuantityOrdered, Task.tbAllocationEvent.QuantityDelivered, Task.tbAllocationEvent.InsertedOn, Task.tbAllocationEvent.RowVer, App.tbEventType.EventType, 
@@ -12,3 +12,4 @@ AS
 							 Cash.tbMode ON Task.tbAllocation.CashModeCode = Cash.tbMode.CashModeCode AND Task.tbAllocation.CashModeCode = Cash.tbMode.CashModeCode INNER JOIN
 							 Activity.tbMirror ON Task.tbAllocation.AccountCode = Activity.tbMirror.AccountCode AND Task.tbAllocation.AllocationCode = Activity.tbMirror.AllocationCode INNER JOIN
 							 App.tbEventType ON Task.tbAllocationEvent.EventTypeCode = App.tbEventType.EventTypeCode;
+

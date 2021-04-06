@@ -304,7 +304,7 @@ AS
 		, (1, 4, 2, 2, 'SQL Connect', 4, 'Trader', 'Sys_SQLConnect', 0)
 		, (1, 5, 2, 5, 'Definitions', 4, 'Trader', 'App_Definition', 0)
 		, (1, 6, 4, 0, 'Cash Accounts', 0, 'Trader', '', 0)
-		, (1, 7, 4, 2, 'Cash Account Enquiry', 4, 'Trader', 'Org_PaymentAccount', 0)
+		, (1, 7, 4, 2, 'Cash Account Statements', 4, 'Trader', 'Org_PaymentAccount', 0)
 		, (1, 8, 5, 0, 'Invoicing', 0, 'Trader', '', 0)
 		, (1, 9, 5, 3, 'Raise Invoices and Credit Notes', 4, 'Trader', 'Invoice_Entry', 0)
 		, (1, 10, 6, 0, 'Transaction Entry', 0, 'Trader', '', 0)

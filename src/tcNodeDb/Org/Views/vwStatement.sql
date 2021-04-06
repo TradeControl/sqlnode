@@ -57,4 +57,3 @@ AS
 		Reference, StatementType, CAST(Charge as float) AS Charge, 
 		CAST(SUM(Charge) OVER (PARTITION BY AccountCode ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS float) AS Balance
 	FROM statement_data;
-

@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Org.vwAssetBalances
+﻿CREATE VIEW Org.vwAssetBalances
 AS
 	WITH financial_periods AS
 	(

@@ -3,7 +3,6 @@
     [UserName]        NVARCHAR (50)  NOT NULL,
     [LogonName]       NVARCHAR (50)  CONSTRAINT [DF_Usr_tb_LogonName] DEFAULT (suser_sname()) NOT NULL,
     [CalendarCode]    NVARCHAR (10)  NULL,
-	[MenuViewCode] smallint NOT NULL CONSTRAINT [DF_Usr_tbUser_MenuViewCode] DEFAULT (0),	
     [PhoneNumber]     NVARCHAR (50)  NULL,
     [MobileNumber]    NVARCHAR (50)  NULL,
     [EmailAddress]    NVARCHAR (255) NULL,
@@ -18,9 +17,10 @@
     [UpdatedBy]       NVARCHAR (50)  CONSTRAINT [DF_Usr_tb_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
     [UpdatedOn]       DATETIME       CONSTRAINT [DF_Usr_tb_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]          ROWVERSION     NOT NULL,
+    [MenuViewCode]    SMALLINT       CONSTRAINT [DF_Usr_tbUser_MenuViewCode] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Usr_tbUser] PRIMARY KEY CLUSTERED ([UserId] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Usr_tb_App_tbCalendar] FOREIGN KEY ([CalendarCode]) REFERENCES [App].[tbCalendar] ([CalendarCode]) ON UPDATE CASCADE,
-    CONSTRAINT FK_Usr_tbMenu_Usr_tbUser FOREIGN KEY (MenuViewCode) REFERENCES Usr.tbMenuView (MenuViewCode)
+    CONSTRAINT [FK_Usr_tbMenu_Usr_tbUser] FOREIGN KEY ([MenuViewCode]) REFERENCES [Usr].[tbMenuView] ([MenuViewCode])
 );
 
 

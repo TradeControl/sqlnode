@@ -1,4 +1,4 @@
-﻿CREATE VIEW Task.vwCostSet
+﻿CREATE   VIEW Task.vwCostSet
 AS
 	SELECT TaskCode, UserId, InsertedBy, InsertedOn, RowVer
 	FROM Task.tbCostSet

@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Task.vwNetworkChangeLog
+﻿CREATE VIEW Task.vwNetworkChangeLog
 AS
 	SELECT Task.tbTask.AccountCode, Org.tbOrg.AccountName, Task.tbTask.TaskCode, Task.tbChangeLog.LogId, Task.tbChangeLog.ChangedOn, Task.tbChangeLog.TransmitStatusCode, Org.tbTransmitStatus.TransmitStatus, 
 				Task.tbChangeLog.ActivityCode, Activity.tbMirror.AllocationCode, Task.tbChangeLog.TaskStatusCode, Task.tbStatus.TaskStatus, Cash.tbMode.CashModeCode, Cash.tbMode.CashMode, Task.tbChangeLog.ActionOn, 

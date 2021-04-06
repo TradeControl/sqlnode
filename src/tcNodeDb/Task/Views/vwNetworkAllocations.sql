@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Task.vwNetworkAllocations
+﻿CREATE VIEW Task.vwNetworkAllocations
 AS
 	SELECT        Task.tbAllocation.ContractAddress, Task.tbAllocation.AccountCode, Org.tbOrg.AccountName, Activity.tbMirror.ActivityCode, Task.tbAllocation.AllocationCode, Task.tbAllocation.AllocationDescription, Task.tbAllocation.TaskCode, 
 							 Task.tbAllocation.TaskTitle, Task.tbAllocation.CashModeCode, Cash.tbMode.CashMode, Task.tbAllocation.UnitOfMeasure, Task.tbAllocation.UnitOfCharge, Task.tbAllocation.TaskStatusCode, Task.tbStatus.TaskStatus, 

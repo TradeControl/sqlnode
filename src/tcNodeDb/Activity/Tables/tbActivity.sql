@@ -11,7 +11,7 @@
     [UpdatedOn]           DATETIME        CONSTRAINT [DF_Activity_tbActivity_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]              ROWVERSION      NOT NULL,
     [ActivityDescription] NVARCHAR (100)  NULL,
-    [UnitCharge]          DECIMAL (18, 5) CONSTRAINT [DF_Activity_tbActivity_UnitCharge] DEFAULT ((0)) NOT NULL,
+    [UnitCharge]          DECIMAL (18, 7) CONSTRAINT [DF_Activity_tbActivity_UnitCharge] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Activity_tbActivityCode] PRIMARY KEY NONCLUSTERED ([ActivityCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Activity_tbActivity_App_tbRegister] FOREIGN KEY ([RegisterName]) REFERENCES [App].[tbRegister] ([RegisterName]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Activity_tbActivity_App_tbUom] FOREIGN KEY ([UnitOfMeasure]) REFERENCES [App].[tbUom] ([UnitOfMeasure]),

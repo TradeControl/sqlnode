@@ -1,11 +1,12 @@
-﻿CREATE   VIEW Cash.vwBalanceSheetVat
+﻿CREATE VIEW Cash.vwBalanceSheetVat
 AS
 	WITH vat_due AS 
 	(	
 		SELECT StartOn, SUM(VatDue) AS VatDue
 		FROM Cash.vwTaxVatSummary 
 		GROUP BY StartOn
-	), vat_paid AS
+	)
+	, vat_paid AS
 	(
 		SELECT vat_due.StartOn, VatDue - VatAdjustment VatDue, 0 VatPaid
 		FROM vat_due
@@ -33,7 +34,8 @@ AS
 		SELECT RowNumber, StartOn, VatDue, VatPaid,
 			SUM(VatDue+VatPaid) OVER (ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance
 		FROM vat_ordered
-	), vat_statement AS
+	)
+	, vat_statement AS
 	(
 		SELECT RowNumber, StartOn, CAST(VatDue as float) VatDue, CAST(VatPaid as float) VatPaid, CAST(Balance as decimal(18,5)) Balance
 		FROM vat_balance
@@ -51,3 +53,4 @@ AS
 			FROM Cash.tbTaxType
 			WHERE TaxTypeCode = 1
 		) tax_type;
+

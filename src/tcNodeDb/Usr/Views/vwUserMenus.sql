@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW Usr.vwUserMenus
+﻿CREATE VIEW Usr.vwUserMenus
 AS
 	SELECT Usr.tbMenuUser.MenuId, Usr.tbMenu.InterfaceCode
 	FROM Usr.vwCredentials 

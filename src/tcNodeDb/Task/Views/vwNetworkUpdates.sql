@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Task.vwNetworkUpdates
+﻿CREATE VIEW Task.vwNetworkUpdates
 AS
 	WITH updates AS
 	(

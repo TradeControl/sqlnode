@@ -46,5 +46,3 @@ AS
 			FROM Cash.tbTaxType
 			WHERE TaxTypeCode = 0
 		) tax_type;
-
-

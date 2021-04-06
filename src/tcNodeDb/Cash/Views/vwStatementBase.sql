@@ -1,4 +1,4 @@
-﻿CREATE VIEW Cash.vwStatementBase
+﻿CREATE   VIEW Cash.vwStatementBase
 AS
 	--invoiced taxes
 	WITH corp_taxcode AS
@@ -152,7 +152,7 @@ AS
 	), transfer_accruals AS
 	(
 		SELECT        Cash.tbPayment.AccountCode, Cash.tbPayment.CashCode EntryDescription, Cash.tbPayment.PaidOn AS TransactOn, Cash.tbPayment.PaymentCode AS ReferenceCode, 
-			7 AS CashEntryTypeCode, Cash.tbPayment.PaidInValue AS PayIn, Cash.tbPayment.PaidOutValue AS PayOut
+			6 AS CashEntryTypeCode, Cash.tbPayment.PaidInValue AS PayIn, Cash.tbPayment.PaidOutValue AS PayOut
 		FROM            transfer_current_account INNER JOIN
 								 Cash.tbPayment ON transfer_current_account.CashAccountCode = Cash.tbPayment.CashAccountCode
 		WHERE        (Cash.tbPayment.PaymentStatusCode = 2)

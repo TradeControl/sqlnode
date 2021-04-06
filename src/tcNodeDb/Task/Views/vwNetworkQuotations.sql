@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Task.vwNetworkQuotations
+﻿CREATE VIEW Task.vwNetworkQuotations
 AS
 	WITH requests AS
 	(

@@ -21,7 +21,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_A708C4B6069F4D8DC4C1E1570C51379F"
+        "MsmKey" = "8:_ABCD7D10FA463F6E6C2B2FD1F357A851"
         "OwnerKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -40,7 +40,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A708C4B6069F4D8DC4C1E1570C51379F"
+        "OwnerKey" = "8:_ABCD7D10FA463F6E6C2B2FD1F357A851"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -175,14 +175,14 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_A708C4B6069F4D8DC4C1E1570C51379F"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_ABCD7D10FA463F6E6C2B2FD1F357A851"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.34.2.0, Culture=neutral, PublicKeyToken=cb281103e4e604b8, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_A708C4B6069F4D8DC4C1E1570C51379F"
+                    "_ABCD7D10FA463F6E6C2B2FD1F357A851"
                     {
                     "Name" = "8:TradeControl.Node.dll"
                     "Attributes" = "3:512"
@@ -273,15 +273,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Trade Control Node Configurator"
-        "ProductCode" = "8:{10CFA242-FA02-4BE6-A5E3-A9956A6A0BB4}"
-        "PackageCode" = "8:{26F4D4ED-6E46-48E3-A9ED-E16FE559626A}"
+        "ProductCode" = "8:{92AD8657-814A-4851-80BA-7E33C7E2E9F1}"
+        "PackageCode" = "8:{083E9DF9-74E3-4B9E-936B-DE922185F6C3}"
         "UpgradeCode" = "8:{87530140-719B-40FB-88AF-371486179C12}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:3.34.2"
+        "ProductVersion" = "8:3.34.3"
         "Manufacturer" = "8:Trade Control"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

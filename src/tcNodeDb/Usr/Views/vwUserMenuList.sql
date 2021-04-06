@@ -1,4 +1,4 @@
-﻿CREATE VIEW Usr.vwUserMenuList
+﻿CREATE   VIEW Usr.vwUserMenuList
 AS
 	WITH user_menus AS
 	(
@@ -36,4 +36,3 @@ AS
 	SELECT menu.MenuId, menu.InterfaceCode, FolderId, RowNumber, ItemId, ItemText, Command, ProjectName, Argument, OpenMode
 	FROM menu_items
 		JOIN Usr.tbMenu menu ON menu_items.MenuId = menu.MenuId;
-

@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE Cash.proc_PaymentPostReconcile
+﻿CREATE PROCEDURE Cash.proc_PaymentPostReconcile
 	(
 	@PaymentCode nvarchar(20),
 	@PostValue decimal(18, 5),

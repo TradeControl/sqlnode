@@ -1,4 +1,4 @@
-﻿CREATE VIEW Task.vwCostSetTasks
+﻿CREATE   VIEW Task.vwCostSetTasks
 AS
 	WITH task_flow AS
 	(

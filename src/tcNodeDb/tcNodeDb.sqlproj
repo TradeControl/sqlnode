@@ -6,8 +6,8 @@
     <Name>tcNodeDb</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
-    <ProjectGuid>{4d93f11e-2699-49ed-bbc7-776697c366df}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
+    <ProjectGuid>{4104c62f-a5b3-4be8-976a-0948acba2bf2}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -24,6 +24,7 @@
     <TargetDatabaseSet>True</TargetDatabaseSet>
     <DefaultCollation>Latin1_General_CI_AS</DefaultCollation>
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+    <DacVersion>3.34.3.0</DacVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -72,6 +73,8 @@
     <Folder Include="Activity\Tables\" />
     <Folder Include="App\" />
     <Folder Include="App\Tables\" />
+    <Folder Include="dbo\" />
+    <Folder Include="dbo\Tables\" />
     <Folder Include="Task\Views\" />
     <Folder Include="Cash\Views\" />
     <Folder Include="Invoice\Views\" />
@@ -79,6 +82,7 @@
     <Folder Include="App\Views\" />
     <Folder Include="Usr\Views\" />
     <Folder Include="Activity\Views\" />
+    <Folder Include="dbo\Views\" />
     <Folder Include="Org\Functions\" />
     <Folder Include="Cash\Functions\" />
     <Folder Include="App\Functions\" />
@@ -91,6 +95,7 @@
     <Folder Include="Activity\Stored Procedures\" />
     <Folder Include="Task\Stored Procedures\" />
     <Folder Include="Org\Stored Procedures\" />
+    <Folder Include="dbo\Stored Procedures\" />
     <Folder Include="Security\" />
   </ItemGroup>
   <ItemGroup>
@@ -131,13 +136,20 @@
     <Build Include="Activity\Tables\tbSyncType.sql" />
     <Build Include="Usr\Tables\tbUser.sql" />
     <Build Include="App\Tables\tbBucket.sql" />
+    <Build Include="dbo\Tables\AspNetRoleClaims.sql" />
     <Build Include="App\Tables\tbBucketInterval.sql" />
+    <Build Include="dbo\Tables\AspNetRoles.sql" />
     <Build Include="App\Tables\tbBucketType.sql" />
+    <Build Include="dbo\Tables\AspNetUserClaims.sql" />
     <Build Include="App\Tables\tbCalendar.sql" />
+    <Build Include="dbo\Tables\AspNetUserLogins.sql" />
     <Build Include="App\Tables\tbCalendarHoliday.sql" />
+    <Build Include="dbo\Tables\AspNetUserRoles.sql" />
     <Build Include="App\Tables\tbCodeExclusion.sql" />
+    <Build Include="dbo\Tables\AspNetUsers.sql" />
     <Build Include="App\Tables\tbDoc.sql" />
     <Build Include="Org\Tables\tbAccountType.sql" />
+    <Build Include="dbo\Tables\AspNetUserTokens.sql" />
     <Build Include="App\Tables\tbDocClass.sql" />
     <Build Include="App\Tables\tbUoc.sql" />
     <Build Include="App\Tables\tbDocSpool.sql" />
@@ -162,6 +174,7 @@
     <Build Include="App\Tables\tbUom.sql" />
     <Build Include="App\Tables\tbYear.sql" />
     <Build Include="App\Tables\tbYearPeriod.sql" />
+    <Build Include="Invoice\Tables\tbEntry.sql" />
     <Build Include="Cash\Tables\tbCategory.sql" />
     <Build Include="Cash\Tables\tbCategoryExp.sql" />
     <Build Include="Cash\Tables\tbCategoryTotal.sql" />
@@ -169,13 +182,16 @@
     <Build Include="Cash\Tables\tbCode.sql" />
     <Build Include="Cash\Tables\tbCoinType.sql" />
     <Build Include="Cash\Tables\tbMirror.sql" />
+    <Build Include="Usr\Tables\tbInterface.sql" />
     <Build Include="Cash\Tables\tbEntryType.sql" />
     <Build Include="Cash\Tables\tbMode.sql" />
+    <Build Include="Usr\Tables\tbMenuView.sql" />
     <Build Include="Cash\Tables\tbPeriod.sql" />
     <Build Include="Org\Tables\tbAccountKey.sql" />
     <Build Include="Cash\Tables\tbStatus.sql" />
     <Build Include="Cash\Tables\tbTaxType.sql" />
     <Build Include="Cash\Tables\tbType.sql" />
+    <Build Include="Task\Tables\tbCostSet.sql" />
     <Build Include="Invoice\Tables\tbMirror.sql" />
     <Build Include="Invoice\Tables\tbInvoice.sql" />
     <Build Include="Cash\Tables\tbChangeType.sql" />
@@ -290,6 +306,7 @@
     <Build Include="Org\Views\vwCashAccountAssets.sql" />
     <Build Include="App\Views\vwTaxCodeTypes.sql" />
     <Build Include="App\Views\vwWarehouseOrg.sql" />
+    <Build Include="dbo\Views\AspNetUserRegistrations.sql" />
     <Build Include="App\Views\vwWarehouseTask.sql" />
     <Build Include="App\Views\vwYearPeriod.sql" />
     <Build Include="Cash\Views\vwAccountRebuild.sql" />
@@ -314,28 +331,29 @@
     <Build Include="Cash\Views\vwCategoryTotals.sql" />
     <Build Include="Cash\Views\vwBalanceSheet.sql" />
     <Build Include="Cash\Views\vwCategoryTrade.sql" />
-    <Build Include="Org\Views\vwAssetBalances.sql" />
     <Build Include="Cash\Views\vwCodeLookup.sql" />
-    <Build Include="Org\Views\vwBalanceSheetAudit.sql" />
     <Build Include="Cash\Views\vwExternalCodesLookup.sql" />
-    <Build Include="Org\Views\vwAssetStatementAudit.sql" />
     <Build Include="Cash\Views\vwFlowTaxType.sql" />
-    <Build Include="Org\Views\vwStatementReport.sql" />
     <Build Include="Cash\Views\vwPeriods.sql" />
-    <Build Include="Cash\Views\vwBalanceSheetTax.sql" />
+    <Build Include="Org\Views\vwAssetBalances.sql" />
     <Build Include="Cash\Views\vwStatementReserves.sql" />
-    <Build Include="Cash\Views\vwBalanceSheetVat.sql" />
+    <Build Include="Org\Views\vwBalanceSheetAudit.sql" />
     <Build Include="Cash\Views\vwTaxVatAuditInvoices.sql" />
-    <Build Include="Org\Views\vwCurrentBalance.sql" />
+    <Build Include="Org\Views\vwAssetStatementAudit.sql" />
     <Build Include="Cash\Views\vwTransferCodeLookup.sql" />
-    <Build Include="Invoice\Views\vwStatusLive.sql" />
+    <Build Include="Org\Views\vwStatementReport.sql" />
     <Build Include="Cash\Views\vwTransfersUnposted.sql" />
+    <Build Include="Cash\Views\vwBalanceSheetTax.sql" />
     <Build Include="Cash\Views\vwVATCodes.sql" />
+    <Build Include="Cash\Views\vwBalanceSheetVat.sql" />
     <Build Include="Invoice\Views\vwAgedDebtPurchases.sql" />
+    <Build Include="Org\Views\vwCurrentBalance.sql" />
     <Build Include="Task\Views\vwNetworkDeployments.sql" />
     <Build Include="Invoice\Views\vwAgedDebtSales.sql" />
+    <Build Include="Invoice\Views\vwStatusLive.sql" />
     <Build Include="Task\Views\vwNetworkUpdates.sql" />
     <Build Include="Invoice\Views\vwCandidateCredits.sql" />
+    <Build Include="Invoice\Views\vwAccountsMode.sql" />
     <Build Include="Task\Views\vwNetworkEventLog.sql" />
     <Build Include="Invoice\Views\vwCandidateDebits.sql" />
     <Build Include="Cash\Views\vwPayments.sql" />
@@ -360,11 +378,13 @@
     <Build Include="Usr\Views\vwCredentials.sql" />
     <Build Include="Task\Views\vwNetworkEvents.sql" />
     <Build Include="Invoice\Views\vwSalesInvoiceSpoolByActivity.sql" />
+    <Build Include="Invoice\Views\vwSalesInvoiceSpoolByItem.sql" />
     <Build Include="Task\Views\vwNetworkQuotations.sql" />
     <Build Include="Invoice\Views\vwSummary.sql" />
     <Build Include="Cash\Views\vwPaymentCode.sql" />
     <Build Include="Task\Views\vwNetworkChangeLog.sql" />
     <Build Include="Invoice\Views\vwTaxSummary.sql" />
+    <Build Include="Invoice\Views\vwCreditSpoolByItem.sql" />
     <Build Include="Org\Views\vwAccountLookup.sql" />
     <Build Include="Org\Views\vwAccountSources.sql" />
     <Build Include="Org\Views\vwAreaCodes.sql" />
@@ -372,10 +392,13 @@
     <Build Include="Org\Views\vwCompanyHeader.sql" />
     <Build Include="Org\Views\vwCompanyLogo.sql" />
     <Build Include="Org\Views\vwContacts.sql" />
+    <Build Include="Usr\Views\vwUserMenuList.sql" />
     <Build Include="Org\Views\vwDepartments.sql" />
+    <Build Include="Org\Views\vwTasks.sql" />
     <Build Include="Task\Views\vwBucket.sql" />
     <Build Include="Org\Views\vwWallets.sql" />
     <Build Include="Org\Views\vwInvoiceItems.sql" />
+    <Build Include="Org\Views\vwInvoiceTasks.sql" />
     <Build Include="Task\Views\vwTasks.sql" />
     <Build Include="Org\Views\vwJobTitles.sql" />
     <Build Include="Invoice\Views\vwCandidateSales.sql" />
@@ -387,14 +410,19 @@
     <Build Include="Invoice\Views\vwRegisterTasks.sql" />
     <Build Include="Invoice\Views\vwRegisterDetail.sql" />
     <Build Include="Invoice\Views\vwRegisterCashCodes.sql" />
+    <Build Include="Task\Views\vwQuotes.sql" />
     <Build Include="Invoice\Views\vwRegister.sql" />
     <Build Include="Org\Views\vwPaymentTerms.sql" />
+    <Build Include="Task\Views\vwCostSet.sql" />
     <Build Include="Invoice\Views\vwRegisterPurchases.sql" />
     <Build Include="Invoice\Views\vwRegisterPurchaseTasks.sql" />
+    <Build Include="Cash\Views\vwStatementBase.sql" />
     <Build Include="Invoice\Views\vwRegisterSales.sql" />
     <Build Include="Org\Views\vwStatement.sql" />
+    <Build Include="Task\Views\vwCostSetTasks.sql" />
     <Build Include="Invoice\Views\vwRegisterSaleTasks.sql" />
     <Build Include="Org\Views\vwTypeLookup.sql" />
+    <Build Include="Cash\Views\vwStatementWhatIf.sql" />
     <Build Include="Task\Views\vwActiveStatusCodes.sql" />
     <Build Include="Org\Functions\fnAccountKeyNamespace.sql" />
     <Build Include="Cash\Functions\fnChangeKeyPath.sql" />
@@ -493,8 +521,11 @@
     <Build Include="Invoice\Stored Procedures\proc_DefaultPaymentOn.sql" />
     <Build Include="Invoice\Stored Procedures\proc_Raise.sql" />
     <Build Include="Invoice\Stored Procedures\proc_RaiseBlank.sql" />
+    <Build Include="dbo\Stored Procedures\AspNetGetUserId.sql" />
     <Build Include="Org\Stored Procedures\proc_NextAddressCode.sql" />
+    <Build Include="dbo\Stored Procedures\AspNetGetUserName.sql" />
     <Build Include="Org\Stored Procedures\proc_AddAddress.sql" />
+    <Build Include="dbo\Stored Procedures\AspNetGetId.sql" />
     <Build Include="Org\Stored Procedures\proc_AddContact.sql" />
     <Build Include="Org\Stored Procedures\proc_BalanceToPay.sql" />
     <Build Include="Org\Stored Procedures\proc_DefaultAccountCode.sql" />
@@ -530,10 +561,12 @@
     <Build Include="Task\Stored Procedures\proc_Op.sql" />
     <Build Include="Task\Stored Procedures\proc_Parent.sql" />
     <Build Include="Task\Stored Procedures\proc_Pay.sql" />
+    <Build Include="Invoice\Stored Procedures\proc_PostEntries.sql" />
     <Build Include="Cash\Stored Procedures\proc_PaymentPostInvoiced.sql" />
     <Build Include="Task\Stored Procedures\proc_Project.sql" />
     <Build Include="Cash\Stored Procedures\proc_PaymentPost.sql" />
     <Build Include="Task\Stored Procedures\proc_ReconcileCharge.sql" />
+    <Build Include="Org\Stored Procedures\proc_DefaultEmailAddress.sql" />
     <Build Include="Task\Stored Procedures\proc_ResetChargedUninvoiced.sql" />
     <Build Include="Task\Stored Procedures\proc_WorkFlow.sql" />
     <Build Include="Task\Stored Procedures\proc_WorkFlowSelected.sql" />
@@ -545,6 +578,7 @@
     <Build Include="Org\Stored Procedures\proc_AccountKeyAdd.sql" />
     <Build Include="Org\Stored Procedures\proc_AccountKeyRename.sql" />
     <Build Include="Org\Stored Procedures\proc_AccountKeyDelete.sql" />
+    <Build Include="Task\Stored Procedures\proc_CostSetAdd.sql" />
     <Build Include="Security\Activity.sql" />
     <Build Include="Security\App.sql" />
     <Build Include="Security\Cash.sql" />
@@ -552,27 +586,5 @@
     <Build Include="Security\Org.sql" />
     <Build Include="Security\Task.sql" />
     <Build Include="Security\Usr.sql" />
-    <Build Include="Invoice\Views\vwAccountsMode.sql" />
-    <Build Include="Invoice\Tables\tbEntry.sql" />
-    <Build Include="Invoice\Stored Procedures\proc_PostEntries.sql" />
-    <Build Include="Invoice\Views\vwCreditSpoolByItem.sql" />
-    <Build Include="Invoice\Views\vwSalesInvoiceSpoolByItem.sql" />
-    <Build Include="Usr\Tables\tbInterface.sql" />
-    <Build Include="Usr\Tables\tbMenuView.sql" />
-    <Build Include="Usr\Views\vwUserMenuList.sql" />
-    <Build Include="Org\Views\vwInvoiceTasks.sql" />
-    <Build Include="Task\Tables\tbCostSet.sql" />
-    <Build Include="Task\Views\vwQuotes.sql" />
-    <Build Include="Task\Views\vwCostSet.sql" />
-    <Build Include="Task\Stored Procedures\proc_CostSetAdd.sql" />
-    <Build Include="Cash\Views\vwStatementBase.sql" />
-    <Build Include="Task\Views\vwCostSetTasks.sql" />
-    <Build Include="Cash\Views\vwStatementWhatIf.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 </Project>

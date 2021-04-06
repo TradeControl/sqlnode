@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Activity.vwUnMirrored
+﻿CREATE VIEW Activity.vwUnMirrored
 AS
 	WITH candidates AS
 	(

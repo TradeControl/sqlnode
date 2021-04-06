@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Invoice.proc_RaiseBlank
+﻿CREATE PROCEDURE Invoice.proc_RaiseBlank
 	(
 	@AccountCode nvarchar(10),
 	@InvoiceTypeCode smallint,

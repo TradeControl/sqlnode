@@ -1,4 +1,4 @@
-﻿CREATE VIEW Invoice.vwSalesInvoiceSpoolByItem
+﻿CREATE   VIEW Invoice.vwSalesInvoiceSpoolByItem
 AS
 	SELECT  sales_invoice.InvoiceNumber, Invoice.tbType.InvoiceType, sales_invoice.InvoiceStatusCode, Usr.tbUser.UserName, sales_invoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, 
 							 sales_invoice.InvoicedOn, sales_invoice.InvoiceValue AS InvoiceValueTotal, sales_invoice.TaxValue AS TaxValueTotal, sales_invoice.PaymentTerms, sales_invoice.DueOn, sales_invoice.Notes, Org.tbOrg.EmailAddress, 
@@ -14,5 +14,4 @@ AS
 	WHERE        (sales_invoice.InvoiceTypeCode = 0) AND EXISTS
 								 (SELECT        UserName, DocTypeCode, DocumentNumber, SpooledOn, RowVer
 								   FROM            App.tbDocSpool AS doc
-								   WHERE        (DocTypeCode = 4) AND (UserName = SUSER_SNAME()) AND (sales_invoice.InvoiceNumber = DocumentNumber));
-
+								   WHERE        (DocTypeCode = 4) AND (UserName = SUSER_SNAME()) AND (sales_invoice.InvoiceNumber = DocumentNumber))

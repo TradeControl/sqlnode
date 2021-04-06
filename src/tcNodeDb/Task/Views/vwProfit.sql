@@ -1,4 +1,4 @@
-﻿CREATE VIEW Task.vwProfit 
+﻿CREATE VIEW [Task].[vwProfit] 
 AS
 	WITH orders AS
 	(
@@ -83,7 +83,7 @@ AS
 			yearperiod.YearNumber, yr.Description, 
 			CONCAT(mn.MonthName, ' ', YEAR(yearperiod.StartOn)) AS Period,
 			task.ActivityCode, cashcode.CashCode, task.TaskTitle, org.AccountName, cashcode.CashDescription,
-			taskstatus.TaskStatus, task.TotalCharge, invoices.InvoiceValue AS InvoicedCharge,
+			taskstatus.TaskStatus, task.TaskStatusCode, task.TotalCharge, invoices.InvoiceValue AS InvoicedCharge,
 			invoices.InvoicePaid AS InvoicedChargePaid,
 			task_costs.TotalCost, task_costs.InvoicedCost, task_costs.InvoicedCostPaid,
 			task.TotalCharge + task_costs.TotalCost AS Profit,
@@ -104,9 +104,10 @@ AS
 			JOIN App.tbMonth mn ON mn.MonthNumber = yearperiod.MonthNumber
 		)
 		SELECT StartOn, AccountCode, TaskCode, YearNumber, [Description], [Period], ActivityCode, CashCode,
-			TaskTitle, AccountName, CashDescription, TaskStatus, CAST(TotalCharge as float) TotalCharge, CAST(InvoicedCharge as float) InvoicedCharge, CAST(InvoicedChargePaid as float) InvoicedChargePaid,
+			TaskTitle, AccountName, CashDescription, TaskStatus, TaskStatusCode, CAST(TotalCharge as float) TotalCharge, CAST(InvoicedCharge as float) InvoicedCharge, CAST(InvoicedChargePaid as float) InvoicedChargePaid,
 			CAST(TotalCost AS float) TotalCost, CAST(InvoicedCost as float) InvoicedCost, CAST(InvoicedCostPaid as float) InvoicedCostPaid, CAST(Profit AS float) Profit,
 			CAST(UninvoicedCharge AS float) UninvoicedCharge, CAST(UnpaidCharge AS float) UnpaidCharge,
 			CAST(UninvoicedCost AS float) UninvoicedCost, CAST(UnpaidCost AS float) UnpaidCost,
 			ActionOn, ActionedOn, PaymentOn
 		FROM profits;
+

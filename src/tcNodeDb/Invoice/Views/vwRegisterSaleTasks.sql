@@ -4,3 +4,4 @@ AS
 							 PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, InvoiceType
 	FROM            Invoice.vwRegisterDetail
 	WHERE        (InvoiceTypeCode < 2);
+

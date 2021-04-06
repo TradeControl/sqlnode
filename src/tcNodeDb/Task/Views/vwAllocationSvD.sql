@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Task.vwAllocationSvD
+﻿CREATE VIEW Task.vwAllocationSvD
 AS
 	WITH allocs AS
 	(

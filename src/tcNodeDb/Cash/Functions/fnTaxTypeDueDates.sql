@@ -1,4 +1,4 @@
-﻿CREATE   FUNCTION Cash.fnTaxTypeDueDates(@TaxTypeCode smallint)
+﻿CREATE FUNCTION Cash.fnTaxTypeDueDates(@TaxTypeCode smallint)
 RETURNS @tbDueDate TABLE (PayOn datetime, PayFrom datetime, PayTo datetime)
  AS
 	BEGIN

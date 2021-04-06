@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Task.proc_Pay (@TaskCode NVARCHAR(20), @Post BIT = 0,	@PaymentCode nvarchar(20) NULL OUTPUT)
+﻿CREATE PROCEDURE Task.proc_Pay (@TaskCode NVARCHAR(20), @Post BIT = 0,	@PaymentCode nvarchar(20) NULL OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 

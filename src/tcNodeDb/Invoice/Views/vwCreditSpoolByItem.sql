@@ -1,4 +1,4 @@
-﻿CREATE VIEW Invoice.vwCreditSpoolByItem
+﻿CREATE   VIEW Invoice.vwCreditSpoolByItem
 AS
 	SELECT        credit_note.InvoiceNumber, Invoice.tbType.InvoiceType, credit_note.InvoiceStatusCode, Usr.tbUser.UserName, credit_note.AccountCode, Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, credit_note.InvoicedOn, 
 							 credit_note.InvoiceValue AS InvoiceValueTotal, credit_note.TaxValue AS TaxValueTotal, credit_note.PaymentTerms, credit_note.DueOn, credit_note.Notes, Org.tbOrg.EmailAddress, Org.tbAddress.Address AS InvoiceAddress, 

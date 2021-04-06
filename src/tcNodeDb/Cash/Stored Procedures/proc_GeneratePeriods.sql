@@ -1,5 +1,4 @@
-﻿
-CREATE   PROCEDURE Cash.proc_GeneratePeriods
+﻿CREATE PROCEDURE Cash.proc_GeneratePeriods
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 

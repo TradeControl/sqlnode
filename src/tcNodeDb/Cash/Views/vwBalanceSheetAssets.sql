@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Cash.vwBalanceSheetAssets
+﻿CREATE VIEW Cash.vwBalanceSheetAssets
 AS
 	WITH asset_statements AS
 	(

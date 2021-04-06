@@ -1,10 +1,10 @@
-﻿CREATE VIEW Cash.vwStatementWhatIf
+﻿CREATE   VIEW Cash.vwStatementWhatIf
 AS
 	WITH quotes AS
 	(
 		SELECT Task.tbTask.TaskCode AS ReferenceCode, 
 			Task.tbTask.AccountCode, Task.tbTask.PaymentOn AS TransactOn, 
-			Task.tbTask.PaymentOn, 6 AS CashEntryTypeCode, 
+			Task.tbTask.PaymentOn, 3 AS CashEntryTypeCode, 
 			CASE WHEN Cash.tbCategory.CashModeCode = 0 
 				THEN (Task.tbTask.UnitCharge + Task.tbTask.UnitCharge * App.tbTaxCode.TaxRate) * Task.tbTask.Quantity 
 				ELSE 0 
@@ -64,7 +64,7 @@ AS
 	), vat_accruals AS
 	(
 		SELECT vat_taxcode.AccountCode, vat_taxcode.CashCode EntryDescription, TransactOn, 5 AS CashEntryTypeCode, 
-				(SELECT CashEntryType FROM Cash.tbEntryType WHERE CashEntryTypeCode = 6) ReferenceCode,
+				(SELECT CashEntryType FROM Cash.tbEntryType WHERE CashEntryTypeCode = 3) ReferenceCode,
 				CASE WHEN TaxDue < 0 THEN ABS(TaxDue) ELSE 0 END AS PayIn,
 				CASE WHEN TaxDue >= 0 THEN TaxDue ELSE 0 END AS PayOut
 		FROM vat_accrual_totals
@@ -106,7 +106,7 @@ AS
 	), corptax_accruals AS
 	(	
 		SELECT AccountCode, CashCode EntryDescription, TransactOn, 4 AS CashEntryTypeCode, 
-				(SELECT CashEntryType FROM Cash.tbEntryType WHERE CashEntryTypeCode = 6) ReferenceCode, 
+				(SELECT CashEntryType FROM Cash.tbEntryType WHERE CashEntryTypeCode = 3) ReferenceCode, 
 				CASE WHEN TaxDue < 0 THEN ABS(TaxDue) ELSE 0 END AS PayIn,
 				CASE WHEN TaxDue >= 0 THEN TaxDue ELSE 0 END AS PayOut
 		FROM corptax_accrual_totals CROSS JOIN corp_taxcode

@@ -1,6 +1,6 @@
-﻿CREATE TABLE Usr.tbInterface
-(
-	InterfaceCode smallint NOT NULL,
-	Interface nvarchar(30) NOT NULL,
-	CONSTRAINT PK_tbInterface PRIMARY KEY CLUSTERED (InterfaceCode)
+﻿CREATE TABLE [Usr].[tbInterface] (
+    [InterfaceCode] SMALLINT      NOT NULL,
+    [Interface]     NVARCHAR (30) NOT NULL,
+    CONSTRAINT [PK_Usr_tbInterface] PRIMARY KEY CLUSTERED ([InterfaceCode] ASC)
 );
+

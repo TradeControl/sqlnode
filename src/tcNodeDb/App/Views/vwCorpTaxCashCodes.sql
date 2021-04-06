@@ -1,5 +1,4 @@
-﻿
-CREATE   VIEW App.vwCorpTaxCashCodes
+﻿CREATE VIEW App.vwCorpTaxCashCodes
 AS
 	WITH category_relations AS
 	(

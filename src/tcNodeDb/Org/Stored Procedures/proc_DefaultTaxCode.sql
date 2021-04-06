@@ -1,5 +1,4 @@
-﻿
-CREATE  PROCEDURE Org.proc_DefaultTaxCode 
+﻿CREATE PROCEDURE Org.proc_DefaultTaxCode 
 	(
 	@AccountCode nvarchar(10),
 	@TaxCode nvarchar(10) OUTPUT

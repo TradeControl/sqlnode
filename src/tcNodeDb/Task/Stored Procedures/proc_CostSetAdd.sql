@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE Task.proc_CostSetAdd(@TaskCode nvarchar(20))
+﻿CREATE   PROCEDURE Task.proc_CostSetAdd(@TaskCode nvarchar(20))
 AS
 	SET XACT_ABORT, NOCOUNT ON;
 	BEGIN TRY

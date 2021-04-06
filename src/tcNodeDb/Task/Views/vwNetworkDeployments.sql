@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Task.vwNetworkDeployments
+﻿CREATE VIEW Task.vwNetworkDeployments
 AS
 	SELECT DISTINCT Task.tbTask.TaskCode, Task.tbTask.AccountCode, Task.tbTask.ActivityCode, Activity.tbActivity.ActivityDescription, Task.tbTask.TaskTitle, Task.tbTask.TaskStatusCode, Task.tbStatus.TaskStatus, Task.tbTask.ActionOn, Task.tbTask.Quantity, 
 							 Cash.tbCategory.CashModeCode, Cash.tbMode.CashMode, App.tbTaxCode.TaxRate, Task.tbTask.UnitCharge, Activity.tbActivity.UnitOfMeasure,
