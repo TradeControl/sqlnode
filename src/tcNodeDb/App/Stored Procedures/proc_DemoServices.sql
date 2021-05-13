@@ -1284,17 +1284,23 @@ AS
 		, (CONCAT(@UserId, '_20190022_120003'), @UserId, 1, 'SUPTWO', @CurrentAccount, '200', 'T0', '20190731', 0.0000, 650.0000, CONCAT('030036.', @UserId))
 		, (CONCAT(@UserId, '_20190022_120004'), @UserId, 1, 'TRACOM', @CurrentAccount, '200', 'T1', '20190731', 0.0000, 180.0000, CONCAT('030037.', @UserId))
 		, (CONCAT(@UserId, '_20190022_120005'), @UserId, 1, 'SUNSUP', @CurrentAccount, '209', 'T1', '20190702', 0.0000, 64.8000, null)
-		, (CONCAT(@UserId, '_20190608_030639'), @UserId, 1, 'BUSOWN', @ReserveAccount, '215', 'N/A', '20190101', 15000.0000, 0.0000, 'owner transfer')
-		, (CONCAT(@UserId, '_20190708_030716'), @UserId, 1, 'HOME', @ReserveAccount, '303', 'N/A', '20190415', 0.0000, 5000.0000, 'Transfer to current account')
 		, (CONCAT(@UserId, '_20190708_030747'), @UserId, 1, 'HOME', @CurrentAccount, '305', 'N/A', '20190415', 5000.0000, 0.0000, 'Transfer from Reserve Account')
 		, (CONCAT(@UserId, '_20191822_121834'), @UserId, 2, 'HOME', @CurrentAccount, '303', 'N/A', '20190831', 0.0000, 5000.0000, 'Transfer to Reserve account')
-		, (CONCAT(@UserId, '_20191822_121848'), @UserId, 2, 'HOME', @ReserveAccount, '305', 'N/A', '20190831', 5000.0000, 0.0000, 'Transfer from current account')
 		, (CONCAT(@UserId, '_20192408_042438'), @UserId, 1, 'HOME', @CurrentAccount, '303', 'N/A', '20190601', 0.0000, 5000.0000, 'Transfer to Reserve Account')
-		, (CONCAT(@UserId, '_20192508_042502'), @UserId, 1, 'HOME', @ReserveAccount, '305', 'N/A', '20190601', 5000.0000, 0.0000, 'Transfer from Current Account')
 		, (CONCAT(@UserId, '_20194708_014729'), @UserId, 1, 'BUSOWN', @CurrentAccount, '215', 'N/A', '20190101', 10000.0000, 0.0000, 'owner transfer')
 		, (CONCAT(@UserId, '_20195222_125225'), @UserId, 1, 'HOME', @CurrentAccount, '303', 'N/A', '20190731', 0.0000, 1000.0000, 'Transfer to Reserve account')
-		, (CONCAT(@UserId, '_20195322_125307'), @UserId, 1, 'HOME', @ReserveAccount, '305', 'N/A', '20190731', 1000.0000, 0.0000, 'Transfer from current account')
 		;
+
+		IF (LEN(COALESCE(@ReserveAccount, '')) > 0)
+		BEGIN
+			INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
+			VALUES (CONCAT(@UserId, '_20191822_121848'), @UserId, 2, 'HOME', @ReserveAccount, '305', 'N/A', '20190831', 5000.0000, 0.0000, 'Transfer from current account')
+			, (CONCAT(@UserId, '_20192508_042502'), @UserId, 1, 'HOME', @ReserveAccount, '305', 'N/A', '20190601', 5000.0000, 0.0000, 'Transfer from Current Account')
+			, (CONCAT(@UserId, '_20190608_030639'), @UserId, 1, 'BUSOWN', @ReserveAccount, '215', 'N/A', '20190101', 15000.0000, 0.0000, 'owner transfer')
+			, (CONCAT(@UserId, '_20190708_030716'), @UserId, 1, 'HOME', @ReserveAccount, '303', 'N/A', '20190415', 0.0000, 5000.0000, 'Transfer to current account')
+			, (CONCAT(@UserId, '_20195322_125307'), @UserId, 1, 'HOME', @ReserveAccount, '305', 'N/A', '20190731', 1000.0000, 0.0000, 'Transfer from current account')
+			;
+		END
 
 		UPDATE Invoice.tbInvoice
 		SET InvoiceStatusCode = 3;

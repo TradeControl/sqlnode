@@ -88,7 +88,7 @@ namespace TradeControl.Node.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The basic configuration has been installed on {0}. Try logging on with a client before loading one of the demos..
+        ///   Looks up a localized string similar to The selected configuration has been installed successfully on {0}..
         /// </summary>
         internal static string BasicSetupInstalled {
             get {

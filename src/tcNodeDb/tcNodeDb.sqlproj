@@ -586,5 +586,8 @@
     <Build Include="Security\Org.sql" />
     <Build Include="Security\Task.sql" />
     <Build Include="Security\Usr.sql" />
+    <Build Include="App\Tables\tbTemplate.sql" />
+    <Build Include="App\Stored Procedures\proc_TemplateCompanyGeneral.sql" />
+    <Build Include="App\Stored Procedures\proc_TemplateTutorials.sql" />
   </ItemGroup>
 </Project>

@@ -215,13 +215,13 @@ AS
 		, (6, 'Invoice_DebitNoteLetterhead', 2, 'Debit Note for Letterhead Paper');
 
 		INSERT INTO Org.tbType (OrganisationTypeCode, CashModeCode, OrganisationType)
-		VALUES (0, 0, 'Non-Approved Supplier')
+		VALUES (0, 0, 'Supplier')
 		, (1, 1, 'Customer')
 		, (2, 1, 'Prospect')
 		, (4, 1, 'Company')
 		, (5, 0, 'Bank')
 		, (7, 0, 'Other')
-		, (8, 0, 'Approved Supplier')
+		, (8, 0, 'TBC')
 		, (9, 0, 'Employee');
 
 		INSERT INTO App.tbText (TextId, Message, Arguments)

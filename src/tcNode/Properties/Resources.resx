@@ -223,4 +223,7 @@
   <data name="tc_upgrade_3_34_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\scripts\tc_upgrade_3_34_3.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="tc_upgrade_3_34_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\scripts\tc_upgrade_3_34_4.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-16</value>
+  </data>
 </root>

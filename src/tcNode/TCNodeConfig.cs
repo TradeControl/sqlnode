@@ -765,7 +765,30 @@ namespace TradeControl.Node
             }
         }
 
-        public void InstallBasicSetup(  short financialMonth,
+        public List<string> TemplateNames
+        {
+            get
+            {
+                try
+                {
+                    List<string> tempateNames;
+                    using (dbNodeNetworkDataContext db = new dbNodeNetworkDataContext(ConnectionString))
+                    {
+                        tempateNames = (from tb in db.tbTemplates orderby tb.TemplateName select tb.TemplateName).ToList<string>();
+                    }
+
+                    return tempateNames;
+                }
+                catch (Exception e)
+                {
+                    ErrorLog(e);
+                    return new List<string>();
+                }
+            }
+        }
+
+        public void InstallBasicSetup(  string templateName,
+                                        short financialMonth,
                                         CoinType coinType,
                                         string govAccountName,
                                         string bankName,
@@ -787,6 +810,12 @@ namespace TradeControl.Node
                     {
                         command.CommandText = "App.proc_BasicSetup";
                         command.CommandType = CommandType.StoredProcedure;
+
+                        SqlParameter pk = command.CreateParameter();
+                        pk.DbType = DbType.String;
+                        pk.ParameterName = "@TemplateName";
+                        pk.Value = templateName;
+                        command.Parameters.Add(pk);
 
                         SqlParameter p0 = command.CreateParameter();
                         p0.DbType = DbType.Int16;

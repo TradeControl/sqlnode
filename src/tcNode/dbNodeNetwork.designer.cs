@@ -22,7 +22,7 @@ namespace TradeControl.Node
 	using System;
 	
 	
-	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="tcTHEBUS")]
+	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="tcNode")]
 	public partial class dbNodeNetworkDataContext : System.Data.Linq.DataContext
 	{
 		
@@ -66,10 +66,13 @@ namespace TradeControl.Node
     partial void InserttbInvoiceMirror(tbInvoiceMirror instance);
     partial void UpdatetbInvoiceMirror(tbInvoiceMirror instance);
     partial void DeletetbInvoiceMirror(tbInvoiceMirror instance);
+    partial void InserttbTemplate(tbTemplate instance);
+    partial void UpdatetbTemplate(tbTemplate instance);
+    partial void DeletetbTemplate(tbTemplate instance);
     #endregion
 		
 		public dbNodeNetworkDataContext() : 
-				base(global::TradeControl.Node.Properties.Settings.Default.tcNodeConnectionString, mappingSource)
+				base(global::TradeControl.Node.Properties.Settings.Default.tcNodeConnectionString1, mappingSource)
 		{
 			OnCreated();
 		}
@@ -247,6 +250,14 @@ namespace TradeControl.Node
 			get
 			{
 				return this.GetTable<vwInvoiceUpdate>();
+			}
+		}
+		
+		public System.Data.Linq.Table<tbTemplate> tbTemplates
+		{
+			get
+			{
+				return this.GetTable<tbTemplate>();
 			}
 		}
 		
@@ -910,7 +921,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Logo", DbType="Image", CanBeNull=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Logo", DbType="Image", UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary Logo
 		{
 			get
@@ -4190,7 +4201,7 @@ namespace TradeControl.Node
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RowVer", AutoSync=AutoSync.Always, DbType="rowversion", CanBeNull=true, IsDbGenerated=true, IsVersion=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RowVer", AutoSync=AutoSync.Always, DbType="rowversion", IsDbGenerated=true, IsVersion=true, UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary RowVer
 		{
 			get
@@ -5947,6 +5958,92 @@ namespace TradeControl.Node
 				{
 					this._PaymentAddress = value;
 				}
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="App.tbTemplate")]
+	public partial class tbTemplate : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _TemplateName;
+		
+		private string _StoredProcedure;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnTemplateNameChanging(string value);
+    partial void OnTemplateNameChanged();
+    partial void OnStoredProcedureChanging(string value);
+    partial void OnStoredProcedureChanged();
+    #endregion
+		
+		public tbTemplate()
+		{
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TemplateName", DbType="NVarChar(100) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string TemplateName
+		{
+			get
+			{
+				return this._TemplateName;
+			}
+			set
+			{
+				if ((this._TemplateName != value))
+				{
+					this.OnTemplateNameChanging(value);
+					this.SendPropertyChanging();
+					this._TemplateName = value;
+					this.SendPropertyChanged("TemplateName");
+					this.OnTemplateNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StoredProcedure", DbType="NVarChar(100) NOT NULL", CanBeNull=false)]
+		public string StoredProcedure
+		{
+			get
+			{
+				return this._StoredProcedure;
+			}
+			set
+			{
+				if ((this._StoredProcedure != value))
+				{
+					this.OnStoredProcedureChanging(value);
+					this.SendPropertyChanging();
+					this._StoredProcedure = value;
+					this.SendPropertyChanged("StoredProcedure");
+					this.OnStoredProcedureChanged();
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 	}

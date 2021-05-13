@@ -64,7 +64,7 @@
         <elementListCompartment Id="a685b7f9-c3a6-4a7a-8005-6344682e6d66" absoluteBounds="6.765, 8.085, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(6.75 : 8.1); (5.5 : 8.1)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(6.75 : 8.1); (5.5 : 8.1)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/dbNodeNetworkDataContext/tbUoc/tbUoc_tbOption" />
       <nodes>
         <classShapeMoniker Id="e2bfd795-a1df-44c4-8d94-f79010d648fe" />
@@ -113,14 +113,14 @@
         <elementListCompartment Id="56bdf843-2c49-46cf-acfe-30793bbfa6a5" absoluteBounds="6.015, 10.71, 1.8450000000000002, 3.518513997395833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(6.9375 : 10.7); (6.9375 : 11.375)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(6.9375 : 10.7); (6.9375 : 11.375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/dbNodeNetworkDataContext/tbInvoice/tbInvoice_tbInvoiceItem" />
       <nodes>
         <classShapeMoniker Id="73ea3e2a-8b90-436b-85be-1ba90d6b029a" />
         <classShapeMoniker Id="aa97a7c1-1752-46d6-9001-f7c10a725450" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(6.9375 : 10.25); (6.9375 : 9.7)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(6.9375 : 10.25); (6.9375 : 9.7)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/dbNodeNetworkDataContext/tbInvoice/tbInvoice_tbInvoiceTask" />
       <nodes>
         <classShapeMoniker Id="73ea3e2a-8b90-436b-85be-1ba90d6b029a" />
@@ -140,7 +140,7 @@
         <elementListCompartment Id="119879b2-a4c4-46c3-abe6-544be14534d8" absoluteBounds="3.64, 15.71, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(6.437498 : 10.7); (6.437498 : 11.125); (5.875 : 11.125); (5.875 : 15.8469962565104); (5.625 : 15.8469962565104)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(6.437498 : 10.7); (6.437498 : 11.125); (5.875 : 11.125); (5.875 : 15.8469962565104); (5.625 : 15.8469962565104)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/dbNodeNetworkDataContext/tbInvoice/tbInvoice_tbMirrorReference" />
       <nodes>
         <classShapeMoniker Id="73ea3e2a-8b90-436b-85be-1ba90d6b029a" />
@@ -165,33 +165,39 @@
         <elementListCompartment Id="f22d494e-549f-49f6-ba3f-2ea69c8e7189" absoluteBounds="8.39, 11.835, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(2.875 : 10.8277498372396); (3.625 : 10.8277498372396)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(2.875 : 10.8277498372396); (3.625 : 10.8277498372396)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/dbNodeNetworkDataContext/tbInvoiceMirror/tbInvoiceMirror_tbMirrorItem" />
       <nodes>
         <classShapeMoniker Id="16e687f1-9bb4-4f4c-8357-3511b936776c" />
         <classShapeMoniker Id="9e1f4c85-c87a-4cc9-ae77-93e2cb2dca11" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(2.875 : 13.1306062825521); (3.625 : 13.1306062825521)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(2.875 : 13.1306062825521); (3.625 : 13.1306062825521)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/dbNodeNetworkDataContext/tbInvoiceMirror/tbInvoiceMirror_tbMirrorTask" />
       <nodes>
         <classShapeMoniker Id="16e687f1-9bb4-4f4c-8357-3511b936776c" />
         <classShapeMoniker Id="7adc4075-efcc-4037-9042-dc16a2c13384" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(1.875 : 13.6362125651042); (1.875 : 15.8469962565104); (3.625 : 15.8469962565104)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(1.875 : 13.6362125651042); (1.875 : 15.8469962565104); (3.625 : 15.8469962565104)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/dbNodeNetworkDataContext/tbInvoiceMirror/tbInvoiceMirror_tbMirrorReference" />
       <nodes>
         <classShapeMoniker Id="16e687f1-9bb4-4f4c-8357-3511b936776c" />
         <classShapeMoniker Id="96f4876e-b396-48ec-9ed8-f6f90a9ace0b" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(2.062499 : 8.325); (2.062499 : 9.75)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(2.062499 : 8.325); (2.062499 : 9.75)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/dbNodeNetworkDataContext/tbOrg/tbOrg_tbInvoiceMirror" />
       <nodes>
         <classShapeMoniker Id="23734475-1843-4104-b4fa-88a7e144305e" />
         <classShapeMoniker Id="16e687f1-9bb4-4f4c-8357-3511b936776c" />
       </nodes>
     </associationConnector>
+    <classShape Id="45a85bf6-9251-4b80-a6c9-504b14a3734a" absoluteBounds="8.125, 6.125, 2, 1.1939925130208333">
+      <DataClassMoniker Name="/dbNodeNetworkDataContext/tbTemplate" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b31248cb-9293-4626-a3fa-cd0eeca4b161" absoluteBounds="8.14, 6.5850000000000009, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
   </nestedChildShapes>
 </ordesignerObjectsDiagram>

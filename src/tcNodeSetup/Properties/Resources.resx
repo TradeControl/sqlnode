@@ -127,7 +127,7 @@
     <value>Add a new data user to {0}. Windows users must first be granted login permissions to {1} using Sql Management Studio.</value>
   </data>
   <data name="BasicSetupInstalled" xml:space="preserve">
-    <value>The basic configuration has been installed on {0}. Try logging on with a client before loading one of the demos.</value>
+    <value>The selected configuration has been installed successfully on {0}.</value>
   </data>
   <data name="ConfigurationSuccess" xml:space="preserve">
     <value>{0} has been successfully configured</value>

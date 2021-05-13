@@ -235,90 +235,93 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
+            <TabItem x:Name="pageBasicSetup" Header="Basic Setup">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid ShowGridLines="False" Margin="5" Grid.IsSharedSizeScope="True" Grid.ColumnSpan="2" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Label Margin="5" Content="Template:" />
+                        <ComboBox Margin="5" x:Name="cbTemplateName" Grid.Column="1" FontWeight="Bold" ></ComboBox>
+                        <Label Margin="5" Content="Financial Year:" Grid.Row="1" />
+                        <ComboBox Margin="5" x:Name="cbFinancialYear" Grid.Column="1" SelectedIndex="3" FontWeight="Bold" Grid.Row="1" >
+                            <ComboBoxItem Content="January"/>
+                            <ComboBoxItem Content="February"/>
+                            <ComboBoxItem Content="March"/>
+                            <ComboBoxItem Content="April"/>
+                            <ComboBoxItem Content="May"/>
+                            <ComboBoxItem Content="June"/>
+                            <ComboBoxItem Content="July"/>
+                            <ComboBoxItem Content="August"/>
+                            <ComboBoxItem Content="September"/>
+                            <ComboBoxItem Content="October"/>
+                            <ComboBoxItem Content="November"/>
+                            <ComboBoxItem Content="December"/>
+                        </ComboBox>
+                        <Label Margin="5" Grid.Row="2" Content="Government:" />
+                        <TextBox x:Name="tbGovAccountName" Grid.Row="2" Grid.Column="1" MaxLength="255" Text="HM REVENUE AND CUSTOMS" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="3" Content="Coin Type:" />
+                        <ComboBox Margin="5" Grid.Row="3" Grid.Column="1" x:Name="cbCoinType" FontWeight="Bold">
+                            <ComboBoxItem Content="Main" />
+                            <ComboBoxItem Content="TestNet" />
+                            <ComboBoxItem Content="Fiat" />
+                        </ComboBox>
+                        <Label Margin="5" Grid.Row="4" Content="Bank:" />
+                        <TextBox x:Name="tbBankName" Grid.Row="4" Grid.Column="1" MaxLength="255" Text="-" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="5" Content="Bank Address:" />
+                        <TextBox x:Name="tbBankAddress" Grid.Row="5" Grid.Column="1" MaxLength="512" Text="-" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="6" Content="Current Account:" />
+                        <TextBox x:Name="tbCurrentAccount" Grid.Row="6" Grid.Column="1" MaxLength="50" Text="CURRENT ACCOUNT" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="7" Content="Sort Code:" />
+                        <TextBox x:Name="tbCA_SortCode" Grid.Row="7" Grid.Column="1" MaxLength="10" Text="00-00-00" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="8" Content="Current Account No.:" />
+                        <TextBox x:Name="tbCA_AccountNumber" Grid.Row="8" Grid.Column="1" MaxLength="20" Text="00000001" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="9" Content="Reserve Account:" />
+                        <TextBox x:Name="tbReserveAccount" Grid.Row="9" Grid.Column="1" MaxLength="50" Text="" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="10" Content="Sort Code:" />
+                        <TextBox x:Name="tbRA_SortCode" Grid.Row="10" Grid.Column="1" MaxLength="10" Text="" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="11" Content="Reserve Account No.:" />
+                        <TextBox x:Name="tbRA_AccountNumber" Grid.Row="11" Grid.Column="1" MaxLength="20" Text="" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="12" Content="Dummy Account:" />
+                        <TextBox x:Name="tbDummyAccount" Grid.Row="12" Grid.Column="1" MaxLength="20" Text="ADJUSTMENTS" Margin="5" FontWeight="Bold" />
+                        <Label Margin="5" Grid.Row="13" Content="Info:" VerticalAlignment="Top"  />
+                        <TextBlock x:Name="lbBasicSetupStatus" Margin="10" Grid.Row="13" Grid.Column="1" Text="Data source not found" Foreground="#FFEA1111" TextWrapping="Wrap" />
+
+                    </Grid>
+
+                    <StackPanel Grid.Row="1"  Margin="5" Grid.ColumnSpan="2" >
+                        <Button Name="btnBasicSetup" Content="Install Basic Setup" Grid.Column="1" Margin="3" IsEnabled="False" Click="BtnBasicSetup_Click" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
             <TabItem x:Name="pageTutorials" Header="Tutorials" Height="22" VerticalAlignment="Top">
                 <TabControl x:Name="tabsTutorials" TabStripPlacement="Bottom" >
-                    <TabItem x:Name="pageBasicSetup" Header="Basic Setup">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <Grid ShowGridLines="False" Margin="5" Grid.IsSharedSizeScope="True" Grid.ColumnSpan="2" >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                    <ColumnDefinition Width="*"></ColumnDefinition>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                    <RowDefinition Height="Auto"></RowDefinition>
-                                </Grid.RowDefinitions>
-                                <Label Margin="5" Content="Financial Year:" />
-                                <ComboBox Margin="5" x:Name="cbFinancialYear" Grid.Column="1" SelectedIndex="3" FontWeight="Bold" >
-                                    <ComboBoxItem Content="January"/>
-                                    <ComboBoxItem Content="February"/>
-                                    <ComboBoxItem Content="March"/>
-                                    <ComboBoxItem Content="April"/>
-                                    <ComboBoxItem Content="May"/>
-                                    <ComboBoxItem Content="June"/>
-                                    <ComboBoxItem Content="July"/>
-                                    <ComboBoxItem Content="August"/>
-                                    <ComboBoxItem Content="September"/>
-                                    <ComboBoxItem Content="October"/>
-                                    <ComboBoxItem Content="November"/>
-                                    <ComboBoxItem Content="December"/>
-                                </ComboBox>
-                                <Label Margin="5" Grid.Row="1" Content="Government:" />
-                                <TextBox x:Name="tbGovAccountName" Grid.Row="1" Grid.Column="1" MaxLength="255" Text="HM REVENUE AND CUSTOMS" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="2" Content="Coin Type:" />
-                                <ComboBox Margin="5" Grid.Row="2" Grid.Column="1" x:Name="cbCoinType" FontWeight="Bold">
-                                    <ComboBoxItem Content="Main" />
-                                    <ComboBoxItem Content="TestNet" />
-                                    <ComboBoxItem Content="Fiat" />
-                                </ComboBox>
-                                <Label Margin="5" Grid.Row="3" Content="Bank:" />
-                                <TextBox x:Name="tbBankName" Grid.Row="3" Grid.Column="1" MaxLength="255" Text="-" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="4" Content="Bank Address:" />
-                                <TextBox x:Name="tbBankAddress" Grid.Row="4" Grid.Column="1" MaxLength="512" Text="-" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="5" Content="Current Account:" />
-                                <TextBox x:Name="tbCurrentAccount" Grid.Row="5" Grid.Column="1" MaxLength="50" Text="CURRENT ACCOUNT" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="6" Content="Sort Code:" />
-                                <TextBox x:Name="tbCA_SortCode" Grid.Row="6" Grid.Column="1" MaxLength="10" Text="00-00-00" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="7" Content="Current Account No.:" />
-                                <TextBox x:Name="tbCA_AccountNumber" Grid.Row="7" Grid.Column="1" MaxLength="20" Text="00000001" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="8" Content="Reserve Account:" />
-                                <TextBox x:Name="tbReserveAccount" Grid.Row="8" Grid.Column="1" MaxLength="50" Text="RESERVE ACCOUNT" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="9" Content="Sort Code:" />
-                                <TextBox x:Name="tbRA_SortCode" Grid.Row="9" Grid.Column="1" MaxLength="10" Text="00-00-00" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="10" Content="Reserve Account No.:" />
-                                <TextBox x:Name="tbRA_AccountNumber" Grid.Row="10" Grid.Column="1" MaxLength="20" Text="00000002" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="11" Content="Dummy Account:" />
-                                <TextBox x:Name="tbDummyAccount" Grid.Row="11" Grid.Column="1" MaxLength="20" Text="ADJUSTMENTS" Margin="5" FontWeight="Bold" />
-                                <Label Margin="5" Grid.Row="12" Content="Info:" VerticalAlignment="Top"  />
-                                <TextBlock x:Name="lbBasicSetupStatus" Margin="10" Grid.Row="12" Grid.Column="1" Text="Data source not found" Foreground="#FFEA1111" TextWrapping="Wrap" />
-
-                            </Grid>
-
-                            <StackPanel Grid.Row="1"  Margin="5" Grid.ColumnSpan="2" >
-                                <Button Name="btnBasicSetup" Content="Install Basic Setup" Grid.Column="1" Margin="3" IsEnabled="False" Click="BtnBasicSetup_Click" />
-                            </StackPanel>
-                        </Grid>
-                    </TabItem>
                     <TabItem x:Name="pageServices" Header="Services">
                         <Grid>
                             <Grid.ColumnDefinitions>

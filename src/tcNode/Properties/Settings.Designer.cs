@@ -107,6 +107,7 @@ namespace TradeControl.Node.Properties {
   <string>tc_upgrade_3_34_1</string>
   <string>tc_upgrade_3_34_2</string>
   <string>tc_upgrade_3_34_3</string>
+  <string>tc_upgrade_3_34_4</string>
 </ArrayOfString>")]
         public global::System.Collections.Specialized.StringCollection SqlScripts {
             get {
@@ -114,6 +115,16 @@ namespace TradeControl.Node.Properties {
             }
             set {
                 this["SqlScripts"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=IAM;Initial Catalog=tcNode;Integrated Security=True")]
+        public string tcNodeConnectionString1 {
+            get {
+                return ((string)(this["tcNodeConnectionString1"]));
             }
         }
         

@@ -31,7 +31,7 @@ namespace TradeControl.Node
                 SqlServerName = config.SqlServerName;
                 Authentication = config.Authentication;
                 SqlUserName = config.SqlUserName;
-                DatabaseName = config.DatabaseName;
+                DatabaseName = config.DatabaseName;                
             }
 
             if (DatabaseName.Length > 0)
@@ -123,7 +123,7 @@ namespace TradeControl.Node
 
                             if (tcnode.IsTCNode)
                             {
-                                lbUpgrade.Content = string.Format(Properties.Resources.UpgradeHeader, tcnode.DatabaseName);
+                                lbUpgrade.Content = string.Format(Properties.Resources.UpgradeHeader, tcnode.DatabaseName);                                
 
                                 if (!tcnode.IsUpToDate)
                                 {
@@ -139,7 +139,7 @@ namespace TradeControl.Node
                                     btnUpgrade.IsEnabled = false;
 
                                     if (!tcnode.IsInitialised)
-                                    {
+                                    {                                        
                                         if (cbUocName.Items.Count == 0)
                                         {
                                             List<string> uocNames = tcnode.UnitOfChargeNames;
@@ -210,6 +210,10 @@ namespace TradeControl.Node
                                         }
                                         else
                                         {
+                                            cbTemplateName.ItemsSource = tcnode.TemplateNames;
+                                            if (cbTemplateName.Items.Count > 0)
+                                                cbTemplateName.SelectedIndex = 0;
+
                                             if (tcnode.UnitOfCharge != "BTC")
                                             {
                                                 tbBankName.Text = "THE BANK PLC";
@@ -224,7 +228,7 @@ namespace TradeControl.Node
                                                 tbCurrentAccount.Text = "TRADE";
                                                 tbCA_AccountNumber.Text = string.Empty;
                                                 tbCA_SortCode.Text = string.Empty;
-                                                tbReserveAccount.Text = "RESERVES";
+                                                tbReserveAccount.Text = string.Empty;
                                                 tbRA_AccountNumber.Text = string.Empty;
                                                 tbRA_SortCode.Text = string.Empty;
                                             }
@@ -550,8 +554,10 @@ namespace TradeControl.Node
                     short financialMonth = (short)(cbFinancialYear.SelectedIndex + 1);
 
                     CoinType coinType = (CoinType)cbCoinType.SelectedIndex;
+                    string templateName = (string)cbTemplateName.SelectedItem;
 
                     tcnode.InstallBasicSetup(
+                        templateName,
                         financialMonth,
                         coinType,
                         tbGovAccountName.Text,
