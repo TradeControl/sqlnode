@@ -21,7 +21,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_44902A3DA5E3808171BB9E1C79ECDCBC"
+        "MsmKey" = "8:_A708C4B6069F4D8DC4C1E1570C51379F"
         "OwnerKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -40,7 +40,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_44902A3DA5E3808171BB9E1C79ECDCBC"
+        "OwnerKey" = "8:_A708C4B6069F4D8DC4C1E1570C51379F"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -175,14 +175,14 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_44902A3DA5E3808171BB9E1C79ECDCBC"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_A708C4B6069F4D8DC4C1E1570C51379F"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.34.4.0, Culture=neutral, PublicKeyToken=cb281103e4e604b8, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.34.5.0, Culture=neutral, PublicKeyToken=cb281103e4e604b8, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_44902A3DA5E3808171BB9E1C79ECDCBC"
+                    "_A708C4B6069F4D8DC4C1E1570C51379F"
                     {
                     "Name" = "8:TradeControl.Node.dll"
                     "Attributes" = "3:512"
@@ -273,15 +273,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Trade Control Node Configurator"
-        "ProductCode" = "8:{E949B1CC-B6A4-403C-9CDE-FEB6D512FC3E}"
-        "PackageCode" = "8:{988F1508-5EA6-4C28-BBF1-A6ADB3F6F4F7}"
+        "ProductCode" = "8:{D42FC6CD-1D67-4D7D-8539-5EE0B0D252A3}"
+        "PackageCode" = "8:{C93C08E9-4BB8-4899-9EFC-8E4ED1035D51}"
         "UpgradeCode" = "8:{87530140-719B-40FB-88AF-371486179C12}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:3.34.4"
+        "ProductVersion" = "8:3.34.6"
         "Manufacturer" = "8:Trade Control"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

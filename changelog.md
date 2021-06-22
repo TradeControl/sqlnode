@@ -31,7 +31,16 @@ Integrates setup templates into the [Node Configuration](https://tradecontrol.gi
 
 - [x] [App.tbTemplate](src/tcNodeDb/App/Tables/tbTemplate.sql) - a list of configuration templates and the associated stored procedure name.
 - [x] [App.proc_TemplateCompanyGeneral](src/tcNodeDb/App/Stored%20Procedures/proc_TemplateCompanyGeneral.sql) - a new template that supports vat and capital accounts
-- [x] [App.proc_TemplateTutorials](src/tcNodeDb/App/Stored%20Procedures/proc_TemplateTutorials.sql) - the original configuration template used by [the tutorials](https://tradecontrol.github.io/tutorials)
+- [x] [App.proc_TemplateTutorials](src/tcNodeDb/App/Stored%20Procedures/proc_TemplateTutorials.sql) - the original configuration template used by [the tutorials](https://tradecontrol.github.io/tutorials/overview)
 - [x] [App.proc_BasicSetup](src/tcNodeDb/App/Stored%20Procedures/proc_BasicSetup.sql) - @TemplateName param to execute user selected configuration.
+
+### 3.34.5
+
+- [x] [Cash.vwBalanceSheetAccounts](src/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql) - fix negative m/e balances zeroised
+
+### 3.34.6
+
+Full script for the [Asp.Net Core interface](https://github.com/tradecontrol/tradecontrol.web). It has no impact on the 365 implementation since it uses the same algorithms.
+
 
  

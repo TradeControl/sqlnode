@@ -443,16 +443,17 @@ namespace TradeControl.Node
                     );
 
                 tcnode.ConfigureNode(
-                    tbAccountCode.Text,
-                    tbBusinessName.Text,
-                    tbFullName.Text,
-                    tbBusinessAddress.Text,
-                    tbEmailAddress.Text,
-                    tbPhoneNumber.Text,
-                    tbCompanyNumber.Text,
-                    tbVatNumber.Text,
-                    tbCalendarCode.Text,
-                    cbUocName.Text
+                    accountCode: tbAccountCode.Text,
+                    businessName: tbBusinessName.Text,
+                    fullName: tbFullName.Text,
+                    businessAddress: tbBusinessAddress.Text,
+                    businessEmailAddress: tbEmailAddress.Text,
+                    userEmailAddress: tbEmailAddress.Text,
+                    phoneNumber: tbPhoneNumber.Text,
+                    companyNumber: tbCompanyNumber.Text,
+                    vatNumber: tbVatNumber.Text,
+                    calendarCode: tbCalendarCode.Text,
+                    uocName: cbUocName.Text
                     );
 
                 lbBusinessStatus.Text = string.Format(Properties.Resources.ConfigurationSuccess, this.cbDatabaseName.Text);

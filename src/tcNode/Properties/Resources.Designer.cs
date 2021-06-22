@@ -1061,5 +1061,60 @@ namespace TradeControl.Node.Properties {
                 return ResourceManager.GetString("tc_upgrade_3_34_4", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script
+        ///Release: 3.34.5
+        ///
+        ///Date: 7 June 2021
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///Change log:
+        ///
+        ///	https://github.com/tradecontrol/sqlnode
+        ///
+        ///Instructions:
+        ///This script should be applied by the Node Configuration app.
+        ///
+        ///******************* [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_34_5 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_34_5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script for ASP.NET Core interface
+        ///Release 3.34.6
+        ///
+        ///Date: 22 June 2021
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///
+        ///***********************************************************************************/
+        ///CREATE OR ALTER PROCEDURE Cash.proc_Paymen [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_34_6 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_34_6", resourceCulture);
+            }
+        }
     }
 }

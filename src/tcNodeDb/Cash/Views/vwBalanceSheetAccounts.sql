@@ -34,7 +34,7 @@ AS
 				THEN (SELECT CashAccountCode FROM Cash.vwCurrentAccount) 
 				ELSE (SELECT CashAccountCode FROM Cash.vwReserveAccount) 
 			END AS AssetCode,
-			CASE WHEN Balance < 0 THEN 0 ELSE 1 END CashModeCode,
+			1 CashModeCode,
 			CASE WHEN (CashCode IS NULL) THEN 2 ELSE 3 END AssetTypeCode, StartOn, Balance
 		FROM account_polarity
 	)

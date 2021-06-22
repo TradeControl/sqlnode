@@ -598,7 +598,8 @@ namespace TradeControl.Node
                                     string businessName,
                                     string fullName,
                                     string businessAddress,
-                                    string emailAddress,
+                                    string businessEmailAddress,
+                                    string userEmailAddress,
                                     string phoneNumber,
                                     string companyNumber,
                                     string vatNumber,
@@ -648,35 +649,42 @@ namespace TradeControl.Node
 
                         SqlParameter p5 = command.CreateParameter();
                         p5.DbType = DbType.String;
-                        p5.ParameterName = "@EmailAddress";
-                        p5.Value = emailAddress;
+                        p5.ParameterName = "@BusinessEmailAddress";
+                        p5.Value = businessEmailAddress;
                         command.Parameters.Add(p5);
 
                         SqlParameter p6 = command.CreateParameter();
+                        p5.DbType = DbType.String;
+                        p5.ParameterName = "@UserEmailAddress";
+                        p5.Value = userEmailAddress;
+                        command.Parameters.Add(p5);
+
+
+                        SqlParameter p7 = command.CreateParameter();
                         p6.DbType = DbType.String;
                         p6.ParameterName = "@PhoneNumber";
                         p6.Value = phoneNumber;
                         command.Parameters.Add(p6);
 
-                        SqlParameter p7 = command.CreateParameter();
+                        SqlParameter p8 = command.CreateParameter();
                         p7.DbType = DbType.String;
                         p7.ParameterName = "@CompanyNumber";
                         p7.Value = companyNumber;
                         command.Parameters.Add(p7);
 
-                        SqlParameter p8 = command.CreateParameter();
+                        SqlParameter p9 = command.CreateParameter();
                         p8.DbType = DbType.String;
                         p8.ParameterName = "@VatNumber";
                         p8.Value = vatNumber;
                         command.Parameters.Add(p8);
 
-                        SqlParameter p9 = command.CreateParameter();
+                        SqlParameter p10 = command.CreateParameter();
                         p9.DbType = DbType.String;
                         p9.ParameterName = "@CalendarCode";
                         p9.Value = calendarCode;
                         command.Parameters.Add(p9);
 
-                        SqlParameter p10 = command.CreateParameter();
+                        SqlParameter p11 = command.CreateParameter();
                         p10.DbType = DbType.String;
                         p10.ParameterName = "@UnitOfCharge";
                         p10.Value = unitOfCharge;
