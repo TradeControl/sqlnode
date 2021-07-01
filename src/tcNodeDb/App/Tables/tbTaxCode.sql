@@ -20,26 +20,26 @@ CREATE NONCLUSTERED INDEX [IX_App_tbTaxCodeByType]
 
 
 GO
-CREATE   TRIGGER App.App_tbTaxCode_TriggerUpdate
-   ON  App.tbTaxCode
-   AFTER UPDATE, INSERT
+
+CREATE TRIGGER App.App_tbTaxCode_TriggerUpdate ON App.tbTaxCode AFTER UPDATE, INSERT
 AS 
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
 		IF EXISTS (SELECT * FROM inserted i WHERE App.fnParsePrimaryKey(TaxCode) = 0)
-			BEGIN
+		BEGIN
 			DECLARE @Msg NVARCHAR(MAX);
 			SELECT @Msg = Message FROM App.tbText WHERE TextId = 2004;
 			RAISERROR (@Msg, 10, 1);
 			ROLLBACK TRANSACTION;
-			END
-		ELSE
-			BEGIN
+		END
+		ELSE IF NOT UPDATE(UpdatedBy)
+		BEGIN
 			UPDATE App.tbTaxCode
 			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
 			FROM App.tbTaxCode INNER JOIN inserted AS i ON tbTaxCode.TaxCode = i.TaxCode;
-			END
+		END
+		
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;

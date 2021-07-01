@@ -4,15 +4,15 @@
 	@FinancialMonth SMALLINT = 4,
 	@CoinTypeCode SMALLINT,
 	@GovAccountName NVARCHAR(255),
-	@BankName NVARCHAR(255),
-	@BankAddress NVARCHAR(MAX),
-	@DummyAccount NVARCHAR(50), 
-	@CurrentAccount NVARCHAR(50),
-	@CA_SortCode NVARCHAR(10),
-	@CA_AccountNumber NVARCHAR(20),
-	@ReserveAccount NVARCHAR(50), 
-	@RA_SortCode NVARCHAR(10),
-	@RA_AccountNumber NVARCHAR(20)
+	@BankName NVARCHAR(255) = null,
+	@BankAddress NVARCHAR(MAX) = null,
+	@DummyAccount NVARCHAR(50) = null, 
+	@CurrentAccount NVARCHAR(50) = null,
+	@CA_SortCode NVARCHAR(10) = null,
+	@CA_AccountNumber NVARCHAR(20) = null,
+	@ReserveAccount NVARCHAR(50) = null, 
+	@RA_SortCode NVARCHAR(10) = null,
+	@RA_AccountNumber NVARCHAR(20) = null
 )
 AS
 	DECLARE 

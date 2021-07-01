@@ -32,7 +32,7 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_Cash_tbCode_IsEnabled_Description]
 
 
 GO
-CREATE   TRIGGER Cash.Cash_tbCode_TriggerUpdate
+CREATE TRIGGER Cash.Cash_tbCode_TriggerUpdate
    ON  Cash.tbCode
    AFTER UPDATE, INSERT
 AS 
@@ -46,7 +46,7 @@ BEGIN
 			RAISERROR (@Msg, 10, 1);
 			ROLLBACK
 			END
-		ELSE
+		ELSE IF NOT UPDATE(UpdatedBy)
 			BEGIN
 			UPDATE Cash.tbCode
 			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP

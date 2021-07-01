@@ -110,4 +110,3 @@ AS
 			CAST(UninvoicedCost AS float) UninvoicedCost, CAST(UnpaidCost AS float) UnpaidCost,
 			ActionOn, ActionedOn, PaymentOn
 		FROM profits;
-

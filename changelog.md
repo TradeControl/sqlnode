@@ -37,7 +37,7 @@ Integrates setup templates into the [Node Configuration](https://tradecontrol.gi
 ### 3.34.5
 
 - [x] [Cash.vwBalanceSheetAccounts](src/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql) - fix negative m/e balances zeroised
-
+- [x] [Org.vwStatement](src/tcNodeDb/Org/Views/vwStatement.sql) - remove unposted payments
 ### 3.34.6
 
 Full script for the [Asp.Net Core interface](https://github.com/tradecontrol/tradecontrol.web). It has no impact on the 365 implementation since it uses the same algorithms.

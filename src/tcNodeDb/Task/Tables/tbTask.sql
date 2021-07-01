@@ -85,11 +85,6 @@ CREATE NONCLUSTERED INDEX [IX_Task_tb_ActivityCodeTaskTitle]
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_Task_tb_ActivityStatusCode]
-    ON [Task].[tbTask]([TaskStatusCode] ASC, [ActionOn] ASC, [AccountCode] ASC) WITH (FILLFACTOR = 90);
-
-
-GO
 CREATE NONCLUSTERED INDEX [IX_Task_tb_CashCode]
     ON [Task].[tbTask]([CashCode] ASC, [TaskStatusCode] ASC, [ActionOn] ASC) WITH (FILLFACTOR = 90);
 

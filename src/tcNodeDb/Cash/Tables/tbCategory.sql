@@ -49,7 +49,7 @@ CREATE NONCLUSTERED INDEX [IX_Cash_tbCategory_TypeOrderCategory]
 
 
 GO
-CREATE   TRIGGER Cash.Cash_tbCategory_TriggerUpdate 
+CREATE TRIGGER Cash.Cash_tbCategory_TriggerUpdate 
    ON  Cash.tbCategory
    AFTER UPDATE, INSERT
 AS 
@@ -57,26 +57,29 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY	
 		IF EXISTS (SELECT * FROM inserted i WHERE App.fnParsePrimaryKey(CategoryCode) = 0)
-			BEGIN
+		BEGIN
 			DECLARE @Msg NVARCHAR(MAX);
 			SELECT @Msg = Message FROM App.tbText WHERE TextId = 2004;
 			RAISERROR (@Msg, 10, 1)
 			ROLLBACK
-			END
-		ELSE
+		END
 
-			IF UPDATE (IsEnabled)
-				BEGIN
-				UPDATE  Cash.tbCode
-				SET     IsEnabled = 0
-				FROM        inserted INNER JOIN
-										 Cash.tbCode ON inserted.CategoryCode = Cash.tbCode.CategoryCode
-				WHERE        (inserted.IsEnabled = 0) AND (Cash.tbCode.IsEnabled <> 0)
+		IF UPDATE (IsEnabled)
+		BEGIN
+			UPDATE  Cash.tbCode
+			SET     IsEnabled = 0
+			FROM        inserted INNER JOIN
+										Cash.tbCode ON inserted.CategoryCode = Cash.tbCode.CategoryCode
+			WHERE        (inserted.IsEnabled = 0) AND (Cash.tbCode.IsEnabled <> 0);
+		END
 
-				END
+		IF NOT UPDATE(UpdatedBy)
+		BEGIN
 			UPDATE Cash.tbCategory
 			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
 			FROM Cash.tbCategory INNER JOIN inserted AS i ON tbCategory.CategoryCode = i.CategoryCode;
+		END
+
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;

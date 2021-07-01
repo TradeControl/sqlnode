@@ -9,7 +9,7 @@ AS
 		FROM Cash.tbPayment 
 			JOIN Org.tbAccount ON Cash.tbPayment.CashAccountCode = Org.tbAccount.CashAccountCode
 			JOIN Cash.tbPaymentStatus ON Cash.tbPayment.PaymentStatusCode = Cash.tbPaymentStatus.PaymentStatusCode
-		WHERE Org.tbAccount.AccountTypeCode < 2
+		WHERE Org.tbAccount.AccountTypeCode < 2 AND Cash.tbPayment.PaymentStatusCode = 1
 	), payments AS
 	(
 		SELECT     AccountCode, TransactedOn, OrderBy, Reference, StatementType, SUM(Charge) AS Charge
@@ -57,3 +57,4 @@ AS
 		Reference, StatementType, CAST(Charge as float) AS Charge, 
 		CAST(SUM(Charge) OVER (PARTITION BY AccountCode ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS float) AS Balance
 	FROM statement_data;
+

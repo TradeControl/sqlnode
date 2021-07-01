@@ -29,14 +29,27 @@ CREATE UNIQUE NONCLUSTERED INDEX [UserNameIndex]
 
 
 GO
-CREATE   TRIGGER dbo.AspNetUsers_TriggerInsert 
+
+CREATE TRIGGER dbo.AspNetUsers_TriggerInsert 
    ON dbo.AspNetUsers
    AFTER INSERT
 AS 
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
-		IF EXISTS (SELECT * FROM inserted 
+		
+		IF NOT EXISTS(SELECT * FROM Usr.tbUser)
+		BEGIN
+			UPDATE AspNetUsers
+			SET EmailConfirmed = 1
+			FROM AspNetUsers 
+				JOIN inserted ON AspNetUsers.Id = inserted.Id;
+
+			INSERT INTO AspNetUserRoles (UserId, RoleId)
+			SELECT inserted.Id UserId, (SELECT Id FROM AspNetRoles WHERE [Name] = 'Administrators') RoleId 
+			FROM inserted; 
+		END
+		ELSE IF EXISTS (SELECT * FROM inserted 
 					JOIN Usr.tbUser ON inserted.UserName = Usr.tbUser.EmailAddress
 					WHERE Usr.tbUser.IsAdministrator <> 0)
 		BEGIN
@@ -67,7 +80,7 @@ BEGIN
 END
 
 GO
-CREATE   TRIGGER dbo.AspNetUsers_TriggerUpdate 
+CREATE TRIGGER dbo.AspNetUsers_TriggerUpdate 
    ON dbo.AspNetUsers
    AFTER UPDATE
 AS 
@@ -77,6 +90,7 @@ BEGIN
 
 		IF UPDATE (EmailConfirmed)
 			AND NOT EXISTS (SELECT * FROM inserted  JOIN Usr.tbUser ON inserted.Email = Usr.tbUser.EmailAddress )
+			AND EXISTS (SELECT * FROM Usr.tbUser)
 		BEGIN			
 			ROLLBACK TRANSACTION;
 			EXEC App.proc_EventLog 'Unregistered ASP.NET users cannot be confirmed';

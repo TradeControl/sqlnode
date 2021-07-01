@@ -73,7 +73,7 @@ CREATE NONCLUSTERED INDEX [IX_Invoice_tbInvoice_FlowInitialise]
 
 
 GO
-CREATE   TRIGGER Invoice.Invoice_tbInvoice_TriggerDelete
+CREATE TRIGGER Invoice.Invoice_tbInvoice_TriggerDelete
 ON Invoice.tbInvoice
 FOR DELETE
 AS
@@ -81,7 +81,7 @@ AS
 
 	BEGIN TRY
 
-		IF EXISTS (SELECT * FROM deleted INNER JOIN Org.tbOrg ON deleted.AccountCode = Org.tbOrg.AccountCode WHERE Org.tbOrg.TransmitStatusCode <> 1)
+		IF EXISTS (SELECT * FROM deleted INNER JOIN Org.tbOrg ON deleted.AccountCode = Org.tbOrg.AccountCode WHERE Org.tbOrg.TransmitStatusCode > 1)
 		BEGIN
 			DECLARE @Msg NVARCHAR(MAX);
 			SELECT @Msg = Message FROM App.tbText WHERE TextId = 1220;
@@ -94,6 +94,7 @@ AS
 	END CATCH
 
 GO
+
 CREATE TRIGGER Invoice.Invoice_tbInvoice_TriggerUpdate
 ON Invoice.tbInvoice
 FOR UPDATE
@@ -115,7 +116,9 @@ AS
 		END
 
 
-		IF UPDATE(InvoicedOn) AND NOT UPDATE(DueOn)
+		IF UPDATE(InvoicedOn) AND EXISTS (
+				SELECT * FROM inserted JOIN deleted 
+					ON inserted.InvoiceNumber = deleted.InvoiceNumber AND inserted.DueOn = deleted.DueOn)
 		BEGIN
 			UPDATE invoice
 			SET DueOn = App.fnAdjustToCalendar(CASE WHEN org.PayDaysFromMonthEnd <> 0 
@@ -130,7 +133,9 @@ AS
 				WHERE i.InvoiceTypeCode = 0;
 		END;	
 
-		IF UPDATE(InvoicedOn) AND NOT UPDATE(ExpectedOn)
+		IF UPDATE(InvoicedOn) AND EXISTS (
+				SELECT * FROM inserted JOIN deleted 
+					ON inserted.InvoiceNumber = deleted.InvoiceNumber AND inserted.ExpectedOn = deleted.ExpectedOn)
 		BEGIN
 			UPDATE invoice
 			SET ExpectedOn = App.fnAdjustToCalendar(CASE WHEN org.PayDaysFromMonthEnd <> 0 

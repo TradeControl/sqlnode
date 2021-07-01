@@ -53,7 +53,8 @@ AS
 		MAX(CASE IsEntry WHEN 0 THEN 0 ELSE RNK END) OVER (PARTITION BY AssetName, CashModeCode ORDER BY EntryNumber) RNK
 		FROM balance_sheet_ranked
 	)
-	SELECT EntryNumber, AssetCode, AssetName, CashModeCode, LiquidityLevel, StartOn, IsEntry,
+	SELECT EntryNumber, AssetCode, AssetName, CashModeCode, LiquidityLevel, balance_sheet_grouped.StartOn, 
+		year_period.YearNumber, year_period.MonthNumber, IsEntry,
 		CASE IsEntry WHEN 0 THEN
 			MAX(Balance) OVER (PARTITION BY AssetName, CashModeCode, RNK ORDER BY EntryNumber) +
 			MIN(Balance) OVER (PARTITION BY AssetName, CashModeCode, RNK ORDER BY EntryNumber) 
@@ -61,4 +62,5 @@ AS
 			Balance
 		END AS Balance
 	FROM balance_sheet_grouped
+		JOIN App.tbYearPeriod year_period ON balance_sheet_grouped.StartOn = year_period.StartOn;
 

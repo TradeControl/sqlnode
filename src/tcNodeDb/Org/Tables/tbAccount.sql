@@ -35,6 +35,11 @@ CREATE NONCLUSTERED INDEX [IX_tbAccount_AccountTypeCode]
 
 
 GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Org_tbAccount_CashAccountName]
+    ON [Org].[tbAccount]([CashAccountName] ASC);
+
+
+GO
 CREATE TRIGGER Org.Org_tbAccount_TriggerUpdate 
    ON  Org.tbAccount
    AFTER UPDATE, INSERT

@@ -1,4 +1,4 @@
-﻿CREATE VIEW Invoice.vwHistoryPurchases
+﻿CREATE   VIEW Invoice.vwHistoryPurchases
 AS
 SELECT        App.tbYearPeriod.YearNumber, App.tbYear.Description, CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS PeriodName, Invoice.vwRegister.StartOn, 
                          Invoice.vwRegister.InvoiceNumber, Invoice.vwRegister.AccountCode, Invoice.vwRegister.InvoiceTypeCode, Invoice.vwRegister.InvoiceStatusCode, Invoice.vwRegister.InvoicedOn, 
@@ -10,4 +10,3 @@ FROM            App.tbYearPeriod INNER JOIN
                          App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber INNER JOIN
                          Invoice.vwRegister ON App.tbYearPeriod.StartOn = Invoice.vwRegister.StartOn
 WHERE        (Invoice.vwRegister.InvoiceTypeCode > 1);
-

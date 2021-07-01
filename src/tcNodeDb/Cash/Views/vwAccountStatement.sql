@@ -1,5 +1,5 @@
 ﻿CREATE VIEW Cash.vwAccountStatement
-  AS
+AS
 	WITH entries AS
 	(
 		SELECT  payment.CashAccountCode, payment.CashCode, ROW_NUMBER() OVER (PARTITION BY payment.CashAccountCode ORDER BY PaidOn) AS EntryNumber, PaymentCode, PaidOn, 
@@ -33,11 +33,14 @@
 							  App.tbTaxCode ON Cash.tbPayment.TaxCode = App.tbTaxCode.TaxCode LEFT OUTER JOIN
 							  Cash.tbCode ON Cash.tbPayment.CashCode = Cash.tbCode.CashCode
 	)
-	SELECT running_balance.CashAccountCode, (SELECT TOP 1 StartOn FROM App.tbYearPeriod	WHERE (StartOn <= running_balance.PaidOn) ORDER BY StartOn DESC) AS StartOn, 
-							running_balance.EntryNumber, running_balance.PaymentCode, running_balance.PaidOn, 
-							payments.AccountName, payments.PaymentReference, COALESCE(payments.PaidInValue, 0) PaidInValue, 
-							COALESCE(payments.PaidOutValue, 0) PaidOutValue, CAST(running_balance.PaidBalance as decimal(18,5)) PaidBalance, 
-							payments.CashCode, payments.CashDescription, payments.TaxDescription, payments.UserName, 
-							payments.AccountCode, payments.TaxCode
-	FROM   running_balance LEFT OUTER JOIN
-							payments ON running_balance.PaymentCode = payments.PaymentCode;	
+		SELECT running_balance.CashAccountCode, 
+			COALESCE((SELECT TOP 1 StartOn FROM App.tbYearPeriod WHERE (StartOn <= running_balance.PaidOn) ORDER BY StartOn DESC), 
+				(SELECT MIN(StartOn) FROM App.tbYearPeriod) ) AS StartOn, 
+			running_balance.EntryNumber, running_balance.PaymentCode, running_balance.PaidOn, 
+			payments.AccountName, payments.PaymentReference, COALESCE(payments.PaidInValue, 0) PaidInValue, 
+			COALESCE(payments.PaidOutValue, 0) PaidOutValue, CAST(running_balance.PaidBalance as decimal(18,5)) PaidBalance, 
+			payments.CashCode, payments.CashDescription, payments.TaxDescription, payments.UserName, 
+			payments.AccountCode, payments.TaxCode
+		FROM   running_balance LEFT OUTER JOIN
+								payments ON running_balance.PaymentCode = payments.PaymentCode
+

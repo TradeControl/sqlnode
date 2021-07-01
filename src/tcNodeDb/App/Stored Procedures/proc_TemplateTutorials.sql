@@ -2,15 +2,15 @@
 (
 	@FinancialMonth SMALLINT = 4,
 	@GovAccountName NVARCHAR(255),
-	@BankName NVARCHAR(255),
-	@BankAddress NVARCHAR(MAX),
+	@BankName NVARCHAR(255) = null,
+	@BankAddress NVARCHAR(MAX) = null,
 	@DummyAccount NVARCHAR(50), 
-	@CurrentAccount NVARCHAR(50),
-	@CA_SortCode NVARCHAR(10),
-	@CA_AccountNumber NVARCHAR(20),
-	@ReserveAccount NVARCHAR(50), 
-	@RA_SortCode NVARCHAR(10),
-	@RA_AccountNumber NVARCHAR(20)
+	@CurrentAccount NVARCHAR(50) = null,
+	@CA_SortCode NVARCHAR(10) = null,
+	@CA_AccountNumber NVARCHAR(20) = null,
+	@ReserveAccount NVARCHAR(50) = null, 
+	@RA_SortCode NVARCHAR(10) = null,
+	@RA_AccountNumber NVARCHAR(20) = null
 )
 AS
 	SET NOCOUNT, XACT_ABORT ON;
@@ -281,4 +281,3 @@ AS
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog
 	END CATCH
-

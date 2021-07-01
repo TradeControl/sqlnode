@@ -45,17 +45,19 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_Usr_tbUser_UserName]
 
 
 GO
-CREATE   TRIGGER Usr.Usr_tbUser_TriggerUpdate 
+CREATE TRIGGER Usr.Usr_tbUser_TriggerUpdate 
    ON  Usr.tbUser
    AFTER UPDATE
 AS 
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
-		
-		UPDATE Usr.tbUser
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
-		FROM Usr.tbUser INNER JOIN inserted AS i ON tbUser.UserId = i.UserId;
+		IF NOT UPDATE(UserName)
+		BEGIN
+			UPDATE Usr.tbUser
+			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+			FROM Usr.tbUser INNER JOIN inserted AS i ON tbUser.UserId = i.UserId;
+		END
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
