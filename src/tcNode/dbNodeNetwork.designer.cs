@@ -72,7 +72,7 @@ namespace TradeControl.Node
     #endregion
 		
 		public dbNodeNetworkDataContext() : 
-				base(global::TradeControl.Node.Properties.Settings.Default.tcNodeConnectionString1, mappingSource)
+				base(global::TradeControl.Node.Properties.Settings.Default.tcNodeConnectionString, mappingSource)
 		{
 			OnCreated();
 		}

@@ -75,16 +75,6 @@ namespace TradeControl.Node.Properties {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
         [global::System.Configuration.DefaultSettingValueAttribute("Data Source=IAM;Initial Catalog=tcNode;Integrated Security=True")]
-        public string tcNodeConnectionString1 {
-            get {
-                return ((string)(this["tcNodeConnectionString1"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=IAM;Initial Catalog=tcTHEBUS;Integrated Security=True")]
         public string tcNodeConnectionString {
             get {
                 return ((string)(this["tcNodeConnectionString"]));
@@ -111,7 +101,8 @@ namespace TradeControl.Node.Properties {
             "de_3_32_1</string>\r\n  <string>tc_upgrade_3_33_1</string>\r\n  <string>tc_upgrade_3" +
             "_34_1</string>\r\n  <string>tc_upgrade_3_34_2</string>\r\n  <string>tc_upgrade_3_34_" +
             "3</string>\r\n  <string>tc_upgrade_3_34_4</string>\r\n  <string>tc_upgrade_3_34_5</s" +
-            "tring>\r\n  <string>tc_upgrade_3_34_6</string>\r\n</ArrayOfString>")]
+            "tring>\r\n  <string>tc_upgrade_3_34_6</string>\r\n  <string>tc_upgrade_3_34_7</strin" +
+            "g>\r\n</ArrayOfString>")]
         public global::System.Collections.Specialized.StringCollection SqlScripts {
             get {
                 return ((global::System.Collections.Specialized.StringCollection)(this["SqlScripts"]));

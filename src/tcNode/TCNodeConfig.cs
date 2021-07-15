@@ -654,41 +654,41 @@ namespace TradeControl.Node
                         command.Parameters.Add(p5);
 
                         SqlParameter p6 = command.CreateParameter();
-                        p5.DbType = DbType.String;
-                        p5.ParameterName = "@UserEmailAddress";
-                        p5.Value = userEmailAddress;
-                        command.Parameters.Add(p5);
+                        p6.DbType = DbType.String;
+                        p6.ParameterName = "@UserEmailAddress";
+                        p6.Value = userEmailAddress;
+                        command.Parameters.Add(p6);
 
 
                         SqlParameter p7 = command.CreateParameter();
-                        p6.DbType = DbType.String;
-                        p6.ParameterName = "@PhoneNumber";
-                        p6.Value = phoneNumber;
-                        command.Parameters.Add(p6);
-
-                        SqlParameter p8 = command.CreateParameter();
                         p7.DbType = DbType.String;
-                        p7.ParameterName = "@CompanyNumber";
-                        p7.Value = companyNumber;
+                        p7.ParameterName = "@PhoneNumber";
+                        p7.Value = phoneNumber;
                         command.Parameters.Add(p7);
 
-                        SqlParameter p9 = command.CreateParameter();
+                        SqlParameter p8 = command.CreateParameter();
                         p8.DbType = DbType.String;
-                        p8.ParameterName = "@VatNumber";
-                        p8.Value = vatNumber;
+                        p8.ParameterName = "@CompanyNumber";
+                        p8.Value = companyNumber;
                         command.Parameters.Add(p8);
 
-                        SqlParameter p10 = command.CreateParameter();
+                        SqlParameter p9 = command.CreateParameter();
                         p9.DbType = DbType.String;
-                        p9.ParameterName = "@CalendarCode";
-                        p9.Value = calendarCode;
+                        p9.ParameterName = "@VatNumber";
+                        p9.Value = vatNumber;
                         command.Parameters.Add(p9);
 
-                        SqlParameter p11 = command.CreateParameter();
+                        SqlParameter p10 = command.CreateParameter();
                         p10.DbType = DbType.String;
-                        p10.ParameterName = "@UnitOfCharge";
-                        p10.Value = unitOfCharge;
+                        p10.ParameterName = "@CalendarCode";
+                        p10.Value = calendarCode;
                         command.Parameters.Add(p10);
+
+                        SqlParameter p11 = command.CreateParameter();
+                        p11.DbType = DbType.String;
+                        p11.ParameterName = "@UnitOfCharge";
+                        p11.Value = unitOfCharge;
+                        command.Parameters.Add(p11);
 
                         command.ExecuteNonQuery();
 
@@ -1160,7 +1160,7 @@ namespace TradeControl.Node
                             stream.WriteLine(Properties.Resources.ErrorLogHeader);
 
                         innerException = e.InnerException != null ? e.InnerException.Message : string.Empty;
-                        line = $"{DateTime.Now.ToString()},{ParseString(e.Message)},{e.Source},{e.TargetSite.Name.ToString()},{ParseString(innerException)}";
+                        line = $"{DateTime.Now},{ParseString(e.Message)},{e.Source},{e.TargetSite.Name},{ParseString(innerException)}";
                         stream.WriteLine(line);
                     }
 
@@ -1245,7 +1245,7 @@ namespace TradeControl.Node
                 }
             }
 
-            if (s.Trim() != string.Empty)
+            if (string.IsNullOrEmpty(s.Trim()))
                 Lines.Add(s);
         }
     }

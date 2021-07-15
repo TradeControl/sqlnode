@@ -1116,5 +1116,30 @@ namespace TradeControl.Node.Properties {
                 return ResourceManager.GetString("tc_upgrade_3_34_6", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script for ASP.NET Core interface
+        ///Release 3.34.7
+        ///
+        ///Date: 14 July 2021
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///
+        ///***********************************************************************************/
+        ///CREATE OR ALTER PROCEDURE App.proc_Templat [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_34_7 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_34_7", resourceCulture);
+            }
+        }
     }
 }

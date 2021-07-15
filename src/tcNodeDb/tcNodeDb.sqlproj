@@ -630,5 +630,7 @@
     <Build Include="Security\Task.sql" />
     <Build Include="Security\Usr.sql" />
     <Build Include="Security\Web.sql" />
+    <Build Include="App\Stored Procedures\proc_TemplateCompanyHMRC2021.sql" />
+    <Build Include="Cash\Views\vwTaxLossesCarriedForward.sql" />
   </ItemGroup>
 </Project>

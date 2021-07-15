@@ -141,6 +141,7 @@
     <Content Include="scripts\tc_upgrade_3_34_4.sql" />
     <Content Include="scripts\tc_upgrade_3_34_5.sql" />
     <Content Include="scripts\tc_upgrade_3_34_6.sql" />
+    <Content Include="scripts\tc_upgrade_3_34_7.sql" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

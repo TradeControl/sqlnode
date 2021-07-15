@@ -38,9 +38,14 @@ Integrates setup templates into the [Node Configuration](https://tradecontrol.gi
 
 - [x] [Cash.vwBalanceSheetAccounts](src/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql) - fix negative m/e balances zeroised
 - [x] [Org.vwStatement](src/tcNodeDb/Org/Views/vwStatement.sql) - remove unposted payments
+
 ### 3.34.6
 
 Full script for the [Asp.Net Core interface](https://github.com/tradecontrol/tradecontrol.web). It has no impact on the 365 implementation since it uses the same algorithms.
 
+### 3.34.7
 
- 
+- [x] [App.proc_TemplateCompanyHMRC2021](src/tcNodeDb/App/Stored%20Procedures/proc_TemplateCompanyHMRC2021.sql) - initialisation template that maps all the codes used by the HRMC Accounts and Tax Return portal
+- [x] [Cash.vwTaxLossesCarriedForward](src/tcNodeDb/Cash/Views/vwTaxLossesCarriedForward.sql) - calculates available losses that can be carried forward on a tax return
+- [x] [Cash.vwProfitAndLossData](src/tcNodeDb/Cash/Views/vwProfitAndLossData.sql) - add CashTypeCode for accessing Corporation Tax totals
+  

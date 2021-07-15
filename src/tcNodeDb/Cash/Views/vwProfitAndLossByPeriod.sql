@@ -1,6 +1,6 @@
 ﻿CREATE   VIEW Cash.vwProfitAndLossByPeriod
 AS
-	SELECT category.CategoryCode, category.Category, periods.YearNumber, periods.MonthNumber, category.DisplayOrder, financial_year.Description,
+	SELECT category.CategoryCode, category.Category, category.CashTypeCode, periods.YearNumber, periods.MonthNumber, category.DisplayOrder, financial_year.Description,
 		year_month.MonthName, profit_data.StartOn, profit_data.InvoiceValue
 	FROM Cash.vwProfitAndLossData profit_data
 		JOIN Cash.tbCategory category ON profit_data.CategoryCode = category.CategoryCode
