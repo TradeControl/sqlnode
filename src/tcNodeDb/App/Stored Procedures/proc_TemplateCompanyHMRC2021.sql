@@ -143,7 +143,6 @@ AS
 		, ('CP8', 'TC-ASSETGP')
 		, ('CP8', 'TC-DIRECT')
 		, ('CP8', 'TC-TAXCO')
-		, ('CP8', 'TC-ASSETNP')
 		, ('CP8', 'TC-LIAB')
 		, ('TC-NP', 'AC12')
 		, ('TC-NP', 'AC24')
@@ -162,6 +161,7 @@ AS
 		, ('TC-VAT', 'TC-SALES')
 		, ('TC-VAT', 'TC-SALESAJ')
 		, ('TC-VAT', 'TC-SUBCON')
+		, ('TC-VAT', 'CP37')
 		;
 		INSERT INTO [Cash].[tbCode] ([CashCode], [CashDescription], [CategoryCode], [TaxCode], [IsEnabled])
 		VALUES ('CP130', 'Cornovirus (Covid-19) support', 'TC-GRANTS', 'N/A', -1)
@@ -228,7 +228,7 @@ AS
 		, ('TC501', 'Directors Loan', 'TC-INVEST', 'N/A', 1)
 		, ('TC600', 'VAT', 'TC-TAXGD', 'N/A', 1)
 		, ('TC601', 'Employers NI', 'TC-TAXCO', 'N/A', 1)
-		, ('TC602', 'Taxes (Corporation)', 'TC-TAXCO', 'N/A', 1)
+		, ('TC602', 'Taxes (Corporation)', 'TC-TAXGD', 'N/A', 1)
 		, ('TC603', 'Taxes (General)', 'TC-TAXCO', 'N/A', 1)
 		, ('TC900', 'Stock Movement', 'TC-ASSETGP', 'N/A', 1)
 		, ('TC901', 'Share Capital', 'TC-LIAB', 'N/A', 1)
@@ -338,7 +338,7 @@ AS
 		SET @CapitalAccount = 'DEPRECIATION ADJUSTMENTS';
 		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
 		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
-		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 39, 'CP46', 1);
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 40, 'CP46', 1);
 
 		SET @CapitalAccount = 'STOCK';
 		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
@@ -348,7 +348,7 @@ AS
 		SET @CapitalAccount = 'VEHICLES';
 		EXEC Org.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
 		INSERT INTO Org.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
-		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 31, 'CP28', 1);
+		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 20, 'CP28', 1);
 
 	END TRY
 	BEGIN CATCH
