@@ -83,7 +83,7 @@ CREATE NONCLUSTERED INDEX IX_Task_tbChangeLog_TaskCode ON Task.tbChangeLog (Task
 CREATE NONCLUSTERED INDEX IX_Task_tbChangeLog_ChangedOn ON Task.tbChangeLog (ChangedOn DESC) ON [PRIMARY];
 CREATE NONCLUSTERED INDEX IX_Task_tbChangeLog_TransmitStatus ON Task.tbChangeLog (TransmitStatusCode, ChangedOn) ON [PRIMARY];
 go
-CREATE OR ALTER VIEW Task.vwChangeLog AS
+CREATE VIEW Task.vwChangeLog AS
 	SELECT    Task.tbChangeLog.LogId, Task.tbChangeLog.TaskCode, Task.tbChangeLog.ChangedOn, Org.tbTransmitStatus.TransmitStatusCode, Org.tbTransmitStatus.TransmitStatus, Org.tbOrg.AccountCode, Org.tbOrg.AccountName, 
 			Task.tbChangeLog.ActivityCode, Task.tbStatus.TaskStatus, Task.tbChangeLog.ActionOn, 
 			Task.tbChangeLog.Quantity, Task.tbChangeLog.CashCode, Cash.tbCode.CashDescription, Task.tbChangeLog.UnitCharge, Task.tbChangeLog.UnitCharge * Task.tbChangeLog.Quantity TotalCharge, 
@@ -438,7 +438,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER TRIGGER Task.Task_tbTask_TriggerDelete
+CREATE TRIGGER Task.Task_tbTask_TriggerDelete
 ON Task.tbTask
 FOR DELETE
 AS
@@ -477,13 +477,13 @@ CREATE NONCLUSTERED INDEX IX_Invoice_tbChangeLog_InvoiceCode ON Invoice.tbChange
 CREATE NONCLUSTERED INDEX IX_Invoice_tbChangeLog_ChangedOn ON Invoice.tbChangeLog (ChangedOn DESC) ON [PRIMARY];
 CREATE NONCLUSTERED INDEX IX_Invoice_tbChangeLog_TransmitStatus ON Invoice.tbChangeLog (TransmitStatusCode, ChangedOn) ON [PRIMARY];
 go
-CREATE OR ALTER VIEW Invoice.vwChangeLog AS
+CREATE VIEW Invoice.vwChangeLog AS
 	SELECT LogId, InvoiceNumber, ChangedOn, transmit.TransmitStatusCode, transmit.TransmitStatus, invoicestatus.InvoiceStatus, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, UpdatedBy
 	FROM Invoice.tbChangeLog changelog
 		JOIN Org.tbTransmitStatus transmit ON changelog.TransmitStatusCode = transmit.TransmitStatusCode
 		JOIN Invoice.tbStatus invoicestatus ON changelog.InvoiceStatusCode = invoicestatus.InvoiceStatusCode;
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbInvoice_TriggerInsert
+ALTER TRIGGER Invoice.Invoice_tbInvoice_TriggerInsert
 ON Invoice.tbInvoice
 FOR INSERT
 AS
@@ -518,7 +518,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbInvoice_TriggerUpdate
+ALTER TRIGGER Invoice.Invoice_tbInvoice_TriggerUpdate
 ON Invoice.tbInvoice
 FOR UPDATE
 AS
@@ -594,7 +594,7 @@ go
 IF NOT EXISTS (SELECT * FROM App.tbText WHERE TextId = 1220)
 	INSERT INTO App.tbText (TextId, Message, Arguments) VALUES (1220, 'Invoices deployed to the network cannot be deleted. Add a credit/debit note instead.', 0);
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbInvoice_TriggerDelete
+CREATE TRIGGER Invoice.Invoice_tbInvoice_TriggerDelete
 ON Invoice.tbInvoice
 FOR DELETE
 AS
@@ -621,7 +621,7 @@ DELETE FROM Usr.tbMenuEntry WHERE Argument = 'App_EventLog';
 IF NOT EXISTS (SELECT * FROM App.tbText WHERE TextId = 1221)
 	INSERT INTO App.tbText (TextId, Message, Arguments) VALUES (1221, 'Service Log cleared down.', 0);
 go
-CREATE OR ALTER PROCEDURE App.proc_EventLogCleardown (@RetentionDays SMALLINT = 30)
+CREATE PROCEDURE App.proc_EventLogCleardown (@RetentionDays SMALLINT = 30)
 AS
 	SET NOCOUNT, XACT_ABORT OFF;
 
@@ -644,7 +644,7 @@ go
 IF NOT EXISTS (SELECT * FROM App.tbText WHERE TextId = 1222)
 	INSERT INTO App.tbText (TextId, Message, Arguments) VALUES (1222, 'Task Change Log cleared down.', 0);
 go
-CREATE OR ALTER PROCEDURE Task.proc_ChangeLogCleardown (@RetentionDays SMALLINT = 30)
+CREATE PROCEDURE Task.proc_ChangeLogCleardown (@RetentionDays SMALLINT = 30)
 AS
 	SET NOCOUNT, XACT_ABORT OFF;
 
@@ -667,7 +667,7 @@ go
 IF NOT EXISTS (SELECT * FROM App.tbText WHERE TextId = 1223)
 	INSERT INTO App.tbText (TextId, Message, Arguments) VALUES (1223, 'Invoice Change Log cleared down.', 0);
 go
-CREATE OR ALTER PROCEDURE Invoice.proc_ChangeLogCleardown (@RetentionDays SMALLINT = 30)
+CREATE PROCEDURE Invoice.proc_ChangeLogCleardown (@RetentionDays SMALLINT = 30)
 AS
 	SET NOCOUNT, XACT_ABORT OFF;
 
@@ -688,7 +688,7 @@ AS
 	END CATCH
 go
 /*********************************************************************************/
-DROP FUNCTION IF EXISTS Cash.fnFlowCashCodeValues;
+DROP FUNCTION Cash.fnFlowCashCodeValues;
 go
 ALTER PROCEDURE Cash.proc_FlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
 AS

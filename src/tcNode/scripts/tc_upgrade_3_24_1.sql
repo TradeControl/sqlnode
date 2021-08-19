@@ -179,7 +179,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Usr.vwDoc
+ALTER VIEW Usr.vwDoc
 AS
 	WITH bank AS 
 	(
@@ -197,7 +197,7 @@ AS
                               bank AS bank_details ON company.AccountCode = bank_details.AccountCode LEFT OUTER JOIN
                               Org.tbAddress ON company.AddressCode = Org.tbAddress.AddressCode;
 go
-CREATE OR ALTER VIEW Org.vwContacts
+ALTER VIEW Org.vwContacts
 AS
 	WITH ContactCount AS (SELECT        ContactName, COUNT(TaskCode) AS Tasks
                                                    FROM            Task.tbTask
@@ -215,7 +215,7 @@ AS
      WHERE        (Org.tbOrg.OrganisationStatusCode < 3)
      ORDER BY Org.tbContact.ContactName;
 go
-CREATE OR ALTER VIEW Org.vwCompanyHeader
+ALTER VIEW Org.vwCompanyHeader
 AS
 SELECT        TOP (1) Org.tbOrg.AccountName AS CompanyName, Org.tbAddress.Address AS CompanyAddress, Org.tbOrg.PhoneNumber AS CompanyPhoneNumber, 
                          Org.tbOrg.EmailAddress AS CompanyEmailAddress, Org.tbOrg.WebSite AS CompanyWebsite, Org.tbOrg.CompanyNumber, Org.tbOrg.VatNumber
@@ -223,7 +223,7 @@ FROM            Org.tbOrg INNER JOIN
                          App.tbOptions ON Org.tbOrg.AccountCode = App.tbOptions.AccountCode LEFT OUTER JOIN
                          Org.tbAddress ON Org.tbOrg.AddressCode = Org.tbAddress.AddressCode;
 go
-CREATE OR ALTER VIEW App.vwIdentity
+ALTER VIEW App.vwIdentity
 AS
 SELECT TOP (1) Org.tbOrg.AccountName, Org.tbAddress.Address, Org.tbOrg.PhoneNumber, Org.tbOrg.EmailAddress, Org.tbOrg.WebSite, Org.tbOrg.Logo, Usr.tbUser.UserName, Usr.tbUser.LogonName, 
                          Usr.tbUser.Avatar, Org.tbOrg.CompanyNumber, Org.tbOrg.VatNumber
@@ -233,7 +233,7 @@ FROM            Org.tbOrg INNER JOIN
                          Usr.vwCredentials INNER JOIN
                          Usr.tbUser ON Usr.vwCredentials.UserId = Usr.tbUser.UserId;
 go
-CREATE OR ALTER VIEW Org.vwStatusReport
+ALTER VIEW Org.vwStatusReport
 AS
 SELECT        Org.vwDatasheet.AccountCode, Org.vwDatasheet.AccountName, Org.vwDatasheet.OrganisationType, Org.vwDatasheet.OrganisationStatus, Org.vwDatasheet.TaxDescription, Org.vwDatasheet.Address, 
                          Org.vwDatasheet.AreaCode, Org.vwDatasheet.PhoneNumber, Org.vwDatasheet.EmailAddress, Org.vwDatasheet.WebSite, Org.vwDatasheet.IndustrySector, 
@@ -250,7 +250,7 @@ FROM            Org.tbPayment INNER JOIN
                          Org.vwDatasheet ON Org.tbPayment.AccountCode = Org.vwDatasheet.AccountCode
 WHERE        (Org.tbPayment.PaymentStatusCode = 1);
 go
-CREATE OR ALTER VIEW Org.vwDatasheet
+ALTER VIEW Org.vwDatasheet
 AS
 	With task_count AS
 	(

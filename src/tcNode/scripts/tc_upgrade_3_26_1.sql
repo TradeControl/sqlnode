@@ -256,7 +256,7 @@ go
 ALTER TABLE [Task].[tbQuote] CHECK CONSTRAINT [FK_Task_tbQuote_Task_tb];
 go
 
-CREATE OR ALTER   VIEW [App].[vwMonths]
+ALTER VIEW [App].[vwMonths]
 AS
 	SELECT DISTINCT CAST(App.tbYearPeriod.StartOn AS decimal) AS StartOn, App.tbMonth.MonthName, App.tbYearPeriod.MonthNumber
 	FROM         App.tbYearPeriod INNER JOIN
@@ -264,7 +264,7 @@ AS
 						  App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 go
 
-CREATE OR ALTER VIEW Cash.vwFlowVatRecurrenceAccruals
+ALTER VIEW Cash.vwFlowVatRecurrenceAccruals
 AS	
 	WITH active_periods AS
 	(
@@ -299,7 +299,7 @@ AS
 		RIGHT OUTER JOIN active_periods ON active_periods.StartOn = vat_accruals.StartOn;		
 
 go
-CREATE OR ALTER VIEW Cash.vwFlowVatPeriodAccruals
+ALTER VIEW Cash.vwFlowVatPeriodAccruals
 AS
 	WITH active_periods AS
 	(

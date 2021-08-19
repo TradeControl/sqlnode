@@ -166,7 +166,7 @@ go
 CREATE UNIQUE NONCLUSTERED INDEX IX_Activity_tbMirror_AllocationCode ON Activity.tbMirror (AccountCode, AllocationCode) INCLUDE (ActivityCode) ON [PRIMARY];
 CREATE NONCLUSTERED INDEX IX_Activity_tbMirror_TransmitStatusCode ON Activity.tbMirror (TransmitStatusCode, AllocationCode) ON [PRIMARY];
 go
-CREATE OR ALTER TRIGGER Activity_tbMirror_Trigger_Insert
+CREATE TRIGGER Activity_tbMirror_Trigger_Insert
 ON Activity.tbMirror
 FOR INSERT
 AS
@@ -184,7 +184,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER TRIGGER Activity_tbMirror_Trigger_Update
+CREATE TRIGGER Activity_tbMirror_Trigger_Update
 ON Activity.tbMirror
 FOR UPDATE
 AS
@@ -270,7 +270,7 @@ ALTER TABLE Task.tbChangeLog ADD
 go
 CREATE UNIQUE NONCLUSTERED INDEX IX_Task_tbChangeLog_LogId ON Task.tbChangeLog (LogId DESC) ON [PRIMARY];
 go
-CREATE OR ALTER TRIGGER Task.Task_tbTask_TriggerDelete
+ALTER TRIGGER Task.Task_tbTask_TriggerDelete
 ON Task.tbTask
 FOR DELETE
 AS
@@ -288,7 +288,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER TRIGGER Task.Task_tbTask_TriggerUpdate
+ALTER TRIGGER Task.Task_tbTask_TriggerUpdate
 ON Task.tbTask
 FOR UPDATE
 AS
@@ -645,7 +645,7 @@ ALTER PROCEDURE Task.proc_AssignToParent
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Task.proc_Configure (@ParentTaskCode nvarchar(20))
+ALTER PROCEDURE Task.proc_Configure (@ParentTaskCode nvarchar(20))
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -799,7 +799,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Task.proc_NetworkUpdated (@TaskCode nvarchar(20))
+CREATE PROCEDURE Task.proc_NetworkUpdated (@TaskCode nvarchar(20))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -814,7 +814,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Task.vwNetworkDeployments
+CREATE VIEW Task.vwNetworkDeployments
 AS
 	SELECT DISTINCT Task.tbTask.TaskCode, Task.tbTask.AccountCode, Task.tbTask.ActivityCode, Activity.tbActivity.ActivityDescription, Task.tbTask.TaskTitle, Task.tbTask.TaskStatusCode, Task.tbStatus.TaskStatus, Task.tbTask.ActionOn, Task.tbTask.Quantity, 
 							 Cash.tbCategory.CashModeCode, Cash.tbMode.CashMode, App.tbTaxCode.TaxRate, Task.tbTask.UnitCharge, Activity.tbActivity.UnitOfMeasure,
@@ -830,7 +830,7 @@ AS
 							 Cash.tbMode ON Cash.tbCategory.CashModeCode = Cash.tbMode.CashModeCode AND Cash.tbCategory.CashModeCode = Cash.tbMode.CashModeCode
 	WHERE        (Task.tbChangeLog.TransmitStatusCode = 1)
 go
-CREATE OR ALTER VIEW Task.vwNetworkUpdates
+CREATE VIEW Task.vwNetworkUpdates
 AS
 	WITH updates AS
 	(
@@ -847,7 +847,7 @@ AS
 		JOIN Task.tbStatus ON Task.tbTask.TaskStatusCode = Task.tbStatus.TaskStatusCode
 		JOIN App.tbTaxCode ON Task.tbTask.TaxCode = App.tbTaxCode.TaxCode AND Task.tbTask.TaxCode = App.tbTaxCode.TaxCode;
 go
-CREATE OR ALTER VIEW Task.vwNetworkEventLog
+CREATE VIEW Task.vwNetworkEventLog
 AS
 	SELECT        Task.tbAllocationEvent.ContractAddress, Task.tbAllocationEvent.LogId, Task.tbAllocationEvent.EventTypeCode, Task.tbAllocationEvent.TaskStatusCode, Task.tbAllocationEvent.ActionOn, Task.tbAllocationEvent.UnitCharge, 
 							 Task.tbAllocationEvent.TaxRate, Task.tbAllocationEvent.QuantityOrdered, Task.tbAllocationEvent.QuantityDelivered, Task.tbAllocationEvent.InsertedOn, Task.tbAllocationEvent.RowVer, App.tbEventType.EventType, 
@@ -862,7 +862,7 @@ AS
 							 Activity.tbMirror ON Task.tbAllocation.AccountCode = Activity.tbMirror.AccountCode AND Task.tbAllocation.AllocationCode = Activity.tbMirror.AllocationCode INNER JOIN
 							 App.tbEventType ON Task.tbAllocationEvent.EventTypeCode = App.tbEventType.EventTypeCode;
 go
-CREATE OR ALTER VIEW Activity.vwUnMirrored
+CREATE VIEW Activity.vwUnMirrored
 AS
 	WITH candidates AS
 	(
@@ -885,19 +885,19 @@ AS
 							 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
 	WHERE        (Cash.tbCategory.CashTypeCode < 2)  AND (Cash.tbCategory.IsEnabled <> 0) AND (Cash.tbCode.IsEnabled <> 0)
 go
-CREATE OR ALTER VIEW Activity.vwExpenseCashCodes
+CREATE VIEW Activity.vwExpenseCashCodes
 AS
 	SELECT CashCode, CashDescription, Category
 	FROM Activity.vwCandidateCashCodes
 	WHERE CashModeCode = 0 AND CashTypeCode = 0
 go
-CREATE OR ALTER VIEW Activity.vwIncomeCashCodes
+CREATE VIEW Activity.vwIncomeCashCodes
 AS
 	SELECT CashCode, CashDescription, Category
 	FROM Activity.vwCandidateCashCodes
 	WHERE CashModeCode = 1 AND CashTypeCode = 0
 go
-CREATE OR ALTER PROCEDURE Activity.proc_Mirror(@ActivityCode nvarchar(50), @AccountCode nvarchar(10), @AllocationCode nvarchar(50))
+CREATE PROCEDURE Activity.proc_Mirror(@ActivityCode nvarchar(50), @AccountCode nvarchar(10), @AllocationCode nvarchar(50))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -912,11 +912,11 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Activity.vwNetworkMirrors
+CREATE VIEW Activity.vwNetworkMirrors
 AS
 	SELECT AccountCode, ActivityCode, AllocationCode, TransmitStatusCode FROM Activity.tbMirror WHERE TransmitStatusCode BETWEEN 1 AND 2;
 go
-CREATE OR ALTER PROCEDURE Activity.proc_NetworkUpdated(@AccountCode nvarchar(10), @AllocationCode nvarchar(50))
+CREATE PROCEDURE Activity.proc_NetworkUpdated(@AccountCode nvarchar(10), @AllocationCode nvarchar(50))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -929,7 +929,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Task.vwAllocationSvD
+CREATE VIEW Task.vwAllocationSvD
 AS
 	WITH allocs AS
 	(
@@ -1019,7 +1019,7 @@ AS
 		JOIN Activity.tbActivity activity ON SvD_scheduled.ActivityCode = activity.ActivityCode
 		JOIN Cash.tbMode polarity ON SvD_scheduled.CashModeCode = polarity.CashModeCode;
 go
-CREATE OR ALTER TRIGGER Task_tbAllocation_Insert
+CREATE TRIGGER Task_tbAllocation_Insert
 ON Task.tbAllocation
 FOR INSERT
 AS
@@ -1034,7 +1034,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER TRIGGER Task_tbAllocation_Trigger_Update
+CREATE TRIGGER Task_tbAllocation_Trigger_Update
 ON Task.tbAllocation
 FOR UPDATE
 AS
@@ -1084,7 +1084,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER VIEW Task.vwNetworkAllocations
+CREATE VIEW Task.vwNetworkAllocations
 AS
 	SELECT        Task.tbAllocation.ContractAddress, Task.tbAllocation.AccountCode, Org.tbOrg.AccountName, Activity.tbMirror.ActivityCode, Task.tbAllocation.AllocationCode, Task.tbAllocation.AllocationDescription, Task.tbAllocation.TaskCode, 
 							 Task.tbAllocation.TaskTitle, Task.tbAllocation.CashModeCode, Cash.tbMode.CashMode, Task.tbAllocation.UnitOfMeasure, Task.tbAllocation.UnitOfCharge, Task.tbAllocation.TaskStatusCode, Task.tbStatus.TaskStatus, 
@@ -1098,7 +1098,7 @@ AS
 							 Task.tbStatus ON Task.tbAllocation.TaskStatusCode = Task.tbStatus.TaskStatusCode AND Task.tbAllocation.TaskStatusCode = Task.tbStatus.TaskStatusCode AND 
 							 Task.tbAllocation.TaskStatusCode = Task.tbStatus.TaskStatusCode AND Task.tbAllocation.TaskStatusCode = Task.tbStatus.TaskStatusCode AND Task.tbAllocation.TaskStatusCode = Task.tbStatus.TaskStatusCode;
 go
-CREATE OR ALTER VIEW Task.vwNetworkEvents
+CREATE VIEW Task.vwNetworkEvents
 AS
 	SELECT        Task.tbAllocationEvent.ContractAddress, Task.tbAllocationEvent.LogId, App.tbEventType.EventTypeCode, App.tbEventType.EventType, 
 							 Task.tbStatus.TaskStatusCode, Task.tbStatus.TaskStatus, Task.tbAllocationEvent.ActionOn, Task.tbAllocationEvent.UnitCharge, Task.tbAllocationEvent.TaxRate, Task.tbAllocationEvent.QuantityOrdered, 
@@ -1107,7 +1107,7 @@ AS
 							 App.tbEventType ON Task.tbAllocationEvent.EventTypeCode = App.tbEventType.EventTypeCode INNER JOIN
 							 Task.tbStatus ON Task.tbAllocationEvent.TaskStatusCode = Task.tbStatus.TaskStatusCode;
 go
-CREATE OR ALTER VIEW Task.vwNetworkQuotations
+CREATE VIEW Task.vwNetworkQuotations
 AS
 	WITH requests AS
 	(
@@ -1162,7 +1162,7 @@ AS
 		JOIN Activity.tbActivity activity ON quotes_projection.ActivityCode = activity.ActivityCode
 		JOIN Cash.tbMode polarity ON quotes_projection.CashModeCode = polarity.CashModeCode;
 go
-CREATE OR ALTER VIEW Task.vwNetworkChangeLog
+CREATE VIEW Task.vwNetworkChangeLog
 AS
 	SELECT Task.tbTask.AccountCode, Org.tbOrg.AccountName, Task.tbTask.TaskCode, Task.tbChangeLog.LogId, Task.tbChangeLog.ChangedOn, Task.tbChangeLog.TransmitStatusCode, Org.tbTransmitStatus.TransmitStatus, 
 				Task.tbChangeLog.ActivityCode, Activity.tbMirror.AllocationCode, Task.tbChangeLog.TaskStatusCode, Task.tbStatus.TaskStatus, Cash.tbMode.CashModeCode, Cash.tbMode.CashMode, Task.tbChangeLog.ActionOn, 
@@ -1201,7 +1201,7 @@ go
 CREATE UNIQUE NONCLUSTERED INDEX IX_Cash_tbMirror_ChargeCode ON Cash.tbMirror (AccountCode, ChargeCode) INCLUDE (CashCode) ON [PRIMARY];
 CREATE NONCLUSTERED INDEX IX_Cash_tbMirror_TransmitStatusCode ON Cash.tbMirror (TransmitStatusCode, ChargeCode) ON [PRIMARY];
 go
-CREATE OR ALTER TRIGGER Cash_tbMirror_Trigger_Insert
+CREATE TRIGGER Cash_tbMirror_Trigger_Insert
 ON Cash.tbMirror
 FOR INSERT
 AS
@@ -1219,7 +1219,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER TRIGGER Cash_tbMirror_Trigger_Update
+CREATE TRIGGER Cash_tbMirror_Trigger_Update
 ON Cash.tbMirror
 FOR UPDATE
 AS
@@ -1337,7 +1337,7 @@ ALTER TABLE Invoice.tbChangeLog ADD
 go
 CREATE UNIQUE NONCLUSTERED INDEX IX_Invoice_tbChangeLog_LogId ON Invoice.tbChangeLog (LogId DESC);
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbMirror_TriggerInsert
+CREATE TRIGGER Invoice.Invoice_tbMirror_TriggerInsert
 ON Invoice.tbMirror
 FOR INSERT
 AS
@@ -1352,7 +1352,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbMirror_TriggerUpdate
+CREATE TRIGGER Invoice.Invoice_tbMirror_TriggerUpdate
 ON Invoice.tbMirror
 FOR UPDATE
 AS
@@ -1392,7 +1392,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbMirrorTask_TriggerInsert
+CREATE TRIGGER Invoice.Invoice_tbMirrorTask_TriggerInsert
 ON Invoice.tbMirrorTask
 FOR INSERT
 AS
@@ -1667,7 +1667,7 @@ ALTER PROCEDURE Invoice.proc_Total
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Invoice.vwNetworkDeployments
+CREATE VIEW Invoice.vwNetworkDeployments
 AS
 	SELECT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.AccountCode, 
 		Invoice.tbType.CashModeCode AS PaymentPolarity, 
@@ -1689,7 +1689,7 @@ AS
 							 Invoice.tbMirror ON Invoice.tbMirrorReference.ContractAddress = Invoice.tbMirror.ContractAddress AND Invoice.tbMirrorReference.ContractAddress = Invoice.tbMirror.ContractAddress
 	WHERE        (Invoice.tbChangeLog.TransmitStatusCode = 1)
 go
-CREATE OR ALTER VIEW Invoice.vwNetworkDeploymentItems
+CREATE VIEW Invoice.vwNetworkDeploymentItems
 AS
 	SELECT Invoice.tbItem.InvoiceNumber, Invoice.tbItem.CashCode ChargeCode, 
 		CASE WHEN LEN(COALESCE(CAST(Invoice.tbItem.ItemReference AS NVARCHAR), '')) > 0 THEN Invoice.tbItem.ItemReference ELSE Cash.tbCode.CashDescription END ChargeDescription, 
@@ -1697,7 +1697,7 @@ AS
 	FROM  Invoice.tbItem 
 		INNER JOIN Cash.tbCode ON Invoice.tbItem.CashCode = Cash.tbCode.CashCode;
 go
-CREATE OR ALTER VIEW Invoice.vwNetworkUpdates
+CREATE VIEW Invoice.vwNetworkUpdates
 AS
 	WITH updates AS
 	(
@@ -1713,7 +1713,7 @@ AS
 		JOIN Invoice.tbInvoice ON updates.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber 
 		JOIN Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
 go
-CREATE OR ALTER VIEW Invoice.vwNetworkChangeLog
+CREATE VIEW Invoice.vwNetworkChangeLog
 AS
 	SELECT  Invoice.tbChangeLog.LogId, Invoice.tbInvoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbType.InvoiceType, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbStatus.InvoiceStatus, 
 							 Invoice.tbChangeLog.TransmitStatusCode, Org.tbTransmitStatus.TransmitStatus, Invoice.tbType.CashModeCode, Cash.tbMode.CashMode, Invoice.tbChangeLog.DueOn, Invoice.tbChangeLog.InvoiceValue, 
@@ -1726,7 +1726,7 @@ AS
 		INNER JOIN Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode AND Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode 
 		INNER JOIN Org.tbTransmitStatus ON Invoice.tbChangeLog.TransmitStatusCode = Org.tbTransmitStatus.TransmitStatusCode;
 go
-CREATE OR ALTER VIEW Cash.vwNetworkMirrors
+CREATE VIEW Cash.vwNetworkMirrors
 AS
 	SELECT AccountCode, CashCode, ChargeCode, TransmitStatusCode FROM Cash.tbMirror WHERE TransmitStatusCode BETWEEN 1 AND 2;
 go
@@ -1737,7 +1737,7 @@ AS
 		JOIN Org.tbTransmitStatus transmit ON changelog.TransmitStatusCode = transmit.TransmitStatusCode
 		JOIN Invoice.tbStatus invoicestatus ON changelog.InvoiceStatusCode = invoicestatus.InvoiceStatusCode;
 go
-CREATE OR ALTER PROCEDURE Cash.proc_Mirror(@CashCode nvarchar(50), @AccountCode nvarchar(10), @ChargeCode nvarchar(50))
+CREATE PROCEDURE Cash.proc_Mirror(@CashCode nvarchar(50), @AccountCode nvarchar(10), @ChargeCode nvarchar(50))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -1753,7 +1753,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_NetworkUpdated(@AccountCode nvarchar(10), @ChargeCode nvarchar(50))
+CREATE PROCEDURE Cash.proc_NetworkUpdated(@AccountCode nvarchar(10), @ChargeCode nvarchar(50))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -1766,7 +1766,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Invoice.proc_NetworkUpdated (@InvoiceNumber nvarchar(20))
+CREATE PROCEDURE Invoice.proc_NetworkUpdated (@InvoiceNumber nvarchar(20))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -1782,7 +1782,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER VIEW Cash.vwUnMirrored
+CREATE VIEW Cash.vwUnMirrored
 AS
 	WITH charge_codes AS
 	(
@@ -1801,7 +1801,7 @@ AS
 		LEFT OUTER JOIN Cash.tbMirror mirror ON charge_codes.AccountCode = mirror.AccountCode AND charge_codes.ChargeCode = mirror.ChargeCode
 	WHERE mirror.ChargeCode IS NULL;
 go
-CREATE OR ALTER VIEW Invoice.vwMirrorDetails
+CREATE VIEW Invoice.vwMirrorDetails
 AS
 	SELECT invoice_task.ContractAddress, invoice_task.TaskCode DetailRef, mirror.ActivityCode DetailCode, alloc.AllocationDescription DetailDescription,
 		invoice_task.Quantity, invoice_task.InvoiceValue, invoice_task.TaxValue, invoice_task.TaxCode, invoice_task.RowVer 
@@ -1816,7 +1816,7 @@ AS
 		JOIN Invoice.tbMirror invoice ON invoice.ContractAddress = invoice_item.ContractAddress
 		JOIN Cash.tbMirror mirror ON invoice_item.ChargeCode = mirror.ChargeCode AND invoice.AccountCode = mirror.AccountCode;
 go
-CREATE OR ALTER VIEW Invoice.vwMirrors
+CREATE VIEW Invoice.vwMirrors
 AS
 	SELECT        Invoice.tbMirror.ContractAddress, Invoice.tbMirror.AccountCode, Org.tbOrg.AccountName, 
 					CASE WHEN tbMirrorReference.ContractAddress IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsMirrored, 
@@ -1829,7 +1829,7 @@ AS
 							 Org.tbOrg ON Invoice.tbMirror.AccountCode = Org.tbOrg.AccountCode LEFT OUTER JOIN
 							 Invoice.tbMirrorReference ON Invoice.tbMirror.ContractAddress = Invoice.tbMirrorReference.ContractAddress
 go
-CREATE OR ALTER VIEW Invoice.vwMirrorEvents
+CREATE VIEW Invoice.vwMirrorEvents
 AS
 	SELECT        Invoice.tbMirrorEvent.ContractAddress, Invoice.tbMirror.AccountCode, Org.tbOrg.AccountName, Invoice.tbMirror.InvoiceNumber, Invoice.tbMirrorEvent.LogId, Invoice.tbMirrorEvent.EventTypeCode, App.tbEventType.EventType, 
 							 Invoice.tbMirrorEvent.InvoiceStatusCode, Invoice.tbStatus.InvoiceStatus, Invoice.tbMirrorEvent.DueOn, Invoice.tbMirrorEvent.PaidValue, Invoice.tbMirrorEvent.PaidTaxValue, Invoice.tbMirrorEvent.InsertedOn, 
@@ -1842,7 +1842,7 @@ AS
 							 Org.tbOrg ON Invoice.tbMirror.AccountCode = Org.tbOrg.AccountCode AND Invoice.tbMirror.AccountCode = Org.tbOrg.AccountCode AND Invoice.tbMirror.AccountCode = Org.tbOrg.AccountCode AND 
 							 Invoice.tbMirror.AccountCode = Org.tbOrg.AccountCode AND Invoice.tbMirror.AccountCode = Org.tbOrg.AccountCode AND Invoice.tbMirror.AccountCode = Org.tbOrg.AccountCode;
 go
-CREATE OR ALTER PROCEDURE Invoice.proc_Mirror(@ContractAddress nvarchar(42), @InvoiceNumber nvarchar(20) OUTPUT)
+CREATE PROCEDURE Invoice.proc_Mirror(@ContractAddress nvarchar(42), @InvoiceNumber nvarchar(20) OUTPUT)
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -2448,7 +2448,7 @@ DECLARE @FinancialYear SMALLINT;
 		EXEC App.proc_ErrorLog
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE App.proc_NodeInitialisation
+ALTER PROCEDURE App.proc_NodeInitialisation
 (
 	@AccountCode NVARCHAR(10),
 	@BusinessName NVARCHAR(255),
@@ -2789,7 +2789,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE App.proc_DemoServices
+ALTER PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,
@@ -4096,7 +4096,7 @@ CommitTran:
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE App.proc_DemoBom
+ALTER PROCEDURE App.proc_DemoBom
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,

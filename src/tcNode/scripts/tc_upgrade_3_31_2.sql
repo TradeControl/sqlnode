@@ -21,7 +21,7 @@ This script should be applied by the Node Configuration app.
 
 ***********************************************************************************/
 go
-CREATE OR ALTER VIEW Invoice.vwAccountsMode
+ALTER VIEW Invoice.vwAccountsMode
 AS
 	SELECT        Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.UserId, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbInvoice.InvoicedOn, Invoice.tbInvoice.Notes, 
 							 Invoice.tbItem.CashCode, Invoice.tbItem.TaxCode, Invoice.tbItem.ItemReference, Invoice.tbInvoice.RowVer AS InvoiceRowVer, Invoice.tbItem.RowVer AS ItemRowVer, Invoice.tbItem.TotalValue, Invoice.tbItem.InvoiceValue, 
@@ -147,7 +147,7 @@ ALTER PROCEDURE Invoice.proc_RaiseBlank
 		EXEC App.proc_ErrorLog
 	END CATCH
 go
-CREATE OR ALTER VIEW Invoice.vwSalesInvoiceSpoolByItem
+CREATE VIEW Invoice.vwSalesInvoiceSpoolByItem
 AS
 	SELECT  sales_invoice.InvoiceNumber, Invoice.tbType.InvoiceType, sales_invoice.InvoiceStatusCode, Usr.tbUser.UserName, sales_invoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, 
 							 sales_invoice.InvoicedOn, sales_invoice.InvoiceValue AS InvoiceValueTotal, sales_invoice.TaxValue AS TaxValueTotal, sales_invoice.PaymentTerms, sales_invoice.DueOn, sales_invoice.Notes, Org.tbOrg.EmailAddress, 
@@ -165,7 +165,7 @@ AS
 								   FROM            App.tbDocSpool AS doc
 								   WHERE        (DocTypeCode = 4) AND (UserName = SUSER_SNAME()) AND (sales_invoice.InvoiceNumber = DocumentNumber))
 go
-CREATE OR ALTER PROCEDURE Org.proc_DefaultEmailAddress 
+CREATE PROCEDURE Org.proc_DefaultEmailAddress 
 	(
 	@AccountCode nvarchar(10),
 	@EmailAddress nvarchar(255) OUTPUT

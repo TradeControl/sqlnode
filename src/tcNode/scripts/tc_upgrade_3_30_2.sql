@@ -96,7 +96,7 @@ AS
 	FROM            Cash.tbPayment
 	WHERE        (PaymentStatusCode = 0);
 go
-CREATE OR ALTER VIEW Org.vwCurrentBalance
+CREATE VIEW Org.vwCurrentBalance
 AS
 	WITH current_balance AS
 	(
@@ -109,7 +109,7 @@ AS
 		JOIN current_balance ON org_statement.AccountCode = current_balance.AccountCode 
 			AND org_statement.RowNumber = current_balance.CurrentBalanceRow
 go
-CREATE OR ALTER VIEW Invoice.vwStatusLive
+CREATE VIEW Invoice.vwStatusLive
 AS
 	WITH nonzero_balance_orgs AS
 	(
@@ -1750,8 +1750,8 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-DROP PROCEDURE IF EXISTS Cash.proc_PaymentPostPaidIn;
-DROP PROCEDURE IF EXISTS Cash.proc_PaymentPostPaidOut;
+DROP PROCEDURE Cash.proc_PaymentPostPaidIn;
+DROP PROCEDURE Cash.proc_PaymentPostPaidOut;
 go
 ALTER PROCEDURE App.proc_SystemRebuild
 AS
@@ -2670,7 +2670,7 @@ AS
 			ActionOn, ActionedOn, PaymentOn
 		FROM profits;
 go
-DROP VIEW IF EXISTS Invoice.vwOutstanding;
+DROP VIEW Invoice.vwOutstanding;
 go
 ALTER TABLE Cash.tbPayment DROP 
 	CONSTRAINT DF_Cash_tbPayment_TaxInValue, DF_Cash_tbPayment_TaxOutValue,

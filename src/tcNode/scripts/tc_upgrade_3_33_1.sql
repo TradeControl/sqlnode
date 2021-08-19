@@ -56,7 +56,7 @@ ALTER TABLE Usr.tbUser WITH NOCHECK ADD
 	MenuViewCode smallint NOT NULL CONSTRAINT DF_Usr_tbUser_MenuViewCode DEFAULT (0),
 	CONSTRAINT FK_Usr_tbMenu_Usr_tbUser FOREIGN KEY (MenuViewCode) REFERENCES Usr.tbMenuView (MenuViewCode);
 go
-CREATE OR ALTER VIEW Usr.vwUserMenuList
+CREATE VIEW Usr.vwUserMenuList
 AS
 	WITH user_menus AS
 	(
@@ -911,12 +911,12 @@ AS
 							 Invoice.tbInvoice ON changelog.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber AND changelog.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
 							 Org.tbOrg ON Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode AND Invoice.tbInvoice.AccountCode = Org.tbOrg.AccountCode;
 go
-DROP VIEW IF EXISTS Org.vwSales;
-DROP VIEW IF EXISTS Org.vwSalesInvoices;
-DROP VIEW IF EXISTS Org.vwPurchases;
-DROP VIEW IF EXISTS Org.vwPurchaseInvoices;
+DROP VIEW Org.vwSales;
+DROP VIEW Org.vwSalesInvoices;
+DROP VIEW Org.vwPurchases;
+DROP VIEW Org.vwPurchaseInvoices;
 go
-CREATE OR ALTER VIEW Org.vwTasks
+CREATE VIEW Org.vwTasks
 AS
 	SELECT        Task.vwTasks.AccountCode, Task.vwTasks.TaskCode, Task.vwTasks.UserId, Task.vwTasks.ContactName, Task.vwTasks.ActivityCode, Task.vwTasks.TaskTitle, Task.vwTasks.TaskStatusCode, Task.vwTasks.ActionById, 
 							 Task.vwTasks.ActionOn, Task.vwTasks.ActionedOn, Task.vwTasks.PaymentOn, Task.vwTasks.SecondReference, Task.vwTasks.TaskNotes, Task.vwTasks.TaxCode, Task.vwTasks.Quantity, Task.vwTasks.UnitCharge, 
@@ -928,7 +928,7 @@ AS
 	WHERE        (Task.vwTasks.CashCode IS NOT NULL)
 
 go
-CREATE OR ALTER VIEW Org.vwInvoiceTasks
+CREATE VIEW Org.vwInvoiceTasks
 AS
 	SELECT        Invoice.tbInvoice.AccountCode, tbInvoiceTask.InvoiceNumber, tbInvoiceTask.TaskCode, Task.tbTask.ContactName, Invoice.tbInvoice.InvoicedOn, tbInvoiceTask.Quantity, tbInvoiceTask.InvoiceValue, tbInvoiceTask.TaxValue, 
 							 tbInvoiceTask.CashCode, tbInvoiceTask.TaxCode, Invoice.tbStatus.InvoiceStatus, Task.tbTask.TaskNotes, Cash.tbCode.CashDescription, Invoice.tbInvoice.InvoiceStatusCode, Task.tbTask.TaskTitle, Org.tbOrg.AccountName, 

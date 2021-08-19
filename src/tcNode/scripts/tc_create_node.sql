@@ -2758,15 +2758,15 @@ NOT FOR REPLICATION
 go
 ALTER TABLE Org.tbOrg NOCHECK CONSTRAINT FK_Org_tb_Org_tbAddress
 go
-ALTER TABLE Org.tbOrg  WITH CHECK ADD  CONSTRAINT tbOrg_FK00 FOREIGN KEY(OrganisationStatusCode)
+ALTER TABLE Org.tbOrg  WITH CHECK ADD  CONSTRAINT FK_tbOrg_Org_tbStatus FOREIGN KEY(OrganisationStatusCode)
 REFERENCES Org.tbStatus (OrganisationStatusCode)
 go
-ALTER TABLE Org.tbOrg CHECK CONSTRAINT tbOrg_FK00
+ALTER TABLE Org.tbOrg CHECK CONSTRAINT FK_tbOrg_Org_tbStatus
 go
-ALTER TABLE Org.tbOrg  WITH CHECK ADD  CONSTRAINT tbOrg_FK01 FOREIGN KEY(OrganisationTypeCode)
+ALTER TABLE Org.tbOrg  WITH CHECK ADD  CONSTRAINT FK_tbOrg_Org_tbType FOREIGN KEY(OrganisationTypeCode)
 REFERENCES Org.tbType (OrganisationTypeCode)
 go
-ALTER TABLE Org.tbOrg CHECK CONSTRAINT tbOrg_FK01
+ALTER TABLE Org.tbOrg CHECK CONSTRAINT FK_tbOrg_Org_tbType
 go
 ALTER TABLE Org.tbSector  WITH CHECK ADD  CONSTRAINT FK_Org_tbSector_Org_tb FOREIGN KEY(AccountCode)
 REFERENCES Org.tbOrg (AccountCode)
@@ -2980,13 +2980,13 @@ BEGIN
 	RETURN @Version
 END
 go
-CREATE OR ALTER VIEW Usr.vwCredentials
+CREATE VIEW Usr.vwCredentials
   AS
 SELECT     UserId, UserName, LogonName, IsAdministrator
 FROM         Usr.tbUser
 WHERE     (LogonName = SUSER_SNAME()) AND (IsEnabled <> 0)
 go
-CREATE OR ALTER FUNCTION App.fnAdjustDateToBucket
+CREATE FUNCTION App.fnAdjustDateToBucket
 	(
 	@BucketDay smallint,
 	@CurrentDate datetime
@@ -3016,7 +3016,7 @@ RETURNS datetime
 	RETURN DATEADD(dd, @Offset, @CurrentDate)
 	END
 go
-CREATE OR ALTER FUNCTION App.fnWeekDay
+CREATE FUNCTION App.fnWeekDay
 	(
 	@Date datetime
 	)
@@ -3032,7 +3032,7 @@ RETURNS smallint
 			END
 	END
 go
-CREATE OR ALTER FUNCTION App.fnAdjustToCalendar
+CREATE FUNCTION App.fnAdjustToCalendar
 	(
 	@SourceDate datetime,
 	@OffsetDays int
@@ -3093,7 +3093,7 @@ BEGIN
 	RETURN @OutputDate				
 END
 go
-CREATE OR ALTER FUNCTION App.fnDocInvoiceType
+CREATE FUNCTION App.fnDocInvoiceType
 	(
 	@InvoiceTypeCode SMALLINT
 	)
@@ -3113,7 +3113,7 @@ AS
 	END
 
 go
-CREATE OR ALTER FUNCTION App.fnOffsetDays(@StartOn DATE, @EndOn DATE)
+CREATE FUNCTION App.fnOffsetDays(@StartOn DATE, @EndOn DATE)
 RETURNS SMALLINT
 AS
 BEGIN
@@ -3175,7 +3175,7 @@ BEGIN
 
 END
 go
-CREATE OR ALTER FUNCTION App.fnParsePrimaryKey(@PK NVARCHAR(50)) RETURNS BIT
+CREATE FUNCTION App.fnParsePrimaryKey(@PK NVARCHAR(50)) RETURNS BIT
 AS
 	BEGIN
 		DECLARE @ParseOk BIT = 0;
@@ -3205,7 +3205,7 @@ AS
 		RETURN @ParseOk;
 	END
 go
-CREATE OR ALTER FUNCTION Org.fnContactFileAs(@ContactName nvarchar(100))
+CREATE FUNCTION Org.fnContactFileAs(@ContactName nvarchar(100))
 RETURNS NVARCHAR(100)
 AS
 BEGIN
@@ -3230,7 +3230,7 @@ BEGIN
 	RETURN @FileAs
 END
 go
-CREATE OR ALTER FUNCTION Task.fnEmailAddress
+CREATE FUNCTION Task.fnEmailAddress
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -3265,7 +3265,7 @@ AS
 	END
 
 go
-CREATE OR ALTER FUNCTION Task.fnIsExpense
+CREATE FUNCTION Task.fnIsExpense
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -3302,7 +3302,7 @@ go
 go
 --VIEW dependencies
 go
-CREATE OR ALTER FUNCTION App.fnBuckets
+CREATE FUNCTION App.fnBuckets
 	(@CurrentDate datetime)
 RETURNS  @tbBkn TABLE (Period smallint, BucketId nvarchar(10), StartDate datetime, EndDate datetime)
   AS
@@ -3368,7 +3368,7 @@ RETURNS  @tbBkn TABLE (Period smallint, BucketId nvarchar(10), StartDate datetim
 	RETURN
 	END
 go
-CREATE OR ALTER FUNCTION Cash.fnTaxTypeDueDates(@TaxTypeCode smallint)
+CREATE FUNCTION Cash.fnTaxTypeDueDates(@TaxTypeCode smallint)
 RETURNS @tbDueDate TABLE (PayOn datetime, PayFrom datetime, PayTo datetime)
  AS
 	BEGIN
@@ -3494,7 +3494,7 @@ RETURNS @tbDueDate TABLE (PayOn datetime, PayFrom datetime, PayTo datetime)
 	RETURN	
 	END
 go
-CREATE OR ALTER FUNCTION App.fnActivePeriod	()
+CREATE FUNCTION App.fnActivePeriod	()
 RETURNS @tbSystemYearPeriod TABLE (YearNumber smallint, StartOn datetime, EndOn datetime, MonthName nvarchar(10), Description nvarchar(10), MonthNumber smallint) 
    AS
 	BEGIN
@@ -3524,7 +3524,7 @@ RETURNS @tbSystemYearPeriod TABLE (YearNumber smallint, StartOn datetime, EndOn 
 go
 --end
 go
-CREATE OR ALTER VIEW Task.vwBucket
+CREATE VIEW Task.vwBucket
 AS
 SELECT        task.TaskCode, task.ActionOn, buckets.Period, buckets.BucketId
 FROM            Task.tbTask AS task CROSS APPLY
@@ -3532,7 +3532,7 @@ FROM            Task.tbTask AS task CROSS APPLY
 				FROM        App.fnBuckets(CURRENT_TIMESTAMP) buckets 
 				WHERE     (StartDate <= task.ActionOn) AND (EndDate > task.ActionOn)) AS buckets
 go
-CREATE OR ALTER VIEW Task.vwTasks
+CREATE VIEW Task.vwTasks
 AS
 SELECT        Task.tbTask.TaskCode, Task.tbTask.UserId, Task.tbTask.AccountCode, Task.tbTask.ContactName, Task.tbTask.ActivityCode, Task.tbTask.TaskTitle, Task.tbTask.TaskStatusCode, Task.tbTask.ActionById, 
                          Task.tbTask.ActionOn, Task.tbTask.ActionedOn, Task.tbTask.PaymentOn, Task.tbTask.SecondReference, Task.tbTask.TaskNotes, Task.tbTask.TaxCode, Task.tbTask.Quantity, Task.tbTask.UnitCharge, 
@@ -3551,7 +3551,7 @@ FROM            Usr.tbUser INNER JOIN
                          Cash.tbCode ON Task.tbTask.CashCode = Cash.tbCode.CashCode LEFT OUTER JOIN
                          Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
 go
-CREATE OR ALTER VIEW Invoice.vwCandidateSales
+CREATE VIEW Invoice.vwCandidateSales
 AS
 SELECT TOP 100 PERCENT TaskCode, AccountCode, ContactName, ActivityCode, ActionOn, ActionedOn, TaskTitle, Quantity, UnitCharge, TotalCharge, TaskNotes, CashDescription, ActionName, OwnerName, TaskStatus, InsertedBy, 
                          InsertedOn, UpdatedBy, UpdatedOn, TaskStatusCode
@@ -3560,7 +3560,7 @@ WHERE        (TaskStatusCode = 1 OR
                          TaskStatusCode = 2) AND (CashModeCode = 1) AND (CashCode IS NOT NULL)
 ORDER BY ActionOn;
 go
-CREATE OR ALTER VIEW Invoice.vwCandidatePurchases
+CREATE VIEW Invoice.vwCandidatePurchases
 AS
 SELECT TOP 100 PERCENT  TaskCode, AccountCode, ContactName, ActivityCode, ActionOn, ActionedOn, Quantity, UnitCharge, TotalCharge, TaskTitle, TaskNotes, CashDescription, ActionName, OwnerName, TaskStatus, InsertedBy, 
                          InsertedOn, UpdatedBy, UpdatedOn, TaskStatusCode
@@ -3569,7 +3569,7 @@ WHERE        (TaskStatusCode = 1 OR
                          TaskStatusCode = 2) AND (CashModeCode = 0) AND (CashCode IS NOT NULL)
 ORDER BY ActionOn;
 go
-CREATE OR ALTER VIEW Invoice.vwRegisterItems
+CREATE VIEW Invoice.vwRegisterItems
 AS
 	SELECT       (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY p.StartOn DESC) AS StartOn,  
 					Invoice.tbInvoice.InvoiceNumber, Invoice.tbItem.CashCode AS TaskCode, Cash.tbCode.CashCode, Cash.tbCode.CashDescription, 
@@ -3588,7 +3588,7 @@ AS
 							 Cash.tbCode ON Invoice.tbItem.CashCode = Cash.tbCode.CashCode LEFT OUTER JOIN
 							 App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode;
 go
-CREATE OR ALTER VIEW Invoice.vwRegisterTasks
+CREATE VIEW Invoice.vwRegisterTasks
 AS
 	SELECT       (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY p.StartOn DESC) AS StartOn,  
 			Invoice.tbInvoice.InvoiceNumber, InvoiceTask.TaskCode, Task.TaskTitle, Cash.tbCode.CashCode, Cash.tbCode.CashDescription, 
@@ -3608,7 +3608,7 @@ AS
 							 Task.tbTask AS Task ON InvoiceTask.TaskCode = Task.TaskCode AND InvoiceTask.TaskCode = Task.TaskCode LEFT OUTER JOIN
 							 App.tbTaxCode ON InvoiceTask.TaxCode = App.tbTaxCode.TaxCode;
 go
-CREATE OR ALTER VIEW Invoice.vwRegisterDetail
+CREATE VIEW Invoice.vwRegisterDetail
 AS
 	WITH register AS
 	(
@@ -3624,14 +3624,14 @@ AS
 	)
 	SELECT *, (InvoiceValue)+TaxValue-(PaidValue+PaidTaxValue) AS UnpaidValue FROM register;
 go
-CREATE OR ALTER VIEW Invoice.vwRegisterCashCodes
+CREATE VIEW Invoice.vwRegisterCashCodes
 AS
 	SELECT TOP 100 PERCENT StartOn, CashCode, CashDescription, SUM(InvoiceValue) AS TotalInvoiceValue, SUM(TaxValue) AS TotalTaxValue
 	FROM            Invoice.vwRegisterDetail
 	GROUP BY StartOn, CashCode, CashDescription
 	ORDER BY StartOn, CashCode;
 go
-CREATE OR ALTER VIEW Invoice.vwRegister
+CREATE VIEW Invoice.vwRegister
 AS
 	SELECT       (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY p.StartOn DESC) AS StartOn,  
 			Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, 
@@ -3647,35 +3647,35 @@ AS
 							 Usr.tbUser ON Invoice.tbInvoice.UserId = Usr.tbUser.UserId
 	WHERE        (Invoice.tbInvoice.AccountCode <> (SELECT AccountCode FROM App.tbOptions));
 go
-CREATE OR ALTER VIEW Invoice.vwRegisterPurchases
+CREATE VIEW Invoice.vwRegisterPurchases
 AS
 SELECT        StartOn, InvoiceNumber, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, PaymentTerms, Notes, Printed, AccountName, UserName, 
                          InvoiceStatus, CashModeCode, InvoiceType, (InvoiceValue + TaxValue) - (PaidValue + PaidTaxValue) AS UnpaidValue
 FROM            Invoice.vwRegister
 WHERE        (InvoiceTypeCode > 1);
 go
-CREATE OR ALTER VIEW Invoice.vwRegisterPurchaseTasks
+CREATE VIEW Invoice.vwRegisterPurchaseTasks
 AS
 SELECT        StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, 
                          PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, InvoiceType, (InvoiceValue + TaxValue) - (PaidValue + PaidTaxValue) AS UnpaidValue
 FROM            Invoice.vwRegisterDetail
 WHERE        (InvoiceTypeCode > 1);
 go
-CREATE OR ALTER VIEW Invoice.vwRegisterSales
+CREATE VIEW Invoice.vwRegisterSales
 AS
 SELECT        StartOn, InvoiceNumber, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, PaymentTerms, Notes, Printed, AccountName, UserName, 
                          InvoiceStatus, CashModeCode, InvoiceType, (InvoiceValue + TaxValue) - (PaidValue + PaidTaxValue) AS UnpaidValue
 FROM            Invoice.vwRegister
 WHERE        (InvoiceTypeCode < 2);
 go
-CREATE OR ALTER VIEW Invoice.vwRegisterSaleTasks
+CREATE VIEW Invoice.vwRegisterSaleTasks
 AS
 SELECT        StartOn, InvoiceNumber, TaskCode, CashCode, CashDescription, TaxCode, TaxDescription, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, 
                          PaymentTerms, Printed, AccountName, UserName, InvoiceStatus, CashModeCode, InvoiceType, (InvoiceValue + TaxValue) - (PaidValue + PaidTaxValue) AS UnpaidValue
 FROM            Invoice.vwRegisterDetail
 WHERE        (InvoiceTypeCode < 2);
 go
-CREATE OR ALTER VIEW Org.vwPurchases
+CREATE VIEW Org.vwPurchases
 AS
 SELECT        AccountCode, TaskCode, UserId, ContactName, ActivityCode, TaskTitle, TaskStatusCode, ActionById, ActionOn, ActionedOn, PaymentOn, SecondReference, TaskNotes, TaxCode, Quantity, UnitCharge, TotalCharge, 
                          AddressCodeFrom, AddressCodeTo, Printed, Spooled, InsertedBy, InsertedOn, UpdatedBy, UpdatedOn, Period, BucketId, TaskStatus, CashCode, CashDescription, OwnerName, ActionName, AccountName, 
@@ -3683,7 +3683,7 @@ SELECT        AccountCode, TaskCode, UserId, ContactName, ActivityCode, TaskTitl
 FROM            Task.vwTasks
 WHERE        (CashModeCode = 0) AND (CashCode IS NOT NULL);
 go
-CREATE OR ALTER VIEW Org.vwSales
+CREATE VIEW Org.vwSales
 AS
 SELECT        AccountCode, TaskCode, UserId, ContactName, ActivityCode, TaskTitle, TaskStatusCode, ActionById, ActionOn, ActionedOn, PaymentOn, SecondReference, TaskNotes, TaxCode, Quantity, UnitCharge, TotalCharge, 
                          AddressCodeFrom, AddressCodeTo, Printed, Spooled, InsertedBy, InsertedOn, UpdatedBy, UpdatedOn, Period, BucketId, TaskStatus, CashCode, CashDescription, OwnerName, ActionName, AccountName, 
@@ -3691,7 +3691,7 @@ SELECT        AccountCode, TaskCode, UserId, ContactName, ActivityCode, TaskTitl
 FROM            Task.vwTasks
 WHERE        (CashModeCode = 1) AND (CashCode IS NOT NULL);
 go
-CREATE OR ALTER VIEW Task.vwOrgActivity
+CREATE VIEW Task.vwOrgActivity
 AS
 SELECT AccountCode, TaskStatusCode, ActionOn, TaskTitle, ActivityCode, ActionById, TaskCode, Period, BucketId, ContactName, TaskStatus, TaskNotes, ActionedOn, OwnerName, CashCode, CashDescription, Quantity, 
                          UnitCharge, TotalCharge, AddressCodeFrom, AddressCodeTo, Printed, InsertedBy, InsertedOn, UpdatedBy, UpdatedOn, AccountName, ActionName
@@ -3699,7 +3699,7 @@ FROM            Task.vwTasks
 WHERE        (TaskStatusCode < 2);
 
 go
-CREATE OR ALTER VIEW Task.vwActiveData
+CREATE VIEW Task.vwActiveData
 AS
 SELECT        TaskCode, UserId, AccountCode, ContactName, ActivityCode, TaskTitle, TaskStatusCode, ActionById, ActionOn, ActionedOn, PaymentOn, SecondReference, TaskNotes, TaxCode, Quantity, UnitCharge, TotalCharge, 
                          AddressCodeFrom, AddressCodeTo, Printed, Spooled, InsertedBy, InsertedOn, UpdatedBy, UpdatedOn, Period, BucketId, TaskStatus, CashCode, CashDescription, OwnerName, ActionName, AccountName, 
@@ -3707,7 +3707,7 @@ SELECT        TaskCode, UserId, AccountCode, ContactName, ActivityCode, TaskTitl
 FROM            Task.vwTasks
 WHERE        (TaskStatusCode = 1);
 go
-CREATE OR ALTER VIEW Task.vwPurchases
+CREATE VIEW Task.vwPurchases
 AS
 SELECT        Task.vwTasks.TaskCode, Task.vwTasks.ActivityCode, Task.vwTasks.TaskStatusCode, Task.vwTasks.ActionOn, Task.vwTasks.ActionById, Task.vwTasks.TaskTitle, Task.vwTasks.Period, Task.vwTasks.BucketId, 
                          Task.vwTasks.AccountCode, Task.vwTasks.ContactName, Task.vwTasks.TaskStatus, Task.vwTasks.TaskNotes, Task.vwTasks.ActionedOn, Task.vwTasks.OwnerName, Task.vwTasks.CashCode, 
@@ -3720,7 +3720,7 @@ FROM            Task.vwTasks LEFT OUTER JOIN
                          Activity.tbActivity ON Task.vwTasks.ActivityCode = Activity.tbActivity.ActivityCode
 WHERE        (Task.vwTasks.CashCode IS NOT NULL) AND (Task.vwTasks.CashModeCode = 0);
 go
-CREATE OR ALTER VIEW Task.vwSales
+CREATE VIEW Task.vwSales
 AS
 SELECT        Task.vwTasks.TaskCode, Task.vwTasks.ActivityCode, Task.vwTasks.TaskStatusCode, Task.vwTasks.ActionOn, Task.vwTasks.ActionById, Task.vwTasks.TaskTitle, Task.vwTasks.Period, Task.vwTasks.BucketId, 
                          Task.vwTasks.AccountCode, Task.vwTasks.ContactName, Task.vwTasks.TaskStatus, Task.vwTasks.TaskNotes, Task.vwTasks.ActionedOn, Task.vwTasks.OwnerName, Task.vwTasks.CashCode, 
@@ -3734,18 +3734,18 @@ FROM            Task.vwTasks LEFT OUTER JOIN
 WHERE        (Task.vwTasks.CashCode IS NOT NULL) AND (Task.vwTasks.CashModeCode = 1);
 go
 
-CREATE OR ALTER VIEW Org.vwPaymentCode
+CREATE VIEW Org.vwPaymentCode
 AS
 	SELECT CONCAT((SELECT UserId FROM Usr.vwCredentials), '_', FORMAT(CURRENT_TIMESTAMP, 'yyyymmdd_hhmmss')) AS PaymentCode
 go
-CREATE OR ALTER VIEW Cash.vwBankCashCodes
+CREATE VIEW Cash.vwBankCashCodes
 AS
 SELECT        Cash.tbCode.CashCode, Cash.tbCode.CashDescription, Cash.tbCode.TaxCode, Cash.tbCategory.CashModeCode
 FROM            Cash.tbCode INNER JOIN
                          Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
 WHERE        (Cash.tbCategory.CashTypeCode = 2)
 go
-CREATE OR ALTER VIEW Cash.vwAccountStatement
+CREATE VIEW Cash.vwAccountStatement
   AS
 	WITH entries AS
 	(
@@ -3794,7 +3794,7 @@ CREATE OR ALTER VIEW Cash.vwAccountStatement
 	FROM   running_balance LEFT OUTER JOIN
 							payments ON running_balance.PaymentCode = payments.PaymentCode;	
 go
-CREATE OR ALTER VIEW Cash.vwAccountStatementListing
+CREATE VIEW Cash.vwAccountStatementListing
 AS
 	SELECT        App.tbYear.YearNumber, Org.tbOrg.AccountName AS Bank, Org.tbAccount.CashAccountCode, Org.tbAccount.CashAccountName, Org.tbAccount.SortCode, Org.tbAccount.AccountNumber, CONCAT(App.tbYear.Description, SPACE(1), 
 							 App.tbMonth.MonthName) AS PeriodName, Cash.vwAccountStatement.StartOn, Cash.vwAccountStatement.EntryNumber, Cash.vwAccountStatement.PaymentCode, Cash.vwAccountStatement.PaidOn, 
@@ -3809,7 +3809,7 @@ AS
 							 Org.tbOrg ON Org.tbAccount.AccountCode = Org.tbOrg.AccountCode ON App.tbYearPeriod.StartOn = Cash.vwAccountStatement.StartOn INNER JOIN
 							 App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber;
 go
-CREATE OR ALTER VIEW Cash.vwTaxVatAccruals
+CREATE VIEW Cash.vwTaxVatAccruals
 AS
 	WITH task_invoiced_quantity AS
 	(
@@ -3857,7 +3857,7 @@ AS
                          App.tbYear ON year_period.YearNumber = App.tbYear.YearNumber INNER JOIN
                          App.tbMonth ON year_period.MonthNumber = App.tbMonth.MonthNumber;
 go
-CREATE OR ALTER VIEW Cash.vwTaxVatAuditAccruals
+CREATE VIEW Cash.vwTaxVatAuditAccruals
 AS
 SELECT       App.tbYear.YearNumber, CONCAT(App.tbYear.Description, ' ', App.tbMonth.MonthName) AS YearPeriod, vat_accruals.StartOn, Task.tbTask.ActionOn, Task.tbTask.TaskTitle, Task.tbTask.TaskCode, Cash.tbCode.CashCode, 
                          Cash.tbCode.CashDescription, Activity.tbActivity.ActivityCode, Task.tbStatus.TaskStatus, Task.tbStatus.TaskStatusCode, vat_accruals.TaxCode, vat_accruals.TaxRate, vat_accruals.TotalValue, 
@@ -3878,7 +3878,7 @@ FROM            Cash.vwTaxVatAccruals AS vat_accruals INNER JOIN
                          Cash.tbCode ON Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode AND 
                          Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode AND Task.tbTask.CashCode = Cash.tbCode.CashCode
 go
-CREATE OR ALTER VIEW Invoice.vwHistoryCashCodes
+CREATE VIEW Invoice.vwHistoryCashCodes
 AS
 SELECT        App.tbYearPeriod.YearNumber, CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS Period, Invoice.vwRegisterDetail.StartOn, Invoice.vwRegisterDetail.CashCode, 
                          Invoice.vwRegisterDetail.CashDescription, SUM(Invoice.vwRegisterDetail.InvoiceValue) AS TotalInvoiceValue, SUM(Invoice.vwRegisterDetail.TaxValue) AS TotalTaxValue
@@ -3889,7 +3889,7 @@ FROM            Invoice.vwRegisterDetail INNER JOIN
 GROUP BY App.tbYearPeriod.YearNumber, CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)), Invoice.vwRegisterDetail.StartOn, Invoice.vwRegisterDetail.CashCode, 
                          Invoice.vwRegisterDetail.CashDescription;
 go
-CREATE OR ALTER VIEW Invoice.vwHistoryPurchaseItems
+CREATE VIEW Invoice.vwHistoryPurchaseItems
 AS
 SELECT        CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS PeriodName, App.tbYearPeriod.YearNumber, Invoice.vwRegisterDetail.StartOn, Invoice.vwRegisterDetail.InvoiceNumber, 
                          Invoice.vwRegisterDetail.TaskCode, Invoice.vwRegisterDetail.CashCode, Invoice.vwRegisterDetail.CashDescription, Invoice.vwRegisterDetail.TaxCode, Invoice.vwRegisterDetail.TaxDescription, 
@@ -3903,7 +3903,7 @@ FROM            Invoice.vwRegisterDetail INNER JOIN
                          App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 WHERE        (Invoice.vwRegisterDetail.InvoiceTypeCode > 1);
 go
-CREATE OR ALTER VIEW App.vwPeriods
+CREATE VIEW App.vwPeriods
 AS
 	SELECT        TOP (100) PERCENT App.tbYear.YearNumber, App.tbYearPeriod.StartOn, App.tbYear.Description + SPACE(1) + App.tbMonth.MonthName AS Description, App.tbYearPeriod.RowVer
 	FROM            App.tbYearPeriod INNER JOIN
@@ -3911,7 +3911,7 @@ AS
 							 App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber
 	WHERE        (App.tbYear.CashStatusCode < 3) AND (App.tbYearPeriod.CashStatusCode < 3)
 go
-CREATE OR ALTER VIEW Cash.vwFlowVatPeriodAccruals
+CREATE VIEW Cash.vwFlowVatPeriodAccruals
 AS
 	WITH active_periods AS
 	(
@@ -3933,7 +3933,7 @@ AS
 		 (HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS VatDue
 	FROM vat_accruals;
 go
-CREATE OR ALTER VIEW Invoice.vwHistoryPurchases
+CREATE VIEW Invoice.vwHistoryPurchases
 AS
 SELECT        App.tbYearPeriod.YearNumber, App.tbYear.Description, CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS PeriodName, Invoice.vwRegister.StartOn, 
                          Invoice.vwRegister.InvoiceNumber, Invoice.vwRegister.AccountCode, Invoice.vwRegister.InvoiceTypeCode, Invoice.vwRegister.InvoiceStatusCode, Invoice.vwRegister.InvoicedOn, 
@@ -3946,7 +3946,7 @@ FROM            App.tbYearPeriod INNER JOIN
                          Invoice.vwRegister ON App.tbYearPeriod.StartOn = Invoice.vwRegister.StartOn
 WHERE        (Invoice.vwRegister.InvoiceTypeCode > 1);
 go
-CREATE OR ALTER VIEW Invoice.vwHistorySalesItems
+CREATE VIEW Invoice.vwHistorySalesItems
 AS
 SELECT        App.tbYearPeriod.YearNumber, CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS PeriodName, Invoice.vwRegisterDetail.StartOn, Invoice.vwRegisterDetail.InvoiceNumber, 
                          (Invoice.vwRegisterDetail.InvoiceValue + Invoice.vwRegisterDetail.TaxValue) - (Invoice.vwRegisterDetail.PaidValue + Invoice.vwRegisterDetail.PaidTaxValue) AS UnpaidValue, Invoice.vwRegisterDetail.TaskCode, 
@@ -3960,7 +3960,7 @@ FROM            Invoice.vwRegisterDetail INNER JOIN
                          App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 WHERE        (Invoice.vwRegisterDetail.InvoiceTypeCode < 2);
 go
-CREATE OR ALTER VIEW Cash.vwFlowVatRecurrenceAccruals
+CREATE VIEW Cash.vwFlowVatRecurrenceAccruals
 AS	
 	WITH active_periods AS
 	(
@@ -3992,7 +3992,7 @@ AS
 		RIGHT OUTER JOIN active_periods ON active_periods.StartOn = vat_accruals.StartOn;		
 go
 
-CREATE OR ALTER VIEW App.vwCorpTaxCashCodes
+CREATE VIEW App.vwCorpTaxCashCodes
 AS
 	WITH category_relations AS
 	(
@@ -4019,7 +4019,7 @@ AS
 	SELECT CashCode FROM cashcode_selected WHERE NOT CashCode IS NULL;
 go
 
-CREATE OR ALTER VIEW Cash.vwTaxCorpTotalsByPeriod
+CREATE VIEW Cash.vwTaxCorpTotalsByPeriod
 AS
 	WITH invoiced_tasks AS
 	(
@@ -4054,7 +4054,7 @@ AS
 							App.tbYearPeriod ON netprofit_consolidated.StartOn = App.tbYearPeriod.StartOn;
 go
 
-CREATE OR ALTER VIEW Cash.vwTaxCorpStatement
+CREATE VIEW Cash.vwTaxCorpStatement
 AS
 	WITH tax_dates AS
 	(
@@ -4087,7 +4087,7 @@ AS
 	WHERE StartOn >= (SELECT MIN(StartOn) FROM App.tbYearPeriod p JOIN App.tbYear y ON p.YearNumber = y.YearNumber  WHERE y.CashStatusCode < 3);
 go
 
-CREATE OR ALTER VIEW App.vwVatTaxCashCodes
+CREATE VIEW App.vwVatTaxCashCodes
 AS
 	WITH category_relations AS
 	(
@@ -4115,7 +4115,7 @@ AS
 	SELECT CashCode FROM cashcode_selected WHERE NOT CashCode IS NULL;
 
 go
-CREATE OR ALTER VIEW Cash.vwTaxVatSummary
+CREATE VIEW Cash.vwTaxVatSummary
 AS
 
 	WITH vat_transactions AS
@@ -4172,7 +4172,7 @@ AS
 go
 
 
-CREATE OR ALTER VIEW Cash.vwTaxVatStatement
+CREATE VIEW Cash.vwTaxVatStatement
 AS
 	WITH vat_dates AS
 	(
@@ -4228,7 +4228,7 @@ AS
 
 go
 
-CREATE OR ALTER VIEW Cash.vwTaxCorpAccruals
+CREATE VIEW Cash.vwTaxCorpAccruals
 AS
 	WITH corptax_ordered_confirmed AS
 	(
@@ -4259,7 +4259,7 @@ AS
 
 go
 
-CREATE OR ALTER VIEW Cash.vwStatement
+CREATE VIEW Cash.vwStatement
 AS
 	--invoiced taxes
 	WITH corp_taxcode AS
@@ -4469,7 +4469,7 @@ AS
 		LEFT OUTER JOIN Cash.tbCode cc ON cs.CashCode = cc.CashCode;
 go
 
-CREATE OR ALTER VIEW Cash.vwTaxCorpAuditAccruals
+CREATE VIEW Cash.vwTaxCorpAuditAccruals
 AS
 	SELECT     App.tbYear.YearNumber, CONCAT(App.tbYear.Description, ' ', App.tbMonth.MonthName) AS YearPeriod, Cash.vwTaxCorpAccruals.StartOn, Task.tbTask.TaskCode, Task.tbTask.AccountCode, Org.tbOrg.AccountName, 
 							 Task.tbTask.TaskTitle, Activity.tbActivity.ActivityCode, Task.tbStatus.TaskStatusCode, Task.tbStatus.TaskStatus, Task.tbTask.CashCode, Cash.tbCode.CashDescription, Activity.tbActivity.UnitOfMeasure, 
@@ -4489,7 +4489,7 @@ AS
 							 App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber AND App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 go
 
-CREATE OR ALTER VIEW Invoice.vwHistorySales
+CREATE VIEW Invoice.vwHistorySales
 AS
 SELECT        App.tbYearPeriod.YearNumber, CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS PeriodName, Invoice.vwRegister.StartOn, 
                          Invoice.vwRegister.InvoiceNumber, Invoice.vwRegister.AccountCode, Invoice.vwRegister.InvoiceTypeCode, Invoice.vwRegister.InvoiceStatusCode, Invoice.vwRegister.InvoicedOn, 
@@ -4503,7 +4503,7 @@ FROM            App.tbYearPeriod INNER JOIN
 WHERE        (Invoice.vwRegister.InvoiceTypeCode < 2);
 go
 
-CREATE OR ALTER VIEW Org.vwMailContacts
+CREATE VIEW Org.vwMailContacts
   AS
 SELECT     AccountCode, ContactName, NickName, NameTitle + N' ' + ContactName AS FormalName, JobTitle, Department
 FROM         Org.tbContact
@@ -4511,7 +4511,7 @@ WHERE     (OnMailingList <> 0)
 
 go
 
-CREATE OR ALTER VIEW Org.vwAddresses
+CREATE VIEW Org.vwAddresses
   AS
 SELECT     TOP 100 PERCENT Org.tbOrg.AccountName, Org.tbAddress.Address, Org.tbOrg.OrganisationTypeCode, Org.tbOrg.OrganisationStatusCode, 
                       Org.tbType.OrganisationType, Org.tbStatus.OrganisationStatus, Org.vwMailContacts.ContactName, Org.vwMailContacts.NickName, 
@@ -4525,7 +4525,7 @@ ORDER BY Org.tbOrg.AccountName
 
 go
 
-CREATE OR ALTER VIEW Task.vwOpBucket
+CREATE VIEW Task.vwOpBucket
 AS
 SELECT        op.TaskCode, op.OperationNumber, op.EndOn, buckets.Period, buckets.BucketId
 FROM            Task.tbOp AS op CROSS APPLY
@@ -4534,7 +4534,7 @@ FROM            Task.tbOp AS op CROSS APPLY
 				WHERE     (StartDate <= op.EndOn) AND (EndDate > op.EndOn)) AS buckets
 go
 
-CREATE OR ALTER VIEW Task.vwOps
+CREATE VIEW Task.vwOps
 AS
 SELECT        Task.tbOp.TaskCode, Task.tbTask.ActivityCode, Task.tbOp.OperationNumber, Task.vwOpBucket.Period, Task.vwOpBucket.BucketId, Task.tbOp.UserId, Task.tbOp.SyncTypeCode, Task.tbOp.OpStatusCode, 
                          Task.tbOp.Operation, Task.tbOp.Note, Task.tbOp.StartOn, Task.tbOp.EndOn, Task.tbOp.Duration, Task.tbOp.OffsetDays, Task.tbOp.InsertedBy, Task.tbOp.InsertedOn, Task.tbOp.UpdatedBy, Task.tbOp.UpdatedOn, 
@@ -4548,7 +4548,7 @@ FROM            Task.tbOp INNER JOIN
                          Cash.tbCode ON Task.tbTask.CashCode = Cash.tbCode.CashCode
 go
 
-CREATE OR ALTER VIEW Cash.vwTaxVatTotals
+CREATE VIEW Cash.vwTaxVatTotals
 AS
 	WITH vat_dates AS
 	(
@@ -4582,7 +4582,7 @@ AS
 go
 
 
-CREATE OR ALTER VIEW Org.vwDatasheet
+CREATE VIEW Org.vwDatasheet
 AS
 	With task_count AS
 	(
@@ -4605,7 +4605,7 @@ AS
 							 task_count ON o.AccountCode = task_count.AccountCode
 go
 
-CREATE OR ALTER VIEW Org.vwStatusReport
+CREATE VIEW Org.vwStatusReport
 AS
 SELECT        Org.vwDatasheet.AccountCode, Org.vwDatasheet.AccountName, Org.vwDatasheet.OrganisationType, Org.vwDatasheet.OrganisationStatus, Org.vwDatasheet.TaxDescription, Org.vwDatasheet.Address, 
                          Org.vwDatasheet.AreaCode, Org.vwDatasheet.PhoneNumber, Org.vwDatasheet.FaxNumber, Org.vwDatasheet.EmailAddress, Org.vwDatasheet.WebSite, Org.vwDatasheet.IndustrySector, 
@@ -4623,7 +4623,7 @@ FROM            Org.tbPayment INNER JOIN
 WHERE        (Org.tbPayment.PaymentStatusCode = 1);
 go
 
-CREATE OR ALTER VIEW Cash.vwTaxCorpTotals
+CREATE VIEW Cash.vwTaxCorpTotals
 AS
 	WITH totals AS
 	(
@@ -4642,7 +4642,7 @@ AS
 	FROM totals;
 go
 
-CREATE OR ALTER VIEW Invoice.vwRegisterExpenses
+CREATE VIEW Invoice.vwRegisterExpenses
  AS
 SELECT     Invoice.vwRegisterTasks.StartOn, Invoice.vwRegisterTasks.InvoiceNumber, Invoice.vwRegisterTasks.TaskCode, App.tbYearPeriod.YearNumber, 
                       App.tbYear.Description, App.tbMonth.MonthName + ' ' + LTRIM(STR(YEAR( App.tbYearPeriod.StartOn))) AS Period, Invoice.vwRegisterTasks.TaskTitle, 
@@ -4661,7 +4661,7 @@ WHERE     (Task.fnIsExpense(Invoice.vwRegisterTasks.TaskCode) = 1)
 
 go
 
-CREATE OR ALTER VIEW Cash.vwSummary
+CREATE VIEW Cash.vwSummary
 AS
 	WITH company AS
 	(
@@ -4714,21 +4714,21 @@ AS
 	FROM    summary_base;
 go
 
-CREATE OR ALTER VIEW App.vwHomeAccount
+CREATE VIEW App.vwHomeAccount
 AS
 	SELECT     Org.tbOrg.AccountCode, Org.tbOrg.AccountName
 	FROM            App.tbOptions INNER JOIN
 							 Org.tbOrg ON App.tbOptions.AccountCode = Org.tbOrg.AccountCode
 go
 
-CREATE OR ALTER VIEW Cash.vwBankAccounts
+CREATE VIEW Cash.vwBankAccounts
 AS
 	SELECT CashAccountCode, CashAccountName, OpeningBalance, CASE WHEN NOT CashCode IS NULL THEN 0 ELSE 1 END AS DisplayOrder
 	FROM Org.tbAccount  
 	WHERE AccountCode <> (SELECT AccountCode FROM App.vwHomeAccount)
 go
 
-CREATE OR ALTER VIEW Cash.vwAccountPeriodClosingBalance
+CREATE VIEW Cash.vwAccountPeriodClosingBalance
 AS
 	WITH last_entries AS
 	(
@@ -4746,7 +4746,7 @@ AS
 	GROUP BY Org.tbAccount.CashAccountCode, Org.tbAccount.CashCode, last_entries.StartOn
 go
 
-CREATE OR ALTER VIEW App.vwGraphBankBalance
+CREATE VIEW App.vwGraphBankBalance
 AS
 SELECT        Format(Cash.vwAccountPeriodClosingBalance.StartOn, 'yyyy-MM') AS PeriodOn, SUM(Cash.vwAccountPeriodClosingBalance.ClosingBalance) AS SumOfClosingBalance
 FROM            Cash.vwAccountPeriodClosingBalance INNER JOIN
@@ -4755,13 +4755,13 @@ WHERE        (Cash.vwAccountPeriodClosingBalance.StartOn > DATEADD(m, - 6, CURRE
 GROUP BY Format(Cash.vwAccountPeriodClosingBalance.StartOn, 'yyyy-MM');
 go
 
-CREATE OR ALTER VIEW Usr.vwUserMenus
+CREATE VIEW Usr.vwUserMenus
 AS
 SELECT Usr.tbMenuUser.MenuId
 FROM Usr.vwCredentials INNER JOIN Usr.tbMenuUser ON Usr.vwCredentials.UserId = Usr.tbMenuUser.UserId;
 go
 
-CREATE OR ALTER VIEW Org.vwInvoiceSummary
+CREATE VIEW Org.vwInvoiceSummary
 AS
 	WITH ois AS
 	(
@@ -4778,7 +4778,7 @@ AS
 	ORDER BY acc.AccountCode, acc.StartOn;
 go
 
-CREATE OR ALTER VIEW App.vwDocPurchaseEnquiry
+CREATE VIEW App.vwDocPurchaseEnquiry
 AS
 SELECT        TOP (100) PERCENT Task.vwTasks.TaskCode, Task.vwTasks.ActionOn, Task.vwTasks.ActivityCode, Task.vwTasks.ActionById, Task.vwTasks.BucketId, Task.vwTasks.TaskTitle, Task.vwTasks.AccountCode, 
                          Task.vwTasks.ContactName, Task.vwTasks.TaskNotes, Task.vwTasks.OwnerName, Task.vwTasks.CashCode, Task.vwTasks.CashDescription, Task.vwTasks.Quantity, Activity.tbActivity.UnitOfMeasure, 
@@ -4791,7 +4791,7 @@ FROM            Task.vwTasks LEFT OUTER JOIN
 WHERE        (Task.vwTasks.CashCode IS NOT NULL) AND (Task.vwTasks.CashModeCode = 0) AND (Task.vwTasks.TaskStatusCode = 0);
 go
 
-CREATE OR ALTER VIEW App.vwDocPurchaseOrder
+CREATE VIEW App.vwDocPurchaseOrder
 AS
 SELECT        TOP (100) PERCENT Task.vwTasks.TaskCode, Task.vwTasks.ActionOn, Task.vwTasks.ActivityCode, Task.vwTasks.ActionById, Task.vwTasks.BucketId, Task.vwTasks.TaskTitle, Task.vwTasks.AccountCode, 
                          Task.vwTasks.ContactName, Task.vwTasks.TaskNotes, Task.vwTasks.OwnerName, Task.vwTasks.CashCode, Task.vwTasks.CashDescription, Task.vwTasks.Quantity, Activity.tbActivity.UnitOfMeasure, 
@@ -4804,7 +4804,7 @@ FROM            Task.vwTasks LEFT OUTER JOIN
 WHERE        (Task.vwTasks.CashCode IS NOT NULL) AND (Task.vwTasks.CashModeCode = 0) AND (Task.vwTasks.TaskStatusCode > 0);
 go
 
-CREATE OR ALTER VIEW App.vwDocQuotation
+CREATE VIEW App.vwDocQuotation
 AS
 SELECT        TOP (100) PERCENT Task.vwTasks.TaskCode, Task.vwTasks.ActionOn, Task.vwTasks.ActivityCode, Task.vwTasks.ActionById, Task.vwTasks.BucketId, Task.vwTasks.TaskTitle, Task.vwTasks.AccountCode, 
                          Task.vwTasks.ContactName, Task.vwTasks.TaskNotes, Task.vwTasks.OwnerName, Task.vwTasks.CashCode, Task.vwTasks.CashDescription, Task.vwTasks.Quantity, Activity.tbActivity.UnitOfMeasure, 
@@ -4817,7 +4817,7 @@ FROM            Task.vwTasks LEFT OUTER JOIN
 WHERE        (Task.vwTasks.CashCode IS NOT NULL) AND (Task.vwTasks.CashModeCode = 1) AND (Task.vwTasks.TaskStatusCode = 0);
 go
 
-CREATE OR ALTER VIEW App.vwDocSalesOrder
+CREATE VIEW App.vwDocSalesOrder
 AS
 SELECT        TOP (100) PERCENT Task.vwTasks.TaskCode, Task.vwTasks.ActionOn, Task.vwTasks.ActivityCode, Task.vwTasks.ActionById, Task.vwTasks.BucketId, Task.vwTasks.AccountCode, Task.vwTasks.TaskTitle, 
                          Task.vwTasks.ContactName, Task.vwTasks.TaskNotes, Task.vwTasks.OwnerName, Task.vwTasks.CashCode, Task.vwTasks.CashDescription, Task.vwTasks.Quantity, Activity.tbActivity.UnitOfMeasure, 
@@ -4830,7 +4830,7 @@ FROM            Task.vwTasks LEFT OUTER JOIN
 WHERE        (Task.vwTasks.CashCode IS NOT NULL) AND (Task.vwTasks.CashModeCode = 1) AND (Task.vwTasks.TaskStatusCode > 0);
 go
 
-CREATE OR ALTER VIEW Cash.vwTaxVatDetails
+CREATE VIEW Cash.vwTaxVatDetails
 AS
 SELECT        App.tbYearPeriod.YearNumber, App.tbYear.Description, CONCAT(App.tbMonth.MonthName, SPACE(1), YEAR(App.tbYearPeriod.StartOn)) AS PeriodName, Cash.vwTaxVatSummary.StartOn, 
                          Cash.vwTaxVatSummary.TaxCode, Cash.vwTaxVatSummary.HomeSales, Cash.vwTaxVatSummary.HomePurchases, Cash.vwTaxVatSummary.ExportSales, Cash.vwTaxVatSummary.ExportPurchases, 
@@ -4841,7 +4841,7 @@ FROM            Cash.vwTaxVatSummary INNER JOIN
                          App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber;
 go
 
-CREATE OR ALTER VIEW App.vwIdentity
+CREATE VIEW App.vwIdentity
 AS
 SELECT TOP (1) Org.tbOrg.AccountName, Org.tbAddress.Address, Org.tbOrg.PhoneNumber, Org.tbOrg.FaxNumber, Org.tbOrg.EmailAddress, Org.tbOrg.WebSite, Org.tbOrg.Logo, Usr.tbUser.UserName, Usr.tbUser.LogonName, 
                          Usr.tbUser.Avatar, Org.tbOrg.CompanyNumber, Org.tbOrg.VatNumber
@@ -4852,7 +4852,7 @@ FROM            Org.tbOrg INNER JOIN
                          Usr.tbUser ON Usr.vwCredentials.UserId = Usr.tbUser.UserId;
 go
 
-CREATE OR ALTER VIEW Cash.vwFlowVatPeriodTotals
+CREATE VIEW Cash.vwFlowVatPeriodTotals
 AS
 	WITH active_periods AS
 	(
@@ -4870,7 +4870,7 @@ AS
 	GROUP BY active_periods.YearNumber, active_periods.StartOn;
 go
 
-CREATE OR ALTER VIEW Cash.vwFlowVatRecurrence
+CREATE VIEW Cash.vwFlowVatRecurrence
 AS
 		WITH active_periods AS
 	(
@@ -4889,7 +4889,7 @@ AS
 go
 
 
-CREATE OR ALTER VIEW Activity.vwCandidateCashCodes
+CREATE VIEW Activity.vwCandidateCashCodes
 AS
 SELECT TOP 100 PERCENT Cash.tbCode.CashCode, Cash.tbCode.CashDescription, Cash.tbCategory.Category
 FROM            Cash.tbCode INNER JOIN
@@ -4898,14 +4898,14 @@ WHERE        (Cash.tbCategory.CashTypeCode < 2)  AND (Cash.tbCategory.IsEnabled 
 ORDER BY Cash.tbCode.CashCode;
 go
 
-CREATE OR ALTER VIEW Activity.vwCodes
+CREATE VIEW Activity.vwCodes
 AS
 SELECT        Activity.tbActivity.ActivityCode, Activity.tbActivity.UnitOfMeasure, Activity.tbActivity.CashCode
 FROM            Activity.tbActivity LEFT OUTER JOIN
                          Cash.tbCode ON Activity.tbActivity.CashCode = Cash.tbCode.CashCode;
 go
 
-CREATE OR ALTER VIEW Activity.vwDefaultText
+CREATE VIEW Activity.vwDefaultText
 AS
 SELECT TOP 100 PERCENT  DefaultText
 FROM            Activity.tbAttribute
@@ -4914,7 +4914,7 @@ HAVING        (DefaultText IS NOT NULL)
 ORDER BY DefaultText;
 go
 
-CREATE OR ALTER VIEW App.vwActivePeriod
+CREATE VIEW App.vwActivePeriod
 AS
 SELECT App.tbYearPeriod.YearNumber, App.tbYearPeriod.StartOn, App.tbYear.Description, App.tbMonth.MonthNumber, App.tbMonth.MonthName, fnActivePeriod.EndOn
 FROM            App.tbYear INNER JOIN
@@ -4924,7 +4924,7 @@ FROM            App.tbYear INNER JOIN
                          App.tbYear.YearNumber = App.tbYearPeriod.YearNumber
 go
 
-CREATE OR ALTER VIEW App.vwActiveYears
+CREATE VIEW App.vwActiveYears
    AS
 SELECT     TOP 100 PERCENT App.tbYear.YearNumber, App.tbYear.Description, Cash.tbStatus.CashStatus
 FROM         App.tbYear INNER JOIN
@@ -4933,7 +4933,7 @@ WHERE     (App.tbYear.CashStatusCode < 3)
 ORDER BY App.tbYear.YearNumber
 go
 
-CREATE OR ALTER VIEW App.vwCandidateHomeAccounts
+CREATE VIEW App.vwCandidateHomeAccounts
 AS
 SELECT        Org.tbOrg.AccountCode, Org.tbOrg.AccountName, Org.tbType.OrganisationType, Cash.tbMode.CashMode
 FROM            Org.tbOrg INNER JOIN
@@ -4942,7 +4942,7 @@ FROM            Org.tbOrg INNER JOIN
 WHERE        (Org.tbOrg.OrganisationStatusCode < 3);
 go
 
-CREATE OR ALTER VIEW App.vwCandidateCategoryCodes
+CREATE VIEW App.vwCandidateCategoryCodes
 AS
 	SELECT TOP 100 PERCENT CategoryCode, Category
 	FROM            Cash.tbCategory
@@ -4950,7 +4950,7 @@ AS
 	ORDER BY CategoryCode;
 go
 
-CREATE OR ALTER VIEW App.vwDocCreditNote
+CREATE VIEW App.vwDocCreditNote
 AS
 SELECT        TOP (100) PERCENT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.Printed, Invoice.tbInvoice.Spooled, Invoice.tbInvoice.InvoiceStatusCode, Usr.tbUser.UserName, Invoice.tbInvoice.AccountCode, 
                          Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, Invoice.tbInvoice.InvoicedOn, Invoice.tbInvoice.InvoiceValue, Invoice.tbInvoice.TaxValue, Invoice.tbInvoice.PaymentTerms, Invoice.tbInvoice.Notes, 
@@ -4962,7 +4962,7 @@ FROM            Invoice.tbInvoice INNER JOIN
 WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 1);
 go
 
-CREATE OR ALTER VIEW App.vwDocDebitNote
+CREATE VIEW App.vwDocDebitNote
 AS
 SELECT        TOP (100) PERCENT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.Printed, Invoice.tbInvoice.Spooled, Invoice.tbInvoice.InvoiceStatusCode, Usr.tbUser.UserName, Invoice.tbInvoice.AccountCode, 
                          Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, Invoice.tbInvoice.InvoicedOn, Invoice.tbInvoice.InvoiceValue, Invoice.tbInvoice.TaxValue, Invoice.tbInvoice.PaymentTerms, Invoice.tbInvoice.Notes, 
@@ -4975,7 +4975,7 @@ WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 3);
 go
 
 
-CREATE OR ALTER VIEW App.vwDocOpenModes
+CREATE VIEW App.vwDocOpenModes
 AS
 SELECT TOP 100 PERCENT OpenMode, OpenModeDescription
 FROM            Usr.tbMenuOpenMode
@@ -4983,7 +4983,7 @@ WHERE        (OpenMode > 1)
 ORDER BY OpenMode;
 go
 
-CREATE OR ALTER VIEW App.vwDocSalesInvoice
+CREATE VIEW App.vwDocSalesInvoice
 AS
 SELECT        TOP (100) PERCENT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.Printed, Invoice.tbInvoice.Spooled, Invoice.tbInvoice.InvoiceStatusCode, Usr.tbUser.UserName, Invoice.tbInvoice.AccountCode, 
                          Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, Invoice.tbInvoice.InvoicedOn, Invoice.tbInvoice.InvoiceValue, Invoice.tbInvoice.TaxValue, Invoice.tbInvoice.PaymentTerms, Invoice.tbInvoice.Notes, 
@@ -4995,21 +4995,21 @@ FROM            Invoice.tbInvoice INNER JOIN
 WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 0);
 go
 
-CREATE OR ALTER VIEW App.vwDocSpool
+CREATE VIEW App.vwDocSpool
  AS
 SELECT     DocTypeCode, DocumentNumber
 FROM         App.tbDocSpool
 WHERE     (UserName = SUSER_SNAME())
 go
 
-CREATE OR ALTER VIEW App.vwEventLog
+CREATE VIEW App.vwEventLog
 AS
 	SELECT        App.tbEventLog.LogCode, App.tbEventLog.LoggedOn, App.tbEventLog.EventTypeCode, App.tbEventType.EventType, App.tbEventLog.EventMessage, App.tbEventLog.InsertedBy, App.tbEventLog.RowVer
 	FROM            App.tbEventLog INNER JOIN
 							 App.tbEventType ON App.tbEventLog.EventTypeCode = App.tbEventType.EventTypeCode
 go
 
-CREATE OR ALTER VIEW App.vwGraphTaskActivity
+CREATE VIEW App.vwGraphTaskActivity
 AS
 SELECT        CONCAT(Task.tbStatus.TaskStatus, SPACE(1), Cash.tbMode.CashMode) AS Category, SUM(Task.tbTask.TotalCharge) AS SumOfTotalCharge
 FROM            Task.tbTask INNER JOIN
@@ -5021,7 +5021,7 @@ WHERE        (Task.tbTask.TaskStatusCode < 3) AND (Task.tbTask.TaskStatusCode > 
 GROUP BY CONCAT(Task.tbStatus.TaskStatus, SPACE(1), Cash.tbMode.CashMode);
 go
 
-CREATE OR ALTER VIEW App.vwMonths
+CREATE VIEW App.vwMonths
 AS
 	SELECT DISTINCT CAST(App.tbYearPeriod.StartOn AS float) AS StartOn, App.tbMonth.MonthName, App.tbYearPeriod.MonthNumber
 	FROM         App.tbYearPeriod INNER JOIN
@@ -5029,7 +5029,7 @@ AS
 						  App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 go
 
-CREATE OR ALTER VIEW App.vwPeriodEndListing
+CREATE VIEW App.vwPeriodEndListing
 AS
 SELECT        TOP (100) PERCENT App.tbYear.YearNumber, App.tbYear.Description, App.tbYear.InsertedBy AS YearInsertedBy, App.tbYear.InsertedOn AS YearInsertedOn, App.tbYearPeriod.StartOn, App.tbMonth.MonthName, 
                          App.tbYearPeriod.InsertedBy AS PeriodInsertedBy, App.tbYearPeriod.InsertedOn AS PeriodInsertedOn, Cash.tbStatus.CashStatus
@@ -5041,21 +5041,21 @@ ORDER BY App.tbYearPeriod.StartOn;
 go
 
 
-CREATE OR ALTER VIEW App.vwTaxCodes
+CREATE VIEW App.vwTaxCodes
 AS
 SELECT        App.tbTaxCode.TaxCode, App.tbTaxCode.TaxDescription, Cash.tbTaxType.TaxType
 FROM            App.tbTaxCode INNER JOIN
                          Cash.tbTaxType ON App.tbTaxCode.TaxTypeCode = Cash.tbTaxType.TaxTypeCode;
 go
 
-CREATE OR ALTER VIEW App.vwTaxCodeTypes
+CREATE VIEW App.vwTaxCodeTypes
 AS
 SELECT        TaxTypeCode, TaxType
 FROM            Cash.tbTaxType
 WHERE        (TaxTypeCode > 0);
 go
 
-CREATE OR ALTER VIEW App.vwWarehouseOrg
+CREATE VIEW App.vwWarehouseOrg
 AS
 SELECT TOP (100) PERCENT Org.tbOrg.AccountCode, Org.tbDoc.DocumentName, Org.tbOrg.AccountName, Org.tbDoc.DocumentImage, Org.tbDoc.DocumentDescription, Org.tbDoc.InsertedBy, Org.tbDoc.InsertedOn, Org.tbDoc.UpdatedBy, 
                          Org.tbDoc.UpdatedOn, Org.tbDoc.RowVer
@@ -5064,7 +5064,7 @@ FROM            Org.tbOrg INNER JOIN
 ORDER BY Org.tbDoc.AccountCode, Org.tbDoc.DocumentName;
 go
 
-CREATE OR ALTER VIEW App.vwWarehouseTask
+CREATE VIEW App.vwWarehouseTask
 AS
 SELECT TOP (100) PERCENT Task.tbDoc.TaskCode, Task.tbDoc.DocumentName, Org.tbOrg.AccountName, Task.tbTask.TaskTitle, Task.tbDoc.DocumentImage, Task.tbDoc.DocumentDescription, Task.tbDoc.InsertedBy, Task.tbDoc.InsertedOn, 
                          Task.tbDoc.UpdatedBy, Task.tbDoc.UpdatedOn, Task.tbDoc.RowVer
@@ -5074,7 +5074,7 @@ FROM            Org.tbOrg INNER JOIN
 ORDER BY Task.tbDoc.TaskCode, Task.tbDoc.DocumentName;
 go
 
-CREATE OR ALTER VIEW App.vwYearPeriod
+CREATE VIEW App.vwYearPeriod
 AS
 SELECT TOP (100) PERCENT App.tbYear.Description, App.tbMonth.MonthName, App.tbYearPeriod.CashStatusCode, App.tbYearPeriod.YearNumber, App.tbYearPeriod.StartOn, App.tbYearPeriod.RowVer
 FROM            App.tbYearPeriod INNER JOIN
@@ -5083,7 +5083,7 @@ FROM            App.tbYearPeriod INNER JOIN
 ORDER BY App.tbYearPeriod.YearNumber, App.tbYearPeriod.StartOn;
 go
 
-CREATE OR ALTER VIEW Cash.vwAccountRebuild
+CREATE VIEW Cash.vwAccountRebuild
   AS
 SELECT     Org.tbPayment.CashAccountCode, Org.tbAccount.OpeningBalance, 
                       Org.tbAccount.OpeningBalance + SUM(Org.tbPayment.PaidInValue - Org.tbPayment.PaidOutValue) AS CurrentBalance
@@ -5093,7 +5093,7 @@ WHERE     (Org.tbPayment.PaymentStatusCode = 1)
 GROUP BY Org.tbPayment.CashAccountCode, Org.tbAccount.OpeningBalance
 go
 
-CREATE OR ALTER VIEW Cash.vwBudget
+CREATE VIEW Cash.vwBudget
 AS
 SELECT TOP 100 PERCENT Cash.tbCode.CategoryCode, Cash.tbPeriod.CashCode, Cash.tbCode.CashDescription, 
 	Cash.tbPeriod.StartOn, App.tbYearPeriod.YearNumber, App.tbMonth.MonthName, Format(App.tbYearPeriod.StartOn, 'yy-MM') AS Period,  
@@ -5108,7 +5108,7 @@ FROM            App.tbYearPeriod INNER JOIN
 
 go
 
-CREATE OR ALTER VIEW Cash.vwBudgetDataEntry
+CREATE VIEW Cash.vwBudgetDataEntry
 AS
 SELECT        TOP (100) PERCENT App.tbYearPeriod.YearNumber, Cash.tbPeriod.CashCode, Cash.tbPeriod.StartOn, App.tbMonth.MonthName, Cash.tbPeriod.ForecastValue, Cash.tbPeriod.ForecastTax, Cash.tbPeriod.Note, 
                          Cash.tbPeriod.RowVer
@@ -5117,21 +5117,21 @@ FROM            App.tbYearPeriod INNER JOIN
                          App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 go
 
-CREATE OR ALTER VIEW Cash.vwCashFlowTypes
+CREATE VIEW Cash.vwCashFlowTypes
 AS
 SELECT        CashTypeCode, CashType
 FROM            Cash.tbType
 WHERE        (CashTypeCode < 2)
 go
 
-CREATE OR ALTER VIEW Cash.vwCategoryBudget
+CREATE VIEW Cash.vwCategoryBudget
 AS
 	SELECT CategoryCode, Category, CategoryTypeCode, CashModeCode, CashTypeCode, DisplayOrder, IsEnabled, InsertedBy, InsertedOn, UpdatedBy, UpdatedOn, RowVer
 	FROM            Cash.tbCategory
 	WHERE        (CategoryTypeCode = 0) AND (CashTypeCode = 0) AND (IsEnabled <> 0)
 go
 
-CREATE OR ALTER VIEW Cash.vwCategoryCodesExpressions
+CREATE VIEW Cash.vwCategoryCodesExpressions
 AS
 SELECT        CategoryCode, Category, DisplayOrder, CategoryTypeCode, CashModeCode, CashTypeCode
 FROM            Cash.tbCategory
@@ -5139,21 +5139,21 @@ WHERE        (CategoryTypeCode = 2);
 go
 
 
-CREATE OR ALTER VIEW Cash.vwCategoryCodesTotals
+CREATE VIEW Cash.vwCategoryCodesTotals
 AS
 SELECT        CategoryCode, Category, DisplayOrder, CategoryTypeCode, CashModeCode, CashTypeCode
 FROM            Cash.tbCategory
 WHERE        (CategoryTypeCode = 1);
 go
 
-CREATE OR ALTER VIEW Cash.vwCategoryCodesTrade
+CREATE VIEW Cash.vwCategoryCodesTrade
 AS
 SELECT        CategoryCode, Category, DisplayOrder, CategoryTypeCode, CashModeCode, CashTypeCode
 FROM            Cash.tbCategory
 WHERE        (CategoryTypeCode = 0);
 go
 
-CREATE OR ALTER VIEW Cash.vwCategoryExpressions
+CREATE VIEW Cash.vwCategoryExpressions
 AS
 	SELECT     TOP 100 PERCENT Cash.tbCategory.DisplayOrder, Cash.tbCategory.CategoryCode, Cash.tbCategory.Category, Cash.tbCategoryExp.Expression, 
 						  Cash.tbCategoryExp.Format
@@ -5162,7 +5162,7 @@ AS
 	WHERE     (Cash.tbCategory.CategoryTypeCode = 2)
 go
 
-CREATE OR ALTER VIEW Cash.vwCategoryTotalCandidates
+CREATE VIEW Cash.vwCategoryTotalCandidates
 AS
 SELECT        Cash.tbCategory.CategoryCode, Cash.tbCategory.Category, Cash.tbCategoryType.CategoryType, Cash.tbType.CashType, Cash.tbMode.CashMode
 FROM            Cash.tbCategory INNER JOIN
@@ -5172,21 +5172,21 @@ FROM            Cash.tbCategory INNER JOIN
 WHERE        (Cash.tbCategory.CashTypeCode < 2) AND (Cash.tbCategory.IsEnabled <> 0);
 go
 
-CREATE OR ALTER VIEW Cash.vwCategoryTotals
+CREATE VIEW Cash.vwCategoryTotals
 AS
 	SELECT CategoryCode, Category, CategoryTypeCode, CashModeCode, CashTypeCode, DisplayOrder, IsEnabled, InsertedBy, InsertedOn, UpdatedBy, UpdatedOn, RowVer
 	FROM            Cash.tbCategory
 	WHERE       (CategoryTypeCode = 1)
 go
 
-CREATE OR ALTER VIEW Cash.vwCategoryTrade
+CREATE VIEW Cash.vwCategoryTrade
 AS
 SELECT        CategoryCode, Category, CategoryTypeCode, CashModeCode, CashTypeCode, DisplayOrder, IsEnabled, InsertedBy, InsertedOn, UpdatedBy, UpdatedOn, RowVer
 FROM            Cash.tbCategory
 WHERE        (CategoryTypeCode = 0) AND (CashTypeCode = 0)
 go
 
-CREATE OR ALTER VIEW Cash.vwCodeLookup
+CREATE VIEW Cash.vwCodeLookup
 AS
 SELECT        Cash.tbCode.CashCode, Cash.tbCode.CashDescription, Cash.tbCategory.Category, Cash.tbMode.CashMode, Cash.tbCode.TaxCode
 FROM            Cash.tbCode INNER JOIN
@@ -5195,7 +5195,7 @@ FROM            Cash.tbCode INNER JOIN
 WHERE (Cash.tbCode.IsEnabled <> 0) AND (Cash.tbCategory.IsEnabled <> 0);
 go
 
-CREATE OR ALTER VIEW Cash.vwExternalCodesLookup
+CREATE VIEW Cash.vwExternalCodesLookup
 AS
 SELECT        Cash.tbCode.CashCode, Cash.tbCode.CashDescription, Cash.tbCategory.Category
 FROM            Cash.tbCode INNER JOIN
@@ -5203,7 +5203,7 @@ FROM            Cash.tbCode INNER JOIN
 WHERE        (Cash.tbCategory.CashTypeCode = 1);
 go
 
-CREATE OR ALTER VIEW Cash.vwFlowTaxType
+CREATE VIEW Cash.vwFlowTaxType
 AS
 	SELECT       Cash.tbTaxType.TaxTypeCode, Cash.tbTaxType.TaxType, Cash.tbTaxType.RecurrenceCode, App.tbRecurrence.Recurrence, Cash.tbTaxType.CashCode, Cash.tbCode.CashDescription, Cash.tbTaxType.MonthNumber, App.tbMonth.MonthName, Cash.tbTaxType.AccountCode, 
 								Cash.tbTaxType.OffsetDays
@@ -5213,14 +5213,14 @@ AS
 								App.tbMonth ON Cash.tbTaxType.MonthNumber = App.tbMonth.MonthNumber
 go
 
-CREATE OR ALTER VIEW Cash.vwPeriods
+CREATE VIEW Cash.vwPeriods
    AS
 SELECT     Cash.tbCode.CashCode, App.tbYearPeriod.StartOn
 FROM         App.tbYearPeriod CROSS JOIN
                       Cash.tbCode
 go
 
-CREATE OR ALTER VIEW Cash.vwStatementReserves
+CREATE VIEW Cash.vwStatementReserves
 AS
 	WITH reserve_account AS
 	(
@@ -5273,7 +5273,7 @@ AS
 		JOIN Cash.tbEntryType entry_type ON unbalanced_reserves.CashEntryTypeCode = entry_type.CashEntryTypeCode
 go
 
-CREATE OR ALTER VIEW Cash.vwTaxVatAuditInvoices
+CREATE VIEW Cash.vwTaxVatAuditInvoices
 AS
 	WITH vat_transactions AS
 	(
@@ -5327,7 +5327,7 @@ AS
                          App.tbMonth ON year_period.MonthNumber = App.tbMonth.MonthNumber;
 go
 
-CREATE OR ALTER VIEW Cash.vwTransferCodeLookup
+CREATE VIEW Cash.vwTransferCodeLookup
 AS
 SELECT        Cash.tbCode.CashCode, Cash.tbCode.CashDescription, Cash.tbCategory.Category, Cash.tbMode.CashMode
 FROM            Cash.tbCode INNER JOIN
@@ -5336,7 +5336,7 @@ FROM            Cash.tbCode INNER JOIN
 WHERE (Cash.tbCode.IsEnabled <> 0) AND (Cash.tbCategory.IsEnabled <> 0) AND (Cash.tbCategory.CashTypeCode = 2);
 go
 
-CREATE OR ALTER VIEW Cash.vwTransfersUnposted
+CREATE VIEW Cash.vwTransfersUnposted
 AS
 	SELECT        PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, TaxInValue, TaxOutValue, PaymentReference, InsertedBy, InsertedOn, 
 							 UpdatedBy, UpdatedOn, RowVer
@@ -5344,14 +5344,14 @@ AS
 	WHERE        (PaymentStatusCode = 2)
 go
 
-CREATE OR ALTER VIEW Cash.vwVATCodes
+CREATE VIEW Cash.vwVATCodes
 AS
 SELECT        TaxCode, TaxDescription
 FROM            App.tbTaxCode
 WHERE        (TaxTypeCode = 1);
 go
 
-CREATE OR ALTER VIEW Invoice.vwAgedDebtPurchases
+CREATE VIEW Invoice.vwAgedDebtPurchases
 AS
 SELECT TOP 100 PERCENT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbStatus.InvoiceStatus, 
                          Invoice.tbType.InvoiceType, (Invoice.tbInvoice.InvoiceValue + Invoice.tbInvoice.TaxValue) - (Invoice.tbInvoice.PaidValue + Invoice.tbInvoice.PaidTaxValue) AS UnpaidValue, DATEDIFF(DD, CURRENT_TIMESTAMP, 
@@ -5365,7 +5365,7 @@ WHERE        (Invoice.tbInvoice.InvoiceTypeCode > 1) AND (Invoice.tbInvoice.Invo
 ORDER BY Invoice.tbInvoice.ExpectedOn;
 go
 
-CREATE OR ALTER VIEW Invoice.vwAgedDebtSales
+CREATE VIEW Invoice.vwAgedDebtSales
 AS
 SELECT TOP 100 PERCENT  Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbStatus.InvoiceStatus, 
                          Invoice.tbType.InvoiceType, (Invoice.tbInvoice.InvoiceValue + Invoice.tbInvoice.TaxValue) - (Invoice.tbInvoice.PaidValue + Invoice.tbInvoice.PaidTaxValue) AS UnpaidValue, DATEDIFF(DD, CURRENT_TIMESTAMP, 
@@ -5379,7 +5379,7 @@ WHERE        (Invoice.tbInvoice.InvoiceTypeCode < 2) AND (Invoice.tbInvoice.Invo
 ORDER BY Invoice.tbInvoice.ExpectedOn;
 go
 
-CREATE OR ALTER VIEW Invoice.vwCandidateCredits
+CREATE VIEW Invoice.vwCandidateCredits
 AS
 SELECT TOP 100 PERCENT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.UserId, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbInvoice.InvoicedOn, 
                          Invoice.tbInvoice.InvoiceValue, Invoice.tbInvoice.TaxValue, Invoice.tbInvoice.PaidValue, Invoice.tbInvoice.PaidTaxValue, Invoice.tbInvoice.PaymentTerms, Invoice.tbInvoice.Notes, Invoice.tbInvoice.Printed, 
@@ -5392,7 +5392,7 @@ WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 0)
 ORDER BY Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoicedOn DESC
 go
 
-CREATE OR ALTER VIEW Invoice.vwCandidateDebits
+CREATE VIEW Invoice.vwCandidateDebits
 AS
 SELECT TOP 100 PERCENT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.UserId, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbInvoice.InvoicedOn, 
                          Invoice.tbInvoice.InvoiceValue, Invoice.tbInvoice.TaxValue, Invoice.tbInvoice.PaidValue, Invoice.tbInvoice.PaidTaxValue, Invoice.tbInvoice.PaymentTerms, Invoice.tbInvoice.Notes, Invoice.tbInvoice.Printed, 
@@ -5405,7 +5405,7 @@ WHERE        (Invoice.tbInvoice.InvoiceTypeCode = 2)
 ORDER BY Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoicedOn DESC
 go
 
-CREATE OR ALTER VIEW Invoice.vwCreditNoteSpool
+CREATE VIEW Invoice.vwCreditNoteSpool
 AS
 SELECT        credit_note.InvoiceNumber, credit_note.Printed, Invoice.tbType.InvoiceType, credit_note.InvoiceStatusCode, Usr.tbUser.UserName, credit_note.AccountCode, Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, 
                          credit_note.InvoicedOn, credit_note.InvoiceValue AS InvoiceValueTotal, credit_note.TaxValue AS TaxValueTotal, credit_note.PaymentTerms, credit_note.Notes, Org.tbOrg.EmailAddress, 
@@ -5424,7 +5424,7 @@ WHERE credit_note.InvoiceTypeCode = 1
 	AND EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 5 AND UserName = SUSER_SNAME() AND credit_note.InvoiceNumber = doc.DocumentNumber);
 go
 
-CREATE OR ALTER VIEW Invoice.vwDebitNoteSpool
+CREATE VIEW Invoice.vwDebitNoteSpool
 AS
 SELECT        debit_note.Printed, debit_note.InvoiceNumber, Invoice.tbType.InvoiceType, debit_note.InvoiceStatusCode, Usr.tbUser.UserName, debit_note.AccountCode, Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, 
                          debit_note.InvoicedOn, debit_note.InvoiceValue AS InvoiceValueTotal, debit_note.TaxValue AS TaxValueTotal, debit_note.PaymentTerms, debit_note.Notes, Org.tbOrg.EmailAddress, 
@@ -5443,7 +5443,7 @@ WHERE debit_note.InvoiceTypeCode = 3 AND
 	EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 6 AND UserName = SUSER_SNAME() AND debit_note.InvoiceNumber = doc.DocumentNumber);
 go
 
-CREATE OR ALTER VIEW Invoice.vwDoc
+CREATE VIEW Invoice.vwDoc
 AS
 SELECT     Org.tbOrg.EmailAddress, Usr.tbUser.UserName, Org.tbOrg.AccountCode, Org.tbOrg.AccountName, Org.tbAddress.Address AS InvoiceAddress, 
                       Invoice.tbInvoice.InvoiceNumber, Invoice.tbType.InvoiceType, Invoice.tbStatus.InvoiceStatus, Invoice.tbInvoice.InvoicedOn, Invoice.tbInvoice.DueOn, 
@@ -5456,7 +5456,7 @@ FROM         Invoice.tbInvoice INNER JOIN
                       Org.tbAddress ON Org.tbOrg.AddressCode = Org.tbAddress.AddressCode
 go
 
-CREATE OR ALTER VIEW Invoice.vwDocItem
+CREATE VIEW Invoice.vwDocItem
 AS
 SELECT     Invoice.tbItem.InvoiceNumber, Invoice.tbItem.CashCode, Cash.tbCode.CashDescription, Invoice.tbInvoice.InvoicedOn AS ActionedOn, 
                       Invoice.tbItem.TaxCode, Invoice.tbItem.InvoiceValue, Invoice.tbItem.TaxValue, Invoice.tbItem.ItemReference
@@ -5465,7 +5465,7 @@ FROM         Invoice.tbItem INNER JOIN
                       Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
 go
 
-CREATE OR ALTER VIEW Invoice.vwDocTask
+CREATE VIEW Invoice.vwDocTask
 AS
 SELECT        tbTaskInvoice.InvoiceNumber, tbTaskInvoice.TaskCode, Task.tbTask.TaskTitle, Task.tbTask.ActivityCode, tbTaskInvoice.CashCode, Cash.tbCode.CashDescription, Task.tbTask.ActionedOn, tbTaskInvoice.Quantity, 
                          Activity.tbActivity.UnitOfMeasure, tbTaskInvoice.InvoiceValue, tbTaskInvoice.TaxValue, tbTaskInvoice.TaxCode, Task.tbTask.SecondReference
@@ -5475,7 +5475,7 @@ FROM            Invoice.tbTask AS tbTaskInvoice INNER JOIN
                          Activity.tbActivity ON Task.tbTask.ActivityCode = Activity.tbActivity.ActivityCode
 go
 
-CREATE OR ALTER VIEW Invoice.vwItems
+CREATE VIEW Invoice.vwItems
 AS
 SELECT        Invoice.tbItem.InvoiceNumber, Invoice.tbItem.CashCode, Cash.tbCode.CashDescription, Invoice.tbItem.TaxCode, Invoice.tbItem.TaxValue, Invoice.tbItem.InvoiceValue, Invoice.tbItem.ItemReference, 
                          Invoice.tbInvoice.InvoicedOn
@@ -5484,7 +5484,7 @@ FROM            Invoice.tbItem INNER JOIN
                          Cash.tbCode ON Invoice.tbItem.CashCode = Cash.tbCode.CashCode;
 go
 
-CREATE OR ALTER VIEW Invoice.vwOutstanding
+CREATE VIEW Invoice.vwOutstanding
 AS
 	WITH invoiced_items AS
 	(
@@ -5516,7 +5516,7 @@ AS
 							 (Invoice.tbInvoice.InvoiceStatusCode = 2);
 go
 
-CREATE OR ALTER VIEW Invoice.vwRegisterPurchasesOverdue
+CREATE VIEW Invoice.vwRegisterPurchasesOverdue
 AS
 SELECT TOP 100 PERCENT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbStatus.InvoiceStatus, 
                          Invoice.tbType.InvoiceType, (Invoice.tbInvoice.InvoiceValue + Invoice.tbInvoice.TaxValue) - (Invoice.tbInvoice.PaidValue + Invoice.tbInvoice.PaidTaxValue) AS UnpaidValue, 
@@ -5530,7 +5530,7 @@ WHERE        (Invoice.tbInvoice.InvoiceTypeCode > 1) AND (Invoice.tbInvoice.Invo
 ORDER BY Invoice.tbInvoice.ExpectedOn;
 go
 
-CREATE OR ALTER VIEW Invoice.vwRegisterSalesOverdue
+CREATE VIEW Invoice.vwRegisterSalesOverdue
 AS
 SELECT TOP 100 PERCENT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbStatus.InvoiceStatus, 
                          Invoice.tbType.InvoiceType, (Invoice.tbInvoice.InvoiceValue + Invoice.tbInvoice.TaxValue) - (Invoice.tbInvoice.PaidValue + Invoice.tbInvoice.PaidTaxValue) AS UnpaidValue, DATEDIFF(DD, CURRENT_TIMESTAMP, 
@@ -5544,7 +5544,7 @@ WHERE        (Invoice.tbInvoice.InvoiceTypeCode < 2) AND (Invoice.tbInvoice.Invo
 ORDER BY Invoice.tbInvoice.ExpectedOn;
 go
 
-CREATE OR ALTER VIEW Invoice.vwSalesInvoiceSpool
+CREATE VIEW Invoice.vwSalesInvoiceSpool
 AS
 SELECT        sales_invoice.InvoiceNumber, Invoice.tbType.InvoiceType, sales_invoice.InvoiceStatusCode, Usr.tbUser.UserName, sales_invoice.AccountCode, Org.tbOrg.AccountName, Invoice.tbStatus.InvoiceStatus, 
                          sales_invoice.InvoicedOn, sales_invoice.InvoiceValue AS InvoiceValueTotal, sales_invoice.TaxValue AS TaxValueTotal, sales_invoice.PaymentTerms, sales_invoice.DueOn, sales_invoice.Notes, 
@@ -5563,7 +5563,7 @@ WHERE sales_invoice.InvoiceTypeCode = 0 AND
 	 EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 4 AND UserName = SUSER_SNAME() AND sales_invoice.InvoiceNumber = doc.DocumentNumber);
 go
 
-CREATE OR ALTER VIEW Invoice.vwSalesInvoiceSpoolByActivity
+CREATE VIEW Invoice.vwSalesInvoiceSpoolByActivity
 AS
 WITH invoice AS 
 (
@@ -5595,7 +5595,7 @@ FROM            invoice AS invoice_1 INNER JOIN
                         Org.tbAddress ON invoice_1.AddressCode = Org.tbAddress.AddressCode;
 go
 
-CREATE OR ALTER VIEW Invoice.vwSummary
+CREATE VIEW Invoice.vwSummary
 AS
 	WITH tasks AS
 	(
@@ -5653,7 +5653,7 @@ AS
 	FROM         invoice_margin;
 go
 
-CREATE OR ALTER VIEW Invoice.vwTaxSummary
+CREATE VIEW Invoice.vwTaxSummary
 AS
 	WITH base AS
 	(
@@ -5673,7 +5673,7 @@ AS
 	GROUP BY InvoiceNumber, TaxCode;
 go
 
-CREATE OR ALTER VIEW Org.vwAccountLookup
+CREATE VIEW Org.vwAccountLookup
 AS
 SELECT        Org.tbOrg.AccountCode, Org.tbOrg.AccountName, Org.tbType.OrganisationType, Cash.tbMode.CashMode
 FROM            Org.tbOrg INNER JOIN
@@ -5682,7 +5682,7 @@ FROM            Org.tbOrg INNER JOIN
 WHERE        (Org.tbOrg.OrganisationStatusCode < 3);
 go
 
-CREATE OR ALTER VIEW Org.vwAccountSources
+CREATE VIEW Org.vwAccountSources
 AS
 SELECT        AccountSource
 FROM            Org.tbOrg
@@ -5690,7 +5690,7 @@ GROUP BY AccountSource
 HAVING        (AccountSource IS NOT NULL);
 go
 
-CREATE OR ALTER VIEW Org.vwAreaCodes
+CREATE VIEW Org.vwAreaCodes
 AS
 SELECT        AreaCode
 FROM            Org.tbOrg
@@ -5698,7 +5698,7 @@ GROUP BY AreaCode
 HAVING        (AreaCode IS NOT NULL);
 go
 
-CREATE OR ALTER VIEW Org.vwBalanceOutstanding
+CREATE VIEW Org.vwBalanceOutstanding
 AS
 	WITH invoices_unpaid AS
 	(
@@ -5722,7 +5722,7 @@ AS
 
 go
 
-CREATE OR ALTER VIEW Org.vwCashAccounts
+CREATE VIEW Org.vwCashAccounts
 AS
 SELECT        Org.tbAccount.CashAccountCode, Org.tbAccount.CashAccountName, Org.tbOrg.AccountName, Org.tbType.OrganisationType, Org.tbAccount.OpeningBalance, Org.tbAccount.CurrentBalance, Org.tbAccount.SortCode, 
                          Org.tbAccount.AccountNumber, Org.tbAccount.AccountClosed, Org.tbAccount.RowVer
@@ -5731,7 +5731,7 @@ FROM            Org.tbOrg INNER JOIN
                          Org.tbType ON Org.tbOrg.OrganisationTypeCode = Org.tbType.OrganisationTypeCode;
 go
 
-CREATE OR ALTER VIEW Org.vwCashAccountsLive
+CREATE VIEW Org.vwCashAccountsLive
 AS
 SELECT        Org.tbAccount.CashAccountCode, Org.tbAccount.CashAccountName, Org.tbAccount.RowVer
 FROM            Org.tbAccount INNER JOIN
@@ -5739,7 +5739,7 @@ FROM            Org.tbAccount INNER JOIN
 WHERE        (Org.tbAccount.AccountClosed = 0);
 go
 
-CREATE OR ALTER VIEW Org.vwCompanyHeader
+CREATE VIEW Org.vwCompanyHeader
 AS
 SELECT        TOP (1) Org.tbOrg.AccountName AS CompanyName, Org.tbAddress.Address AS CompanyAddress, Org.tbOrg.PhoneNumber AS CompanyPhoneNumber, Org.tbOrg.FaxNumber AS CompanyFaxNumber, 
                          Org.tbOrg.EmailAddress AS CompanyEmailAddress, Org.tbOrg.WebSite AS CompanyWebsite, Org.tbOrg.CompanyNumber, Org.tbOrg.VatNumber
@@ -5748,14 +5748,14 @@ FROM            Org.tbOrg INNER JOIN
                          Org.tbAddress ON Org.tbOrg.AddressCode = Org.tbAddress.AddressCode;
 go
 
-CREATE OR ALTER VIEW Org.vwCompanyLogo
+CREATE VIEW Org.vwCompanyLogo
 AS
 SELECT        TOP (1) Org.tbOrg.Logo
 FROM            Org.tbOrg INNER JOIN
                          App.tbOptions ON Org.tbOrg.AccountCode = App.tbOptions.AccountCode;
 go
 
-CREATE OR ALTER VIEW Org.vwContacts
+CREATE VIEW Org.vwContacts
 AS
 	WITH ContactCount AS (SELECT        ContactName, COUNT(TaskCode) AS Tasks
                                                    FROM            Task.tbTask
@@ -5774,7 +5774,7 @@ AS
      ORDER BY Org.tbContact.ContactName;
 go
 
-CREATE OR ALTER VIEW Org.vwDepartments
+CREATE VIEW Org.vwDepartments
 AS
 SELECT        Department
 FROM            Org.tbContact
@@ -5782,7 +5782,7 @@ GROUP BY Department
 HAVING        (Department IS NOT NULL);
 go
 
-CREATE OR ALTER VIEW Org.vwInvoiceItems
+CREATE VIEW Org.vwInvoiceItems
 AS
 SELECT        Invoice.tbInvoice.AccountCode, Invoice.tbItem.InvoiceNumber, Invoice.tbItem.CashCode, Invoice.tbInvoice.InvoicedOn, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbStatus.InvoiceStatus, 
                          Cash.tbCode.CashDescription, Org.tbOrg.AccountName, Invoice.tbInvoice.InvoiceStatusCode, Invoice.tbType.InvoiceType, Invoice.tbItem.TaxCode, Invoice.tbItem.TaxValue, 
@@ -5796,7 +5796,7 @@ FROM            Invoice.tbInvoice INNER JOIN
 WHERE        (Invoice.tbInvoice.InvoiceStatusCode > 0);
 go
 
-CREATE OR ALTER VIEW Org.vwJobTitles
+CREATE VIEW Org.vwJobTitles
 AS
 SELECT        JobTitle
 FROM            Org.tbContact
@@ -5804,7 +5804,7 @@ GROUP BY JobTitle
 HAVING        (JobTitle IS NOT NULL);
 go
 
-CREATE OR ALTER VIEW Org.vwListActive
+CREATE VIEW Org.vwListActive
 AS
 	SELECT        TOP (100) PERCENT Org.tbOrg.AccountCode, Org.tbOrg.AccountName, Org.tbType.CashModeCode
 	FROM            Org.tbOrg INNER JOIN
@@ -5816,14 +5816,14 @@ AS
 	ORDER BY Org.tbOrg.AccountName;
 go
 
-CREATE OR ALTER VIEW Org.vwListAll
+CREATE VIEW Org.vwListAll
 AS
 	SELECT TOP (100) PERCENT Org.tbOrg.AccountCode, Org.tbOrg.AccountName, Org.tbType.CashModeCode
 	FROM Org.tbOrg INNER JOIN Org.tbType ON Org.tbOrg.OrganisationTypeCode = Org.tbType.OrganisationTypeCode
 	ORDER BY Org.tbOrg.AccountName;
 go
 
-CREATE OR ALTER VIEW Org.vwNameTitles
+CREATE VIEW Org.vwNameTitles
 AS
 SELECT        NameTitle
 FROM            Org.tbContact
@@ -5831,7 +5831,7 @@ GROUP BY NameTitle
 HAVING        (NameTitle IS NOT NULL);
 go
 
-CREATE OR ALTER VIEW Org.vwPayments
+CREATE VIEW Org.vwPayments
 AS
 SELECT        Org.tbPayment.AccountCode, Org.tbPayment.PaymentCode, Org.tbPayment.UserId, Org.tbPayment.PaymentStatusCode, Org.tbPayment.CashAccountCode, Org.tbPayment.CashCode, Org.tbPayment.TaxCode, 
                          Org.tbPayment.PaidOn, Org.tbPayment.PaidInValue, Org.tbPayment.PaidOutValue, Org.tbPayment.TaxInValue, Org.tbPayment.TaxOutValue, Org.tbPayment.PaymentReference, Org.tbPayment.InsertedBy, 
@@ -5844,7 +5844,7 @@ FROM            Org.tbPayment INNER JOIN
 WHERE        (Org.tbPayment.PaymentStatusCode = 1);
 go
 
-CREATE OR ALTER VIEW Org.vwPaymentsListing
+CREATE VIEW Org.vwPaymentsListing
 AS
 SELECT        TOP (100) PERCENT Org.tbOrg.AccountCode, Org.tbOrg.AccountName, Org.tbType.OrganisationType, Org.tbStatus.OrganisationStatus, Org.tbPayment.PaymentCode, Usr.tbUser.UserName, 
                          App.tbTaxCode.TaxDescription AS PaymentTaxDescription, Org.tbAccount.CashAccountName, Cash.tbCode.CashDescription, Org.tbPayment.UserId, Org.tbPayment.CashAccountCode, Org.tbPayment.CashCode, 
@@ -5862,7 +5862,7 @@ WHERE        (Org.tbPayment.PaymentStatusCode = 1)
 ORDER BY Org.tbPayment.AccountCode, Org.tbPayment.PaidOn DESC;
 go
 
-CREATE OR ALTER VIEW Org.vwPaymentsUnposted
+CREATE VIEW Org.vwPaymentsUnposted
 AS
 SELECT        PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, TaxInValue, TaxOutValue, PaymentReference, InsertedBy, InsertedOn, 
                          UpdatedBy, UpdatedOn, RowVer
@@ -5871,7 +5871,7 @@ WHERE        (PaymentStatusCode = 0)
 go
 
 
-CREATE OR ALTER VIEW Org.vwPaymentTerms
+CREATE VIEW Org.vwPaymentTerms
 AS
 SELECT        PaymentTerms
 FROM            Org.tbOrg
@@ -5879,7 +5879,7 @@ GROUP BY PaymentTerms
 HAVING         LEN(ISNULL(PaymentTerms, '')) > 0;
 go
 
-CREATE OR ALTER VIEW Org.vwPurchaseInvoices
+CREATE VIEW Org.vwPurchaseInvoices
 AS
 SELECT        Invoice.tbInvoice.AccountCode, tbInvoiceTask.InvoiceNumber, tbInvoiceTask.TaskCode, Task.tbTask.ContactName, Invoice.tbInvoice.InvoicedOn, tbInvoiceTask.Quantity, tbInvoiceTask.InvoiceValue, 
                          tbInvoiceTask.TaxValue, tbInvoiceTask.CashCode, tbInvoiceTask.TaxCode, Invoice.tbStatus.InvoiceStatus, Task.tbTask.TaskNotes, Cash.tbCode.CashDescription, Invoice.tbInvoice.InvoiceStatusCode, 
@@ -5894,7 +5894,7 @@ FROM            Invoice.tbInvoice INNER JOIN
 WHERE        (Invoice.tbInvoice.InvoiceStatusCode > 0) AND (Invoice.tbInvoice.InvoiceTypeCode > 1);
 go
 
-CREATE OR ALTER VIEW Org.vwSalesInvoices
+CREATE VIEW Org.vwSalesInvoices
 AS
 SELECT        Invoice.tbInvoice.AccountCode, tbInvoiceTask.InvoiceNumber, tbInvoiceTask.TaskCode, Task.tbTask.ContactName, Invoice.tbInvoice.InvoicedOn, tbInvoiceTask.Quantity, tbInvoiceTask.InvoiceValue, 
                          tbInvoiceTask.TaxValue, tbInvoiceTask.CashCode, tbInvoiceTask.TaxCode, Invoice.tbStatus.InvoiceStatus, Task.tbTask.TaskNotes, Cash.tbCode.CashDescription, Invoice.tbInvoice.InvoiceStatusCode, 
@@ -5909,7 +5909,7 @@ FROM            Invoice.tbInvoice INNER JOIN
 WHERE        (Invoice.tbInvoice.InvoiceStatusCode > 0) AND (Invoice.tbInvoice.InvoiceTypeCode = 0);
 go
 
-CREATE OR ALTER VIEW Org.vwStatement 
+CREATE VIEW Org.vwStatement 
 AS
 	WITH payment_data AS
 	(
@@ -5958,21 +5958,21 @@ AS
 		FROM statement_data;
 go
 
-CREATE OR ALTER VIEW Org.vwTypeLookup
+CREATE VIEW Org.vwTypeLookup
 AS
 SELECT        Org.tbType.OrganisationTypeCode, Org.tbType.OrganisationType, Cash.tbMode.CashMode
 FROM            Org.tbType INNER JOIN
                          Cash.tbMode ON Org.tbType.CashModeCode = Cash.tbMode.CashModeCode;
 go
 
-CREATE OR ALTER VIEW Task.vwActiveStatusCodes
+CREATE VIEW Task.vwActiveStatusCodes
 AS
 SELECT        TaskStatusCode, TaskStatus
 FROM            Task.tbStatus
 WHERE        (TaskStatusCode < 3);
 go
 
-CREATE OR ALTER VIEW Task.vwAttributeDescriptions
+CREATE VIEW Task.vwAttributeDescriptions
 AS
 SELECT        Attribute, AttributeDescription
 FROM            Task.tbAttribute
@@ -5981,7 +5981,7 @@ HAVING        (AttributeDescription IS NOT NULL);
 go
 
 
-CREATE OR ALTER VIEW Task.vwAttributesForOrder
+CREATE VIEW Task.vwAttributesForOrder
 AS
 SELECT        TaskCode, Attribute, PrintOrder, AttributeDescription
 FROM            Task.tbAttribute
@@ -5989,14 +5989,14 @@ WHERE        (AttributeTypeCode = 0);
 go
 
 
-CREATE OR ALTER VIEW Task.vwAttributesForQuote
+CREATE VIEW Task.vwAttributesForQuote
 AS
 SELECT        TaskCode, Attribute, PrintOrder, AttributeDescription
 FROM            Task.tbAttribute
 WHERE        (AttributeTypeCode = 1);
 go
 
-CREATE OR ALTER VIEW Task.vwCashMode
+CREATE VIEW Task.vwCashMode
   AS
 SELECT     Task.tbTask.TaskCode, CASE WHEN Cash.tbCategory.CategoryCode IS NULL 
                       THEN Org.tbType.CashModeCode ELSE Cash.tbCategory.CashModeCode END AS CashModeCode
@@ -6007,7 +6007,7 @@ FROM         Task.tbTask INNER JOIN
                       Org.tbType ON Org.tbOrg.OrganisationTypeCode = Org.tbType.OrganisationTypeCode
 go
 
-CREATE OR ALTER VIEW Task.vwDoc
+CREATE VIEW Task.vwDoc
 AS
 SELECT     Task.fnEmailAddress(Task.tbTask.TaskCode) AS EmailAddress, Task.tbTask.TaskCode, Task.tbTask.TaskStatusCode, Task.tbStatus.TaskStatus, 
                       Task.tbTask.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, Org.tbAddress.Address AS InvoiceAddress, 
@@ -6031,7 +6031,7 @@ FROM         Org.tbOrg AS Org_tb2 RIGHT OUTER JOIN
                       App.tbTaxCode ON Task.tbTask.TaxCode = App.tbTaxCode.TaxCode
 go
 
-CREATE OR ALTER VIEW Task.vwEdit
+CREATE VIEW Task.vwEdit
 AS
 SELECT        Task.tbTask.TaskCode, Task.tbTask.UserId, Task.tbTask.AccountCode, Task.tbTask.TaskTitle, Task.tbTask.ContactName, Task.tbTask.ActivityCode, Task.tbTask.TaskStatusCode, Task.tbTask.ActionById, 
                          Task.tbTask.ActionOn, Task.tbTask.ActionedOn, Task.tbTask.TaskNotes, Task.tbTask.Quantity, Task.tbTask.CashCode, Task.tbTask.TaxCode, Task.tbTask.UnitCharge, Task.tbTask.TotalCharge, 
@@ -6043,7 +6043,7 @@ FROM            Task.tbTask INNER JOIN
 
 go
 
-CREATE OR ALTER VIEW Task.vwFlow
+CREATE VIEW Task.vwFlow
 AS
 SELECT        Task.tbFlow.ParentTaskCode, Task.tbFlow.StepNumber, Task.tbTask.TaskCode, Task.tbTask.ActivityCode, Task.tbTask.TaskTitle, Task.tbTask.TaskNotes, Task.tbStatus.TaskStatus, Task.tbTask.ActionOn, 
                          Task.tbTask.Quantity, Task.tbTask.ActionedOn, Org.tbOrg.AccountCode, Usr.tbUser.UserName AS Owner, tbUser_1.UserName AS ActionBy, Org.tbOrg.AccountName, Task.tbTask.UnitCharge, 
@@ -6056,7 +6056,7 @@ FROM            Usr.tbUser AS tbUser_1 INNER JOIN
                          Task.tbFlow ON Task.tbTask.TaskCode = Task.tbFlow.ChildTaskCode;
 go
 
-CREATE OR ALTER VIEW Task.vwProfit 
+CREATE VIEW Task.vwProfit 
 AS
 	WITH orders AS
 	(
@@ -6167,7 +6167,7 @@ AS
 		FROM profits;
 go
 
-CREATE OR ALTER VIEW Task.vwProfitToDate
+CREATE VIEW Task.vwProfitToDate
 AS
 	WITH TaskProfitToDate AS 
 		(SELECT        MAX(PaymentOn) AS LastPaymentOn
@@ -6182,7 +6182,7 @@ AS
 go
 
 
-CREATE OR ALTER VIEW Task.vwPurchaseEnquiryDeliverySpool
+CREATE VIEW Task.vwPurchaseEnquiryDeliverySpool
 AS
 SELECT        purchase_enquiry.TaskCode, purchase_enquiry.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, Org.tbAddress.Address AS InvoiceAddress, 
                          collection_account.AccountName AS CollectAccount, collection_address.Address AS CollectAddress, delivery_account.AccountName AS DeliveryAccount, delivery_address.Address AS DeliveryAddress, 
@@ -6203,7 +6203,7 @@ FROM            Org.tbOrg AS delivery_account INNER JOIN
 WHERE EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 2 AND UserName = SUSER_SNAME() AND purchase_enquiry.TaskCode = doc.DocumentNumber);
 go
 
-CREATE OR ALTER VIEW Task.vwPurchaseEnquirySpool
+CREATE VIEW Task.vwPurchaseEnquirySpool
 AS
 SELECT        purchase_enquiry.TaskCode, purchase_enquiry.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, Org.tbAddress.Address AS InvoiceAddress, 
                          Org_tbAddress_1.Address AS DeliveryAddress, purchase_enquiry.AccountCode, purchase_enquiry.TaskNotes, purchase_enquiry.ActivityCode, purchase_enquiry.ActionOn, Activity.tbActivity.UnitOfMeasure, 
@@ -6220,7 +6220,7 @@ FROM            Usr.tbUser INNER JOIN
 WHERE EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 2 AND UserName = SUSER_SNAME() AND purchase_enquiry.TaskCode = doc.DocumentNumber);
 go
 
-CREATE OR ALTER VIEW Task.vwPurchaseOrderDeliverySpool
+CREATE VIEW Task.vwPurchaseOrderDeliverySpool
 AS
 SELECT        purchase_order.TaskCode, purchase_order.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, invoice_address.Address AS InvoiceAddress, 
                          delivery_account.AccountName AS CollectAccount, delivery_address.Address AS CollectAddress, collection_account.AccountName AS DeliveryAccount, collection_address.Address AS DeliveryAddress, 
@@ -6244,7 +6244,7 @@ WHERE EXISTS (
     WHERE        (DocTypeCode = 3) AND (UserName = SUSER_SNAME()) AND (purchase_order.TaskCode = DocumentNumber));
 go
 
-CREATE OR ALTER VIEW Task.vwPurchaseOrderSpool
+CREATE VIEW Task.vwPurchaseOrderSpool
 AS
 SELECT        purchase_order.TaskCode, purchase_order.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, invoice_address.Address AS InvoiceAddress, 
                          delivery_address.Address AS DeliveryAddress, purchase_order.AccountCode, purchase_order.TaskNotes, purchase_order.ActivityCode, purchase_order.ActionOn, Activity.tbActivity.UnitOfMeasure, 
@@ -6261,7 +6261,7 @@ FROM            Usr.tbUser INNER JOIN
 WHERE EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 3 AND UserName = SUSER_SNAME() AND purchase_order.TaskCode = doc.DocumentNumber);
 go
 
-CREATE OR ALTER VIEW Task.vwQuotationSpool
+CREATE VIEW Task.vwQuotationSpool
 AS
 SELECT        sales_order.TaskCode, sales_order.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, invoice_address.Address AS InvoiceAddress, 
                          delivery_address.Address AS DeliveryAddress, sales_order.AccountCode, sales_order.TaskNotes, sales_order.ActivityCode, sales_order.ActionOn, Activity.tbActivity.UnitOfMeasure, sales_order.Quantity, 
@@ -6280,7 +6280,7 @@ WHERE EXISTS (
     WHERE        (DocTypeCode = 0) AND (UserName = SUSER_SNAME()) AND (sales_order.TaskCode = DocumentNumber));
 go
 
-CREATE OR ALTER VIEW Task.vwSalesOrderSpool
+CREATE VIEW Task.vwSalesOrderSpool
 AS
 SELECT        sales_order.TaskCode, sales_order.ContactName, Org.tbContact.NickName, Usr.tbUser.UserName, Org.tbOrg.AccountName, invoice_address.Address AS InvoiceAddress, 
                          delivery_address.Address AS DeliveryAddress, sales_order.AccountCode, sales_order.TaskNotes, sales_order.TaskTitle, sales_order.ActivityCode, sales_order.ActionOn, Activity.tbActivity.UnitOfMeasure, 
@@ -6299,7 +6299,7 @@ WHERE EXISTS (
     WHERE        (DocTypeCode = 1) AND (UserName = SUSER_SNAME()) AND (sales_order.TaskCode = DocumentNumber));
 go
 
-CREATE OR ALTER VIEW Task.vwTitles
+CREATE VIEW Task.vwTitles
 AS
 SELECT        ActivityCode, TaskTitle
 FROM            Task.tbTask
@@ -6307,7 +6307,7 @@ GROUP BY TaskTitle, ActivityCode
 HAVING        (TaskTitle IS NOT NULL);
 go
 
-CREATE OR ALTER VIEW Usr.vwDoc
+CREATE VIEW Usr.vwDoc
 AS
 	WITH bank AS 
 	(
@@ -6326,14 +6326,14 @@ AS
                               Org.tbAddress ON company.AddressCode = Org.tbAddress.AddressCode;
 go
 
-CREATE OR ALTER VIEW Usr.vwMenuItemFormMode
+CREATE VIEW Usr.vwMenuItemFormMode
 AS
 	SELECT        OpenMode, OpenModeDescription
 	FROM            Usr.tbMenuOpenMode
 	WHERE        (OpenMode < 2);
 go
 
-CREATE OR ALTER VIEW Usr.vwMenuItemReportMode
+CREATE VIEW Usr.vwMenuItemReportMode
 AS
 	SELECT        OpenMode, OpenModeDescription
 	FROM            Usr.tbMenuOpenMode
@@ -6342,7 +6342,7 @@ go
 
 --TABLE VALUED FUNCTIONS
 go
-CREATE OR ALTER FUNCTION Cash.fnFlowBankBalances (@CashAccountCode NVARCHAR(10))
+CREATE FUNCTION Cash.fnFlowBankBalances (@CashAccountCode NVARCHAR(10))
 RETURNS TABLE
 AS
 	RETURN
@@ -6370,7 +6370,7 @@ AS
 		LEFT OUTER JOIN closing_balance ON account_periods.CashAccountCode = closing_balance.CashAccountCode
 												AND account_periods.StartOn = closing_balance.StartOn;
 go
-CREATE OR ALTER FUNCTION Cash.fnFlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
+CREATE FUNCTION Cash.fnFlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
 RETURNS TABLE
 AS
 	--ref Cash.proc_FlowCashCodeValues() for live implementation including accruals
@@ -6485,7 +6485,7 @@ AS
 		GROUP BY StartOn
 	)
 go
-CREATE OR ALTER FUNCTION Cash.fnFlowCategoriesByType
+CREATE FUNCTION Cash.fnFlowCategoriesByType
 	(
 	@CashTypeCode smallint,
 	@CategoryTypeCode smallint = 1
@@ -6500,7 +6500,7 @@ AS
 		)
 
 go
-CREATE OR ALTER FUNCTION Cash.fnFlowCategory(@CashTypeCode SMALLINT)
+CREATE FUNCTION Cash.fnFlowCategory(@CashTypeCode SMALLINT)
 RETURNS TABLE
 AS
 	RETURN
@@ -6510,7 +6510,7 @@ AS
 		WHERE        (CategoryTypeCode = 0) AND (CashTypeCode = @CashTypeCode) AND (IsEnabled <> 0)		
 	)
 go
-CREATE OR ALTER FUNCTION Cash.fnFlowCategoryCashCodes
+CREATE FUNCTION Cash.fnFlowCategoryCashCodes
 	(
 	@CategoryCode nvarchar(10)
 	)
@@ -6522,7 +6522,7 @@ AS
 		WHERE     (CategoryCode = @CategoryCode) AND (IsEnabled <> 0)			 
 	)
 go
-CREATE OR ALTER FUNCTION Cash.fnFlowCategoryTotalCodes(@CategoryCode NVARCHAR(10))
+CREATE FUNCTION Cash.fnFlowCategoryTotalCodes(@CategoryCode NVARCHAR(10))
 RETURNS TABLE
 AS
 	RETURN
@@ -6530,7 +6530,7 @@ AS
 		SELECT ChildCode AS CategoryCode FROM Cash.tbCategoryTotal WHERE ParentCode = @CategoryCode
 	)
 go
-CREATE OR ALTER FUNCTION Invoice.fnEditCreditCandidates (@InvoiceNumber nvarchar(20), @AccountCode nvarchar(10))
+CREATE FUNCTION Invoice.fnEditCreditCandidates (@InvoiceNumber nvarchar(20), @AccountCode nvarchar(10))
 RETURNS TABLE
 AS
 	RETURN 
@@ -6553,7 +6553,7 @@ AS
 		ORDER BY Invoice.tbInvoice.InvoicedOn DESC
 	);
 go
-CREATE OR ALTER FUNCTION Invoice.fnEditDebitCandidates (@InvoiceNumber nvarchar(20), @AccountCode nvarchar(10))
+CREATE FUNCTION Invoice.fnEditDebitCandidates (@InvoiceNumber nvarchar(20), @AccountCode nvarchar(10))
 RETURNS TABLE
 AS
 	RETURN 
@@ -6576,7 +6576,7 @@ AS
 		ORDER BY Invoice.tbInvoice.InvoicedOn DESC
 	);
 go
-CREATE OR ALTER FUNCTION Invoice.fnEditTasks (@InvoiceNumber nvarchar(20), @AccountCode nvarchar(10))
+CREATE FUNCTION Invoice.fnEditTasks (@InvoiceNumber nvarchar(20), @AccountCode nvarchar(10))
 RETURNS TABLE
 AS
 	RETURN 
@@ -6599,7 +6599,7 @@ go
 
 /********** STORED PROCEDURES *****************/
 go
-CREATE OR ALTER PROCEDURE App.proc_EventLog (@EventMessage NVARCHAR(MAX), @EventTypeCode SMALLINT = 0, @LogCode NVARCHAR(20) = NULL OUTPUT)
+CREATE PROCEDURE App.proc_EventLog (@EventMessage NVARCHAR(MAX), @EventTypeCode SMALLINT = 0, @LogCode NVARCHAR(20) = NULL OUTPUT)
 AS
 	SET XACT_ABORT, NOCOUNT ON;
 
@@ -6647,7 +6647,7 @@ AS
 
 go
 
-CREATE OR ALTER PROCEDURE App.proc_ErrorLog 
+CREATE PROCEDURE App.proc_ErrorLog 
 AS
 DECLARE 
 	@ErrorMessage NVARCHAR(MAX)
@@ -6673,7 +6673,7 @@ DECLARE
 	RAISERROR ('%s', @ErrorSeverity, @ErrorState, @ErrorMessage);
 go
 
-CREATE OR ALTER PROCEDURE Activity.proc_Mode
+CREATE PROCEDURE Activity.proc_Mode
 	(
 	@ActivityCode nvarchar(50)
 	)
@@ -6693,7 +6693,7 @@ CREATE OR ALTER PROCEDURE Activity.proc_Mode
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Activity.proc_NextAttributeOrder 
+CREATE PROCEDURE Activity.proc_NextAttributeOrder 
 	(
 	@ActivityCode nvarchar(50),
 	@PrintOrder smallint = 10 output
@@ -6721,7 +6721,7 @@ CREATE OR ALTER PROCEDURE Activity.proc_NextAttributeOrder
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Activity.proc_NextOperationNumber 
+CREATE PROCEDURE Activity.proc_NextOperationNumber 
 	(
 	@ActivityCode nvarchar(50),
 	@OperationNumber smallint = 10 output
@@ -6748,7 +6748,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Activity.proc_NextStepNumber 
+CREATE PROCEDURE Activity.proc_NextStepNumber 
 	(
 	@ActivityCode nvarchar(50),
 	@StepNumber smallint = 10 output
@@ -6776,7 +6776,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Activity.proc_Parent
+CREATE PROCEDURE Activity.proc_Parent
 	(
 	@ActivityCode nvarchar(50),
 	@ParentCode nvarchar(50) = null output
@@ -6801,7 +6801,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Activity.proc_WorkFlow
+CREATE PROCEDURE Activity.proc_WorkFlow
 	(
 	@ParentActivityCode nvarchar(50),
 	@ActivityCode nvarchar(50)
@@ -6840,7 +6840,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Activity.proc_WorkFlowMultiLevel
+CREATE PROCEDURE Activity.proc_WorkFlowMultiLevel
 	(
 	@ActivityCode nvarchar(50)
 	)
@@ -6904,7 +6904,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE App.proc_AddCalDateRange
+CREATE PROCEDURE App.proc_AddCalDateRange
 	(
 		@CalendarCode nvarchar(10),
 		@FromDate datetime,
@@ -6936,7 +6936,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE App.proc_AdjustToCalendar
+CREATE PROCEDURE App.proc_AdjustToCalendar
 	(
 	@SourceDate datetime,
 	@OffsetDays int,
@@ -7010,7 +7010,7 @@ AS
 
 go
 
-CREATE OR ALTER PROCEDURE App.proc_CompanyName
+CREATE PROCEDURE App.proc_CompanyName
 	(
 	@AccountName nvarchar(255) = null output
 	)
@@ -7021,7 +7021,7 @@ CREATE OR ALTER PROCEDURE App.proc_CompanyName
 	 
 go
 
-CREATE OR ALTER PROCEDURE App.proc_DelCalDateRange
+CREATE PROCEDURE App.proc_DelCalDateRange
 	(
 		@CalendarCode nvarchar(10),
 		@FromDate datetime,
@@ -7041,7 +7041,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE App.proc_DocDespool
+CREATE PROCEDURE App.proc_DocDespool
 	(
 	@DocTypeCode SMALLINT
 	)
@@ -7102,7 +7102,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE App.proc_Initialised
+CREATE PROCEDURE App.proc_Initialised
 (@Setting bit)
   AS
 	SET NOCOUNT, XACT_ABORT ON;
@@ -7133,7 +7133,7 @@ CREATE OR ALTER PROCEDURE App.proc_Initialised
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_GeneratePeriods
+CREATE PROCEDURE Cash.proc_GeneratePeriods
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -7187,7 +7187,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE App.proc_PeriodClose
+CREATE PROCEDURE App.proc_PeriodClose
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -7261,7 +7261,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE App.proc_PeriodGetYear
+CREATE PROCEDURE App.proc_PeriodGetYear
 	(
 	@StartOn DATETIME,
 	@YearNumber INTEGER OUTPUT
@@ -7283,7 +7283,7 @@ AS
 	END CATCH	 
 go
 
-CREATE OR ALTER PROCEDURE App.proc_ReassignUser 
+CREATE PROCEDURE App.proc_ReassignUser 
 	(
 	@UserId nvarchar(10)
 	)
@@ -7301,7 +7301,7 @@ CREATE OR ALTER PROCEDURE App.proc_ReassignUser
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE App.proc_SystemRebuild
+CREATE PROCEDURE App.proc_SystemRebuild
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -7749,7 +7749,7 @@ AS
 go
 
 
-CREATE OR ALTER PROCEDURE App.proc_YearPeriods
+CREATE PROCEDURE App.proc_YearPeriods
 	(
 	@YearNumber int
 	)
@@ -7769,7 +7769,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_AccountRebuild
+CREATE PROCEDURE Cash.proc_AccountRebuild
 	(
 	@CashAccountCode nvarchar(10)
 	)
@@ -7795,7 +7795,7 @@ CREATE OR ALTER PROCEDURE Cash.proc_AccountRebuild
 	END CATCH 
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_CodeDefaults 
+CREATE PROCEDURE Cash.proc_CodeDefaults 
 	(
 	@CashCode nvarchar(50)
 	)
@@ -7817,7 +7817,7 @@ CREATE OR ALTER PROCEDURE Cash.proc_CodeDefaults
 	END CATCH 
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_CurrentAccount(@CashAccountCode NVARCHAR(10) OUTPUT)
+CREATE PROCEDURE Cash.proc_CurrentAccount(@CashAccountCode NVARCHAR(10) OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
@@ -7834,7 +7834,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_FlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
+CREATE PROCEDURE Cash.proc_FlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
 AS
 	--ref Cash.fnFlowCashCodeValues() for a sample inline function implementation 
 
@@ -8057,7 +8057,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_FlowCategoryCodeFromName
+CREATE PROCEDURE Cash.proc_FlowCategoryCodeFromName
 	(
 		@Category nvarchar(50),
 		@CategoryCode nvarchar(10) output
@@ -8080,7 +8080,7 @@ AS
 	END CATCH  
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_PaymentPostMisc
+CREATE PROCEDURE Org.proc_PaymentPostMisc
 	(
 	@PaymentCode nvarchar(20) 
 	)
@@ -8193,7 +8193,7 @@ CREATE OR ALTER PROCEDURE Org.proc_PaymentPostMisc
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_PayAccrual (@PaymentCode NVARCHAR(20))
+CREATE PROCEDURE Cash.proc_PayAccrual (@PaymentCode NVARCHAR(20))
 AS
     SET NOCOUNT, XACT_ABORT ON;
 
@@ -8217,7 +8217,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_ReserveAccount(@CashAccountCode NVARCHAR(10) OUTPUT)
+CREATE PROCEDURE Cash.proc_ReserveAccount(@CashAccountCode NVARCHAR(10) OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
@@ -8231,7 +8231,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_DefaultPaymentOn
+CREATE PROCEDURE Task.proc_DefaultPaymentOn
 	(
 		@AccountCode nvarchar(10),
 		@ActionOn datetime,
@@ -8260,7 +8260,7 @@ AS
 
 go
 
-CREATE OR ALTER PROCEDURE Cash.proc_VatBalance(@Balance money output)
+CREATE PROCEDURE Cash.proc_VatBalance(@Balance money output)
  AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -8272,7 +8272,7 @@ CREATE OR ALTER PROCEDURE Cash.proc_VatBalance(@Balance money output)
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_Total 
+CREATE PROCEDURE Invoice.proc_Total 
 	(
 	@InvoiceNumber nvarchar(20)
 	)
@@ -8322,7 +8322,7 @@ CREATE OR ALTER PROCEDURE Invoice.proc_Total
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_Accept 
+CREATE PROCEDURE Invoice.proc_Accept 
 	(
 	@InvoiceNumber nvarchar(20)
 	)
@@ -8370,7 +8370,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_AddTask 
+CREATE PROCEDURE Invoice.proc_AddTask 
 	(
 	@InvoiceNumber nvarchar(20),
 	@TaskCode nvarchar(20)	
@@ -8454,7 +8454,7 @@ CREATE OR ALTER PROCEDURE Invoice.proc_AddTask
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_Cancel 
+CREATE PROCEDURE Invoice.proc_Cancel 
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -8484,7 +8484,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_Credit
+CREATE PROCEDURE Invoice.proc_Credit
 	(
 		@InvoiceNumber nvarchar(20) output
 	)
@@ -8564,7 +8564,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_DefaultDocType
+CREATE PROCEDURE Invoice.proc_DefaultDocType
 	(
 		@InvoiceNumber nvarchar(20),
 		@DocTypeCode smallint OUTPUT
@@ -8592,7 +8592,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_BalanceOutstanding 
+CREATE PROCEDURE Org.proc_BalanceOutstanding 
 	(
 	@AccountCode nvarchar(10),
 	@Balance money = 0 OUTPUT
@@ -8619,7 +8619,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_PaymentPostPaidIn
+CREATE PROCEDURE Org.proc_PaymentPostPaidIn
 	(
 	@PaymentCode nvarchar(20),
 	@PostValue money  
@@ -8702,7 +8702,7 @@ CREATE OR ALTER PROCEDURE Org.proc_PaymentPostPaidIn
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_PaymentPostPaidOut
+CREATE PROCEDURE Org.proc_PaymentPostPaidOut
 	(
 	@PaymentCode nvarchar(20),
 	@PostValue money  
@@ -8784,7 +8784,7 @@ CREATE OR ALTER PROCEDURE Org.proc_PaymentPostPaidOut
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_PaymentPostInvoiced (@PaymentCode nvarchar(20))
+CREATE PROCEDURE Org.proc_PaymentPostInvoiced (@PaymentCode nvarchar(20))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -8822,7 +8822,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_Pay
+CREATE PROCEDURE Invoice.proc_Pay
 	(
 	@InvoiceNumber nvarchar(20),
 	@PaidOn datetime,
@@ -8935,7 +8935,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Invoice.proc_DefaultPaymentOn
+CREATE PROCEDURE Invoice.proc_DefaultPaymentOn
 	(
 		@AccountCode nvarchar(10),
 		@ActionOn datetime,
@@ -8963,7 +8963,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_Raise
+CREATE PROCEDURE Invoice.proc_Raise
 	(
 	@TaskCode nvarchar(20),
 	@InvoiceTypeCode smallint,
@@ -9029,7 +9029,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Invoice.proc_RaiseBlank
+CREATE PROCEDURE Invoice.proc_RaiseBlank
 	(
 	@AccountCode nvarchar(10),
 	@InvoiceTypeCode smallint,
@@ -9085,7 +9085,7 @@ CREATE OR ALTER PROCEDURE Invoice.proc_RaiseBlank
 
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_NextAddressCode 
+CREATE PROCEDURE Org.proc_NextAddressCode 
 	(
 	@AccountCode nvarchar(10),
 	@AddressCode nvarchar(15) OUTPUT
@@ -9109,7 +9109,7 @@ CREATE OR ALTER PROCEDURE Org.proc_NextAddressCode
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_AddAddress 
+CREATE PROCEDURE Org.proc_AddAddress 
 	(
 	@AccountCode nvarchar(10),
 	@Address ntext
@@ -9139,7 +9139,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_AddContact 
+CREATE PROCEDURE Org.proc_AddContact 
 	(
 	@AccountCode nvarchar(10),
 	@ContactName nvarchar(100)	 
@@ -9161,7 +9161,7 @@ CREATE OR ALTER PROCEDURE Org.proc_AddContact
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_BalanceToPay(@AccountCode NVARCHAR(10), @Balance MONEY = 0 OUTPUT)
+CREATE PROCEDURE Org.proc_BalanceToPay(@AccountCode NVARCHAR(10), @Balance MONEY = 0 OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -9191,7 +9191,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_DefaultAccountCode 
+CREATE PROCEDURE Org.proc_DefaultAccountCode 
 	(
 	@AccountName nvarchar(100),
 	@AccountCode nvarchar(10) OUTPUT 
@@ -9278,7 +9278,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_DefaultTaxCode 
+CREATE PROCEDURE Org.proc_DefaultTaxCode 
 	(
 	@AccountCode nvarchar(10),
 	@TaxCode nvarchar(10) OUTPUT
@@ -9303,7 +9303,7 @@ CREATE OR ALTER PROCEDURE Org.proc_DefaultTaxCode
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_NextPaymentCode (@PaymentCode NVARCHAR(20) OUTPUT)
+CREATE PROCEDURE Org.proc_NextPaymentCode (@PaymentCode NVARCHAR(20) OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -9315,7 +9315,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_PaymentAdd(@AccountCode nvarchar(10), @CashAccountCode AS nvarchar(10), @CashCode nvarchar(50), @PaidOn datetime, @ToPay money, @PaymentCode nvarchar(20) output)
+CREATE PROCEDURE Org.proc_PaymentAdd(@AccountCode nvarchar(10), @CashAccountCode AS nvarchar(10), @CashCode nvarchar(50), @PaidOn datetime, @ToPay money, @PaymentCode nvarchar(20) output)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
@@ -9348,7 +9348,7 @@ AS
 
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_Rebuild (@AccountCode NVARCHAR(10))
+CREATE PROCEDURE Org.proc_Rebuild (@AccountCode NVARCHAR(10))
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -9661,7 +9661,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_PaymentDelete
+CREATE PROCEDURE Org.proc_PaymentDelete
 	(
 	@PaymentCode nvarchar(20)
 	)
@@ -9692,7 +9692,7 @@ CREATE OR ALTER PROCEDURE Org.proc_PaymentDelete
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_PaymentMove
+CREATE PROCEDURE Org.proc_PaymentMove
 	(
 	@PaymentCode nvarchar(20),
 	@CashAccountCode nvarchar(10)
@@ -9726,7 +9726,7 @@ CREATE OR ALTER PROCEDURE Org.proc_PaymentMove
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_PaymentPost 
+CREATE PROCEDURE Org.proc_PaymentPost 
 AS
     SET NOCOUNT, XACT_ABORT ON;
 
@@ -9781,7 +9781,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Org.proc_Statement (@AccountCode NVARCHAR(10))
+CREATE PROCEDURE Org.proc_Statement (@AccountCode NVARCHAR(10))
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -9798,7 +9798,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_AssignToParent 
+CREATE PROCEDURE Task.proc_AssignToParent 
 	(
 	@ChildTaskCode nvarchar(20),
 	@ParentTaskCode nvarchar(20)
@@ -9849,7 +9849,7 @@ CREATE OR ALTER PROCEDURE Task.proc_AssignToParent
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_NextCode
+CREATE PROCEDURE Task.proc_NextCode
 	(
 		@ActivityCode nvarchar(50),
 		@TaskCode nvarchar(20) OUTPUT
@@ -9897,7 +9897,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_Configure 
+CREATE PROCEDURE Task.proc_Configure 
 	(
 	@ParentTaskCode nvarchar(20)
 	)
@@ -10056,7 +10056,7 @@ AS
 
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_Schedule (@ParentTaskCode nvarchar(20))
+CREATE PROCEDURE Task.proc_Schedule (@ParentTaskCode nvarchar(20))
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -10209,7 +10209,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_Copy
+CREATE PROCEDURE Task.proc_Copy
 	(
 	@FromTaskCode nvarchar(20),
 	@ParentTaskCode nvarchar(20) = null,
@@ -10334,7 +10334,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_Cost 
+CREATE PROCEDURE Task.proc_Cost 
 	(
 	@ParentTaskCode nvarchar(20),
 	@TotalCost money = 0 OUTPUT
@@ -10389,7 +10389,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_DefaultDocType
+CREATE PROCEDURE Task.proc_DefaultDocType
 	(
 		@TaskCode nvarchar(20),
 		@DocTypeCode smallint OUTPUT
@@ -10426,7 +10426,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_DefaultInvoiceType
+CREATE PROCEDURE Task.proc_DefaultInvoiceType
 	(
 		@TaskCode nvarchar(20),
 		@InvoiceTypeCode smallint OUTPUT
@@ -10458,7 +10458,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_DefaultTaxCode 
+CREATE PROCEDURE Task.proc_DefaultTaxCode 
 	(
 	@AccountCode nvarchar(10),
 	@CashCode nvarchar(50),
@@ -10494,7 +10494,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_Delete 
+CREATE PROCEDURE Task.proc_Delete 
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -10538,7 +10538,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_EmailAddress 
+CREATE PROCEDURE Task.proc_EmailAddress 
 	(
 	@TaskCode nvarchar(20),
 	@EmailAddress nvarchar(255) OUTPUT
@@ -10575,7 +10575,7 @@ SET NOCOUNT, XACT_ABORT ON;
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_EmailDetail 
+CREATE PROCEDURE Task.proc_EmailDetail 
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -10619,7 +10619,7 @@ SET NOCOUNT, XACT_ABORT ON;
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_EmailFooter 
+CREATE PROCEDURE Task.proc_EmailFooter 
 AS
 --mod replace with view
 
@@ -10640,7 +10640,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_FullyInvoiced
+CREATE PROCEDURE Task.proc_FullyInvoiced
 	(
 	@TaskCode nvarchar(20),
 	@IsFullyInvoiced bit = 0 output
@@ -10672,7 +10672,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_IsProject 
+CREATE PROCEDURE Task.proc_IsProject 
 	(
 	@TaskCode nvarchar(20),
 	@IsProject bit = 0 output
@@ -10697,7 +10697,7 @@ CREATE OR ALTER PROCEDURE Task.proc_IsProject
 	END CATCH	
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_Mode 
+CREATE PROCEDURE Task.proc_Mode 
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -10715,7 +10715,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_NextAttributeOrder 
+CREATE PROCEDURE Task.proc_NextAttributeOrder 
 	(
 	@TaskCode nvarchar(20),
 	@PrintOrder smallint = 10 output
@@ -10742,7 +10742,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_NextOperationNumber 
+CREATE PROCEDURE Task.proc_NextOperationNumber 
 	(
 	@TaskCode nvarchar(20),
 	@OperationNumber smallint = 10 output
@@ -10768,7 +10768,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_Op
+CREATE PROCEDURE Task.proc_Op
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -10798,7 +10798,7 @@ AS
 	END CATCH
 go
 
- CREATE OR ALTER PROCEDURE Task.proc_Parent 
+ CREATE PROCEDURE Task.proc_Parent 
 	(
 	@TaskCode nvarchar(20),
 	@ParentTaskCode nvarchar(20) output
@@ -10823,7 +10823,7 @@ AS
 
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_Pay (@TaskCode NVARCHAR(20), @Post BIT = 0,	@PaymentCode nvarchar(20) NULL OUTPUT)
+CREATE PROCEDURE Task.proc_Pay (@TaskCode NVARCHAR(20), @Post BIT = 0,	@PaymentCode nvarchar(20) NULL OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -10851,39 +10851,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER VIEW Cash.vwTaxVatTotals
-AS
-	WITH vat_dates AS
-	(
-		SELECT PayFrom, PayTo FROM Cash.fnTaxTypeDueDates(1)
-	), vatPeriod AS
-	(
-		SELECT        StartOn, y.YearNumber, p.MonthNumber,
-			(SELECT PayTo FROM vat_dates WHERE p.StartOn >= PayFrom AND p.StartOn < PayTo) AS VatStartOn, VatAdjustment
-		FROM            App.tbYearPeriod AS p JOIN App.tbYear AS y ON p.YearNumber = y.YearNumber 
-		WHERE     (y.CashStatusCode = 1) OR (y.CashStatusCode = 2)
-	), vat_results AS
-	(
-		SELECT VatStartOn AS PayTo, DATEADD(MONTH, -1, VatStartOn) AS PostOn,
-			SUM(HomeSales) AS HomeSales, SUM(HomePurchases) AS HomePurchases, SUM(ExportSales) AS ExportSales, SUM(ExportPurchases) AS ExportPurchases, 
-			SUM(HomeSalesVat) AS HomeSalesVat, SUM(HomePurchasesVat) AS HomePurchasesVat, 
-			SUM(ExportSalesVat) AS ExportSalesVat, SUM(ExportPurchasesVat) AS ExportPurchasesVat, SUM(VatDue) AS VatDue
-		FROM Cash.vwTaxVatSummary vatCodeDue JOIN vatPeriod ON vatCodeDue.StartOn = vatPeriod.StartOn
-		GROUP BY VatStartOn
-	), vat_adjustments AS
-	(
-		SELECT VatStartOn AS PayTo, SUM(VatAdjustment) AS VatAdjustment
-		FROM vatPeriod p 
-		GROUP BY VatStartOn
-	)
-	SELECT active_year.YearNumber, active_year.Description, active_month.MonthName AS Period, vat_results.PostOn AS StartOn, HomeSales, HomePurchases, ExportSales, ExportPurchases, HomeSalesVat, HomePurchasesVat, ExportSalesVat, ExportPurchasesVat,
-		vat_adjustments.VatAdjustment, VatDue - vat_adjustments.VatAdjustment AS VatDue
-	FROM vat_results JOIN vat_adjustments ON vat_results.PayTo = vat_adjustments.PayTo
-		JOIN App.tbYearPeriod year_period ON vat_results.PostOn = year_period.StartOn
-		JOIN App.tbMonth active_month ON year_period.MonthNumber = active_month.MonthNumber
-		JOIN App.tbYear active_year ON year_period.YearNumber = active_year.YearNumber;
-go
-CREATE OR ALTER PROCEDURE Task.proc_Project 
+CREATE PROCEDURE Task.proc_Project 
 	(
 	@TaskCode nvarchar(20),
 	@ParentTaskCode nvarchar(20) output
@@ -10905,7 +10873,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_ReconcileCharge
+CREATE PROCEDURE Task.proc_ReconcileCharge
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -10929,7 +10897,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_ResetChargedUninvoiced
+CREATE PROCEDURE Task.proc_ResetChargedUninvoiced
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -10946,7 +10914,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_WorkFlow 
+CREATE PROCEDURE Task.proc_WorkFlow 
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -10967,7 +10935,7 @@ CREATE OR ALTER PROCEDURE Task.proc_WorkFlow
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Task.proc_WorkFlowSelected 
+CREATE PROCEDURE Task.proc_WorkFlowSelected 
 	(
 	@ChildTaskCode nvarchar(20),
 	@ParentTaskCode nvarchar(20) = NULL
@@ -10993,7 +10961,7 @@ CREATE OR ALTER PROCEDURE Task.proc_WorkFlowSelected
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Usr.proc_MenuCleanReferences(@MenuId SMALLINT)
+CREATE PROCEDURE Usr.proc_MenuCleanReferences(@MenuId SMALLINT)
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -11019,7 +10987,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Usr.proc_MenuInsert
+CREATE PROCEDURE Usr.proc_MenuInsert
 	(
 		@MenuName nvarchar(50),
 		@FromMenuId smallint = 0,
@@ -11056,7 +11024,7 @@ AS
 	END CATCH
 go
 
-CREATE OR ALTER PROCEDURE Usr.proc_MenuItemDelete( @EntryId int )
+CREATE PROCEDURE Usr.proc_MenuItemDelete( @EntryId int )
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -11108,7 +11076,7 @@ AS
 go
 
 /*  TRIGGERS ****/
-CREATE OR ALTER TRIGGER Activity.Activity_tbActivity_TriggerUpdate
+CREATE TRIGGER Activity.Activity_tbActivity_TriggerUpdate
    ON  Activity.tbActivity
    AFTER UPDATE, INSERT
 AS 
@@ -11136,7 +11104,7 @@ END
 go
 ALTER TABLE Activity.tbActivity ENABLE TRIGGER Activity_tbActivity_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Activity.Activity_tbAttribute_TriggerUpdate 
+CREATE TRIGGER Activity.Activity_tbAttribute_TriggerUpdate 
    ON  Activity.tbAttribute
    AFTER UPDATE
 AS 
@@ -11154,7 +11122,7 @@ END
 go
 ALTER TABLE Activity.tbAttribute ENABLE TRIGGER Activity_tbAttribute_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Activity.Activity_tbFlow_TriggerUpdate 
+CREATE TRIGGER Activity.Activity_tbFlow_TriggerUpdate 
    ON  Activity.tbFlow
    AFTER UPDATE
 AS 
@@ -11172,7 +11140,7 @@ END
 go
 ALTER TABLE Activity.tbFlow ENABLE TRIGGER Activity_tbFlow_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Activity.Activity_tbOp_TriggerUpdate 
+CREATE TRIGGER Activity.Activity_tbOp_TriggerUpdate 
    ON  Activity.tbOp 
    AFTER UPDATE
 AS 
@@ -11190,7 +11158,7 @@ END
 go
 ALTER TABLE Activity.tbOp ENABLE TRIGGER Activity_tbOp_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER App.App_tbCalendar_TriggerUpdate 
+CREATE TRIGGER App.App_tbCalendar_TriggerUpdate 
    ON  App.tbCalendar
    AFTER UPDATE, INSERT
 AS 
@@ -11212,7 +11180,7 @@ END
 go
 ALTER TABLE App.tbCalendar ENABLE TRIGGER App_tbCalendar_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER App.App_tbOptions_TriggerUpdate 
+CREATE TRIGGER App.App_tbOptions_TriggerUpdate 
    ON  App.tbOptions
    AFTER UPDATE
 AS 
@@ -11230,7 +11198,7 @@ END
 go
 ALTER TABLE App.tbOptions ENABLE TRIGGER App_tbOptions_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER App.App_tbTaxCode_TriggerUpdate
+CREATE TRIGGER App.App_tbTaxCode_TriggerUpdate
    ON  App.tbTaxCode
    AFTER UPDATE, INSERT
 AS 
@@ -11258,7 +11226,7 @@ END
 go
 ALTER TABLE App.tbTaxCode ENABLE TRIGGER App_tbTaxCode_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER App.App_tbUom_TriggerUpdate
+CREATE TRIGGER App.App_tbUom_TriggerUpdate
    ON  App.tbUom
    AFTER UPDATE, INSERT
 AS 
@@ -11280,7 +11248,7 @@ END
 go
 ALTER TABLE App.tbUom ENABLE TRIGGER App_tbUom_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbCategory_TriggerUpdate 
+CREATE TRIGGER Cash.Cash_tbCategory_TriggerUpdate 
    ON  Cash.tbCategory
    AFTER UPDATE, INSERT
 AS 
@@ -11316,7 +11284,7 @@ END
 go
 ALTER TABLE Cash.tbCategory ENABLE TRIGGER Cash_tbCategory_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbCode_TriggerUpdate
+CREATE TRIGGER Cash.Cash_tbCode_TriggerUpdate
    ON  Cash.tbCode
    AFTER UPDATE, INSERT
 AS 
@@ -11344,7 +11312,7 @@ END
 go
 ALTER TABLE Cash.tbCode ENABLE TRIGGER Cash_tbCode_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbPeriod_Trigger_Update 
+CREATE TRIGGER Cash.Cash_tbPeriod_Trigger_Update 
 ON Cash.tbPeriod FOR INSERT, UPDATE
 AS
 	SET NOCOUNT ON;
@@ -11367,7 +11335,7 @@ AS
 go
 ALTER TABLE Cash.tbPeriod ENABLE TRIGGER Cash_tbPeriod_Trigger_Update
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbInvoice_TriggerUpdate
+CREATE TRIGGER Invoice.Invoice_tbInvoice_TriggerUpdate
 ON Invoice.tbInvoice
 FOR UPDATE
 AS
@@ -11414,7 +11382,7 @@ AS
 go
 ALTER TABLE Invoice.tbInvoice ENABLE TRIGGER Invoice_tbInvoice_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbInvoice_TriggerInsert
+CREATE TRIGGER Invoice.Invoice_tbInvoice_TriggerInsert
 ON Invoice.tbInvoice
 FOR INSERT
 AS
@@ -11445,7 +11413,7 @@ AS
 go
 ALTER TABLE Invoice.tbInvoice ENABLE TRIGGER Invoice_tbInvoice_TriggerInsert
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbItem_TriggerInsert
+CREATE TRIGGER Invoice.Invoice_tbItem_TriggerInsert
 ON Invoice.tbItem
 FOR INSERT, UPDATE
 AS
@@ -11479,7 +11447,7 @@ AS
 go
 ALTER TABLE Invoice.tbItem ENABLE TRIGGER Invoice_tbItem_TriggerInsert
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbTask_TriggerDelete
+CREATE TRIGGER Invoice.Invoice_tbTask_TriggerDelete
 ON Invoice.tbTask
 FOR DELETE
 AS
@@ -11497,7 +11465,7 @@ AS
 go
 ALTER TABLE Invoice.tbTask ENABLE TRIGGER Invoice_tbTask_TriggerDelete
 go
-CREATE OR ALTER TRIGGER Invoice.Invoice_tbTask_TriggerInsert
+CREATE TRIGGER Invoice.Invoice_tbTask_TriggerInsert
 ON Invoice.tbTask
 FOR INSERT, UPDATE
 AS
@@ -11531,7 +11499,7 @@ AS
 go
 ALTER TABLE Invoice.tbTask ENABLE TRIGGER Invoice_tbTask_TriggerInsert
 go
-CREATE OR ALTER TRIGGER Org.Org_tbAccount_TriggerUpdate 
+CREATE TRIGGER Org.Org_tbAccount_TriggerUpdate 
    ON  Org.tbAccount
    AFTER UPDATE, INSERT
 AS 
@@ -11566,7 +11534,7 @@ END
 go
 ALTER TABLE Org.tbAccount ENABLE TRIGGER Org_tbAccount_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Org.Org_tbAddress_TriggerInsert
+CREATE TRIGGER Org.Org_tbAddress_TriggerInsert
 ON Org.tbAddress 
 FOR INSERT
 AS
@@ -11591,7 +11559,7 @@ AS
 go
 ALTER TABLE Org.tbAddress ENABLE TRIGGER Org_tbAddress_TriggerInsert
 go
-CREATE OR ALTER TRIGGER Org.Org_tbAddress_TriggerUpdate 
+CREATE TRIGGER Org.Org_tbAddress_TriggerUpdate 
    ON  Org.tbAddress
    AFTER UPDATE
 AS 
@@ -11609,7 +11577,7 @@ END
 go
 ALTER TABLE Org.tbAddress ENABLE TRIGGER Org_tbAddress_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Org.Org_tbContact_TriggerInsert 
+CREATE TRIGGER Org.Org_tbContact_TriggerInsert 
    ON  Org.tbContact
    AFTER INSERT
 AS 
@@ -11636,7 +11604,7 @@ END
 go
 ALTER TABLE Org.tbContact ENABLE TRIGGER Org_tbContact_TriggerInsert
 go
-CREATE OR ALTER TRIGGER Org.Org_tbContact_TriggerUpdate 
+CREATE TRIGGER Org.Org_tbContact_TriggerUpdate 
    ON  Org.tbContact
    AFTER UPDATE
 AS 
@@ -11665,7 +11633,7 @@ END
 go
 ALTER TABLE Org.tbContact ENABLE TRIGGER Org_tbContact_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Org.Org_tbDoc_TriggerUpdate 
+CREATE TRIGGER Org.Org_tbDoc_TriggerUpdate 
    ON  Org.tbDoc
    AFTER UPDATE
 AS 
@@ -11683,7 +11651,7 @@ END
 go
 ALTER TABLE Org.tbDoc ENABLE TRIGGER Org_tbDoc_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Org.Org_tbOrg_TriggerUpdate 
+CREATE TRIGGER Org.Org_tbOrg_TriggerUpdate 
    ON  Org.tbOrg
    AFTER UPDATE, INSERT
 AS 
@@ -11711,7 +11679,7 @@ END
 go
 ALTER TABLE Org.tbOrg ENABLE TRIGGER Org_tbOrg_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Org.Org_tbPayment_TriggerInsert
+CREATE TRIGGER Org.Org_tbPayment_TriggerInsert
 ON Org.tbPayment
 FOR INSERT
 AS
@@ -11734,7 +11702,7 @@ AS
 go
 ALTER TABLE Org.tbPayment ENABLE TRIGGER Org_tbPayment_TriggerInsert
 go
-CREATE OR ALTER TRIGGER Org.Org_tbPayment_TriggerUpdate
+CREATE TRIGGER Org.Org_tbPayment_TriggerUpdate
 ON Org.tbPayment
 FOR UPDATE
 AS
@@ -11771,7 +11739,7 @@ AS
 go
 ALTER TABLE Org.tbPayment ENABLE TRIGGER Org_tbPayment_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Task.Task_tbAttribute_TriggerUpdate 
+CREATE TRIGGER Task.Task_tbAttribute_TriggerUpdate 
    ON  Task.tbAttribute
    AFTER UPDATE
 AS 
@@ -11789,7 +11757,7 @@ END
 go
 ALTER TABLE Task.tbAttribute ENABLE TRIGGER Task_tbAttribute_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Task.Task_tbDoc_TriggerUpdate 
+CREATE TRIGGER Task.Task_tbDoc_TriggerUpdate 
    ON  Task.tbDoc
    AFTER UPDATE
 AS 
@@ -11807,7 +11775,7 @@ END
 go
 ALTER TABLE Task.tbDoc ENABLE TRIGGER Task_tbDoc_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Task.Task_tbFlow_TriggerUpdate 
+CREATE TRIGGER Task.Task_tbFlow_TriggerUpdate 
    ON  Task.tbFlow
    AFTER UPDATE
 AS 
@@ -11825,7 +11793,7 @@ END
 go
 ALTER TABLE Task.tbFlow ENABLE TRIGGER Task_tbFlow_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Task.Task_tbOp_TriggerUpdate 
+CREATE TRIGGER Task.Task_tbOp_TriggerUpdate 
    ON  Task.tbOp 
    AFTER UPDATE, INSERT
 AS 
@@ -11885,7 +11853,7 @@ END
 go
 ALTER TABLE Task.tbOp ENABLE TRIGGER Task_tbOp_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Task.Task_tbQuote_TriggerUpdate 
+CREATE TRIGGER Task.Task_tbQuote_TriggerUpdate 
    ON  Task.tbQuote
    AFTER UPDATE
 AS 
@@ -11903,7 +11871,7 @@ END
 go
 ALTER TABLE Task.tbQuote ENABLE TRIGGER Task_tbQuote_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Task.Task_tbTask_TriggerInsert
+CREATE TRIGGER Task.Task_tbTask_TriggerInsert
 ON Task.tbTask
 FOR INSERT
 AS
@@ -11950,7 +11918,7 @@ AS
 go
 ALTER TABLE Task.tbTask ENABLE TRIGGER Task_tbTask_TriggerInsert
 go
-CREATE OR ALTER TRIGGER Task.Task_tbTask_TriggerUpdate
+CREATE TRIGGER Task.Task_tbTask_TriggerUpdate
 ON Task.tbTask
 FOR UPDATE
 AS
@@ -12213,7 +12181,7 @@ AS
 go
 ALTER TABLE Task.tbTask ENABLE TRIGGER Task_tbTask_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Usr.Usr_tbMenuEntry_TriggerUpdate 
+CREATE TRIGGER Usr.Usr_tbMenuEntry_TriggerUpdate 
    ON  Usr.tbMenuEntry
    AFTER UPDATE
 AS 
@@ -12231,7 +12199,7 @@ END
 go
 ALTER TABLE Usr.tbMenuEntry ENABLE TRIGGER Usr_tbMenuEntry_TriggerUpdate
 go
-CREATE OR ALTER TRIGGER Usr.Usr_tbUser_TriggerUpdate 
+CREATE TRIGGER Usr.Usr_tbUser_TriggerUpdate 
    ON  Usr.tbUser
    AFTER UPDATE
 AS 

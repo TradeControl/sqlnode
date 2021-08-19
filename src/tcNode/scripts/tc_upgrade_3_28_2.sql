@@ -51,7 +51,7 @@ go
 ALTER TABLE Org.tbAccount  WITH CHECK ADD CONSTRAINT FK_Org_tbAccount_Cash_tbCoinType FOREIGN KEY(CoinTypeCode)
 REFERENCES Cash.tbCoinType (CoinTypeCode)
 go
-CREATE OR ALTER PROCEDURE Cash.proc_CoinType(@CoinTypeCode smallint output)
+CREATE PROCEDURE Cash.proc_CoinType(@CoinTypeCode smallint output)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -114,7 +114,7 @@ ON DELETE CASCADE
 go
 ALTER TABLE Org.tbAccountKey CHECK CONSTRAINT FK_Org_tbAccountKey_Org_tbAccount
 go
-CREATE OR ALTER VIEW Org.vwWallets
+CREATE VIEW Org.vwWallets
 AS
 	SELECT        Org.tbAccount.CashAccountCode, Org.tbAccount.CashAccountName, Org.tbAccount.CashCode, Org.tbAccount.CoinTypeCode
 	FROM            Org.tbAccount INNER JOIN
@@ -122,7 +122,7 @@ AS
 							 Cash.tbCode ON Org.tbAccount.CashCode = Cash.tbCode.CashCode
 	WHERE        (Org.tbAccount.DummyAccount = 0) AND Org.tbAccount.CoinTypeCode < 2;
 go
-CREATE OR ALTER PROCEDURE Org.proc_WalletInitialise
+CREATE PROCEDURE Org.proc_WalletInitialise
 AS
 	SET NOCOUNT, XACT_ABORT OFF;
 
@@ -147,7 +147,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Org.proc_AccountKeyAdd (@CashAccountCode nvarchar (10), @ParentName nvarchar(50), @ChildName nvarchar(50), @ChildHDPath nvarchar(50) output)
+CREATE PROCEDURE Org.proc_AccountKeyAdd (@CashAccountCode nvarchar (10), @ParentName nvarchar(50), @ChildName nvarchar(50), @ChildHDPath nvarchar(50) output)
 AS
 	SET NOCOUNT, XACT_ABORT OFF;
 
@@ -181,7 +181,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Org.proc_AccountKeyRename(@CashAccountCode nvarchar (10), @OldKeyName nvarchar(50), @NewKeyName nvarchar(50), @KeyNamespace nvarchar(1024) output)
+CREATE PROCEDURE Org.proc_AccountKeyRename(@CashAccountCode nvarchar (10), @OldKeyName nvarchar(50), @NewKeyName nvarchar(50), @KeyNamespace nvarchar(1024) output)
 AS
 	SET NOCOUNT, XACT_ABORT OFF;
 
@@ -212,7 +212,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Org.proc_AccountKeyDelete(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
+CREATE PROCEDURE Org.proc_AccountKeyDelete(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
 AS
 	SET NOCOUNT, XACT_ABORT OFF;
 
@@ -328,7 +328,7 @@ go
 ALTER TABLE Cash.tbChange WITH CHECK ADD CONSTRAINT FK__Cash_tbChange_Cash_tbChangeType FOREIGN KEY (ChangeTypeCode)
 REFERENCES Cash.tbChangeType (ChangeTypeCode);
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbChange_TriggerUpdate
+CREATE TRIGGER Cash.Cash_tbChange_TriggerUpdate
    ON  Cash.tbChange
    AFTER UPDATE
 AS 
@@ -358,7 +358,7 @@ go
 ALTER TABLE Cash.tbChangeReference  WITH CHECK ADD CONSTRAINT FK_Cash_tbChangeReferencee_Invoice_tbInvoice FOREIGN KEY(InvoiceNumber)
 REFERENCES Invoice.tbInvoice (InvoiceNumber);
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbChangeReference_TriggerInsert
+CREATE TRIGGER Cash.Cash_tbChangeReference_TriggerInsert
 ON Cash.tbChangeReference
 FOR INSERT, UPDATE
 AS
@@ -390,7 +390,7 @@ AS
 	WHERE        (Invoice.tbInvoice.InvoiceTypeCode < 2) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
 
 go
-CREATE OR ALTER VIEW Org.vwNamespace
+CREATE VIEW Org.vwNamespace
 AS
 
 	WITH ancestors AS
@@ -609,7 +609,7 @@ AS
 							 Cash.tbChangeReference ON Invoice.tbInvoice.InvoiceNumber = Cash.tbChangeReference.InvoiceNumber
 	WHERE        (Invoice.tbInvoice.InvoiceTypeCode < 2) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
 go
-CREATE OR ALTER PROCEDURE Cash.proc_ChangeAddressIndex 
+CREATE PROCEDURE Cash.proc_ChangeAddressIndex 
 (
 	@CashAccountCode nvarchar(10), 
 	@KeyName nvarchar(50), 
@@ -630,7 +630,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_ChangeNew 
+CREATE PROCEDURE Cash.proc_ChangeNew 
 (
 	@CashAccountCode nvarchar(10), 
 	@KeyName nvarchar(50), 
@@ -667,7 +667,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER FUNCTION Org.fnAccountKeyNamespace
+CREATE FUNCTION Org.fnAccountKeyNamespace
 (
 	@CashAccountCode nvarchar(10),
 	@HDPath hierarchyid
@@ -695,7 +695,7 @@ BEGIN
 	RETURN @KeyNamespace
 END
 go
-CREATE OR ALTER FUNCTION Org.fnKeyNamespace (@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
+CREATE FUNCTION Org.fnKeyNamespace (@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
 RETURNS TABLE 
 AS
 	RETURN
@@ -724,7 +724,7 @@ AS
 		FROM namespace_set
 	)
 go
-CREATE OR ALTER FUNCTION Cash.fnChangeKeyPath (@CoinTypeCode smallint, @HDPath nvarchar(256), @ChangeTypeCode smallint, @AddressIndex int)
+CREATE FUNCTION Cash.fnChangeKeyPath (@CoinTypeCode smallint, @HDPath nvarchar(256), @ChangeTypeCode smallint, @AddressIndex int)
 RETURNS nvarchar(256)
 AS
 BEGIN
@@ -762,7 +762,7 @@ CREATE UNIQUE NONCLUSTERED INDEX IX_Cash_tbTx_PaymentAddress ON Cash.tbTx (Payme
 go
 CREATE NONCLUSTERED INDEX IX_Cash_tbTx_TxStatusCode ON Cash.tbTx (TxStatusCode, TransactedOn);
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbTx_Trigger
+CREATE TRIGGER Cash.Cash_tbTx_Trigger
    ON  Cash.tbTx
    AFTER UPDATE, INSERT
 AS 
@@ -800,7 +800,7 @@ BEGIN
 	END CATCH
 END
 go
-CREATE OR ALTER TRIGGER [Cash].[Cash_tbTx_Trigger_Delete]
+CREATE TRIGGER [Cash].[Cash_tbTx_Trigger_Delete]
    ON  [Cash].[tbTx]
    AFTER DELETE
 AS 
@@ -856,7 +856,7 @@ go
 ALTER TABLE Cash.tbTxReference  WITH CHECK ADD CONSTRAINT FK_Cash_tbTxReference_Cash_tbTxStatus FOREIGN KEY(TxStatusCode)
 REFERENCES Cash.tbTxStatus (TxStatusCode)
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbTxReference_TriggerDelete
+CREATE TRIGGER Cash.Cash_tbTxReference_TriggerDelete
    ON  Cash.tbTxReference
    AFTER DELETE
 AS 
@@ -875,7 +875,7 @@ BEGIN
 	END CATCH
 END
 go
-CREATE OR ALTER FUNCTION Cash.fnChangeUnassigned (@CashAccountCode nvarchar(10))
+CREATE FUNCTION Cash.fnChangeUnassigned (@CashAccountCode nvarchar(10))
 RETURNS TABLE
 AS
 	RETURN
@@ -895,7 +895,7 @@ AS
 		WHERE  (change.CashAccountCode = @CashAccountCode)  AND (change.ChangeTypeCode = 0) AND (Cash.tbChangeReference.PaymentAddress IS NULL) AND (change.ChangeStatusCode = 0)
 	)
 go
-CREATE OR ALTER FUNCTION Cash.fnChange(@CashAccountCode nvarchar(10), @KeyName nvarchar(50), @ChangeTypeCode smallint)
+CREATE FUNCTION Cash.fnChange(@CashAccountCode nvarchar(10), @KeyName nvarchar(50), @ChangeTypeCode smallint)
 RETURNS TABLE
 AS
 	RETURN
@@ -939,7 +939,7 @@ AS
 		) AS change_balance
 	)
 go
-CREATE OR ALTER PROCEDURE Cash.proc_TxInvoice (@PaymentAddress nvarchar(42), @TxId nvarchar(64))
+CREATE PROCEDURE Cash.proc_TxInvoice (@PaymentAddress nvarchar(42), @TxId nvarchar(64))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
@@ -992,7 +992,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_ChangeAssign
+CREATE PROCEDURE Cash.proc_ChangeAssign
 (
 	@CashAccountCode nvarchar(10), 
 	@KeyName nvarchar(50), 
@@ -1045,7 +1045,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_ChangeDelete (@PaymentAddress nvarchar(42))
+CREATE PROCEDURE Cash.proc_ChangeDelete (@PaymentAddress nvarchar(42))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
@@ -1070,7 +1070,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_ChangeNote (@PaymentAddress nvarchar(42), @Note nvarchar(256))
+CREATE PROCEDURE Cash.proc_ChangeNote (@PaymentAddress nvarchar(42), @Note nvarchar(256))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
@@ -1147,7 +1147,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Cash.vwChangeCollection
+CREATE VIEW Cash.vwChangeCollection
 AS
 	SELECT        change.PaymentAddress, Cash.fnChangeKeyPath(account.CoinTypeCode, account_key.HDPath.ToString(), change.ChangeTypeCode, change.AddressIndex)  FullHDPath
 	FROM            Cash.tbChange AS change INNER JOIN
@@ -1155,7 +1155,7 @@ AS
 							 Org.tbAccount AS account ON account_key.CashAccountCode = account.CashAccountCode
 	WHERE        (change.ChangeStatusCode < 2);
 go
-CREATE OR ALTER PROCEDURE Cash.proc_ChangeTxAdd(@PaymentAddress nvarchar(42), @TxId nvarchar(64), @TxStatusCode smallint, @MoneyIn decimal(18, 5), @Confirmations int, @TxMessage nvarchar(50) = null)
+CREATE PROCEDURE Cash.proc_ChangeTxAdd(@PaymentAddress nvarchar(42), @TxId nvarchar(64), @TxStatusCode smallint, @MoneyIn decimal(18, 5), @Confirmations int, @TxMessage nvarchar(50) = null)
 AS
 	SET XACT_ABORT, NOCOUNT ON;
 	BEGIN TRY
@@ -1194,7 +1194,7 @@ AS
 	END CATCH
 
 go
-CREATE OR ALTER VIEW Cash.vwTxReference
+CREATE VIEW Cash.vwTxReference
 AS
 	WITH tx AS
 	(
@@ -1216,7 +1216,7 @@ AS
 		LEFT OUTER JOIN pay_in ON tx.TxNumber = pay_in.TxNumber
 		LEFT OUTER JOIN pay_out ON tx.TxNumber = pay_out.TxNumber;
 go
-CREATE OR ALTER FUNCTION Cash.fnChangeTx(@PaymentAddress nvarchar(42))
+CREATE FUNCTION Cash.fnChangeTx(@PaymentAddress nvarchar(42))
 RETURNS TABLE
 AS
 	RETURN
@@ -1228,7 +1228,7 @@ AS
 		WHERE        (Cash.tbTx.PaymentAddress = @PaymentAddress)		
 	)
 go
-CREATE OR ALTER FUNCTION Cash.fnTx(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
+CREATE FUNCTION Cash.fnTx(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
 RETURNS TABLE
 AS
 	RETURN
@@ -1256,7 +1256,7 @@ AS
 			JOIN tx ON key_namespace.HDPath = tx.HDPath
 	)
 go
-CREATE OR ALTER VIEW Org.vwListAll
+ALTER VIEW Org.vwListAll
 AS
 	WITH accounts AS
 	(
@@ -1270,7 +1270,7 @@ AS
 		FROM accounts 
 			INNER JOIN Org.tbType AS org_type ON accounts.OrganisationTypeCode = org_type.OrganisationTypeCode
 go
-CREATE OR ALTER PROCEDURE Cash.proc_PaymentAdd(@AccountCode nvarchar(10), @CashAccountCode AS nvarchar(10), @CashCode nvarchar(50), @PaidOn datetime, @ToPay decimal(18, 5), @PaymentReference nvarchar(50) = null, @PaymentCode nvarchar(20) output)
+CREATE PROCEDURE Cash.proc_PaymentAdd(@AccountCode nvarchar(10), @CashAccountCode AS nvarchar(10), @CashCode nvarchar(50), @PaidOn datetime, @ToPay decimal(18, 5), @PaymentReference nvarchar(50) = null, @PaymentCode nvarchar(20) output)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
@@ -1302,7 +1302,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_TxPayIn
+CREATE PROCEDURE Cash.proc_TxPayIn
 (
 	@CashAccountCode nvarchar(10), 
 	@PaymentAddress nvarchar(42),
@@ -1351,7 +1351,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_TxPayInChange
+CREATE PROCEDURE Cash.proc_TxPayInChange
 (
 	@CashAccountCode nvarchar(10), 
 	@PaymentAddress nvarchar(42),
@@ -1401,7 +1401,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_TxPayOutTransfer
+CREATE PROCEDURE Cash.proc_TxPayOutTransfer
 (
 	@PaymentAddress nvarchar(42)
 	, @TxId nvarchar(64)
@@ -1473,7 +1473,7 @@ AS
 		EXEC App.proc_ErrorLog
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_TxPayOutMisc
+CREATE PROCEDURE Cash.proc_TxPayOutMisc
 (
 	@PaymentAddress nvarchar(42)
 	, @TxId nvarchar(64)
@@ -1543,7 +1543,7 @@ AS
 		EXEC App.proc_ErrorLog
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_TxPayAccount
+CREATE PROCEDURE Cash.proc_TxPayAccount
 (
 	@PaymentAddress nvarchar(42)
 	, @TxId nvarchar(64)
@@ -1606,7 +1606,7 @@ AS
 		EXEC App.proc_ErrorLog
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_TxPayOutInvoice 
+CREATE PROCEDURE Cash.proc_TxPayOutInvoice 
 (
 	@AccountCode nvarchar(10),
 	@CashCode nvarchar(50),
@@ -1635,7 +1635,7 @@ AS
 		EXEC App.proc_ErrorLog
 	END CATCH
 go
-CREATE OR ALTER FUNCTION Cash.fnNamespaceBalance(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
+CREATE FUNCTION Cash.fnNamespaceBalance(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
 RETURNS float
 AS
 BEGIN
@@ -1656,7 +1656,7 @@ BEGIN
 	RETURN @Balance;
 END
 go
-CREATE OR ALTER FUNCTION Cash.fnKeyNameBalance(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
+CREATE FUNCTION Cash.fnKeyNameBalance(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
 RETURNS float
 AS
 BEGIN
@@ -1678,7 +1678,7 @@ BEGIN
 	RETURN @Balance;
 END
 go
-CREATE OR ALTER FUNCTION Cash.fnKeyAddresses(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
+CREATE FUNCTION Cash.fnKeyAddresses(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
 RETURNS TABLE
 AS
 	RETURN

@@ -23,7 +23,7 @@ It inserts the upgade into App.tbInstall.
 
 ***********************************************************************************/
 go
-CREATE OR ALTER PROCEDURE App.proc_NodeInitialisation
+ALTER PROCEDURE App.proc_NodeInitialisation
 (
 	@AccountCode NVARCHAR(10),
 	@BusinessName NVARCHAR(255),
@@ -373,7 +373,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE App.proc_BasicSetup
+ALTER PROCEDURE App.proc_BasicSetup
 (	
 	@FinancialMonth SMALLINT = 4,
 	@CoinTypeCode SMALLINT,
@@ -668,7 +668,7 @@ DECLARE
 		EXEC App.proc_ErrorLog
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE App.proc_DemoBom
+ALTER PROCEDURE App.proc_DemoBom
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,
@@ -1099,7 +1099,7 @@ CommitTran:
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE App.proc_DemoServices
+ALTER PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,

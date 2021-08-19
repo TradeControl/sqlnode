@@ -659,7 +659,7 @@ ALTER TABLE Task.tbQuote DROP
 go
 
 
-CREATE OR ALTER VIEW Task.vwProfit 
+ALTER VIEW Task.vwProfit 
 AS
 	WITH orders AS
 	(
@@ -779,7 +779,7 @@ FROM            Org.tbOrg INNER JOIN
                          Org.tbType ON Org.tbOrg.OrganisationTypeCode = Org.tbType.OrganisationTypeCode;
 
 go
-CREATE OR ALTER VIEW Cash.vwFlowVatPeriodAccruals
+ALTER VIEW Cash.vwFlowVatPeriodAccruals
 AS
 	WITH active_periods AS
 	(
@@ -803,7 +803,7 @@ AS
 		CAST((HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS decimal(18,5)) VatDue
 	FROM vat_accruals;
 go
-CREATE OR ALTER VIEW Cash.vwFlowVatRecurrenceAccruals
+ALTER VIEW Cash.vwFlowVatRecurrenceAccruals
 AS	
 	WITH active_periods AS
 	(
@@ -837,7 +837,7 @@ AS
 	FROM vat_accruals 
 		RIGHT OUTER JOIN active_periods ON active_periods.StartOn = vat_accruals.StartOn;	
 go
-CREATE OR ALTER VIEW Cash.vwTaxCorpTotals
+ALTER VIEW Cash.vwTaxCorpTotals
 AS
 	WITH totals AS
 	(
@@ -855,7 +855,7 @@ AS
 	SELECT StartOn, PeriodYear, [Description], [Period], CorporationTaxRate, TaxAdjustment, CAST(NetProfit AS decimal(18, 5)) NetProfit, CAST(CorporationTax AS decimal(18, 5)) CorporationTax
 	FROM totals;
 go
-CREATE OR ALTER PROCEDURE Cash.proc_FlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
+ALTER PROCEDURE Cash.proc_FlowCashCodeValues(@CashCode nvarchar(50), @YearNumber smallint, @IncludeActivePeriods BIT = 0, @IncludeOrderBook BIT = 0, @IncludeTaxAccruals BIT = 0)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -1081,7 +1081,7 @@ AS
 	END CATCH
 
 go
-CREATE OR ALTER PROCEDURE Cash.proc_VatBalance(@Balance decimal(18, 5) output)
+ALTER PROCEDURE Cash.proc_VatBalance(@Balance decimal(18, 5) output)
  AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -1092,7 +1092,7 @@ CREATE OR ALTER PROCEDURE Cash.proc_VatBalance(@Balance decimal(18, 5) output)
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE [Org].[proc_BalanceToPay](@AccountCode NVARCHAR(10), @Balance DECIMAL(18, 5) = 0 OUTPUT)
+ALTER PROCEDURE Org.proc_BalanceToPay(@AccountCode NVARCHAR(10), @Balance DECIMAL(18, 5) = 0 OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -1122,7 +1122,7 @@ AS
 	END CATCH
 
 go
-CREATE OR ALTER PROCEDURE Task.proc_Cost 
+ALTER PROCEDURE Task.proc_Cost 
 	(
 	@ParentTaskCode nvarchar(20),
 	@TotalCost decimal(18, 5) = 0 OUTPUT
@@ -1176,7 +1176,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Task.proc_FullyInvoiced
+ALTER PROCEDURE Task.proc_FullyInvoiced
 	(
 	@TaskCode nvarchar(20),
 	@IsFullyInvoiced bit = 0 output
@@ -1207,7 +1207,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Task.proc_ReconcileCharge
+ALTER PROCEDURE Task.proc_ReconcileCharge
 	(
 	@TaskCode nvarchar(20)
 	)
@@ -1382,7 +1382,7 @@ go
 ALTER TABLE App.tbTaxCode WITH NOCHECK ADD
 	Decimals smallint NOT NULL CONSTRAINT DF_App_tbTaxCode_Decimals DEFAULT (2)
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbPayment_TriggerInsert
+CREATE TRIGGER Cash.Cash_tbPayment_TriggerInsert
 ON Cash.tbPayment
 FOR INSERT
 AS
@@ -1404,7 +1404,7 @@ AS
 go
 ALTER TABLE Cash.tbPayment ENABLE TRIGGER Cash_tbPayment_TriggerInsert
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbPayment_TriggerUpdate
+CREATE TRIGGER Cash.Cash_tbPayment_TriggerUpdate
 ON Cash.tbPayment
 FOR UPDATE
 AS
@@ -1874,7 +1874,7 @@ AS
 	FROM            Cash.tbPayment
 	WHERE        (PaymentStatusCode = 2)
 go
-CREATE OR ALTER VIEW Cash.vwPayments
+CREATE VIEW Cash.vwPayments
 AS
 SELECT        Cash.tbPayment.AccountCode, Cash.tbPayment.PaymentCode, Cash.tbPayment.UserId, Cash.tbPayment.PaymentStatusCode, Cash.tbPayment.CashAccountCode, Cash.tbPayment.CashCode, Cash.tbPayment.TaxCode, 
                          Cash.tbPayment.PaidOn, Cash.tbPayment.PaidInValue, Cash.tbPayment.PaidOutValue, Cash.tbPayment.TaxInValue, Cash.tbPayment.TaxOutValue, Cash.tbPayment.PaymentReference, Cash.tbPayment.InsertedBy, 
@@ -1890,7 +1890,7 @@ go
 IF NOT OBJECT_ID('Org.vwPayments') IS NULL
 	DROP VIEW Org.vwPayments;
 go
-CREATE OR ALTER VIEW Cash.vwPaymentsListing
+CREATE VIEW Cash.vwPaymentsListing
 AS
 SELECT        TOP (100) PERCENT Org.tbOrg.AccountCode, Org.tbOrg.AccountName, Org.tbType.OrganisationType, Org.tbStatus.OrganisationStatus, Cash.tbPayment.PaymentCode, Usr.tbUser.UserName, 
                          App.tbTaxCode.TaxDescription AS PaymentTaxDescription, Org.tbAccount.CashAccountName, Cash.tbCode.CashDescription, Cash.tbPayment.UserId, Cash.tbPayment.CashAccountCode, Cash.tbPayment.CashCode, 
@@ -1910,7 +1910,7 @@ go
 IF NOT OBJECT_ID('Org.vwPaymentsListing') IS NULL
 	DROP VIEW Org.vwPaymentsListing
 go
-CREATE OR ALTER VIEW Cash.vwPaymentsUnposted
+CREATE VIEW Cash.vwPaymentsUnposted
 AS
 SELECT        PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, TaxInValue, TaxOutValue, PaymentReference, InsertedBy, InsertedOn, 
                          UpdatedBy, UpdatedOn, RowVer
@@ -1969,7 +1969,7 @@ AS
 		FROM statement_data;
 
 go
-CREATE OR ALTER PROCEDURE Cash.proc_PaymentPostMisc
+CREATE PROCEDURE Cash.proc_PaymentPostMisc
 	(
 	@PaymentCode nvarchar(20) 
 	)
@@ -2154,7 +2154,7 @@ AS
 	END CATCH
 
 go
-CREATE OR ALTER PROCEDURE Cash.proc_NextPaymentCode (@PaymentCode NVARCHAR(20) OUTPUT)
+CREATE PROCEDURE Cash.proc_NextPaymentCode (@PaymentCode NVARCHAR(20) OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -2174,7 +2174,7 @@ go
 IF NOT OBJECT_ID('Org.proc_PaymentAdd') IS NULL
 	DROP PROCEDURE Org.proc_PaymentAdd;
 go
-CREATE OR ALTER PROCEDURE Cash.proc_PaymentDelete
+CREATE PROCEDURE Cash.proc_PaymentDelete
 	(
 	@PaymentCode nvarchar(20)
 	)
@@ -2208,7 +2208,7 @@ go
 IF NOT OBJECT_ID('Org.proc_PaymentDelete') IS NULL
 	DROP PROCEDURE Org.proc_PaymentDelete;
 go
-CREATE OR ALTER PROCEDURE Cash.proc_PaymentMove
+CREATE PROCEDURE Cash.proc_PaymentMove
 	(
 	@PaymentCode nvarchar(20),
 	@CashAccountCode nvarchar(10)
@@ -2242,7 +2242,7 @@ CREATE OR ALTER PROCEDURE Cash.proc_PaymentMove
 	END CATCH
 
 go
-CREATE OR ALTER PROCEDURE Cash.proc_PaymentPostReconcile
+CREATE PROCEDURE Cash.proc_PaymentPostReconcile
 	(
 	@PaymentCode nvarchar(20),
 	@PostValue decimal(18, 5),
@@ -2339,7 +2339,7 @@ go
 IF NOT OBJECT_ID('Org.proc_PaymentPostPaidOut') IS NULL
 	DROP PROCEDURE Org.proc_PaymentPostPaidOut;
 go
-CREATE OR ALTER PROCEDURE Cash.proc_PaymentPostPaidIn
+CREATE PROCEDURE Cash.proc_PaymentPostPaidIn
 	(
 	@PaymentCode nvarchar(20),
 	@PostValue decimal(18, 5)  
@@ -2432,7 +2432,7 @@ CREATE OR ALTER PROCEDURE Cash.proc_PaymentPostPaidIn
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Cash.proc_PaymentPostPaidOut
+CREATE PROCEDURE Cash.proc_PaymentPostPaidOut
 	(
 	@PaymentCode nvarchar(20),
 	@PostValue decimal(18, 5)  
@@ -2525,7 +2525,7 @@ CREATE OR ALTER PROCEDURE Cash.proc_PaymentPostPaidOut
 	END CATCH
 
 go
-CREATE OR ALTER PROCEDURE Cash.proc_PaymentPostInvoiced (@PaymentCode nvarchar(20))
+CREATE PROCEDURE Cash.proc_PaymentPostInvoiced (@PaymentCode nvarchar(20))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -2566,7 +2566,7 @@ go
 IF NOT OBJECT_ID('Org.proc_PaymentPostInvoiced') IS NULL
 	DROP PROCEDURE Org.proc_PaymentPostInvoiced;
 go
-CREATE OR ALTER PROCEDURE Cash.proc_PaymentPost 
+CREATE PROCEDURE Cash.proc_PaymentPost 
 AS
     SET NOCOUNT, XACT_ABORT ON;
 
@@ -2738,7 +2738,7 @@ AS
 	END CATCH
 
 go
-CREATE OR ALTER VIEW Cash.vwPaymentCode
+CREATE VIEW Cash.vwPaymentCode
 AS
 	SELECT CONCAT(LEFT((SELECT UserId FROM Usr.vwCredentials), 2), '_', FORMAT(CURRENT_TIMESTAMP, 'yymmdd_hhmmss'), '_', DATEPART(MILLISECOND, CURRENT_TIMESTAMP)) AS PaymentCode
 go

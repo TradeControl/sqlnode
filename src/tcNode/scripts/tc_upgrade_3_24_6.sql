@@ -23,7 +23,7 @@ It inserts the upgade into App.tbInstall.
 
 ***********************************************************************************/
 go
-CREATE OR ALTER PROCEDURE App.proc_DemoServices
+ALTER PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,

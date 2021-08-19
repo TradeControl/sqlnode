@@ -124,7 +124,7 @@ AS
 	SELECT (SELECT TOP 1 StartOn FROM App.tbYearPeriod	WHERE (StartOn <= TransactedOn) ORDER BY StartOn DESC) AS StartOn, *
 	FROM Org.vwStatement
 go
-CREATE OR ALTER VIEW Org.vwAssetBalances
+CREATE VIEW Org.vwAssetBalances
 AS
 	WITH financial_periods AS
 	(
@@ -201,7 +201,7 @@ AS
 	FROM asset_balances
 		JOIN Cash.tbAssetType asset_type ON asset_balances.AssetTypeCode = asset_type.AssetTypeCode;
 go
-CREATE OR ALTER VIEW Org.vwBalanceSheetAudit
+CREATE VIEW Org.vwBalanceSheetAudit
 AS
 	SELECT        App.tbYear.YearNumber, App.tbYear.Description, App.tbMonth.MonthName, Org.tbOrg.AccountCode, Org.tbOrg.AccountName, Org.tbType.OrganisationType, Cash.tbMode.CashMode, Cash.tbAssetType.AssetTypeCode, 
 							 Cash.tbAssetType.AssetType, Org.vwAssetBalances.StartOn, Org.vwAssetBalances.Balance
@@ -216,7 +216,7 @@ AS
 							 App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber
 	WHERE        (Org.vwAssetBalances.Balance <> 0) AND (Org.vwAssetBalances.StartOn <= (SELECT TOP (1) StartOn FROM App.vwActivePeriod));
 go
-CREATE OR ALTER VIEW Org.vwAssetStatementAudit
+CREATE VIEW Org.vwAssetStatementAudit
 AS
 	SELECT App.tbYear.YearNumber, App.tbYear.Description, App.tbMonth.MonthName, App.tbYearPeriod.StartOn, asset_statement.AccountCode, account.AccountName, asset_statement.RowNumber, asset_statement.TransactedOn, asset_statement.Charge, asset_statement.Balance
 	FROM  Org.vwAssetStatement AS asset_statement INNER JOIN
@@ -225,7 +225,7 @@ AS
 			App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber INNER JOIN
 			App.tbMonth ON App.tbYearPeriod.MonthNumber = App.tbMonth.MonthNumber;
 go
-CREATE OR ALTER VIEW Org.vwStatementReport
+CREATE VIEW Org.vwStatementReport
 AS
 	SELECT  asset.AccountCode, o.AccountName, asset.RowNumber, App.tbYear.YearNumber, App.tbYear.Description, App.tbMonth.MonthName, asset.StartOn, asset.TransactedOn, asset.Reference, asset.StatementType, asset.Charge, asset.Balance
 	FROM            Org.vwAssetStatement AS asset INNER JOIN
@@ -606,7 +606,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Cash.vwBalanceSheetTax
+CREATE VIEW Cash.vwBalanceSheetTax
 AS
 	SELECT tax_type.AssetCode, tax_type.AssetName, 
 		CAST(0 as smallint) CashModeCode,  
@@ -621,7 +621,7 @@ AS
 			WHERE TaxTypeCode = 0
 		) tax_type;
 go
-CREATE OR ALTER VIEW Cash.vwBalanceSheetVat
+CREATE VIEW Cash.vwBalanceSheetVat
 AS
 	SELECT tax_type.AssetCode, tax_type.AssetName, 
 		CAST(0 as smallint) CashModeCode,  

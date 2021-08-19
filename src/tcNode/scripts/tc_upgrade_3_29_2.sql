@@ -23,7 +23,7 @@ It inserts the upgade into App.tbInstall.
 
 ***********************************************************************************/
 go
-CREATE OR ALTER PROCEDURE App.proc_NodeInitialisation
+ALTER PROCEDURE App.proc_NodeInitialisation
 (
 	@AccountCode NVARCHAR(10),
 	@BusinessName NVARCHAR(255),
@@ -2479,7 +2479,7 @@ AS
 	WHERE        (closing_balance.StartOn > DATEADD(m, - 6, CURRENT_TIMESTAMP))
 	GROUP BY Format(closing_balance.StartOn, 'yyyy-MM');
 go
-DROP VIEW IF EXISTS Cash.vwAccountPeriodClosingBalance
+DROP VIEW Cash.vwAccountPeriodClosingBalance
 go
 ALTER VIEW Cash.vwTaxVatAccruals
 AS

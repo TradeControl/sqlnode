@@ -18,7 +18,7 @@ It inserts the upgade into App.tbInstall.
 
 ***********************************************************************************/
 go
-CREATE OR ALTER PROCEDURE App.proc_NodeInitialisation
+CREATE PROCEDURE App.proc_NodeInitialisation
 (
 	@AccountCode NVARCHAR(10),
 	@BusinessName NVARCHAR(255),
@@ -393,7 +393,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE Usr.proc_AddUser
+CREATE PROCEDURE Usr.proc_AddUser
 (
 	@UserName NVARCHAR(25), 
 	@FullName NVARCHAR(100),
@@ -533,7 +533,7 @@ AS
 		CLOSE funcs
 		DEALLOCATE funcs
 go
-CREATE OR ALTER PROCEDURE App.proc_BasicSetup
+CREATE PROCEDURE App.proc_BasicSetup
 (	
 	@FinancialMonth SMALLINT = 4,
 	@GovAccountName NVARCHAR(255),
@@ -793,7 +793,7 @@ DECLARE @FinancialYear SMALLINT;
 		EXEC App.proc_ErrorLog
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE App.proc_DemoBom
+CREATE PROCEDURE App.proc_DemoBom
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,
@@ -1210,7 +1210,7 @@ CommitTran:
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE App.proc_DemoServices
+CREATE PROCEDURE App.proc_DemoServices
 (
 	@CreateOrders BIT = 0,
 	@InvoiceOrders BIT = 0,

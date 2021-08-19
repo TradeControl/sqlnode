@@ -26,7 +26,7 @@ It inserts the upgade into App.tbInstall.
 
 ***********************************************************************************/
 go
-CREATE OR ALTER TRIGGER Org.Org_tbAccount_TriggerUpdate 
+ALTER TRIGGER Org.Org_tbAccount_TriggerUpdate 
    ON  Org.tbAccount
    AFTER UPDATE, INSERT
 AS 
@@ -75,7 +75,7 @@ BEGIN
 	END CATCH
 END
 go
-CREATE OR ALTER PROCEDURE App.proc_SystemRebuild
+ALTER PROCEDURE App.proc_SystemRebuild
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 

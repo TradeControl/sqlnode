@@ -471,8 +471,8 @@ ALTER TABLE Org.tbAccount
 	DROP CONSTRAINT DF_Org_tbAccount_IsDummyAccount,
 	COLUMN DummyAccount
 go
-DROP VIEW IF EXISTS Org.vwCashAccounts
-DROP VIEW IF EXISTS Org.vwCashAccountsLive
+DROP VIEW Org.vwCashAccounts
+DROP VIEW Org.vwCashAccountsLive
 go
 ALTER PROCEDURE Cash.proc_CurrentAccount(@CashAccountCode NVARCHAR(10) OUTPUT)
 AS
@@ -647,7 +647,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Org.vwCashAccountAssets
+CREATE VIEW Org.vwCashAccountAssets
 AS
 	SELECT        Org.tbAccount.CashAccountCode, Org.tbAccount.LiquidityLevel, Org.tbAccount.CashAccountName, Org.tbAccount.AccountCode, Cash.tbCode.CashCode, Cash.tbCode.TaxCode
 	FROM            Org.tbAccount INNER JOIN
@@ -761,7 +761,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER TRIGGER Cash.Cash_tbPayment_TriggerDelete
+CREATE TRIGGER Cash.Cash_tbPayment_TriggerDelete
 ON Cash.tbPayment
 FOR DELETE
 AS
@@ -1540,7 +1540,7 @@ AS
 							 Cash.vwTaxVatTotals AS vat ON active_periods.StartOn = vat.StartOn
 	GROUP BY active_periods.YearNumber, active_periods.StartOn;
 go
-CREATE OR ALTER VIEW Cash.vwCategoryCapital
+CREATE VIEW Cash.vwCategoryCapital
 AS
 	SELECT DISTINCT category.CategoryCode, category.Category, category.DisplayOrder, cat_type.CategoryType, cash_type.CashType, cash_mode.CashMode,
 		cat_type.CategoryTypeCode, cash_type.CashTypeCode, cash_mode.CashModeCode
@@ -1564,9 +1564,9 @@ AS
 	SELECT CategoryCode, Category, CategoryType, CashType, CashMode
 	FROM Cash.vwCategoryCapital
 go
-DROP FUNCTION IF EXISTS Cash.fnFlowCategory
+DROP FUNCTION Cash.fnFlowCategory
 go
-CREATE OR ALTER FUNCTION Cash.fnFlowCategory(@CashTypeCode smallint)
+CREATE FUNCTION Cash.fnFlowCategory(@CashTypeCode smallint)
 RETURNS @tbCategory TABLE (CategoryCode nvarchar(10), Category nvarchar(50), CashModeCode smallint, DisplayOrder smallint)
 AS
 BEGIN
@@ -1589,7 +1589,7 @@ BEGIN
 	RETURN
 END
 go
-CREATE OR ALTER VIEW Cash.vwCurrentAccount
+CREATE VIEW Cash.vwCurrentAccount
 AS
 	SELECT TOP 1 CashAccountCode, LiquidityLevel 
 	FROM Org.tbAccount 
@@ -1609,7 +1609,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Cash.vwReserveAccount
+CREATE VIEW Cash.vwReserveAccount
 AS
 	SELECT TOP 1 CashAccountCode, LiquidityLevel 
 	FROM Org.tbAccount 
@@ -1635,7 +1635,7 @@ AS
 	WHERE (AccountTypeCode = 0)
 go
 
-CREATE OR ALTER VIEW Cash.vwBalanceSheetPeriods
+CREATE VIEW Cash.vwBalanceSheetPeriods
 AS
 	WITH financial_periods AS
 	(
@@ -1689,14 +1689,14 @@ AS
 	SELECT AssetCode, AssetName, CashModeCode, LiquidityLevel, AssetTypeCode, YearNumber, StartOn, CAST(0 as bit) IsEntry
 	FROM asset_code_periods;
 go
-CREATE OR ALTER VIEW Cash.vwBalanceStartOn
+CREATE VIEW Cash.vwBalanceStartOn
 AS
 	SELECT MIN(App.tbYearPeriod.StartOn) StartOn
 	FROM  App.tbYearPeriod 
 		JOIN App.tbYear ON App.tbYearPeriod.YearNumber = App.tbYear.YearNumber
 	WHERE (App.tbYear.CashStatusCode < 3) AND (App.tbYearPeriod.CashStatusCode < 3)
 go
-CREATE OR ALTER VIEW Org.vwAssetStatement
+CREATE VIEW Org.vwAssetStatement
 AS
 	WITH payment_data AS
 	(
@@ -1745,7 +1745,7 @@ AS
 		CAST(SUM(Charge) OVER (PARTITION BY AccountCode ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS float) AS Balance
 	FROM statement_data;
 go
-CREATE OR ALTER VIEW Cash.vwBalanceSheetOrgs
+CREATE VIEW Cash.vwBalanceSheetOrgs
 AS
 	WITH financial_periods AS
 	(
@@ -1833,7 +1833,7 @@ AS
 	FROM org_base
 		JOIN Cash.tbAssetType asset_type ON org_base.AssetTypeCode = asset_type.AssetTypeCode;
 go
-CREATE OR ALTER VIEW Cash.vwBalanceSheetAccounts
+CREATE VIEW Cash.vwBalanceSheetAccounts
 AS
 	WITH account_statements AS
 	(
@@ -1877,7 +1877,7 @@ AS
 	FROM account_base
 		JOIN Cash.tbAssetType asset_type ON account_base.AssetTypeCode = asset_type.AssetTypeCode;
 go
-CREATE OR ALTER VIEW Cash.vwBalanceSheetAssets
+CREATE VIEW Cash.vwBalanceSheetAssets
 AS
 	WITH asset_statements AS
 	(
@@ -1906,7 +1906,7 @@ AS
 		JOIN Org.tbAccount account ON asset_base.CashAccountCode = account.CashAccountCode;
 
 go
-CREATE OR ALTER VIEW Cash.vwBalanceSheet
+CREATE VIEW Cash.vwBalanceSheet
 AS
 	WITH balance_sheets AS
 	(

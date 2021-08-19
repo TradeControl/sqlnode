@@ -347,7 +347,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER VIEW Task.vwQuotes
+CREATE VIEW Task.vwQuotes
 AS
 	SELECT        Task.tbTask.UserId, Cash.tbCategory.CashModeCode, Cash.tbMode.CashMode, Task.tbTask.ActionOn, Task.tbTask.TaskCode, Task.tbTask.AccountCode, Task.tbTask.ContactName, Task.tbTask.ActivityCode, 
 							 Task.tbTask.TaskTitle, Task.tbTask.SecondReference, Task.tbTask.TaxCode, Task.tbTask.Quantity, Task.tbTask.UnitCharge, Task.tbTask.TotalCharge, Task.vwBucket.Period, Task.vwBucket.BucketId, Task.tbTask.CashCode, 
@@ -361,13 +361,13 @@ AS
 							 Cash.tbMode ON Cash.tbCategory.CashModeCode = Cash.tbMode.CashModeCode
 	WHERE        (Task.tbTask.TaskStatusCode = 0);
 go
-CREATE OR ALTER VIEW Task.vwCostSet
+CREATE VIEW Task.vwCostSet
 AS
 	SELECT TaskCode, UserId, InsertedBy, InsertedOn, RowVer
 	FROM Task.tbCostSet
 	WHERE (UserId = (SELECT UserId FROM Usr.vwCredentials));
 go
-CREATE OR ALTER PROCEDURE Task.proc_CostSetAdd(@TaskCode nvarchar(20))
+CREATE PROCEDURE Task.proc_CostSetAdd(@TaskCode nvarchar(20))
 AS
 	SET XACT_ABORT, NOCOUNT ON;
 	BEGIN TRY
@@ -386,7 +386,7 @@ UPDATE Cash.tbEntryType
 SET CashEntryType = 'Transfer'
 WHERE CashEntryTypeCode = 6;
 go
-CREATE OR ALTER VIEW Cash.vwStatementBase
+CREATE VIEW Cash.vwStatementBase
 AS
 	--invoiced taxes
 	WITH corp_taxcode AS
@@ -598,7 +598,7 @@ AS
 		JOIN Org.tbOrg org ON cs.AccountCode = org.AccountCode
 		JOIN Cash.tbEntryType et ON cs.CashEntryTypeCode = et.CashEntryTypeCode;
 go
-CREATE OR ALTER VIEW Task.vwCostSetTasks
+CREATE VIEW Task.vwCostSetTasks
 AS
 	WITH task_flow AS
 	(
@@ -622,7 +622,7 @@ AS
 		JOIN Cash.tbCode cash_code ON quote.CashCode = cash_code.CashCode
 	WHERE quote.TaskStatusCode = 0;
 go
-CREATE OR ALTER VIEW Cash.vwStatementWhatIf
+CREATE VIEW Cash.vwStatementWhatIf
 AS
 	WITH quotes AS
 	(

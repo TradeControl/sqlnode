@@ -184,7 +184,7 @@ ON DELETE CASCADE
 go
 ALTER TABLE dbo.AspNetUserTokens CHECK CONSTRAINT FK_AspNetUserTokens_AspNetUsers_UserId
 go
-CREATE OR ALTER TRIGGER dbo.AspNetUsers_TriggerInsert 
+CREATE TRIGGER dbo.AspNetUsers_TriggerInsert 
    ON dbo.AspNetUsers
    AFTER INSERT
 AS 
@@ -221,7 +221,7 @@ BEGIN
 
 END
 go
-CREATE OR ALTER TRIGGER dbo.AspNetUsers_TriggerUpdate 
+CREATE TRIGGER dbo.AspNetUsers_TriggerUpdate 
    ON dbo.AspNetUsers
    AFTER UPDATE
 AS 
@@ -251,7 +251,7 @@ BEGIN
 
 END
 go
-CREATE OR ALTER VIEW dbo.AspNetUserRegistrations
+CREATE VIEW dbo.AspNetUserRegistrations
 AS
 	SELECT asp.Id, asp.UserName EmailAddress, u.UserName,
 		asp.EmailConfirmed IsConfirmed, 
@@ -273,7 +273,7 @@ AS
 	FROM AspNetUsers asp
 		LEFT OUTER JOIN Usr.tbUser u ON asp.Email = u.EmailAddress;
 go
-CREATE OR ALTER PROCEDURE dbo.AspNetGetUserId(@Id nvarchar(450), @UserId nvarchar(10) OUTPUT)
+CREATE PROCEDURE dbo.AspNetGetUserId(@Id nvarchar(450), @UserId nvarchar(10) OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
@@ -292,7 +292,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE dbo.AspNetGetUserName(@Id nvarchar(450), @UserName nvarchar(50) OUTPUT)
+CREATE PROCEDURE dbo.AspNetGetUserName(@Id nvarchar(450), @UserName nvarchar(50) OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
@@ -306,7 +306,7 @@ AS
 		EXEC App.proc_ErrorLog;
 	END CATCH
 go
-CREATE OR ALTER PROCEDURE dbo.AspNetGetId(@UserId nvarchar(10), @Id nvarchar(450) OUTPUT)
+CREATE PROCEDURE dbo.AspNetGetId(@UserId nvarchar(10), @Id nvarchar(450) OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
