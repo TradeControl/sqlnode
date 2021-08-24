@@ -102,7 +102,7 @@ namespace TradeControl.Node.Properties {
             "_34_1</string>\r\n  <string>tc_upgrade_3_34_2</string>\r\n  <string>tc_upgrade_3_34_" +
             "3</string>\r\n  <string>tc_upgrade_3_34_4</string>\r\n  <string>tc_upgrade_3_34_5</s" +
             "tring>\r\n  <string>tc_upgrade_3_34_6</string>\r\n  <string>tc_upgrade_3_34_7</strin" +
-            "g>\r\n</ArrayOfString>")]
+            "g>\r\n  <string>tc_upgrade_3_34_8</string>\r\n</ArrayOfString>")]
         public global::System.Collections.Specialized.StringCollection SqlScripts {
             get {
                 return ((global::System.Collections.Specialized.StringCollection)(this["SqlScripts"]));

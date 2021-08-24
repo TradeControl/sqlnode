@@ -235,4 +235,7 @@
   <data name="tc_upgrade_3_34_7" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\scripts\tc_upgrade_3_34_7.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-16</value>
   </data>
+  <data name="tc_upgrade_3_34_8" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\scripts\tc_upgrade_3_34_8.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
 </root>

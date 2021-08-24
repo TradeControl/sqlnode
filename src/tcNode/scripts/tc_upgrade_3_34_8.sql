@@ -1,4 +1,21 @@
-﻿CREATE VIEW Cash.vwBalanceSheetAccounts
+/**************************************************************************************
+Trade Control
+Upgrade script for ASP.NET Core interface
+Release 3.34.8
+
+Date: 24 August 2021
+Author: IAM
+
+Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+
+You may obtain a copy of the License at
+
+	https://www.gnu.org/licenses/gpl-3.0.en.html
+
+
+***********************************************************************************/
+go
+ALTER VIEW Cash.vwBalanceSheetAccounts
 AS
 	WITH cash_accounts AS
 	(
@@ -79,4 +96,5 @@ AS
 	SELECT AssetCode, asset_type.AssetType AssetName, CashModeCode, asset_type.AssetTypeCode, StartOn, Balance
 	FROM account_base
 		JOIN Cash.tbAssetType asset_type ON account_base.AssetTypeCode = asset_type.AssetTypeCode;
+go
 

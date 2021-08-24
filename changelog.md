@@ -48,4 +48,7 @@ Full script for the [Asp.Net Core interface](https://github.com/tradecontrol/tra
 - [x] [App.proc_TemplateCompanyHMRC2021](src/tcNodeDb/App/Stored%20Procedures/proc_TemplateCompanyHMRC2021.sql) - initialisation template that maps all the codes used by the HRMC Accounts and Tax Return portal
 - [x] [Cash.vwTaxLossesCarriedForward](src/tcNodeDb/Cash/Views/vwTaxLossesCarriedForward.sql) - calculates available losses that can be carried forward on a tax return
 - [x] [Cash.vwProfitAndLossData](src/tcNodeDb/Cash/Views/vwProfitAndLossData.sql) - add CashTypeCode for accessing Corporation Tax totals
-  
+
+### 3.34.8
+
+- [x] [Cash.vwBalanceSheetAccounts](src/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql) - fix capital balance calculating incorrectly for companies trading with multiple current and reserve accounts

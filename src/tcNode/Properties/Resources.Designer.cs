@@ -1109,7 +1109,8 @@ namespace TradeControl.Node.Properties {
         ///
         ///
         ///***********************************************************************************/
-        ///CREATE OR ALTER PROCEDURE Cash.proc_Paymen [rest of string was truncated]&quot;;.
+        ///go
+        ///CREATE PROCEDURE Cash.proc_PaymentPost [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_34_6 {
             get {
@@ -1134,11 +1135,38 @@ namespace TradeControl.Node.Properties {
         ///
         ///
         ///***********************************************************************************/
-        ///CREATE OR ALTER PROCEDURE App.proc_Templat [rest of string was truncated]&quot;;.
+        ///go
+        ///CREATE PROCEDURE App.proc_TemplateComp [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string tc_upgrade_3_34_7 {
             get {
                 return ResourceManager.GetString("tc_upgrade_3_34_7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**************************************************************************************
+        ///Trade Control
+        ///Upgrade script for ASP.NET Core interface
+        ///Release 3.34.8
+        ///
+        ///Date: 24 August 2021
+        ///Author: IAM
+        ///
+        ///Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
+        ///
+        ///You may obtain a copy of the License at
+        ///
+        ///	https://www.gnu.org/licenses/gpl-3.0.en.html
+        ///
+        ///
+        ///***********************************************************************************/
+        ///go
+        ///ALTER VIEW Cash.vwBalanceSheetAccoun [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string tc_upgrade_3_34_8 {
+            get {
+                return ResourceManager.GetString("tc_upgrade_3_34_8", resourceCulture);
             }
         }
     }
