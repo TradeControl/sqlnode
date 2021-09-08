@@ -381,10 +381,6 @@ END
 
 As shown in the **tbEventLog** creation statement above, all tables that are not Type Tables, have a field called ``RowVer timestamp NOT NULL`` added to their definition. This gives Azure Sql the version of the row when it is returned following an update, preventing it from being rejected. None Azure versions of Sql Server do not need this field, but it is harmless.
 
-### Comments
-
-Trade Control has been developed by a single author who does not like comments cluttering up the code.  Currently, comments are only used as reminders and requests for change. Coding, however, does strive to be self-documenting.
-
 ## Licence
 
 The Trade Control Code licence is issued by Trade Control Ltd under a [GNU General Public Licence v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) 
