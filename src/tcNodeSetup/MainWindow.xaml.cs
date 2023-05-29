@@ -212,7 +212,7 @@ namespace TradeControl.Node
                                         {
                                             cbTemplateName.ItemsSource = tcnode.TemplateNames;
                                             if (cbTemplateName.Items.Count > 0)
-                                                cbTemplateName.SelectedIndex = 0;
+                                                cbTemplateName.SelectedIndex = cbTemplateName.Items.Count - 1;
 
                                             if (tcnode.UnitOfCharge != "BTC")
                                             {

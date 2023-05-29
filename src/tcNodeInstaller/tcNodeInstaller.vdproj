@@ -15,13 +15,7 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_255116D2AFC176AAF74DE809CE5FEF8D"
-        "OwnerKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_A708C4B6069F4D8DC4C1E1570C51379F"
+        "MsmKey" = "8:_44902A3DA5E3808171BB9E1C79ECDCBC"
         "OwnerKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -33,6 +27,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_E2353AEA534EF60851B4C394BB07785B"
+        "OwnerKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
         "MsmSig" = "8:_UNDEFINED"
@@ -40,13 +40,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A708C4B6069F4D8DC4C1E1570C51379F"
+        "OwnerKey" = "8:_44902A3DA5E3808171BB9E1C79ECDCBC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_255116D2AFC176AAF74DE809CE5FEF8D"
+        "OwnerKey" = "8:_E2353AEA534EF60851B4C394BB07785B"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -144,20 +144,20 @@
         }
         "File"
         {
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_255116D2AFC176AAF74DE809CE5FEF8D"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_44902A3DA5E3808171BB9E1C79ECDCBC"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
+            "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.34.8.0, Culture=neutral, PublicKeyToken=cb281103e4e604b8, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_255116D2AFC176AAF74DE809CE5FEF8D"
+                    "_44902A3DA5E3808171BB9E1C79ECDCBC"
                     {
-                    "Name" = "8:System.Net.Http.dll"
+                    "Name" = "8:TradeControl.Node.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:System.Net.Http.dll"
+            "SourcePath" = "8:TradeControl.Node.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_5CF1BA07340340B497A48A5C96106A02"
@@ -175,20 +175,20 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_A708C4B6069F4D8DC4C1E1570C51379F"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_E2353AEA534EF60851B4C394BB07785B"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:TradeControl.Node, Version=3.34.7.0, Culture=neutral, PublicKeyToken=cb281103e4e604b8, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
                 "ScatterAssemblies"
                 {
-                    "_A708C4B6069F4D8DC4C1E1570C51379F"
+                    "_E2353AEA534EF60851B4C394BB07785B"
                     {
-                    "Name" = "8:TradeControl.Node.dll"
+                    "Name" = "8:System.Net.Http.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:TradeControl.Node.dll"
+            "SourcePath" = "8:System.Net.Http.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_5CF1BA07340340B497A48A5C96106A02"
@@ -273,15 +273,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Trade Control Node Configurator"
-        "ProductCode" = "8:{58B71D2E-C65A-4C63-9F6B-9885D4171779}"
-        "PackageCode" = "8:{655A60CD-F024-48A9-8D59-35167B66D8FC}"
+        "ProductCode" = "8:{00BC0304-7498-4731-8E9B-3F95C1118862}"
+        "PackageCode" = "8:{DD19ADC7-9BA0-4772-8F9A-FF9F68136C49}"
         "UpgradeCode" = "8:{87530140-719B-40FB-88AF-371486179C12}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:3.34.8"
+        "ProductVersion" = "8:3.34.9"
         "Manufacturer" = "8:Trade Control"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -809,7 +809,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_DD76A4FF61444B16BCBCED7BF1C5D3C3"
             {
-            "SourcePath" = "8:..\\tcNodeSetup\\obj\\Release\\TradeControl.Node.Config.exe"
+            "SourcePath" = "8:..\\tcNodeSetup\\obj\\Debug\\TradeControl.Node.Config.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_5CF1BA07340340B497A48A5C96106A02"
