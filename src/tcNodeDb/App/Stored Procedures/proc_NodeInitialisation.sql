@@ -256,7 +256,7 @@ AS
 			, (8, 0, 'TBC')
 			, (9, 0, 'Employee');
 
-		IF NOT EXISTS(SELECT * FROM App.tbText)
+		IF NOT EXISTS(SELECT * FROM App.tbText WHERE NOT TextId BETWEEN 1220 AND 1225)
 		BEGIN
 			INSERT INTO App.tbText (TextId, Message, Arguments)
 			VALUES (1003, 'Enter new menu name', 0)

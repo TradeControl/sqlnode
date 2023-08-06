@@ -74,7 +74,7 @@ namespace TradeControl.Node.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=IAM;Initial Catalog=tcNode;Integrated Security=True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=IAM-01;Initial Catalog=tcNodeDb;Integrated Security=True")]
         public string tcNodeConnectionString {
             get {
                 return ((string)(this["tcNodeConnectionString"]));
@@ -83,26 +83,8 @@ namespace TradeControl.Node.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsi=\"http://www.w3." +
-            "org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <s" +
-            "tring>tc_upgrade_3_23_2</string>\r\n  <string>tc_upgrade_3_24_1</string>\r\n  <strin" +
-            "g>tc_upgrade_3_24_2</string>\r\n  <string>tc_upgrade_3_24_3</string>\r\n  <string>tc" +
-            "_upgrade_3_24_4</string>\r\n  <string>tc_upgrade_3_24_5</string>\r\n  <string>tc_upg" +
-            "rade_3_24_6</string>\r\n  <string>tc_upgrade_3_25_1</string>\r\n  <string>tc_upgrade" +
-            "_3_26_1</string>\r\n  <string>tc_upgrade_3_27_1</string>\r\n  <string>tc_upgrade_3_2" +
-            "8_1</string>\r\n  <string>tc_upgrade_3_28_2</string>\r\n  <string>tc_upgrade_3_28_3<" +
-            "/string>\r\n  <string>tc_upgrade_3_28_4</string>\r\n  <string>tc_upgrade_3_28_5</str" +
-            "ing>\r\n  <string>tc_upgrade_3_29_1</string>\r\n  <string>tc_upgrade_3_29_2</string>" +
-            "\r\n  <string>tc_upgrade_3_29_3</string>\r\n  <string>tc_upgrade_3_29_4</string>\r\n  " +
-            "<string>tc_upgrade_3_30_1</string>\r\n  <string>tc_upgrade_3_30_2</string>\r\n  <str" +
-            "ing>tc_upgrade_3_30_3</string>\r\n  <string>tc_upgrade_3_30_4</string>\r\n  <string>" +
-            "tc_upgrade_3_30_5</string>\r\n  <string>tc_upgrade_3_30_6</string>\r\n  <string>tc_u" +
-            "pgrade_3_31_1</string>\r\n  <string>tc_upgrade_3_31_2</string>\r\n  <string>tc_upgra" +
-            "de_3_32_1</string>\r\n  <string>tc_upgrade_3_33_1</string>\r\n  <string>tc_upgrade_3" +
-            "_34_1</string>\r\n  <string>tc_upgrade_3_34_2</string>\r\n  <string>tc_upgrade_3_34_" +
-            "3</string>\r\n  <string>tc_upgrade_3_34_4</string>\r\n  <string>tc_upgrade_3_34_5</s" +
-            "tring>\r\n  <string>tc_upgrade_3_34_6</string>\r\n  <string>tc_upgrade_3_34_7</strin" +
-            "g>\r\n  <string>tc_upgrade_3_34_8</string>\r\n</ArrayOfString>")]
+        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ArrayOfString xmlns:xsd=\"http://www.w3." +
+            "org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" />")]
         public global::System.Collections.Specialized.StringCollection SqlScripts {
             get {
                 return ((global::System.Collections.Specialized.StringCollection)(this["SqlScripts"]));

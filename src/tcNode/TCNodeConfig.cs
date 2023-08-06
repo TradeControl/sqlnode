@@ -474,6 +474,14 @@ namespace TradeControl.Node
                 }
             }
         }
+
+        bool IsDeprecatedVersion
+        {
+            get
+            {
+                return InstalledVersion.Major != CurrentVersion.Major;
+            }
+        }
         #endregion
 
         #region Installation and Upgrades
@@ -500,7 +508,9 @@ namespace TradeControl.Node
                 List<string> upgrades = new List<string>();
 
                 if (!IsTCNode)
-                    return;
+                    throw new Exception("Upgrade error: unrecognised database");
+                else if (IsDeprecatedVersion)
+                    throw new Exception($"Version {InstalledVersion.Major} is deprecated. Contact support to upgrade to version {CurrentVersion.Major}");
 
                 foreach (string candidate in Properties.Settings.Default.SqlScripts)
                 {
@@ -528,7 +538,6 @@ namespace TradeControl.Node
                 throw e;
             }
         }
-
 
         private void RegisterRelease()
         {

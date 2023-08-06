@@ -1,20 +1,4 @@
-﻿/**************************************************************************************
-Trade Control
-Upgrade script for ASP.NET Core interface
-Release 3.34.6
-
-Date: 22 June 2021
-Author: IAM
-
-Trade Control by Trade Control Ltd is licensed under GNU General Public License v3.0. 
-
-You may obtain a copy of the License at
-
-	https://www.gnu.org/licenses/gpl-3.0.en.html
-
-
-***********************************************************************************/
-CREATE   PROCEDURE Cash.proc_PaymentPostById(@UserId nvarchar(10)) 
+﻿CREATE   PROCEDURE Cash.proc_PaymentPostById(@UserId nvarchar(10)) 
 AS
     SET NOCOUNT, XACT_ABORT ON;
 

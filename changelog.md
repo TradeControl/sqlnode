@@ -2,6 +2,36 @@
 
 Changes to 3.33.1, released February 2021. Previous releases are logged in the [development history archive](https://github.com/iamonnox/tradecontrol).
 
+## Version 4
+
+The purpose of Version 4 is to bring the schema naming conventions into alignment with the apps underlying [Production Theory](https://tradecontrol.github.io/articles/tc_production/). In consequence, all associated repositories will need to be updated before it can be published. 
+
+[Sql Server project tcNodeDb4](https://github.com/TradeControl/sqlnode/tree/master/src/tcNodeDb4)
+
+### 4.1.1
+
+Name changes:
+
+V3 Name | V4 Name
+ -- | --
+ Activity | Object
+ Organisation | Subject
+ Org | Subject
+ Task | Project
+ tbMode | tbPolarity
+ CashMode | CashPolarity
+ Task.proc_IsProject | Project.proc_IsProjected
+ Task.proc_Project | Project.proc_Root
+ Task.proc_Mode | Task.proc_Polarity
+
+ - [x] Archive version 3 scripts
+ - [x] A new [tc_node_creation](src/tcNode/scripts/tc_create_node.sql) script doctored from the output of Sql Server project **tcNodeDb4**
+ - [x] Deprecate version 3 in Node Setup - [IsDeprecatedVersion()](src/tcNode/tcNodeConfig.cs)
+
+## Version 3
+
+[Sql Server project tcNodeDb](https://github.com/TradeControl/sqlnode/tree/master/src/tcNodeDb)
+
 ### 3.34.1
 
 Completion of the [costing system](https://tradecontrol.github.io/tutorials/manufacturing#job-costing)

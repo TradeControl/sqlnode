@@ -88,7 +88,7 @@ AS
 
 ### Recursion
 
-TC is a recursive application: Activities, Tasks and Cash Categories are its key components and they are all recursive. Organisations, in the pre-release versions of TC, were also expressed recursively, but this confused the users and was therefore replaced with the current simplified form. In CL 2000, recursion had to be expressed through a combination of self-calling procedures and cursors. Legacy procedures that use this technique can be obtained from the following code:
+TC is a recursive application: Objects, Projects and Cash Categories are its key components and they are all recursive. Subjects, in pre-release versions, were also expressed recursively, [namespaces](https://tradecontrol.github.io/articles/tc_production/#namespaces), but this confused the users and was therefore replaced with the current simplified form. In CL 2000, recursion had to be expressed through a combination of self-calling procedures and cursors. Legacy procedures that use this technique can be obtained from the following code:
 
 ``` sql
 WITH cms AS
@@ -105,37 +105,37 @@ SELECT DISTINCT referenced_object
 FROM cms
 WHERE referenced_object = referencing_object;
 ```
-By way of example, *Task.proc_Delete*, with error handling removed, is written like this:
+By way of example, *Project.proc_Delete*, with error handling removed, is written like this:
 
 ``` sql
-CREATE OR ALTER PROCEDURE Task.proc_Delete (@TaskCode nvarchar(20))
+CREATE OR ALTER PROCEDURE Project.proc_Delete (@ProjectCode nvarchar(20))
 AS
-	DECLARE @ChildTaskCode nvarchar(20)
+	DECLARE @ChildProjectCode nvarchar(20)
 
 	IF @@NESTLEVEL = 1
 		BEGIN TRANSACTION
 
-	DELETE FROM Task.tbFlow
-	WHERE     (ChildTaskCode = @TaskCode)
+	DELETE FROM Project.tbFlow
+	WHERE     (ChildProjectCode = @ProjectCode)
 
 	DECLARE curFlow cursor local for
-		SELECT     ChildTaskCode
-		FROM         Task.tbFlow
-		WHERE     (ParentTaskCode = @TaskCode)
+		SELECT     ChildProjectCode
+		FROM         Project.tbFlow
+		WHERE     (ParentProjectCode = @ProjectCode)
 	
 	OPEN curFlow		
-	FETCH NEXT FROM curFlow INTO @ChildTaskCode
+	FETCH NEXT FROM curFlow INTO @ChildProjectCode
 	WHILE @@FETCH_STATUS = 0
 		BEGIN
-		EXEC Task.proc_Delete @ChildTaskCode
-		FETCH NEXT FROM curFlow INTO @ChildTaskCode		
+		EXEC Project.proc_Delete @ChildProjectCode
+		FETCH NEXT FROM curFlow INTO @ChildProjectCode		
 		END
 	
 	CLOSE curFlow
 	DEALLOCATE curFlow
 	
-	DELETE FROM Task.tbTask
-	WHERE (TaskCode = @TaskCode)
+	DELETE FROM Project.tbProject
+	WHERE (ProjectCode = @ProjectCode)
 	
 	IF @@NESTLEVEL = 1
 		COMMIT TRANSACTION
@@ -144,46 +144,46 @@ AS
 
 It is identical to the CL 2000 version and is retained because there is enforced integrity checking on the work flow. To code this procedure using a CTE recursion equivalent would require something like the following code, where **UNION ALL** is the recursive operator:
 ``` sql
-DECLARE @TaskCode nvarchar(20) = 'IM_10011';
+DECLARE @ProjectCode nvarchar(20) = 'IM_10011';
 
 	BEGIN TRANSACTION;
 
-	DECLARE @Tasks TABLE (ParentTaskCode nvarchar(20), ChildTaskCode nvarchar(20));
+	DECLARE @Projects TABLE (ParentProjectCode nvarchar(20), ChildProjectCode nvarchar(20));
 
-	WITH task_flow AS
+	WITH project_flow AS
 	(
-		SELECT child.ParentTaskCode, child.ChildTaskCode
-		FROM Task.tbFlow child 
-		WHERE child.ParentTaskCode = @TaskCode
+		SELECT child.ParentProjectCode, child.ChildProjectCode
+		FROM Project.tbFlow child 
+		WHERE child.ParentProjectCode = @ProjectCode
 			UNION
-		SELECT child.ParentTaskCode, child.ChildTaskCode
-		FROM Task.tbFlow child 
-		WHERE child.ChildTaskCode = @TaskCode
+		SELECT child.ParentProjectCode, child.ChildProjectCode
+		FROM Project.tbFlow child 
+		WHERE child.ChildProjectCode = @ProjectCode
 
 		UNION ALL
 
-		SELECT child.ParentTaskCode, child.ChildTaskCode
-		FROM Task.tbFlow child 
-			JOIN task_flow parent ON child.ParentTaskCode = parent.ChildTaskCode
+		SELECT child.ParentProjectCode, child.ChildProjectCode
+		FROM Project.tbFlow child 
+			JOIN project_flow parent ON child.ParentProjectCode = parent.ChildProjectCode
 	)
-	INSERT INTO @Tasks (ParentTaskCode, ChildTaskCode)
-	SELECT  ParentTaskCode, ChildTaskCode
-	FROM task_flow;
+	INSERT INTO @Projects (ParentProjectCode, ChildProjectCode)
+	SELECT  ParentProjectCode, ChildProjectCode
+	FROM project_flow;
 
 	DELETE tb
-	FROM Task.tbFlow tb
-		JOIN @Tasks flow ON tb.ParentTaskCode = flow.ParentTaskCode 
-				AND tb.ChildTaskCode = flow.ChildTaskCode;
+	FROM Project.tbFlow tb
+		JOIN @Projects flow ON tb.ParentProjectCode = flow.ParentProjectCode 
+				AND tb.ChildProjectCode = flow.ChildProjectCode;
 
-	WITH tasks AS
+	WITH projects AS
 	(
-		SELECT @TaskCode AS TaskCode
+		SELECT @ProjectCode AS ProjectCode
 		UNION
-		SELECT DISTINCT ChildTaskCode AS TaskCode FROM @Tasks
+		SELECT DISTINCT ChildProjectCode AS ProjectCode FROM @Projects
 	)
 	DELETE tb
-	FROM Task.tbTask tb 
-		JOIN tasks ON tb.TaskCode = tasks.TaskCode;
+	FROM Project.tbProject tb 
+		JOIN projects ON tb.ProjectCode = projects.ProjectCode;
 	
 	COMMIT TRANSACTION;
 
@@ -352,14 +352,14 @@ Tables that are not [Enumerated Types](#enumerated-types) have four additional c
 Updates are set inside the table triggers:
 
 ``` sql
-CREATE OR ALTER TRIGGER Activity.Activity_tbActivity_TriggerUpdate
-   ON  Activity.tbActivity
+CREATE OR ALTER TRIGGER Object.Object_tbObject_TriggerUpdate
+   ON  Object.tbObject
    AFTER UPDATE, INSERT
 AS 
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY	
-		IF EXISTS (SELECT * FROM inserted i WHERE App.fnParsePrimaryKey(ActivityCode) = 0)
+		IF EXISTS (SELECT * FROM inserted i WHERE App.fnParsePrimaryKey(ObjectCode) = 0)
 			BEGIN
 			DECLARE @Msg NVARCHAR(MAX);
 			SELECT @Msg = Message FROM App.tbText WHERE TextId = 2004;
@@ -368,9 +368,9 @@ BEGIN
 			END
 		ELSE
 			BEGIN
-			UPDATE Activity.tbActivity
+			UPDATE Object.tbObject
 			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
-			FROM Activity.tbActivity INNER JOIN inserted AS i ON tbActivity.ActivityCode = i.ActivityCode;
+			FROM Object.tbObject INNER JOIN inserted AS i ON tbObject.ObjectCode = i.ObjectCode;
 			END
 	END TRY
 	BEGIN CATCH

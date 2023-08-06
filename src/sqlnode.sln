@@ -23,6 +23,52 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "tcNodeInstaller", "tcNodeIn
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcNodeDb", "tcNodeDb\tcNodeDb.sqlproj", "{38FE62E1-74AF-4DB6-8532-C5541432C1CC}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcNodeDb4", "tcNodeDb4\tcNodeDb4.sqlproj", "{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "archive", "archive", "{554B6C10-71AE-474E-B230-40706ACB9D07}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V3", "V3", "{2B8A0B81-09A9-4BA5-8FE2-F590C0CCCDEB}"
+	ProjectSection(SolutionItems) = preProject
+		archive\V3\tc_create_node.sql = archive\V3\tc_create_node.sql
+		archive\V3\tc_upgrade_3_23_2.sql = archive\V3\tc_upgrade_3_23_2.sql
+		archive\V3\tc_upgrade_3_24_1.sql = archive\V3\tc_upgrade_3_24_1.sql
+		archive\V3\tc_upgrade_3_24_2.sql = archive\V3\tc_upgrade_3_24_2.sql
+		archive\V3\tc_upgrade_3_24_3.sql = archive\V3\tc_upgrade_3_24_3.sql
+		archive\V3\tc_upgrade_3_24_4.sql = archive\V3\tc_upgrade_3_24_4.sql
+		archive\V3\tc_upgrade_3_24_5.sql = archive\V3\tc_upgrade_3_24_5.sql
+		archive\V3\tc_upgrade_3_24_6.sql = archive\V3\tc_upgrade_3_24_6.sql
+		archive\V3\tc_upgrade_3_25_1.sql = archive\V3\tc_upgrade_3_25_1.sql
+		archive\V3\tc_upgrade_3_26_1.sql = archive\V3\tc_upgrade_3_26_1.sql
+		archive\V3\tc_upgrade_3_27_1.sql = archive\V3\tc_upgrade_3_27_1.sql
+		archive\V3\tc_upgrade_3_28_1.sql = archive\V3\tc_upgrade_3_28_1.sql
+		archive\V3\tc_upgrade_3_28_2.sql = archive\V3\tc_upgrade_3_28_2.sql
+		archive\V3\tc_upgrade_3_28_3.sql = archive\V3\tc_upgrade_3_28_3.sql
+		archive\V3\tc_upgrade_3_28_4.sql = archive\V3\tc_upgrade_3_28_4.sql
+		archive\V3\tc_upgrade_3_28_5.sql = archive\V3\tc_upgrade_3_28_5.sql
+		archive\V3\tc_upgrade_3_29_1.sql = archive\V3\tc_upgrade_3_29_1.sql
+		archive\V3\tc_upgrade_3_29_2.sql = archive\V3\tc_upgrade_3_29_2.sql
+		archive\V3\tc_upgrade_3_29_3.sql = archive\V3\tc_upgrade_3_29_3.sql
+		archive\V3\tc_upgrade_3_29_4.sql = archive\V3\tc_upgrade_3_29_4.sql
+		archive\V3\tc_upgrade_3_30_1.sql = archive\V3\tc_upgrade_3_30_1.sql
+		archive\V3\tc_upgrade_3_30_2.sql = archive\V3\tc_upgrade_3_30_2.sql
+		archive\V3\tc_upgrade_3_30_3.sql = archive\V3\tc_upgrade_3_30_3.sql
+		archive\V3\tc_upgrade_3_30_4.sql = archive\V3\tc_upgrade_3_30_4.sql
+		archive\V3\tc_upgrade_3_30_5.sql = archive\V3\tc_upgrade_3_30_5.sql
+		archive\V3\tc_upgrade_3_30_6.sql = archive\V3\tc_upgrade_3_30_6.sql
+		archive\V3\tc_upgrade_3_31_1.sql = archive\V3\tc_upgrade_3_31_1.sql
+		archive\V3\tc_upgrade_3_31_2.sql = archive\V3\tc_upgrade_3_31_2.sql
+		archive\V3\tc_upgrade_3_32_1.sql = archive\V3\tc_upgrade_3_32_1.sql
+		archive\V3\tc_upgrade_3_33_1.sql = archive\V3\tc_upgrade_3_33_1.sql
+		archive\V3\tc_upgrade_3_34_1.sql = archive\V3\tc_upgrade_3_34_1.sql
+		archive\V3\tc_upgrade_3_34_2.sql = archive\V3\tc_upgrade_3_34_2.sql
+		archive\V3\tc_upgrade_3_34_3.sql = archive\V3\tc_upgrade_3_34_3.sql
+		archive\V3\tc_upgrade_3_34_4.sql = archive\V3\tc_upgrade_3_34_4.sql
+		archive\V3\tc_upgrade_3_34_5.sql = archive\V3\tc_upgrade_3_34_5.sql
+		archive\V3\tc_upgrade_3_34_6.sql = archive\V3\tc_upgrade_3_34_6.sql
+		archive\V3\tc_upgrade_3_34_7.sql = archive\V3\tc_upgrade_3_34_7.sql
+		archive\V3\tc_upgrade_3_34_8.sql = archive\V3\tc_upgrade_3_34_8.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,9 +93,18 @@ Global
 		{38FE62E1-74AF-4DB6-8532-C5541432C1CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38FE62E1-74AF-4DB6-8532-C5541432C1CC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{38FE62E1-74AF-4DB6-8532-C5541432C1CC}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2B8A0B81-09A9-4BA5-8FE2-F590C0CCCDEB} = {554B6C10-71AE-474E-B230-40706ACB9D07}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {09BCD0A8-4594-4316-8D0E-9A458D6F3DAB}

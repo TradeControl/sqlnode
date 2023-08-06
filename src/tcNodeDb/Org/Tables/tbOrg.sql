@@ -33,8 +33,8 @@
     CONSTRAINT [FK_Org_tb_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Org_tb_Org_tbAddress] FOREIGN KEY ([AddressCode]) REFERENCES [Org].[tbAddress] ([AddressCode]) NOT FOR REPLICATION,
     CONSTRAINT [FK_Org_tbOrg_tbTransmitStatus] FOREIGN KEY ([TransmitStatusCode]) REFERENCES [Org].[tbTransmitStatus] ([TransmitStatusCode]),
-    CONSTRAINT [tbOrg_FK00] FOREIGN KEY ([OrganisationStatusCode]) REFERENCES [Org].[tbStatus] ([OrganisationStatusCode]),
-    CONSTRAINT [tbOrg_FK01] FOREIGN KEY ([OrganisationTypeCode]) REFERENCES [Org].[tbType] ([OrganisationTypeCode])
+    CONSTRAINT [FK_Org_tbOrg_tbStatus] FOREIGN KEY ([OrganisationStatusCode]) REFERENCES [Org].[tbStatus] ([OrganisationStatusCode]),
+    CONSTRAINT [FK_Org_tbOrg_tbType] FOREIGN KEY ([OrganisationTypeCode]) REFERENCES [Org].[tbType] ([OrganisationTypeCode])
 );
 
 
