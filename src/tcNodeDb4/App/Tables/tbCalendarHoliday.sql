@@ -3,7 +3,7 @@
     [UnavailableOn] DATETIME      NOT NULL,
     [RowVer]        ROWVERSION    NOT NULL,
     CONSTRAINT [PK_App_tbCalendarHoliday] PRIMARY KEY CLUSTERED ([CalendarCode] ASC, [UnavailableOn] ASC) WITH (FILLFACTOR = 90),
-    CONSTRAINT [App_tbCalendarHoliday_FK00] FOREIGN KEY ([CalendarCode]) REFERENCES [App].[tbCalendar] ([CalendarCode]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [FK_App_tbCalendarHoliday_tbCalendar] FOREIGN KEY ([CalendarCode]) REFERENCES [App].[tbCalendar] ([CalendarCode]) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 

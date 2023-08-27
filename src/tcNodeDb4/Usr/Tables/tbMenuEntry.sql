@@ -14,8 +14,8 @@
     [RowVer]      ROWVERSION     NOT NULL,
     CONSTRAINT [PK_Usr_tbMenuEntry] PRIMARY KEY CLUSTERED ([MenuId] ASC, [EntryId] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Usr_tbMenuEntry_Usr_tbMenu] FOREIGN KEY ([MenuId]) REFERENCES [Usr].[tbMenu] ([MenuId]) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT [Usr_tbMenuEntry_FK01] FOREIGN KEY ([Command]) REFERENCES [Usr].[tbMenuCommand] ([Command]),
-    CONSTRAINT [Usr_tbMenuEntry_FK02] FOREIGN KEY ([OpenMode]) REFERENCES [Usr].[tbMenuOpenMode] ([OpenMode]),
+    CONSTRAINT [FK_Usr_tbMenuEntry_tbMenuCommand] FOREIGN KEY ([Command]) REFERENCES [Usr].[tbMenuCommand] ([Command]),
+    CONSTRAINT [FK_Usr_tbMenuEntry_tbMenuOpenMode] FOREIGN KEY ([OpenMode]) REFERENCES [Usr].[tbMenuOpenMode] ([OpenMode]),
     CONSTRAINT [IX_Usr_tbMenuEntry_MenuFolderItem] UNIQUE NONCLUSTERED ([MenuId] ASC, [FolderId] ASC, [ItemId] ASC) WITH (FILLFACTOR = 90)
 );
 

@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE Subject.proc_AccountKeyAdd (@CashAccountCode nvarchar (10), @ParentName nvarchar(50), @ChildName nvarchar(50), @ChildHDPath nvarchar(50) output)
+﻿CREATE PROCEDURE Subject.proc_AccountKeyAdd (@CashAccountCode nvarchar (10), @ParentName nvarchar(50), @ChildName nvarchar(50), @ChildHDPath nvarchar(50) output)
 AS
 	SET NOCOUNT, XACT_ABORT OFF;
 
