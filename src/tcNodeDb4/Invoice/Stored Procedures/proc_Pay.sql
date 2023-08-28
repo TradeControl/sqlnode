@@ -15,8 +15,8 @@ AS
 		, @BalanceOutstanding decimal(18, 5) = 0
 		, @InvoiceOutstanding decimal(18, 5) = 0
 		, @CashPolarityCode smallint
+		, @SubjectCode nvarchar(10)
 		, @AccountCode nvarchar(10)
-		, @CashAccountCode nvarchar(10)
 		, @InvoiceStatusCode smallint
 		, @UserId nvarchar(10)
 		, @PaymentReference nvarchar(20)
@@ -24,16 +24,16 @@ AS
 
 		SELECT 
 			@CashPolarityCode = Invoice.tbType.CashPolarityCode, 
-			@AccountCode = Invoice.tbInvoice.AccountCode, 
+			@SubjectCode = Invoice.tbInvoice.SubjectCode, 
 			@PayBalance = Subject.tbSubject.PayBalance,
 			@InvoiceStatusCode = Invoice.tbInvoice.InvoiceStatusCode,
 			@InvoiceOutstanding = InvoiceValue + TaxValue - PaidValue - PaidTaxValue
 		FROM Invoice.tbInvoice 
 			INNER JOIN Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
-			INNER JOIN Subject.tbSubject ON Invoice.tbInvoice.AccountCode = Subject.tbSubject.AccountCode
+			INNER JOIN Subject.tbSubject ON Invoice.tbInvoice.SubjectCode = Subject.tbSubject.SubjectCode
 		WHERE     ( Invoice.tbInvoice.InvoiceNumber = @InvoiceNumber)
 	
-		EXEC Subject.proc_BalanceOutstanding @AccountCode, @BalanceOutstanding OUTPUT
+		EXEC Subject.proc_BalanceOutstanding @SubjectCode, @BalanceOutstanding OUTPUT
 		IF @BalanceOutstanding = 0 
 		BEGIN
 			DECLARE @Msg NVARCHAR(MAX);
@@ -75,7 +75,7 @@ AS
 			SET @PaidOut = CASE WHEN @BalanceOutstanding < 0 THEN ABS(@BalanceOutstanding) ELSE 0 END
 			END
 	
-		EXEC Cash.proc_CurrentAccount @CashAccountCode OUTPUT
+		EXEC Cash.proc_CurrentAccount @AccountCode OUTPUT
 
 		BEGIN TRANSACTION
 
@@ -83,8 +83,8 @@ AS
 			BEGIN			
 
 			INSERT INTO Cash.tbPayment
-								  (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
-			VALUES     (@PaymentCode,@UserId, 0, @AccountCode, @CashAccountCode, @PaidOn, @PaidIn, @PaidOut, @PaymentReference)		
+								  (PaymentCode, UserId, PaymentStatusCode, SubjectCode, AccountCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
+			VALUES     (@PaymentCode,@UserId, 0, @SubjectCode, @AccountCode, @PaidOn, @PaidIn, @PaidOut, @PaymentReference)		
 		
 			IF @Post <> 0
 				EXEC Cash.proc_PaymentPostInvoiced @PaymentCode			

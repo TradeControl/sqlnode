@@ -1,7 +1,7 @@
 ﻿
 CREATE   PROCEDURE Subject.proc_AddContact 
 	(
-	@AccountCode nvarchar(10),
+	@SubjectCode nvarchar(10),
 	@ContactName nvarchar(100)	 
 	)
   AS
@@ -10,10 +10,10 @@ CREATE   PROCEDURE Subject.proc_AddContact
 	BEGIN TRY
 	
 		INSERT INTO Subject.tbContact
-								(AccountCode, ContactName, PhoneNumber, EmailAddress)
-		SELECT     AccountCode, @ContactName AS ContactName, PhoneNumber, EmailAddress
+								(SubjectCode, ContactName, PhoneNumber, EmailAddress)
+		SELECT     SubjectCode, @ContactName AS ContactName, PhoneNumber, EmailAddress
 		FROM         Subject.tbSubject
-		WHERE AccountCode = @AccountCode
+		WHERE SubjectCode = @SubjectCode
 	
   	END TRY
 	BEGIN CATCH

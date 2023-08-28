@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [Invoice].[tbInvoice] (
     [InvoiceNumber]     NVARCHAR (20)   NOT NULL,
     [UserId]            NVARCHAR (10)   NOT NULL,
-    [AccountCode]       NVARCHAR (10)   NOT NULL,
+    [SubjectCode]       NVARCHAR (10)   NOT NULL,
     [InvoiceTypeCode]   SMALLINT        NOT NULL,
     [InvoiceStatusCode] SMALLINT        NOT NULL,
     [InvoicedOn]        DATETIME        CONSTRAINT [DF_Invoice_tb_InvoicedOn] DEFAULT (CONVERT([date],getdate())) NOT NULL,
@@ -19,14 +19,14 @@
     CONSTRAINT [PK_Invoice_tbInvoicePK] PRIMARY KEY CLUSTERED ([InvoiceNumber] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Invoice_tb_Invoice_tbStatus] FOREIGN KEY ([InvoiceStatusCode]) REFERENCES [Invoice].[tbStatus] ([InvoiceStatusCode]),
     CONSTRAINT [FK_Invoice_tb_Invoice_tbType] FOREIGN KEY ([InvoiceTypeCode]) REFERENCES [Invoice].[tbType] ([InvoiceTypeCode]),
-    CONSTRAINT [FK_Invoice_tb_Subject_tb] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]),
+    CONSTRAINT [FK_Invoice_tb_Subject_tb] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]),
     CONSTRAINT [FK_Invoice_tb_Usr_tb] FOREIGN KEY ([UserId]) REFERENCES [Usr].[tbUser] ([UserId]) ON UPDATE CASCADE
 );
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Invoice_tb_AccountCode]
-    ON [Invoice].[tbInvoice]([AccountCode] ASC, [InvoicedOn] ASC) WITH (FILLFACTOR = 90);
+    ON [Invoice].[tbInvoice]([SubjectCode] ASC, [InvoicedOn] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
@@ -41,24 +41,24 @@ CREATE NONCLUSTERED INDEX [IX_Invoice_tb_UserId]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Invoice_tbInvoice_AccountCode_DueOn]
-    ON [Invoice].[tbInvoice]([AccountCode] ASC, [InvoiceTypeCode] ASC, [DueOn] ASC)
+    ON [Invoice].[tbInvoice]([SubjectCode] ASC, [InvoiceTypeCode] ASC, [DueOn] ASC)
     INCLUDE([InvoiceNumber]);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Invoice_tbInvoice_AccountCode_Status]
-    ON [Invoice].[tbInvoice]([AccountCode] ASC, [InvoiceStatusCode] ASC, [InvoiceNumber] ASC);
+    ON [Invoice].[tbInvoice]([SubjectCode] ASC, [InvoiceStatusCode] ASC, [InvoiceNumber] ASC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Invoice_tbInvoice_AccountCode_Type]
-    ON [Invoice].[tbInvoice]([AccountCode] ASC, [InvoiceNumber] ASC, [InvoiceTypeCode] ASC)
+    ON [Invoice].[tbInvoice]([SubjectCode] ASC, [InvoiceNumber] ASC, [InvoiceTypeCode] ASC)
     INCLUDE([InvoiceValue], [TaxValue]);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Invoice_tbInvoice_AccountValues]
-    ON [Invoice].[tbInvoice]([AccountCode] ASC, [InvoiceStatusCode] ASC, [InvoiceNumber] ASC)
+    ON [Invoice].[tbInvoice]([SubjectCode] ASC, [InvoiceStatusCode] ASC, [InvoiceNumber] ASC)
     INCLUDE([InvoiceValue], [TaxValue]);
 
 
@@ -69,7 +69,7 @@ CREATE NONCLUSTERED INDEX [IX_Invoice_tbInvoice_ExpectedOn]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Invoice_tbInvoice_FlowInitialise]
-    ON [Invoice].[tbInvoice]([InvoiceTypeCode] ASC, [UserId] ASC, [InvoiceStatusCode] ASC, [AccountCode] ASC, [InvoiceNumber] ASC, [InvoicedOn] ASC, [PaymentTerms] ASC, [Printed] ASC);
+    ON [Invoice].[tbInvoice]([InvoiceTypeCode] ASC, [UserId] ASC, [InvoiceStatusCode] ASC, [SubjectCode] ASC, [InvoiceNumber] ASC, [InvoicedOn] ASC, [PaymentTerms] ASC, [Printed] ASC);
 
 
 GO
@@ -81,7 +81,7 @@ AS
 
 	BEGIN TRY
 
-		IF EXISTS (SELECT * FROM deleted INNER JOIN Subject.tbSubject ON deleted.AccountCode = Subject.tbSubject.AccountCode WHERE Subject.tbSubject.TransmitStatusCode > 1)
+		IF EXISTS (SELECT * FROM deleted INNER JOIN Subject.tbSubject ON deleted.SubjectCode = Subject.tbSubject.SubjectCode WHERE Subject.tbSubject.TransmitStatusCode > 1)
 		BEGIN
 			DECLARE @Msg NVARCHAR(MAX);
 			SELECT @Msg = Message FROM App.tbText WHERE TextId = 1220;
@@ -129,7 +129,7 @@ AS
 													END, 0)		
 				FROM Invoice.tbInvoice invoice
 					JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
-					JOIN Subject.tbSubject Subject ON i.AccountCode = Subject.AccountCode
+					JOIN Subject.tbSubject Subject ON i.SubjectCode = Subject.SubjectCode
 				WHERE i.InvoiceTypeCode = 0;
 		END;	
 
@@ -146,23 +146,23 @@ AS
 													END, 0)		
 				FROM Invoice.tbInvoice invoice
 					JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
-					JOIN Subject.tbSubject Subject ON i.AccountCode = Subject.AccountCode
+					JOIN Subject.tbSubject Subject ON i.SubjectCode = Subject.SubjectCode
 				WHERE i.InvoiceTypeCode = 0;
 		END;	
 		
 		WITH invoices AS
 		(
-			SELECT inserted.InvoiceNumber, inserted.AccountCode, inserted.InvoiceStatusCode, inserted.DueOn, inserted.InvoiceValue, inserted.TaxValue, inserted.PaidValue, inserted.PaidTaxValue FROM inserted JOIN deleted ON inserted.InvoiceNumber = deleted.InvoiceNumber WHERE inserted.InvoiceStatusCode = 1 AND deleted.InvoiceStatusCode = 0
+			SELECT inserted.InvoiceNumber, inserted.SubjectCode, inserted.InvoiceStatusCode, inserted.DueOn, inserted.InvoiceValue, inserted.TaxValue, inserted.PaidValue, inserted.PaidTaxValue FROM inserted JOIN deleted ON inserted.InvoiceNumber = deleted.InvoiceNumber WHERE inserted.InvoiceStatusCode = 1 AND deleted.InvoiceStatusCode = 0
 		)
 		INSERT INTO Invoice.tbChangeLog (InvoiceNumber, TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue)
 		SELECT InvoiceNumber, Subjects.TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue
-		FROM invoices JOIN Subject.tbSubject Subjects ON invoices.AccountCode = Subjects.AccountCode;
+		FROM invoices JOIN Subject.tbSubject Subjects ON invoices.SubjectCode = Subjects.SubjectCode;
 
 		IF UPDATE(InvoiceStatusCode) OR UPDATE(DueOn) OR UPDATE(PaidValue) OR UPDATE(PaidTaxValue) OR UPDATE(InvoiceValue) OR UPDATE (TaxValue)
 		BEGIN
 			WITH candidates AS
 			(
-				SELECT InvoiceNumber, AccountCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue 
+				SELECT InvoiceNumber, SubjectCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue 
 				FROM inserted
 				WHERE EXISTS (SELECT * FROM Invoice.tbChangeLog WHERE InvoiceNumber = inserted.InvoiceNumber)
 			)
@@ -177,7 +177,7 @@ AS
 			SELECT candidates.InvoiceNumber, CASE Subjects.TransmitStatusCode WHEN 1 THEN 2 ELSE 0 END TransmitStatusCode, candidates.InvoiceStatusCode,
 				candidates.DueOn, candidates.InvoiceValue, candidates.TaxValue, candidates.PaidValue, candidates.PaidTaxValue
 			FROM candidates 
-				JOIN Subject.tbSubject Subjects ON candidates.AccountCode = Subjects.AccountCode 
+				JOIN Subject.tbSubject Subjects ON candidates.SubjectCode = Subjects.SubjectCode 
 				JOIN logs ON candidates.InvoiceNumber = logs.InvoiceNumber
 			WHERE (logs.InvoiceStatusCode <> candidates.InvoiceStatusCode) 
 				OR (logs.TransmitStatusCode < 2)
@@ -213,14 +213,14 @@ AS
 												END, 0)				 
 		FROM Invoice.tbInvoice invoice
 			JOIN inserted i ON i.InvoiceNumber = invoice.InvoiceNumber
-			JOIN Subject.tbSubject Subject ON i.AccountCode = Subject.AccountCode
+			JOIN Subject.tbSubject Subject ON i.SubjectCode = Subject.SubjectCode
 		WHERE i.InvoiceTypeCode = 0;
 
 		INSERT INTO Invoice.tbChangeLog
 								 (InvoiceNumber, TransmitStatusCode, InvoiceStatusCode, DueOn, InvoiceValue, TaxValue)
 		SELECT      inserted.InvoiceNumber, Subject.tbSubject.TransmitStatusCode, inserted.InvoiceStatusCode, inserted.DueOn, inserted.InvoiceValue, inserted.TaxValue
 		FROM            inserted INNER JOIN
-								 Subject.tbSubject ON inserted.AccountCode = Subject.tbSubject.AccountCode
+								 Subject.tbSubject ON inserted.SubjectCode = Subject.tbSubject.SubjectCode
 		WHERE InvoiceStatusCode > 0
 								 
 	END TRY

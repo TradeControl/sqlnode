@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE Subject.proc_BalanceOutstanding 
 	(
-	@AccountCode nvarchar(10),
+	@SubjectCode nvarchar(10),
 	@Balance decimal(18, 5) = 0 OUTPUT
 	)
 AS
@@ -8,15 +8,15 @@ AS
 
 	BEGIN TRY		
 		
-		SELECT @Balance = ISNULL(Balance, 0) FROM Subject.vwBalanceOutstanding WHERE AccountCode = @AccountCode
+		SELECT @Balance = ISNULL(Balance, 0) FROM Subject.vwBalanceOutstanding WHERE SubjectCode = @SubjectCode
 
-		IF EXISTS(SELECT     AccountCode
+		IF EXISTS(SELECT     SubjectCode
 				  FROM         Cash.tbPayment
-				  WHERE     (PaymentStatusCode = 0) AND (AccountCode = @AccountCode)) AND (@Balance <> 0)
+				  WHERE     (PaymentStatusCode = 0) AND (SubjectCode = @SubjectCode)) AND (@Balance <> 0)
 			BEGIN
 			SELECT  @Balance = @Balance - SUM(PaidInValue - PaidOutValue) 
 			FROM         Cash.tbPayment
-			WHERE     (PaymentStatusCode = 0) AND (AccountCode = @AccountCode)		
+			WHERE     (PaymentStatusCode = 0) AND (SubjectCode = @SubjectCode)		
 			END
 		
   	END TRY

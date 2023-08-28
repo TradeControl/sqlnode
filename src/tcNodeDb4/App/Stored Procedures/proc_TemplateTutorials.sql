@@ -18,8 +18,8 @@ AS
 	BEGIN TRY
 		DECLARE
 			@CoinTypeCode SMALLINT = (SELECT TOP (1) CoinTypeCode FROM App.tbOptions),
-			@AccountCode NVARCHAR(10),
-			@CashAccountCode NVARCHAR(10);
+			@SubjectCode NVARCHAR(10),
+			@AccountCode NVARCHAR(10);
 
 		INSERT INTO [App].[tbBucket] ([Period], [BucketId], [BucketDescription], [AllowForecasts])
 		VALUES (0, 'Overdue', 'Overdue Orders', 0)
@@ -170,28 +170,28 @@ AS
 		--SET HOME TAX CODE
 		UPDATE Subject.tbSubject
 		SET TaxCode = 'T1'
-		WHERE AccountCode = (SELECT AccountCode FROM App.tbOptions)
+		WHERE SubjectCode = (SELECT SubjectCode FROM App.tbOptions)
 
 		--CREATE GOV
-		EXEC Subject.proc_DefaultAccountCode @AccountName = @GovAccountName, @AccountCode = @AccountCode OUTPUT
-		INSERT INTO Subject.tbSubject (AccountCode, AccountName, SubjectStatusCode, SubjectTypeCode, TaxCode)
-			VALUES (@AccountCode, @GovAccountName, 1, 7, 'N/A');
+		EXEC Subject.proc_DefaultSubjectCode @SubjectName = @GovAccountName, @SubjectCode = @SubjectCode OUTPUT
+		INSERT INTO Subject.tbSubject (SubjectCode, SubjectName, SubjectStatusCode, SubjectTypeCode, TaxCode)
+			VALUES (@SubjectCode, @GovAccountName, 1, 7, 'N/A');
 
 		--ASSIGN CASH CODES AND GOV TO TAX TYPES
 		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '603', MonthNumber = @FinancialMonth
+		SET SubjectCode = @SubjectCode, CashCode = '603', MonthNumber = @FinancialMonth
 		WHERE TaxTypeCode = 0;
 
 		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '601', MonthNumber = @FinancialMonth
+		SET SubjectCode = @SubjectCode, CashCode = '601', MonthNumber = @FinancialMonth
 		WHERE TaxTypeCode = 1;
 
 		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '604', MonthNumber = @FinancialMonth
+		SET SubjectCode = @SubjectCode, CashCode = '604', MonthNumber = @FinancialMonth
 		WHERE TaxTypeCode = 2;
 
 		UPDATE Cash.tbTaxType
-		SET AccountCode = @AccountCode, CashCode = '602', MonthNumber = @FinancialMonth
+		SET SubjectCode = @SubjectCode, CashCode = '602', MonthNumber = @FinancialMonth
 		WHERE TaxTypeCode = 3;
 
 		--BANK ACCOUNTS / WALLETS
@@ -199,82 +199,82 @@ AS
 		IF @CoinTypeCode = 2
 		BEGIN
 			--fiat
-			EXEC Subject.proc_DefaultAccountCode @AccountName = @BankName, @AccountCode = @AccountCode OUTPUT	
-			INSERT INTO Subject.tbSubject (AccountCode, AccountName, SubjectStatusCode, SubjectTypeCode, TaxCode)
-			VALUES (@AccountCode, @BankName, 1, 5, 'T0');
+			EXEC Subject.proc_DefaultSubjectCode @SubjectName = @BankName, @SubjectCode = @SubjectCode OUTPUT	
+			INSERT INTO Subject.tbSubject (SubjectCode, SubjectName, SubjectStatusCode, SubjectTypeCode, TaxCode)
+			VALUES (@SubjectCode, @BankName, 1, 5, 'T0');
 
-			EXEC Subject.proc_AddAddress @AccountCode = @AccountCode, @Address = @BankAddress;
+			EXEC Subject.proc_AddAddress @SubjectCode = @SubjectCode, @Address = @BankAddress;
 		END
 		ELSE
 		BEGIN
 			--crypto
-			EXEC Subject.proc_DefaultAccountCode @AccountName = 'BITCOIN MINER', @AccountCode = @AccountCode OUTPUT
-			INSERT INTO Subject.tbSubject (AccountCode, AccountName, SubjectStatusCode, SubjectTypeCode, TaxCode)
-			VALUES (@AccountCode, 'BITCOIN MINER', 1, 7, 'N/A');
+			EXEC Subject.proc_DefaultSubjectCode @SubjectName = 'BITCOIN MINER', @SubjectCode = @SubjectCode OUTPUT
+			INSERT INTO Subject.tbSubject (SubjectCode, SubjectName, SubjectStatusCode, SubjectTypeCode, TaxCode)
+			VALUES (@SubjectCode, 'BITCOIN MINER', 1, 7, 'N/A');
 
 			UPDATE App.tbOptions
-			SET MinerAccountCode = @AccountCode;
+			SET MinerAccountCode = @SubjectCode;
 
-			SELECT @AccountCode = AccountCode FROM App.tbOptions 
+			SELECT @SubjectCode = SubjectCode FROM App.tbOptions 
 		END
 
-		EXEC Subject.proc_DefaultAccountCode @AccountName = @CurrentAccount, @AccountCode = @CashAccountCode OUTPUT
-		INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, OpeningBalance, SortCode, AccountNumber, CashCode)
-		VALUES        (@CashAccountCode, @AccountCode, @CurrentAccount, 0, @CA_SortCode, @CA_AccountNumber, '301')
+		EXEC Subject.proc_DefaultSubjectCode @SubjectName = @CurrentAccount, @SubjectCode = @AccountCode OUTPUT
+		INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, OpeningBalance, SortCode, AccountNumber, CashCode)
+		VALUES        (@AccountCode, @SubjectCode, @CurrentAccount, 0, @CA_SortCode, @CA_AccountNumber, '301')
 
 		IF (LEN(@ReserveAccount) > 0)
 		BEGIN
-			EXEC Subject.proc_DefaultAccountCode @AccountName = @ReserveAccount, @AccountCode = @CashAccountCode OUTPUT
-			INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, OpeningBalance, SortCode, AccountNumber)
-			VALUES        (@CashAccountCode, @AccountCode, @ReserveAccount, 0, @RA_SortCode, @RA_AccountNumber)
+			EXEC Subject.proc_DefaultSubjectCode @SubjectName = @ReserveAccount, @SubjectCode = @AccountCode OUTPUT
+			INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, OpeningBalance, SortCode, AccountNumber)
+			VALUES        (@AccountCode, @SubjectCode, @ReserveAccount, 0, @RA_SortCode, @RA_AccountNumber)
 		END
 
-		SELECT @AccountCode = (SELECT AccountCode FROM App.tbOptions)
+		SELECT @SubjectCode = (SELECT SubjectCode FROM App.tbOptions)
 
 		IF (LEN(@DummyAccount) > 0)
 		BEGIN
-			EXEC Subject.proc_DefaultAccountCode @AccountName = @DummyAccount, @AccountCode = @CashAccountCode OUTPUT
-			INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode)
-			VALUES        (@CashAccountCode, @AccountCode, @DummyAccount, 1);
+			EXEC Subject.proc_DefaultSubjectCode @SubjectName = @DummyAccount, @SubjectCode = @AccountCode OUTPUT
+			INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, AccountTypeCode)
+			VALUES        (@AccountCode, @SubjectCode, @DummyAccount, 1);
 		END
 
 		--CAPITAL 
 		DECLARE @CapitalAccount NVARCHAR(50);
 
 		SET @CapitalAccount = 'PREMISES';
-		EXEC Subject.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
-		INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
-		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 50, '701', 1);
+		EXEC Subject.proc_DefaultSubjectCode @SubjectName = @CapitalAccount, @SubjectCode = @AccountCode OUTPUT
+		INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@AccountCode, @SubjectCode, @CapitalAccount, 2, 50, '701', 1);
 
 		SET @CapitalAccount = 'FIXTURES AND FITTINGS';
-		EXEC Subject.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
-		INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
-		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 40, '701', 1);
+		EXEC Subject.proc_DefaultSubjectCode @SubjectName = @CapitalAccount, @SubjectCode = @AccountCode OUTPUT
+		INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@AccountCode, @SubjectCode, @CapitalAccount, 2, 40, '701', 1);
 
 		SET @CapitalAccount = 'PLANT AND MACHINERY';
-		EXEC Subject.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
-		INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
-		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 30, '701', 1);
+		EXEC Subject.proc_DefaultSubjectCode @SubjectName = @CapitalAccount, @SubjectCode = @AccountCode OUTPUT
+		INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@AccountCode, @SubjectCode, @CapitalAccount, 2, 30, '701', 1);
 
 		SET @CapitalAccount = 'VEHICLES';
-		EXEC Subject.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
-		INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
-		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 20, '701', 1);
+		EXEC Subject.proc_DefaultSubjectCode @SubjectName = @CapitalAccount, @SubjectCode = @AccountCode OUTPUT
+		INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@AccountCode, @SubjectCode, @CapitalAccount, 2, 20, '701', 1);
 
 		SET @CapitalAccount = 'STOCK';
-		EXEC Subject.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
-		INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
-		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 10, '700', 1)
+		EXEC Subject.proc_DefaultSubjectCode @SubjectName = @CapitalAccount, @SubjectCode = @AccountCode OUTPUT
+		INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@AccountCode, @SubjectCode, @CapitalAccount, 2, 10, '700', 1)
 
 		SET @CapitalAccount = 'LONGTERM LIABILITIES';
-		EXEC Subject.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
-		INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
-		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 50, '702', 0);
+		EXEC Subject.proc_DefaultSubjectCode @SubjectName = @CapitalAccount, @SubjectCode = @AccountCode OUTPUT
+		INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@AccountCode, @SubjectCode, @CapitalAccount, 2, 50, '702', 0);
 
 		SET @CapitalAccount = 'CALLED UP SHARE CAPITAL';
-		EXEC Subject.proc_DefaultAccountCode @AccountName = @CapitalAccount, @AccountCode = @CashAccountCode OUTPUT
-		INSERT INTO Subject.tbAccount (CashAccountCode, AccountCode, CashAccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
-		VALUES        (@CashAccountCode, @AccountCode, @CapitalAccount, 2, 60, '703', 0);
+		EXEC Subject.proc_DefaultSubjectCode @SubjectName = @CapitalAccount, @SubjectCode = @AccountCode OUTPUT
+		INSERT INTO Subject.tbAccount (AccountCode, SubjectCode, AccountName, AccountTypeCode, LiquidityLevel, CashCode, AccountClosed)
+		VALUES        (@AccountCode, @SubjectCode, @CapitalAccount, 2, 60, '703', 0);
 
 
 	END TRY

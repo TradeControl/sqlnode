@@ -57,7 +57,7 @@ AS
 					(SELECT TOP 1 StartOn FROM App.tbYearPeriod WHERE (StartOn <= payment.PaidOn) ORDER BY StartOn DESC) AS StartOn,
 					(PaidInValue - PaidOutValue) AssetValue
 				FROM Cash.tbPayment payment
-					JOIN Subject.tbAccount account ON payment.CashAccountCode = account.CashAccountCode
+					JOIN Subject.tbAccount account ON payment.AccountCode = account.AccountCode
 				WHERE account.AccountTypeCode = 2 AND payment.IsProfitAndLoss <> 0 AND PaidOn >= @StartOn
 			), asset_summary AS
 			(

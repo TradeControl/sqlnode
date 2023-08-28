@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE Cash.proc_ReserveAccount(@CashAccountCode NVARCHAR(10) OUTPUT)
+﻿CREATE PROCEDURE Cash.proc_ReserveAccount(@AccountCode NVARCHAR(10) OUTPUT)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
-		SELECT  @CashAccountCode = CashAccountCode
+		SELECT  @AccountCode = AccountCode
 		FROM Cash.vwReserveAccount;
 	END TRY
 	BEGIN CATCH

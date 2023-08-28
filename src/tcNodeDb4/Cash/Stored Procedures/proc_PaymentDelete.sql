@@ -7,20 +7,20 @@
 
 	BEGIN TRY
 		DECLARE 
-			@AccountCode nvarchar(10)
-			, @CashAccountCode nvarchar(10)
+			@SubjectCode nvarchar(10)
+			, @AccountCode nvarchar(10)
 
-		SELECT  @AccountCode = AccountCode, @CashAccountCode = CashAccountCode
+		SELECT  @SubjectCode = SubjectCode, @AccountCode = AccountCode
 		FROM         Cash.tbPayment
 		WHERE     (PaymentCode = @PaymentCode)
 
 		DELETE FROM Cash.tbPayment
 		WHERE     (PaymentCode = @PaymentCode)
 	
-		EXEC Subject.proc_Rebuild @AccountCode
+		EXEC Subject.proc_Rebuild @SubjectCode
 
 		BEGIN TRANSACTION
-		EXEC Cash.proc_AccountRebuild @CashAccountCode
+		EXEC Cash.proc_AccountRebuild @AccountCode
 		COMMIT TRANSACTION
 
   	END TRY

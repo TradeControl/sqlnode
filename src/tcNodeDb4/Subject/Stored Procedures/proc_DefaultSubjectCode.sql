@@ -1,8 +1,8 @@
 ﻿
-CREATE   PROCEDURE Subject.proc_DefaultAccountCode 
+CREATE   PROCEDURE Subject.proc_DefaultSubjectCode 
 	(
-	@AccountName nvarchar(100),
-	@AccountCode nvarchar(10) OUTPUT 
+	@SubjectName nvarchar(100),
+	@SubjectCode nvarchar(10) OUTPUT 
 	)
 AS
    	SET NOCOUNT, XACT_ABORT ON;
@@ -23,9 +23,9 @@ AS
 		SET @pos = 1
 		SET @ParsedName = ''
 
-		WHILE @pos <= datalength(@AccountName)
+		WHILE @pos <= datalength(@SubjectName)
 		BEGIN
-			SET @ASCII = ASCII(SUBSTRING(@AccountName, @pos, 1))
+			SET @ASCII = ASCII(SUBSTRING(@SubjectName, @pos, 1))
 			SET @ok = CASE 
 				WHEN @ASCII = 32 THEN 1
 				WHEN @ASCII = 45 THEN 1
@@ -35,7 +35,7 @@ AS
 				ELSE 0
 			END
 			IF @ok = 1
-				SELECT @ParsedName = @ParsedName + char(ASCII(SUBSTRING(@AccountName, @pos, 1)))
+				SELECT @ParsedName = @ParsedName + char(ASCII(SUBSTRING(@SubjectName, @pos, 1)))
 			SET @pos = @pos + 1
 		END
 
@@ -63,22 +63,22 @@ AS
 		--print @SecondWord
 
 		IF LEN(@SecondWord) > 0
-			SET @AccountCode = UPPER(left(@FirstWord, 3)) + UPPER(left(@SecondWord, 3))		
+			SET @SubjectCode = UPPER(left(@FirstWord, 3)) + UPPER(left(@SecondWord, 3))		
 		ELSE
-			SET @AccountCode = UPPER(left(@FirstWord, 6))
+			SET @SubjectCode = UPPER(left(@FirstWord, 6))
 
-		SET @ValidatedCode = @AccountCode
-		SELECT @rows = COUNT(AccountCode) FROM Subject.tbSubject WHERE AccountCode = @ValidatedCode
+		SET @ValidatedCode = @SubjectCode
+		SELECT @rows = COUNT(SubjectCode) FROM Subject.tbSubject WHERE SubjectCode = @ValidatedCode
 		SET @Suffix = 0
 	
 		WHILE @rows > 0
 		BEGIN
 			SET @Suffix = @Suffix + 1
-			SET @ValidatedCode = @AccountCode + LTRIM(STR(@Suffix))
-			SELECT @rows = COUNT(AccountCode) FROM Subject.tbSubject WHERE AccountCode = @ValidatedCode
+			SET @ValidatedCode = @SubjectCode + LTRIM(STR(@Suffix))
+			SELECT @rows = COUNT(SubjectCode) FROM Subject.tbSubject WHERE SubjectCode = @ValidatedCode
 		END
 	
-		SET @AccountCode = @ValidatedCode
+		SET @SubjectCode = @ValidatedCode
 	
   	END TRY
 	BEGIN CATCH

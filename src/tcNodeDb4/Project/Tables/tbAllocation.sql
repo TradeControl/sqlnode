@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [Project].[tbAllocation] (
     [ContractAddress]       NVARCHAR (42)   NOT NULL,
-    [AccountCode]           NVARCHAR (10)   NOT NULL,
+    [SubjectCode]           NVARCHAR (10)   NOT NULL,
     [AllocationCode]        NVARCHAR (50)   NOT NULL,
     [AllocationDescription] NVARCHAR (256)  NULL,
     [ProjectCode]              NVARCHAR (20)   NOT NULL,
@@ -17,7 +17,7 @@
     [RowVer]                ROWVERSION      NOT NULL,
     [UnitCharge]            DECIMAL (18, 7) CONSTRAINT [DF_Project_tbAllocation_UnitCharge] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_Project_tbAllocation] PRIMARY KEY CLUSTERED ([ContractAddress] ASC),
-    CONSTRAINT [FK_Project_tbAllocation_AccountCode] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT [FK_Project_tbAllocation_AccountCode] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT [FK_Project_tbAllocation_CashPolarityCode] FOREIGN KEY ([CashPolarityCode]) REFERENCES [Cash].[tbPolarity] ([CashPolarityCode]),
     CONSTRAINT [FK_Project_tbAllocation_ProjectStatusCode] FOREIGN KEY ([ProjectStatusCode]) REFERENCES [Project].[tbStatus] ([ProjectStatusCode])
 );
@@ -25,17 +25,17 @@
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Project_tbAllocation_ObjectCode]
-    ON [Project].[tbAllocation]([AccountCode] ASC, [AllocationCode] ASC);
+    ON [Project].[tbAllocation]([SubjectCode] ASC, [AllocationCode] ASC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Project_tbAllocation_ProjectStatusCode]
-    ON [Project].[tbAllocation]([ProjectStatusCode] ASC, [AccountCode] ASC, [AllocationCode] ASC, [ActionOn] ASC);
+    ON [Project].[tbAllocation]([ProjectStatusCode] ASC, [SubjectCode] ASC, [AllocationCode] ASC, [ActionOn] ASC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Project_tbAllocation_ProjectCode]
-    ON [Project].[tbAllocation]([AccountCode] ASC, [ProjectCode] ASC);
+    ON [Project].[tbAllocation]([SubjectCode] ASC, [ProjectCode] ASC);
 
 
 GO

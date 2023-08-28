@@ -4,10 +4,10 @@ AS
 
 	BEGIN TRY
 	
-		DECLARE @CashAccountCode nvarchar(10);
+		DECLARE @AccountCode nvarchar(10);
 
-		EXEC Cash.proc_CurrentAccount @CashAccountCode output
-		SELECT @CoinTypeCode = CoinTypeCode FROM Subject.tbAccount WHERE CashAccountCode = @CashAccountCode
+		EXEC Cash.proc_CurrentAccount @AccountCode output
+		SELECT @CoinTypeCode = CoinTypeCode FROM Subject.tbAccount WHERE AccountCode = @AccountCode
 
 	END TRY
 	BEGIN CATCH

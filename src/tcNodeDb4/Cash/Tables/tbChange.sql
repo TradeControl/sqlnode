@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [Cash].[tbChange] (
     [PaymentAddress]   NVARCHAR (42)       NOT NULL,
-    [CashAccountCode]  NVARCHAR (10)       NOT NULL,
+    [AccountCode]  NVARCHAR (10)       NOT NULL,
     [HDPath]           [sys].[hierarchyid] NOT NULL,
     [ChangeTypeCode]   SMALLINT            CONSTRAINT [DF_Cash_tbChange_ChangeTypeCode] DEFAULT ((0)) NOT NULL,
     [ChangeStatusCode] SMALLINT            CONSTRAINT [DF_Cash_tbChange_ChangeStatusCode] DEFAULT ((0)) NOT NULL,
@@ -13,23 +13,23 @@
     [RowVer]           ROWVERSION          NOT NULL,
     CONSTRAINT [PK_Cash_tbChange] PRIMARY KEY CLUSTERED ([PaymentAddress] ASC),
     CONSTRAINT [FK__Cash_tbChange_Cash_tbChangeType] FOREIGN KEY ([ChangeTypeCode]) REFERENCES [Cash].[tbChangeType] ([ChangeTypeCode]),
-    CONSTRAINT [FK_Cash_tbChange_Subject_tbAccountKey] FOREIGN KEY ([CashAccountCode], [HDPath]) REFERENCES [Subject].[tbAccountKey] ([CashAccountCode], [HDPath]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [FK_Cash_tbChange_Subject_tbAccountKey] FOREIGN KEY ([AccountCode], [HDPath]) REFERENCES [Subject].[tbAccountKey] ([AccountCode], [HDPath]) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Cash_tbChange_ChangeTypeCode]
-    ON [Cash].[tbChange]([CashAccountCode] ASC, [HDPath] ASC, [ChangeTypeCode] ASC, [ChangeStatusCode] ASC, [AddressIndex] ASC);
+    ON [Cash].[tbChange]([AccountCode] ASC, [HDPath] ASC, [ChangeTypeCode] ASC, [ChangeStatusCode] ASC, [AddressIndex] ASC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbChange_ChangeStatusCode]
-    ON [Cash].[tbChange]([CashAccountCode] ASC, [ChangeStatusCode] ASC, [AddressIndex] ASC);
+    ON [Cash].[tbChange]([AccountCode] ASC, [ChangeStatusCode] ASC, [AddressIndex] ASC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbChange_UpdatedOn]
-    ON [Cash].[tbChange]([CashAccountCode] ASC, [HDPath] ASC, [UpdatedOn] DESC);
+    ON [Cash].[tbChange]([AccountCode] ASC, [HDPath] ASC, [UpdatedOn] DESC);
 
 
 GO

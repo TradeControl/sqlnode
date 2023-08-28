@@ -1,6 +1,6 @@
 ﻿CREATE   PROCEDURE Cash.proc_ChangeAssign
 (
-	@CashAccountCode nvarchar(10), 
+	@AccountCode nvarchar(10), 
 	@KeyName nvarchar(50), 
 	@PaymentAddress nvarchar(42), 
 	@InvoiceNumber nvarchar(20),

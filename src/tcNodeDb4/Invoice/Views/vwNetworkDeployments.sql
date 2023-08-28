@@ -1,6 +1,6 @@
 ﻿CREATE VIEW Invoice.vwNetworkDeployments
 AS
-	SELECT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.AccountCode, 
+	SELECT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.SubjectCode, 
 		Invoice.tbType.CashPolarityCode AS PaymentPolarity, 
 		CASE Invoice.tbType.InvoiceTypeCode 
 			WHEN 0 THEN Invoice.tbType.CashPolarityCode 

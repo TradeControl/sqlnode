@@ -1,6 +1,6 @@
 ﻿CREATE   PROCEDURE Invoice.proc_DefaultPaymentOn
 	(
-		@AccountCode nvarchar(10),
+		@SubjectCode nvarchar(10),
 		@ActionOn datetime,
 		@PaymentOn datetime output
 	)
@@ -16,7 +16,7 @@ AS
 					DATEADD(d, Subject.PaymentDays, @ActionOn)	
 				END
 		FROM Subject.tbSubject Subject 
-		WHERE Subject.AccountCode = @AccountCode
+		WHERE Subject.SubjectCode = @SubjectCode
 
 		SELECT @PaymentOn = App.fnAdjustToCalendar(@ActionOn, 0) 					
 	 

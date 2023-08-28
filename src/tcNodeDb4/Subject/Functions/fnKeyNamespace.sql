@@ -1,28 +1,28 @@
-﻿CREATE   FUNCTION Subject.fnKeyNamespace (@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
+﻿CREATE   FUNCTION Subject.fnKeyNamespace (@AccountCode nvarchar(10), @KeyName nvarchar(50))
 RETURNS TABLE 
 AS
 	RETURN
 	(
 		WITH key_root AS
 		(
-			SELECT CashAccountCode, HDPath, HDLevel, KeyName
+			SELECT AccountCode, HDPath, HDLevel, KeyName
 			FROM Subject.tbAccountKey
-			WHERE CashAccountCode = @CashAccountCode AND KeyName = @KeyName
+			WHERE AccountCode = @AccountCode AND KeyName = @KeyName
 		), candidates AS
 		(
-			SELECT CashAccountCode, HDPath.GetAncestor(1) ParentHDPath, HDPath ChildHDPath, KeyName
+			SELECT AccountCode, HDPath.GetAncestor(1) ParentHDPath, HDPath ChildHDPath, KeyName
 			FROM Subject.tbAccountKey
-			WHERE CashAccountCode = @CashAccountCode AND HDLevel > (SELECT HDLevel FROM key_root) 
+			WHERE AccountCode = @AccountCode AND HDLevel > (SELECT HDLevel FROM key_root) 
 		), namespace_set AS
 		(
-			SELECT CashAccountCode, cast(NULL AS hierarchyid) ParentHDPath, HDPath ChildHDPath, KeyName FROM key_root
+			SELECT AccountCode, cast(NULL AS hierarchyid) ParentHDPath, HDPath ChildHDPath, KeyName FROM key_root
 
 			UNION ALL
 
-			SELECT candidates.CashAccountCode, candidates.ParentHDPath, candidates.ChildHDPath, candidates.KeyName
+			SELECT candidates.AccountCode, candidates.ParentHDPath, candidates.ChildHDPath, candidates.KeyName
 			FROM candidates
 				JOIN namespace_set ON candidates.ParentHDPath = namespace_set.ChildHDPath
 		)
-		SELECT CashAccountCode, ChildHDPath HDPath, KeyName, Subject.fnAccountKeyNamespace(CashAccountCode, ChildHDPath) KeyNamespace
+		SELECT AccountCode, ChildHDPath HDPath, KeyName, Subject.fnAccountKeyNamespace(AccountCode, ChildHDPath) KeyNamespace
 		FROM namespace_set
 	)

@@ -1,13 +1,13 @@
-﻿CREATE   FUNCTION Cash.fnNamespaceBalance(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
+﻿CREATE   FUNCTION Cash.fnNamespaceBalance(@AccountCode nvarchar(10), @KeyName nvarchar(50))
 RETURNS float
 AS
 BEGIN
 	DECLARE @Balance float;
 
 	SELECT @Balance = SUM(COALESCE(change_balance.Balance, 0))
-	FROM Subject.fnKeyNamespace(@CashAccountCode, @KeyName) kn
+	FROM Subject.fnKeyNamespace(@AccountCode, @KeyName) kn
 		JOIN Cash.tbChange change
-			ON kn.CashAccountCode = change.CashAccountCode AND kn.HDPath = change.HDPath
+			ON kn.AccountCode = change.AccountCode AND kn.HDPath = change.HDPath
 		OUTER APPLY
 		(
 			SELECT PaymentAddress, SUM(MoneyIn) Balance

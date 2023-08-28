@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [Subject].[tbSubject] (
-    [AccountCode]            NVARCHAR (10)   NOT NULL,
-    [AccountName]            NVARCHAR (255)  NOT NULL,
+    [SubjectCode]            NVARCHAR (10)   NOT NULL,
+    [SubjectName]            NVARCHAR (255)  NOT NULL,
     [SubjectTypeCode]   SMALLINT        CONSTRAINT [DF_Subject_tb_SubjectTypeCode] DEFAULT ((1)) NOT NULL,
     [SubjectStatusCode] SMALLINT        CONSTRAINT [DF_Subject_tb_SubjectStatusCode] DEFAULT ((1)) NOT NULL,
     [TaxCode]                NVARCHAR (10)   NULL,
@@ -9,7 +9,7 @@
     [PhoneNumber]            NVARCHAR (50)   NULL,
     [EmailAddress]           NVARCHAR (255)  NULL,
     [WebSite]                NVARCHAR (255)  NULL,
-    [AccountSource]          NVARCHAR (100)  NULL,
+    [SubjectSource]          NVARCHAR (100)  NULL,
     [PaymentTerms]           NVARCHAR (100)  NULL,
     [ExpectedDays]           SMALLINT        CONSTRAINT [DF_Subject_tbSubject_ExpectedDays] DEFAULT ((0)) NOT NULL,
     [PaymentDays]            SMALLINT        CONSTRAINT [DF_Subject_tb_PaymentDays] DEFAULT ((0)) NOT NULL,
@@ -29,7 +29,7 @@
     [TransmitStatusCode]     SMALLINT        CONSTRAINT [DF_Subject_tbSubject_TransmitStatusCode] DEFAULT ((0)) NOT NULL,
     [OpeningBalance]         DECIMAL (18, 5) CONSTRAINT [DF_Subject_tb_OpeningBalance] DEFAULT ((0)) NOT NULL,
     [Turnover]               DECIMAL (18, 5) CONSTRAINT [DF_Subject_tb_Turnover] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_Subject_tbSubject] PRIMARY KEY NONCLUSTERED ([AccountCode] ASC) WITH (FILLFACTOR = 90),
+    CONSTRAINT [PK_Subject_tbSubject] PRIMARY KEY NONCLUSTERED ([SubjectCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Subject_tb_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Subject_tb_Subject_tbAddress] FOREIGN KEY ([AddressCode]) REFERENCES [Subject].[tbAddress] ([AddressCode]) NOT FOR REPLICATION,
     CONSTRAINT [FK_Subject_tbSubject_tbTransmitStatus] FOREIGN KEY ([TransmitStatusCode]) REFERENCES [Subject].[tbTransmitStatus] ([TransmitStatusCode]),
@@ -44,12 +44,12 @@ ALTER TABLE [Subject].[tbSubject] NOCHECK CONSTRAINT [FK_Subject_tb_Subject_tbAd
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Subject_tb_AccountName]
-    ON [Subject].[tbSubject]([AccountName] ASC) WITH (FILLFACTOR = 90);
+    ON [Subject].[tbSubject]([SubjectName] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_Subject_tb_AccountSource]
-    ON [Subject].[tbSubject]([AccountSource] ASC) WITH (FILLFACTOR = 90);
+CREATE NONCLUSTERED INDEX [IX_Subject_tb_SubjectSource]
+    ON [Subject].[tbSubject]([SubjectSource] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
@@ -59,7 +59,7 @@ CREATE NONCLUSTERED INDEX [IX_Subject_tb_AreaCode]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Subject_tbSubject_OpeningBalance]
-    ON [Subject].[tbSubject]([AccountCode] ASC)
+    ON [Subject].[tbSubject]([SubjectCode] ASC)
     INCLUDE([OpeningBalance]);
 
 
@@ -70,7 +70,7 @@ CREATE NONCLUSTERED INDEX [IX_Subject_tb_SubjectStatusCode]
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Subject_tb_Status_AccountCode]
-    ON [Subject].[tbSubject]([SubjectStatusCode] ASC, [AccountName] ASC) WITH (FILLFACTOR = 90);
+    ON [Subject].[tbSubject]([SubjectStatusCode] ASC, [SubjectName] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
@@ -85,8 +85,8 @@ CREATE NONCLUSTERED INDEX [IX_Subject_tb_PaymentTerms]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_tbSubject_tb_AccountCode]
-    ON [Subject].[tbSubject]([AccountCode] ASC)
-    INCLUDE([AccountName]);
+    ON [Subject].[tbSubject]([SubjectCode] ASC)
+    INCLUDE([SubjectName]);
 
 
 GO
@@ -97,7 +97,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
-		IF EXISTS (SELECT * FROM inserted i WHERE App.fnParsePrimaryKey(AccountCode) = 0)
+		IF EXISTS (SELECT * FROM inserted i WHERE App.fnParsePrimaryKey(SubjectCode) = 0)
 			BEGIN
 			DECLARE @Msg NVARCHAR(MAX);
 			SELECT @Msg = Message FROM App.tbText WHERE TextId = 2004;
@@ -108,7 +108,7 @@ BEGIN
 			BEGIN
 			UPDATE Subject.tbSubject
 			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
-			FROM Subject.tbSubject INNER JOIN inserted AS i ON tbSubject.AccountCode = i.AccountCode;
+			FROM Subject.tbSubject INNER JOIN inserted AS i ON tbSubject.SubjectCode = i.SubjectCode;
 			END
 	END TRY
 	BEGIN CATCH

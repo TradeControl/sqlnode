@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE Subject.proc_Rebuild(@AccountCode NVARCHAR(10))
+﻿CREATE PROCEDURE Subject.proc_Rebuild(@SubjectCode NVARCHAR(10))
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
@@ -14,7 +14,7 @@ AS
 								App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
 								Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
 		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0) AND Invoice.tbItem.TotalValue <> 0
-			AND (Invoice.tbInvoice.AccountCode = @AccountCode);
+			AND (Invoice.tbInvoice.SubjectCode = @SubjectCode);
 
 		UPDATE Invoice.tbItem
 		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
@@ -24,7 +24,7 @@ AS
 								App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode 
 								INNER JOIN Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
 		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0)
-			AND (Invoice.tbInvoice.AccountCode = @AccountCode);
+			AND (Invoice.tbInvoice.SubjectCode = @SubjectCode);
                    
 		UPDATE Invoice.tbProject
 		SET InvoiceValue =  ROUND(Invoice.tbProject.TotalValue / (1 + App.tbTaxCode.TaxRate), Decimals)
@@ -32,7 +32,7 @@ AS
 								App.tbTaxCode ON Invoice.tbProject.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
 								Invoice.tbInvoice ON Invoice.tbProject.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
 		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0) AND Invoice.tbProject.TotalValue <> 0
-			AND (Invoice.tbInvoice.AccountCode = @AccountCode);
+			AND (Invoice.tbInvoice.SubjectCode = @SubjectCode);
 
 		UPDATE Invoice.tbProject
 		SET TaxValue = CASE App.tbTaxCode.RoundingCode 
@@ -46,7 +46,7 @@ AS
 								App.tbTaxCode ON Invoice.tbProject.TaxCode = App.tbTaxCode.TaxCode 
 								INNER JOIN Invoice.tbInvoice ON Invoice.tbProject.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber
 		WHERE     ( Invoice.tbInvoice.InvoiceStatusCode <> 0)
-			AND (Invoice.tbInvoice.AccountCode = @AccountCode);
+			AND (Invoice.tbInvoice.SubjectCode = @SubjectCode);
 						   	
 		WITH items AS
 		(
@@ -75,7 +75,7 @@ AS
 			TaxValue = TotalTaxValue
 		FROM  Invoice.tbInvoice invoices 
 			JOIN invoice_totals ON invoices.InvoiceNumber = invoice_totals.InvoiceNumber
-		WHERE AccountCode = @AccountCode AND (InvoiceValue <> TotalInvoiceValue OR TaxValue <> TotalTaxValue);
+		WHERE SubjectCode = @SubjectCode AND (InvoiceValue <> TotalInvoiceValue OR TaxValue <> TotalTaxValue);
 
 
 
@@ -83,7 +83,7 @@ AS
 		(
 			SELECT InvoiceNumber, InvoiceStatusCode, PaidValue, PaidTaxValue
 			FROM Invoice.vwStatusLive
-			WHERE AccountCode = @AccountCode
+			WHERE SubjectCode = @SubjectCode
 		)
 		UPDATE invoices
 		SET 
@@ -100,7 +100,7 @@ AS
 		COMMIT TRANSACTION
 
 		DECLARE @Msg NVARCHAR(MAX);
-		SELECT @Msg = CONCAT(@AccountCode, ' ', Message) FROM App.tbText WHERE TextId = 3006;
+		SELECT @Msg = CONCAT(@SubjectCode, ' ', Message) FROM App.tbText WHERE TextId = 3006;
 		EXEC App.proc_EventLog @EventMessage = @Msg, @EventTypeCode = 2;
 
   	END TRY

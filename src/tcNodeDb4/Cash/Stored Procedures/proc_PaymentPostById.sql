@@ -10,19 +10,19 @@ AS
 			FROM            Cash.tbPayment 
 				INNER JOIN Cash.tbCode ON Cash.tbPayment.CashCode = Cash.tbCode.CashCode 
 				INNER JOIN Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-				INNER JOIN Subject.tbAccount ON Subject.tbAccount.CashAccountCode = Cash.tbPayment.CashAccountCode
+				INNER JOIN Subject.tbAccount ON Subject.tbAccount.AccountCode = Cash.tbPayment.AccountCode
 			WHERE (Subject.tbAccount.AccountTypeCode < 2)
 				AND (Cash.tbPayment.PaymentStatusCode = 0) 
 				AND (Cash.tbPayment.UserId = @UserId)
 
-			ORDER BY Cash.tbPayment.AccountCode, Cash.tbPayment.PaidOn
+			ORDER BY Cash.tbPayment.SubjectCode, Cash.tbPayment.PaidOn
 
 		DECLARE curInv cursor local for
 			SELECT     PaymentCode
 			FROM         Cash.tbPayment
 			WHERE     (PaymentStatusCode = 0) AND (CashCode IS NULL)
 				AND (Cash.tbPayment.UserId = @UserId)
-			ORDER BY AccountCode, PaidOn
+			ORDER BY SubjectCode, PaidOn
 		
 		BEGIN TRANSACTION
 

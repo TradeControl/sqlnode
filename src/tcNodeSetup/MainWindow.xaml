@@ -131,7 +131,7 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Label Margin="5" Content="Account Code:"  />
-                        <TextBox Margin="5" Grid.Column="1" Name="tbAccountCode" Text="HOME" MaxLength="10" FontWeight="Bold"  />
+                        <TextBox Margin="5" Grid.Column="1" Name="tbSubjectCode" Text="HOME" MaxLength="10" FontWeight="Bold"  />
                         <Label Margin="5" Grid.Row="2" Content="Business Name:"  />
                         <TextBox Margin="5" Grid.Row="2" Grid.Column="1" Name="tbBusinessName" Text="THE BUSINESS" MaxLength="255" FontWeight="Bold"  />
                         <Label Margin="5" Grid.Row="3" Content="Business Address:"  />

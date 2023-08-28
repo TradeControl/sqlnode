@@ -14,19 +14,27 @@ Name changes:
 
 V3 Name | V4 Name
  -- | --
- Activity | Object
- Organisation | Subject
- Org | Subject
- Task | Project
- tbMode | tbPolarity
- CashMode | CashPolarity
- Task.proc_IsProject | Project.proc_IsProjected
- Task.proc_Project | Project.proc_Root
- Task.proc_Mode | Task.proc_Polarity
+Activity | Object
+Organisation | Subject
+Org | Subject
+Task | Project
+tbMode | tbPolarity
+CashMode | CashPolarity
+AccountCode | SubjectCode
+AccountName | SubjectName
+AccountSource | SubjectSource
+DefaultAccountCode | DefaultSubjectCode
+AccountLookup | SubjectLookup
+CashAccountCode | AccountCode
+CashAccountName | AccountName 
+Task.proc_IsProject | Project.proc_IsProjected
+Task.proc_Project | Project.proc_Root
+Task.proc_Mode | Task.proc_Polarity
 
  - [x] Archive version 3 scripts
  - [x] A new [tc_node_creation](src/tcNode/scripts/tc_create_node.sql) script doctored from the output of Sql Server project **tcNodeDb4**
  - [x] Deprecate version 3 in Node Setup - [IsDeprecatedVersion()](src/tcNode/tcNodeConfig.cs)
+ - [x] Apply name changes to the db interfaces in [tcNode](src/tcNode/dbNodeNetwork.dbml)
 
 ## Version 3
 

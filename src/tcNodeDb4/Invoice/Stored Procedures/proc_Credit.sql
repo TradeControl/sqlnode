@@ -51,8 +51,8 @@ AS
 		WHERE     (InvoiceTypeCode = @InvoiceTypeCode)	
 	
 		INSERT INTO Invoice.tbInvoice	
-							(InvoiceNumber, InvoiceStatusCode, AccountCode, InvoiceValue, TaxValue, UserId, InvoiceTypeCode, InvoicedOn)
-		SELECT     @CreditNumber AS InvoiceNumber, 0 AS InvoiceStatusCode, AccountCode, InvoiceValue, TaxValue, @UserId AS UserId, 
+							(InvoiceNumber, InvoiceStatusCode, SubjectCode, InvoiceValue, TaxValue, UserId, InvoiceTypeCode, InvoicedOn)
+		SELECT     @CreditNumber AS InvoiceNumber, 0 AS InvoiceStatusCode, SubjectCode, InvoiceValue, TaxValue, @UserId AS UserId, 
 							@InvoiceTypeCode AS InvoiceTypeCode, CURRENT_TIMESTAMP AS InvoicedOn
 		FROM         Invoice.tbInvoice
 		WHERE     (InvoiceNumber = @InvoiceNumber)

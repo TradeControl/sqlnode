@@ -3,7 +3,7 @@ AS
 	WITH quotes AS
 	(
 		SELECT Project.tbProject.ProjectCode AS ReferenceCode, 
-			Project.tbProject.AccountCode, Project.tbProject.PaymentOn AS TransactOn, 
+			Project.tbProject.SubjectCode, Project.tbProject.PaymentOn AS TransactOn, 
 			Project.tbProject.PaymentOn, 3 AS CashEntryTypeCode, 
 			CASE WHEN Cash.tbCategory.CashPolarityCode = 0 
 				THEN (Project.tbProject.UnitCharge + Project.tbProject.UnitCharge * App.tbTaxCode.TaxRate) * Project.tbProject.Quantity 
@@ -28,7 +28,7 @@ AS
 				App.tbTaxCode.TaxRate,
 				Cash.tbCategory.CashPolarityCode
 		FROM    Project.vwCostSetProjects cost_set INNER JOIN	Project.tbProject quotes ON cost_set.ProjectCode = quotes.ProjectCode INNER JOIN
-				Subject.tbSubject ON quotes.AccountCode = Subject.tbSubject.AccountCode INNER JOIN
+				Subject.tbSubject ON quotes.SubjectCode = Subject.tbSubject.SubjectCode INNER JOIN
 				Cash.tbCode ON quotes.CashCode = Cash.tbCode.CashCode INNER JOIN
 				Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode INNER JOIN
 				App.tbTaxCode ON quotes.TaxCode = App.tbTaxCode.TaxCode 
@@ -59,11 +59,11 @@ AS
 		GROUP BY TransactOn
 	), vat_taxcode AS
 	(
-		SELECT TOP (1) AccountCode, CashCode 
+		SELECT TOP (1) SubjectCode, CashCode 
 		FROM Cash.tbTaxType WHERE (TaxTypeCode = 1)
 	), vat_accruals AS
 	(
-		SELECT vat_taxcode.AccountCode, vat_taxcode.CashCode EntryDescription, TransactOn, 5 AS CashEntryTypeCode, 
+		SELECT vat_taxcode.SubjectCode, vat_taxcode.CashCode EntryDescription, TransactOn, 5 AS CashEntryTypeCode, 
 				(SELECT CashEntryType FROM Cash.tbEntryType WHERE CashEntryTypeCode = 3) ReferenceCode,
 				CASE WHEN TaxDue < 0 THEN ABS(TaxDue) ELSE 0 END AS PayIn,
 				CASE WHEN TaxDue >= 0 THEN TaxDue ELSE 0 END AS PayOut
@@ -101,28 +101,28 @@ AS
 		GROUP BY TransactOn
 	), corp_taxcode AS
 	(
-		SELECT TOP (1) AccountCode, CashCode 
+		SELECT TOP (1) SubjectCode, CashCode 
 		FROM Cash.tbTaxType WHERE (TaxTypeCode = 0)
 	), corptax_accruals AS
 	(	
-		SELECT AccountCode, CashCode EntryDescription, TransactOn, 4 AS CashEntryTypeCode, 
+		SELECT SubjectCode, CashCode EntryDescription, TransactOn, 4 AS CashEntryTypeCode, 
 				(SELECT CashEntryType FROM Cash.tbEntryType WHERE CashEntryTypeCode = 3) ReferenceCode, 
 				CASE WHEN TaxDue < 0 THEN ABS(TaxDue) ELSE 0 END AS PayIn,
 				CASE WHEN TaxDue >= 0 THEN TaxDue ELSE 0 END AS PayOut
 		FROM corptax_accrual_totals CROSS JOIN corp_taxcode
 	), cost_statement AS
 	(
-		SELECT AccountCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut, EntryDescription FROM Cash.vwStatementBase
+		SELECT SubjectCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut, EntryDescription FROM Cash.vwStatementBase
 		UNION
-		SELECT AccountCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut, EntryDescription FROM quotes
+		SELECT SubjectCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut, EntryDescription FROM quotes
 		UNION
-		SELECT AccountCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut, EntryDescription FROM vat_accruals
+		SELECT SubjectCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut, EntryDescription FROM vat_accruals
 		UNION
-		SELECT AccountCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut, EntryDescription FROM corptax_accruals
+		SELECT SubjectCode, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut, EntryDescription FROM corptax_accruals
 	), statement_base AS
 	(
 		SELECT ROW_NUMBER() OVER(ORDER BY TransactOn, CashEntryTypeCode DESC) AS RowNumber,
-		 AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut 
+		 SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut 
 		 FROM cost_statement
 	), opening_balance AS
 	(	
@@ -134,7 +134,7 @@ AS
 	(
 		SELECT 
 			0 AS RowNumber,
-			(SELECT TOP (1) AccountCode FROM App.tbOptions) AS AccountCode,
+			(SELECT TOP (1) SubjectCode FROM App.tbOptions) AS SubjectCode,
 			NULL AS EntryDescription,
 			NULL AS TransactOn,    
 			(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 3013) AS ReferenceCode,	
@@ -142,16 +142,16 @@ AS
 			PayIn = (SELECT OpeningBalance FROM opening_balance),
 			0 AS PayOut
 		UNION 
-		SELECT RowNumber, AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut 
+		SELECT RowNumber, SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut 
 		FROM statement_base
 	), company_statement AS
 	(
-		SELECT RowNumber, AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut,
+		SELECT RowNumber, SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut,
 			SUM(PayIn + (PayOut * -1)) OVER (ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance
 		FROM statement_data
 	)
-	SELECT RowNumber, cs.AccountCode, Subject.AccountName, cs.EntryDescription,
+	SELECT RowNumber, cs.SubjectCode, Subject.SubjectName, cs.EntryDescription,
 			TransactOn, ReferenceCode, cs.CashEntryTypeCode, et.CashEntryType, CAST(PayIn AS decimal(18, 5)) PayIn, CAST(PayOut AS decimal(18, 5)) PayOut, CAST(Balance AS decimal(18, 5)) Balance
 	FROM company_statement cs 
-		JOIN Subject.tbSubject Subject ON cs.AccountCode = Subject.AccountCode
+		JOIN Subject.tbSubject Subject ON cs.SubjectCode = Subject.SubjectCode
 		JOIN Cash.tbEntryType et ON cs.CashEntryTypeCode = et.CashEntryTypeCode;

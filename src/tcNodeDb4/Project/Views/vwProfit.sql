@@ -79,10 +79,10 @@ AS
 		WHERE (flow.ParentProjectCode IS NULL)
 	), profits AS
 	(
-		SELECT orders.StartOn, Project.AccountCode, orders.ProjectCode, 
+		SELECT orders.StartOn, Project.SubjectCode, orders.ProjectCode, 
 			yearperiod.YearNumber, yr.Description, 
 			CONCAT(mn.MonthName, ' ', YEAR(yearperiod.StartOn)) AS Period,
-			Project.ObjectCode, cashcode.CashCode, Project.ProjectTitle, Subject.AccountName, cashcode.CashDescription,
+			Project.ObjectCode, cashcode.CashCode, Project.ProjectTitle, Subject.SubjectName, cashcode.CashDescription,
 			Projectstatus.ProjectStatus, Project.ProjectStatusCode, Project.TotalCharge, invoices.InvoiceValue AS InvoicedCharge,
 			invoices.InvoicePaid AS InvoicedChargePaid,
 			Project_costs.TotalCost, Project_costs.InvoicedCost, Project_costs.InvoicedCostPaid,
@@ -98,13 +98,13 @@ AS
 			JOIN Project_costs ON orders.ProjectCode = Project_costs.ProjectCode	
 			JOIN Cash.tbCode cashcode ON Project.CashCode = cashcode.CashCode
 			JOIN Project.tbStatus Projectstatus ON Projectstatus.ProjectStatusCode = Project.ProjectStatusCode
-			JOIN Subject.tbSubject Subject ON Subject.AccountCode = Project.AccountCode
+			JOIN Subject.tbSubject Subject ON Subject.SubjectCode = Project.SubjectCode
 			JOIN App.tbYearPeriod yearperiod ON yearperiod.StartOn = orders.StartOn
 			JOIN App.tbYear yr ON yr.YearNumber = yearperiod.YearNumber
 			JOIN App.tbMonth mn ON mn.MonthNumber = yearperiod.MonthNumber
 		)
-		SELECT StartOn, AccountCode, ProjectCode, YearNumber, [Description], [Period], ObjectCode, CashCode,
-			ProjectTitle, AccountName, CashDescription, ProjectStatus, ProjectStatusCode, CAST(TotalCharge as float) TotalCharge, CAST(InvoicedCharge as float) InvoicedCharge, CAST(InvoicedChargePaid as float) InvoicedChargePaid,
+		SELECT StartOn, SubjectCode, ProjectCode, YearNumber, [Description], [Period], ObjectCode, CashCode,
+			ProjectTitle, SubjectName, CashDescription, ProjectStatus, ProjectStatusCode, CAST(TotalCharge as float) TotalCharge, CAST(InvoicedCharge as float) InvoicedCharge, CAST(InvoicedChargePaid as float) InvoicedChargePaid,
 			CAST(TotalCost AS float) TotalCost, CAST(InvoicedCost as float) InvoicedCost, CAST(InvoicedCostPaid as float) InvoicedCostPaid, CAST(Profit AS float) Profit,
 			CAST(UninvoicedCharge AS float) UninvoicedCharge, CAST(UnpaidCharge AS float) UnpaidCharge,
 			CAST(UninvoicedCost AS float) UninvoicedCost, CAST(UnpaidCost AS float) UnpaidCost,

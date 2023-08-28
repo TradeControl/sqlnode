@@ -1,6 +1,6 @@
 ﻿CREATE VIEW Project.vwNetworkDeployments
 AS
-	SELECT DISTINCT Project.tbProject.ProjectCode, Project.tbProject.AccountCode, Project.tbProject.ObjectCode, Object.tbObject.ObjectDescription, Project.tbProject.ProjectTitle, Project.tbProject.ProjectStatusCode, Project.tbStatus.ProjectStatus, Project.tbProject.ActionOn, Project.tbProject.Quantity, 
+	SELECT DISTINCT Project.tbProject.ProjectCode, Project.tbProject.SubjectCode, Project.tbProject.ObjectCode, Object.tbObject.ObjectDescription, Project.tbProject.ProjectTitle, Project.tbProject.ProjectStatusCode, Project.tbStatus.ProjectStatus, Project.tbProject.ActionOn, Project.tbProject.Quantity, 
 							 Cash.tbCategory.CashPolarityCode, Cash.tbPolarity.CashPolarity, App.tbTaxCode.TaxRate, Project.tbProject.UnitCharge, Object.tbObject.UnitOfMeasure,
 								 (SELECT        UnitOfCharge
 								   FROM            App.tbOptions) AS UnitOfCharge

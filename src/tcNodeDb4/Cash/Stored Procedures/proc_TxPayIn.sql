@@ -1,9 +1,9 @@
 ﻿CREATE   PROCEDURE Cash.proc_TxPayIn
 (
-	@CashAccountCode nvarchar(10), 
+	@AccountCode nvarchar(10), 
 	@PaymentAddress nvarchar(42),
 	@TxId nvarchar(64),
-	@AccountCode nvarchar(10), 
+	@SubjectCode nvarchar(10), 
 	@CashCode nvarchar(50), 
 	@PaidOn datetime, 
 	@PaymentReference nvarchar(50) = null, 
@@ -17,14 +17,14 @@ AS
 		FROM Cash.tbTx 
 		WHERE TxId = @TxId AND PaymentAddress = @PaymentAddress
 
-		IF NOT EXISTS (SELECT * FROM Subject.tbSubject WHERE AccountCode = @AccountCode)
-			SELECT @AccountCode = AccountCode FROM App.vwHomeAccount;
+		IF NOT EXISTS (SELECT * FROM Subject.tbSubject WHERE SubjectCode = @SubjectCode)
+			SELECT @SubjectCode = SubjectCode FROM App.vwHomeAccount;
 		ELSE IF @Confirmations = 0 
 			RETURN 1;
 
 		BEGIN TRAN
 
-		EXEC Cash.proc_PaymentAdd @AccountCode, @CashAccountCode, @CashCode, @PaidOn, @ToPay, @PaymentReference, @PaymentCode OUTPUT;
+		EXEC Cash.proc_PaymentAdd @SubjectCode, @AccountCode, @CashCode, @PaidOn, @ToPay, @PaymentReference, @PaymentCode OUTPUT;
 
 		UPDATE Cash.tbTx
 		SET TxStatusCode = 1

@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [App].[tbOptions] (
     [Identifier]         NVARCHAR (4)  NOT NULL,
     [IsInitialised]      BIT           CONSTRAINT [DF_App_tbOptions_IsIntialised] DEFAULT ((0)) NOT NULL,
-    [AccountCode]        NVARCHAR (10) NOT NULL,
+    [SubjectCode]        NVARCHAR (10) NOT NULL,
     [RegisterName]       NVARCHAR (50) NOT NULL,
     [DefaultPrintMode]   SMALLINT      CONSTRAINT [DF_App_tbOptions_DefaultPrintMode] DEFAULT ((2)) NOT NULL,
     [BucketTypeCode]     SMALLINT      CONSTRAINT [DF_App_tbOptions_BucketTypeCode] DEFAULT ((1)) NOT NULL,
@@ -28,8 +28,8 @@
     CONSTRAINT [FK_App_tbOptions_App_tbRegister] FOREIGN KEY ([RegisterName]) REFERENCES [App].[tbRegister] ([RegisterName]) ON UPDATE CASCADE,
     CONSTRAINT [FK_App_tbOptions_Cash_tbCode] FOREIGN KEY ([MinerFeeCode]) REFERENCES [Cash].[tbCode] ([CashCode]),
     CONSTRAINT [FK_App_tbOptions_Cash_tbCoinType] FOREIGN KEY ([CoinTypeCode]) REFERENCES [Cash].[tbCoinType] ([CoinTypeCode]),
-    CONSTRAINT [FK_App_tbOptions_Subject_tb] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]) ON UPDATE CASCADE,
-    CONSTRAINT [FK_App_tbOptions_Subject_tbSubject] FOREIGN KEY ([MinerAccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]),
+    CONSTRAINT [FK_App_tbOptions_Subject_tb] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_App_tbOptions_Subject_tbSubject] FOREIGN KEY ([MinerAccountCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]),
     CONSTRAINT [FK_App_tbUoc_UnitOfCharge] FOREIGN KEY ([UnitOfCharge]) REFERENCES [App].[tbUoc] ([UnitOfCharge])
 );
 

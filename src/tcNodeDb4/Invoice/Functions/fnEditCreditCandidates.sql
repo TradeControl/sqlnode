@@ -1,4 +1,4 @@
-﻿CREATE   FUNCTION Invoice.fnEditCreditCandidates (@InvoiceNumber nvarchar(20), @AccountCode nvarchar(10))
+﻿CREATE   FUNCTION Invoice.fnEditCreditCandidates (@InvoiceNumber nvarchar(20), @SubjectCode nvarchar(10))
 RETURNS TABLE
 AS
 	RETURN 
@@ -17,6 +17,6 @@ AS
 								Project.tbProject AS tbProject ON tbInvoiceProject.ProjectCode = tbProject.ProjectCode INNER JOIN
 								Invoice.tbStatus ON Invoice.tbInvoice.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode ON Usr.tbUser.UserId = Invoice.tbInvoice.UserId LEFT OUTER JOIN
 								InvoiceEditProjects AS InvoiceEditProjects ON tbProject.ProjectCode = InvoiceEditProjects.ProjectCode
-		WHERE        (Invoice.tbInvoice.AccountCode = @AccountCode) AND (Invoice.tbInvoice.InvoiceTypeCode = 0) AND (InvoiceEditProjects.ProjectCode IS NULL)
+		WHERE        (Invoice.tbInvoice.SubjectCode = @SubjectCode) AND (Invoice.tbInvoice.InvoiceTypeCode = 0) AND (InvoiceEditProjects.ProjectCode IS NULL)
 		ORDER BY Invoice.tbInvoice.InvoicedOn DESC
 	);

@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE Invoice.proc_PostEntryById(@UserId nvarchar(10), @AccountCode nvarchar(10), @CashCode nvarchar(50))
+﻿CREATE   PROCEDURE Invoice.proc_PostEntryById(@UserId nvarchar(10), @SubjectCode nvarchar(10), @CashCode nvarchar(50))
 AS
    	SET NOCOUNT, XACT_ABORT ON;
 
@@ -12,15 +12,15 @@ AS
 
 		SELECT @InvoiceTypeCode = InvoiceTypeCode 
 		FROM Invoice.tbEntry 
-		WHERE UserId = @UserId AND AccountCode = @AccountCode AND CashCode = @CashCode;
+		WHERE UserId = @UserId AND SubjectCode = @SubjectCode AND CashCode = @CashCode;
 		
-		EXEC Invoice.proc_RaiseBlank @AccountCode, @InvoiceTypeCode, @InvoiceNumber output;
+		EXEC Invoice.proc_RaiseBlank @SubjectCode, @InvoiceTypeCode, @InvoiceNumber output;
 
 		WITH invoice_entry AS
 		(
 			SELECT @InvoiceNumber InvoiceNumber, MIN(InvoicedOn) InvoicedOn
 			FROM Invoice.tbEntry
-			WHERE AccountCode = @AccountCode AND InvoiceTypeCode = @InvoiceTypeCode
+			WHERE SubjectCode = @SubjectCode AND InvoiceTypeCode = @InvoiceTypeCode
 		)
 		UPDATE Invoice.tbInvoice
 		SET 
@@ -33,12 +33,12 @@ AS
 		INSERT INTO Invoice.tbItem (InvoiceNumber, CashCode, TaxCode, ItemReference, TotalValue, InvoiceValue)
 		SELECT @InvoiceNumber InvoiceNumber, CashCode, TaxCode, ItemReference, TotalValue, InvoiceValue
 		FROM Invoice.tbEntry
-		WHERE AccountCode = @AccountCode AND CashCode = @CashCode
+		WHERE SubjectCode = @SubjectCode AND CashCode = @CashCode
 
 		EXEC Invoice.proc_Accept @InvoiceNumber;
 
 		DELETE FROM Invoice.tbEntry
-		WHERE UserId = @UserId AND AccountCode = @AccountCode AND CashCode = @CashCode;
+		WHERE UserId = @UserId AND SubjectCode = @SubjectCode AND CashCode = @CashCode;
 
 		COMMIT TRAN;
 

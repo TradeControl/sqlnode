@@ -8,7 +8,7 @@ AS
 		WHERE (yr.CashStatusCode BETWEEN 1 AND 2)
 	), assets AS
 	(
-		SELECT CashAccountCode AssetCode, CashAccountName AssetName, LiquidityLevel, CAST(4 as smallint) AssetTypeCode, 
+		SELECT AccountCode AssetCode, AccountName AssetName, LiquidityLevel, CAST(4 as smallint) AssetTypeCode, 
 			category.CashPolarityCode,
 			YearNumber, StartOn
 		FROM Subject.tbAccount account
@@ -18,21 +18,21 @@ AS
 		WHERE (AccountTypeCode= 2) AND (AccountClosed = 0)
 	), cash AS
 	(
-		SELECT CashAccountCode AssetCode, AssetType AssetName, LiquidityLevel, AssetTypeCode, CAST(1 as smallint) CashPolarityCode, YearNumber, StartOn
+		SELECT AccountCode AssetCode, AssetType AssetName, LiquidityLevel, AssetTypeCode, CAST(1 as smallint) CashPolarityCode, YearNumber, StartOn
 		FROM Cash.tbAssetType
 			CROSS JOIN Cash.vwCurrentAccount 
 			CROSS JOIN financial_periods
 		WHERE AssetTypeCode = 3
 	), bank AS
 	(
-		SELECT CashAccountCode AssetCode, AssetType AssetName, LiquidityLevel, AssetTypeCode, CAST(1 as smallint) CashPolarityCode, YearNumber, StartOn
+		SELECT AccountCode AssetCode, AssetType AssetName, LiquidityLevel, AssetTypeCode, CAST(1 as smallint) CashPolarityCode, YearNumber, StartOn
 		FROM Cash.tbAssetType
 			CROSS JOIN Cash.vwReserveAccount 
 			CROSS JOIN financial_periods
 		WHERE AssetTypeCode = 2
 	), Subjects AS
 	(
-		SELECT CashAccountCode AssetCode, AssetType AssetName, LiquidityLevel, AssetTypeCode,
+		SELECT AccountCode AssetCode, AssetType AssetName, LiquidityLevel, AssetTypeCode,
 			CAST(CASE AssetTypeCode WHEN 0 THEN 1 ELSE 0 END as smallint) CashPolarityCode,
 			YearNumber, StartOn
 		FROM Cash.tbAssetType

@@ -3,7 +3,7 @@ AS
 	WITH statement_base AS
 	(
 		SELECT ROW_NUMBER() OVER(ORDER BY TransactOn, CashEntryTypeCode DESC) AS RowNumber,
-		 AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut 
+		 SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut 
 		 FROM Cash.vwStatementBase
 	), opening_balance AS
 	(	
@@ -15,7 +15,7 @@ AS
 	(
 		SELECT 
 			0 AS RowNumber,
-			(SELECT TOP (1) AccountCode FROM App.tbOptions) AS AccountCode,
+			(SELECT TOP (1) SubjectCode FROM App.tbOptions) AS SubjectCode,
 			NULL AS EntryDescription,
 			NULL AS TransactOn,    
 			(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 3013) AS ReferenceCode,	
@@ -23,16 +23,16 @@ AS
 			PayIn = (SELECT OpeningBalance FROM opening_balance),
 			0 AS PayOut
 		UNION 
-		SELECT RowNumber, AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut 
+		SELECT RowNumber, SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut 
 		FROM statement_base
 	), company_statement AS
 	(
-		SELECT RowNumber, AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut,
+		SELECT RowNumber, SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut,
 			SUM(PayIn + (PayOut * -1)) OVER (ORDER BY RowNumber ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance
 		FROM statement_data
 	)
-	SELECT RowNumber, cs.AccountCode, Subject.AccountName, cs.EntryDescription,
+	SELECT RowNumber, cs.SubjectCode, Subject.SubjectName, cs.EntryDescription,
 			TransactOn, ReferenceCode, cs.CashEntryTypeCode, et.CashEntryType, CAST(PayIn AS decimal(18, 5)) PayIn, CAST(PayOut AS decimal(18, 5)) PayOut, CAST(Balance AS decimal(18, 5)) Balance
 	FROM company_statement cs 
-		JOIN Subject.tbSubject Subject ON cs.AccountCode = Subject.AccountCode
+		JOIN Subject.tbSubject Subject ON cs.SubjectCode = Subject.SubjectCode
 		JOIN Cash.tbEntryType et ON cs.CashEntryTypeCode = et.CashEntryTypeCode;

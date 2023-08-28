@@ -4,31 +4,31 @@ AS
 
 	BEGIN TRY
 		DECLARE 
-			@AccountCode nvarchar(10)
+			@SubjectCode nvarchar(10)
 			, @InvoiceTypeCode smallint
 			, @InvoiceNumber nvarchar(20);
 			
 		DECLARE c1 CURSOR LOCAL FOR
-			SELECT AccountCode, InvoiceTypeCode
+			SELECT SubjectCode, InvoiceTypeCode
 			FROM Invoice.tbEntry
 			WHERE UserId = @UserId
-			GROUP BY AccountCode, InvoiceTypeCode;
+			GROUP BY SubjectCode, InvoiceTypeCode;
 
 		OPEN c1;
 
 		BEGIN TRAN;
 
-		FETCH NEXT FROM c1 INTO @AccountCode, @InvoiceTypeCode;
+		FETCH NEXT FROM c1 INTO @SubjectCode, @InvoiceTypeCode;
 		
 		WHILE (@@FETCH_STATUS = 0)
 		BEGIN
-			EXEC Invoice.proc_RaiseBlank @AccountCode, @InvoiceTypeCode, @InvoiceNumber output;
+			EXEC Invoice.proc_RaiseBlank @SubjectCode, @InvoiceTypeCode, @InvoiceNumber output;
 
 			WITH invoice_entry AS
 			(
 				SELECT @InvoiceNumber InvoiceNumber, MIN(InvoicedOn) InvoicedOn
 				FROM Invoice.tbEntry
-				WHERE AccountCode = @AccountCode AND InvoiceTypeCode = @InvoiceTypeCode
+				WHERE SubjectCode = @SubjectCode AND InvoiceTypeCode = @InvoiceTypeCode
 			)
 			UPDATE Invoice.tbInvoice
 			SET 
@@ -41,11 +41,11 @@ AS
 			INSERT INTO Invoice.tbItem (InvoiceNumber, CashCode, TaxCode, ItemReference, TotalValue, InvoiceValue)
 			SELECT @InvoiceNumber InvoiceNumber, CashCode, TaxCode, ItemReference, TotalValue, InvoiceValue
 			FROM Invoice.tbEntry
-			WHERE AccountCode = @AccountCode AND InvoiceTypeCode = @InvoiceTypeCode
+			WHERE SubjectCode = @SubjectCode AND InvoiceTypeCode = @InvoiceTypeCode
 
 			EXEC Invoice.proc_Accept @InvoiceNumber;
 
-			FETCH NEXT FROM c1 INTO @AccountCode, @InvoiceTypeCode;
+			FETCH NEXT FROM c1 INTO @SubjectCode, @InvoiceTypeCode;
 		END
 
 		DELETE FROM Invoice.tbEntry

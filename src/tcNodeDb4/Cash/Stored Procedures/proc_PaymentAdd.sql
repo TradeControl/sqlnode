@@ -1,16 +1,16 @@
-﻿CREATE PROCEDURE Cash.proc_PaymentAdd(@AccountCode nvarchar(10), @CashAccountCode AS nvarchar(10), @CashCode nvarchar(50), @PaidOn datetime, @ToPay decimal(18, 5), @PaymentReference nvarchar(50) = null, @PaymentCode nvarchar(20) output)
+﻿CREATE PROCEDURE Cash.proc_PaymentAdd(@SubjectCode nvarchar(10), @AccountCode AS nvarchar(10), @CashCode nvarchar(50), @PaidOn datetime, @ToPay decimal(18, 5), @PaymentReference nvarchar(50) = null, @PaymentCode nvarchar(20) output)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 	BEGIN TRY
 		
 		EXECUTE Cash.proc_NextPaymentCode  @PaymentCode OUTPUT
 
-		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
+		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, SubjectCode, AccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
 		SELECT   @PaymentCode AS PaymentCode, 
 			(SELECT UserId FROM Usr.vwCredentials) AS UserId,
 			0 AS PaymentStatusCode,
+			@SubjectCode AS SubjectCode,
 			@AccountCode AS AccountCode,
-			@CashAccountCode AS CashAccountCode,
 			@CashCode AS CashCode,
 			Cash.tbCode.TaxCode,
 			@PaidOn As PaidOn,

@@ -9,13 +9,13 @@ CREATE   PROCEDURE Project.proc_WorkFlowSelected
 
 	BEGIN TRY
 		IF NOT (@ParentProjectCode IS NULL)
-			SELECT        Project.tbProject.AccountCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, Project.tbProject.ActionOn, Project.vwCashPolarity.CashPolarityCode, Project.tbFlow.OffsetDays
+			SELECT        Project.tbProject.SubjectCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, Project.tbProject.ActionOn, Project.vwCashPolarity.CashPolarityCode, Project.tbFlow.OffsetDays
 			FROM            Project.tbProject INNER JOIN
 									 Project.tbFlow ON Project.tbProject.ProjectCode = Project.tbFlow.ChildProjectCode LEFT OUTER JOIN
 									 Project.vwCashPolarity ON Project.tbProject.ProjectCode = Project.vwCashPolarity.ProjectCode
 			WHERE        (Project.tbFlow.ParentProjectCode = @ParentProjectCode) AND (Project.tbFlow.ChildProjectCode = @ChildProjectCode)
 		ELSE
-			SELECT        Project.tbProject.AccountCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, Project.tbProject.ActionOn, Project.vwCashPolarity.CashPolarityCode, 0 AS OffsetDays
+			SELECT        Project.tbProject.SubjectCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, Project.tbProject.ActionOn, Project.vwCashPolarity.CashPolarityCode, 0 AS OffsetDays
 			FROM            Project.tbProject LEFT OUTER JOIN
 									 Project.vwCashPolarity ON Project.tbProject.ProjectCode = Project.vwCashPolarity.ProjectCode
 			WHERE        (Project.tbProject.ProjectCode = @ChildProjectCode)

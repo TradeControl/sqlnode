@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [Project].[tbProject] (
     [ProjectCode]        NVARCHAR (20)   NOT NULL,
     [UserId]          NVARCHAR (10)   NOT NULL,
-    [AccountCode]     NVARCHAR (10)   NOT NULL,
+    [SubjectCode]     NVARCHAR (10)   NOT NULL,
     [SecondReference] NVARCHAR (20)   NULL,
     [ProjectTitle]       NVARCHAR (100)  NULL,
     [ContactName]     NVARCHAR (100)  NULL,
@@ -29,7 +29,7 @@
     CONSTRAINT [PK_Project_tbProject] PRIMARY KEY CLUSTERED ([ProjectCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Project_tb_tbObject] FOREIGN KEY ([ObjectCode]) REFERENCES [Object].[tbObject] ([ObjectCode]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Project_tb_tbStatus] FOREIGN KEY ([ProjectStatusCode]) REFERENCES [Project].[tbStatus] ([ProjectStatusCode]),
-    CONSTRAINT [FK_Project_tb_tbSubject] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_Project_tb_tbSubject] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Project_tb_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]),
     CONSTRAINT [FK_Project_tb_Cash_tbCode] FOREIGN KEY ([CashCode]) REFERENCES [Cash].[tbCode] ([CashCode]),
     CONSTRAINT [FK_Project_tb_Subject_tbAddress_From] FOREIGN KEY ([AddressCodeFrom]) REFERENCES [Subject].[tbAddress] ([AddressCode]),
@@ -41,17 +41,17 @@
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Project_tb_AccountCode]
-    ON [Project].[tbProject]([AccountCode] ASC) WITH (FILLFACTOR = 90);
+    ON [Project].[tbProject]([SubjectCode] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Project_tb_AccountCodeByActionOn]
-    ON [Project].[tbProject]([AccountCode] ASC, [ActionOn] ASC) WITH (FILLFACTOR = 90);
+    ON [Project].[tbProject]([SubjectCode] ASC, [ActionOn] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Project_tb_AccountCodeByStatus]
-    ON [Project].[tbProject]([AccountCode] ASC, [ProjectStatusCode] ASC, [ActionOn] ASC) WITH (FILLFACTOR = 90);
+    ON [Project].[tbProject]([SubjectCode] ASC, [ProjectStatusCode] ASC, [ActionOn] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
@@ -71,7 +71,7 @@ CREATE NONCLUSTERED INDEX [IX_Project_tb_ActionOn]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Project_tb_ActionOnStatus]
-    ON [Project].[tbProject]([ProjectStatusCode] ASC, [ActionOn] ASC, [AccountCode] ASC) WITH (FILLFACTOR = 90);
+    ON [Project].[tbProject]([ProjectStatusCode] ASC, [ActionOn] ASC, [SubjectCode] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
@@ -106,7 +106,7 @@ CREATE NONCLUSTERED INDEX [IX_Project_tbProject_ActionOn_Status_CashCode]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Project_tbProject_ActionOn_ProjectCode_CashCode]
-    ON [Project].[tbProject]([ActionOn] ASC, [ProjectCode] ASC, [CashCode] ASC, [ProjectStatusCode] ASC, [AccountCode] ASC)
+    ON [Project].[tbProject]([ActionOn] ASC, [ProjectCode] ASC, [CashCode] ASC, [ProjectStatusCode] ASC, [SubjectCode] ASC)
     INCLUDE([ProjectTitle], [ObjectCode], [ActionedOn], [Quantity], [UnitCharge], [TotalCharge], [PaymentOn]);
 
 
@@ -158,22 +158,22 @@ AS
                 ELSE 
                     DATEADD(d, Subject.PaymentDays + Subject.ExpectedDays, Project.ActionOn) END, 0) 
 	    FROM Project.tbProject Project
-		    JOIN Subject.tbSubject Subject ON Project.AccountCode = Subject.AccountCode
+		    JOIN Subject.tbSubject Subject ON Project.SubjectCode = Subject.SubjectCode
 		    JOIN inserted i ON Project.ProjectCode = i.ProjectCode
 	    WHERE NOT Project.CashCode IS NULL 
 
-	    INSERT INTO Subject.tbContact (AccountCode, ContactName)
-	    SELECT DISTINCT AccountCode, ContactName 
+	    INSERT INTO Subject.tbContact (SubjectCode, ContactName)
+	    SELECT DISTINCT SubjectCode, ContactName 
 	    FROM inserted
 	    WHERE EXISTS (SELECT ContactName FROM inserted AS i WHERE (NOT (ContactName IS NULL)) AND (ContactName <> N''))
-                AND NOT EXISTS(SELECT Subject.tbContact.ContactName FROM inserted AS i INNER JOIN Subject.tbContact ON i.AccountCode = Subject.tbContact.AccountCode AND i.ContactName = Subject.tbContact.ContactName)
+                AND NOT EXISTS(SELECT Subject.tbContact.ContactName FROM inserted AS i INNER JOIN Subject.tbContact ON i.SubjectCode = Subject.tbContact.SubjectCode AND i.ContactName = Subject.tbContact.ContactName)
 
 		INSERT INTO Project.tbChangeLog
-								 (ProjectCode, TransmitStatusCode, AccountCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
-		SELECT inserted.ProjectCode, Subject.tbSubject.TransmitStatusCode, inserted.AccountCode, inserted.ObjectCode, inserted.ProjectStatusCode, 
+								 (ProjectCode, TransmitStatusCode, SubjectCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
+		SELECT inserted.ProjectCode, Subject.tbSubject.TransmitStatusCode, inserted.SubjectCode, inserted.ObjectCode, inserted.ProjectStatusCode, 
 								 inserted.ActionOn, inserted.Quantity, inserted.CashCode, inserted.TaxCode, inserted.UnitCharge
 		FROM inserted 
-			JOIN Subject.tbSubject ON inserted.AccountCode = Subject.tbSubject.AccountCode
+			JOIN Subject.tbSubject ON inserted.SubjectCode = Subject.tbSubject.SubjectCode
 			JOIN Cash.tbCode ON inserted.CashCode = Cash.tbCode.CashCode
 	END TRY
 	BEGIN CATCH
@@ -374,7 +374,7 @@ AS
 													END, 0) 
 			FROM Project.tbProject Project
 				JOIN inserted i ON Project.ProjectCode = i.ProjectCode
-				JOIN Subject.tbSubject Subject ON i.AccountCode = Subject.AccountCode				
+				JOIN Subject.tbSubject Subject ON i.SubjectCode = Subject.SubjectCode				
 			WHERE NOT Project.CashCode IS NULL 
 		END
 
@@ -427,15 +427,15 @@ AS
 
 		IF UPDATE (ContactName)
 		BEGIN
-			INSERT INTO Subject.tbContact (AccountCode, ContactName)
-			SELECT DISTINCT AccountCode, ContactName FROM inserted
+			INSERT INTO Subject.tbContact (SubjectCode, ContactName)
+			SELECT DISTINCT SubjectCode, ContactName FROM inserted
 			WHERE EXISTS (SELECT     *
 						FROM         inserted AS i
 						WHERE     (NOT (ContactName IS NULL)) AND
 												(ContactName <> N''))
 				AND NOT EXISTS(SELECT  *
 								FROM inserted AS i 
-								INNER JOIN Subject.tbContact ON i.AccountCode = Subject.tbContact.AccountCode AND i.ContactName = Subject.tbContact.ContactName)
+								INNER JOIN Subject.tbContact ON i.SubjectCode = Subject.tbContact.SubjectCode AND i.ContactName = Subject.tbContact.ContactName)
 		END
 		
 		UPDATE Project.tbProject
@@ -446,22 +446,22 @@ AS
 		BEGIN
 			WITH candidates AS
 			(
-				SELECT ProjectCode, AccountCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge
+				SELECT ProjectCode, SubjectCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge
 				FROM inserted
 				WHERE EXISTS (SELECT * FROM Project.tbChangeLog WHERE ProjectCode = inserted.ProjectCode)
 			)
 			, logs AS
 			(
-				SELECT clog.LogId, clog.ProjectCode, clog.AccountCode, clog.ObjectCode, clog.ProjectStatusCode, clog.TransmitStatusCode, clog.ActionOn, clog.Quantity, clog.CashCode, clog.TaxCode, clog.UnitCharge
+				SELECT clog.LogId, clog.ProjectCode, clog.SubjectCode, clog.ObjectCode, clog.ProjectStatusCode, clog.TransmitStatusCode, clog.ActionOn, clog.Quantity, clog.CashCode, clog.TaxCode, clog.UnitCharge
 				FROM Project.tbChangeLog clog
 				JOIN candidates ON clog.ProjectCode = candidates.ProjectCode AND LogId = (SELECT MAX(LogId) FROM Project.tbChangeLog WHERE ProjectCode = candidates.ProjectCode)		
 			)
 			INSERT INTO Project.tbChangeLog
-									(ProjectCode, TransmitStatusCode, AccountCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
-			SELECT candidates.ProjectCode, CASE Subjects.TransmitStatusCode WHEN 1 THEN 2 ELSE 0 END TransmitStatusCode, candidates.AccountCode,
+									(ProjectCode, TransmitStatusCode, SubjectCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
+			SELECT candidates.ProjectCode, CASE Subjects.TransmitStatusCode WHEN 1 THEN 2 ELSE 0 END TransmitStatusCode, candidates.SubjectCode,
 				candidates.ObjectCode, candidates.ProjectStatusCode, candidates.ActionOn, candidates.Quantity, candidates.CashCode, candidates.TaxCode, candidates.UnitCharge
 			FROM candidates 
-				JOIN Subject.tbSubject Subjects ON candidates.AccountCode = Subjects.AccountCode 
+				JOIN Subject.tbSubject Subjects ON candidates.SubjectCode = Subjects.SubjectCode 
 				JOIN logs ON candidates.ProjectCode = logs.ProjectCode
 			WHERE (logs.ProjectStatusCode <> candidates.ProjectStatusCode) 
 				OR (logs.TransmitStatusCode < 2)
@@ -471,20 +471,20 @@ AS
 				OR (logs.TaxCode <> candidates.TaxCode);
 		END;
 
-		IF UPDATE(AccountCode)
+		IF UPDATE(SubjectCode)
 		BEGIN
 			WITH candidates AS
 			(
 				SELECT inserted.* FROM inserted
 				JOIN deleted ON inserted.ProjectCode = deleted.ProjectCode
-				WHERE inserted.AccountCode <> deleted.AccountCode
+				WHERE inserted.SubjectCode <> deleted.SubjectCode
 			)
 			INSERT INTO Project.tbChangeLog
-									 (ProjectCode, TransmitStatusCode, AccountCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
-			SELECT candidates.ProjectCode, Subject.tbSubject.TransmitStatusCode, candidates.AccountCode, candidates.ObjectCode, candidates.ProjectStatusCode, 
+									 (ProjectCode, TransmitStatusCode, SubjectCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
+			SELECT candidates.ProjectCode, Subject.tbSubject.TransmitStatusCode, candidates.SubjectCode, candidates.ObjectCode, candidates.ProjectStatusCode, 
 									 candidates.ActionOn, candidates.Quantity, candidates.CashCode, candidates.TaxCode, candidates.UnitCharge
 			FROM candidates 
-				JOIN Subject.tbSubject ON candidates.AccountCode = Subject.tbSubject.AccountCode
+				JOIN Subject.tbSubject ON candidates.SubjectCode = Subject.tbSubject.SubjectCode
 				JOIN Cash.tbCode ON candidates.CashCode = Cash.tbCode.CashCode;
 		END
 
@@ -502,11 +502,11 @@ AS
 
 	BEGIN TRY
 		INSERT INTO Project.tbChangeLog
-								 (ProjectCode, TransmitStatusCode, AccountCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
+								 (ProjectCode, TransmitStatusCode, SubjectCode, ObjectCode, ProjectStatusCode, ActionOn, Quantity, CashCode, TaxCode, UnitCharge)
 		SELECT deleted.ProjectCode, CASE Subject.tbSubject.TransmitStatusCode WHEN 1 THEN 2 ELSE 0 END TransmitStatusCode, 
-					deleted.AccountCode, deleted.ObjectCode, 4 CancelledStatusCode, 
+					deleted.SubjectCode, deleted.ObjectCode, 4 CancelledStatusCode, 
 					deleted.ActionOn, deleted.Quantity, deleted.CashCode, deleted.TaxCode, deleted.UnitCharge
-		FROM deleted INNER JOIN Subject.tbSubject ON deleted.AccountCode = Subject.tbSubject.AccountCode;
+		FROM deleted INNER JOIN Subject.tbSubject ON deleted.SubjectCode = Subject.tbSubject.SubjectCode;
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;

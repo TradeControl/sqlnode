@@ -1,7 +1,7 @@
 ﻿
 CREATE   PROCEDURE Subject.proc_AddAddress 
 	(
-	@AccountCode nvarchar(10),
+	@SubjectCode nvarchar(10),
 	@Address ntext
 	)
 AS
@@ -10,17 +10,17 @@ AS
 	BEGIN TRY
 		DECLARE @AddressCode nvarchar(15)
 	
-		EXECUTE Subject.proc_NextAddressCode @AccountCode, @AddressCode OUTPUT
+		EXECUTE Subject.proc_NextAddressCode @SubjectCode, @AddressCode OUTPUT
 	
 		INSERT INTO Subject.tbAddress
-							  (AddressCode, AccountCode, Address)
-		VALUES     (@AddressCode, @AccountCode, @Address)
+							  (AddressCode, SubjectCode, Address)
+		VALUES     (@AddressCode, @SubjectCode, @Address)
 	
-		IF NOT EXISTS (SELECT * FROM Subject.tbSubject Subject JOIN Subject.tbAddress Subject_addr ON Subject.AddressCode = Subject_addr.AddressCode WHERE Subject.AccountCode = @AccountCode)
+		IF NOT EXISTS (SELECT * FROM Subject.tbSubject Subject JOIN Subject.tbAddress Subject_addr ON Subject.AddressCode = Subject_addr.AddressCode WHERE Subject.SubjectCode = @SubjectCode)
 		BEGIN
 			UPDATE Subject.tbSubject
 			SET AddressCode = @AddressCode
-			WHERE Subject.tbSubject.AccountCode = @AccountCode
+			WHERE Subject.tbSubject.SubjectCode = @SubjectCode
 		END
 
   	END TRY

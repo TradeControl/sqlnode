@@ -6,12 +6,12 @@ CREATE   PROCEDURE App.proc_Initialised
 
 	BEGIN TRY
 		IF @Setting = 1
-			AND (EXISTS (SELECT     Subject.tbSubject.AccountCode
+			AND (EXISTS (SELECT     Subject.tbSubject.SubjectCode
 						FROM         Subject.tbSubject INNER JOIN
-											  App.tbOptions ON Subject.tbSubject.AccountCode = App.tbOptions.AccountCode)
+											  App.tbOptions ON Subject.tbSubject.SubjectCode = App.tbOptions.SubjectCode)
 			OR EXISTS (SELECT     Subject.tbAddress.AddressCode
 						   FROM         Subject.tbSubject INNER JOIN
-												 App.tbOptions ON Subject.tbSubject.AccountCode = App.tbOptions.AccountCode INNER JOIN
+												 App.tbOptions ON Subject.tbSubject.SubjectCode = App.tbOptions.SubjectCode INNER JOIN
 												 Subject.tbAddress ON Subject.tbSubject.AddressCode = Subject.tbAddress.AddressCode)
 			OR EXISTS (SELECT     TOP 1 UserId
 							   FROM         Usr.tbUser))

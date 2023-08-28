@@ -14,7 +14,7 @@ AS
 		@UserId nvarchar(10)
 		, @NextNumber int
 		, @InvoiceSuffix nvarchar(4)
-		, @AccountCode nvarchar(10)
+		, @SubjectCode nvarchar(10)
 	
 		SELECT @UserId = UserId FROM Usr.vwCredentials
 
@@ -35,7 +35,7 @@ AS
 			END
 
 		SET @InvoicedOn = isnull(CAST(@InvoicedOn AS DATE), CAST(CURRENT_TIMESTAMP AS DATE))
-		SELECT @AccountCode = AccountCode FROM Project.tbProject WHERE ProjectCode = @ProjectCode
+		SELECT @SubjectCode = SubjectCode FROM Project.tbProject WHERE ProjectCode = @ProjectCode
 
 
 		BEGIN TRANSACTION
@@ -47,11 +47,11 @@ AS
 		WHERE     (InvoiceTypeCode = @InvoiceTypeCode)
 	
 		INSERT INTO Invoice.tbInvoice
-							(InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode, PaymentTerms)
-		SELECT     @InvoiceNumber AS InvoiceNumber, @UserId AS UserId, Project.tbProject.AccountCode, @InvoiceTypeCode AS InvoiceTypeCode, @InvoicedOn AS InvoicedOn, 
+							(InvoiceNumber, UserId, SubjectCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode, PaymentTerms)
+		SELECT     @InvoiceNumber AS InvoiceNumber, @UserId AS UserId, Project.tbProject.SubjectCode, @InvoiceTypeCode AS InvoiceTypeCode, @InvoicedOn AS InvoicedOn, 
 							0 AS InvoiceStatusCode, Subject.tbSubject.PaymentTerms
 		FROM         Project.tbProject INNER JOIN
-							Subject.tbSubject ON Project.tbProject.AccountCode = Subject.tbSubject.AccountCode
+							Subject.tbSubject ON Project.tbProject.SubjectCode = Subject.tbSubject.SubjectCode
 		WHERE     ( Project.tbProject.ProjectCode = @ProjectCode)
 
 		EXEC Invoice.proc_AddProject @InvoiceNumber, @ProjectCode

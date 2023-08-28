@@ -1,6 +1,6 @@
 ﻿CREATE   PROCEDURE Subject.proc_DefaultEmailAddress 
 	(
-	@AccountCode nvarchar(10),
+	@SubjectCode nvarchar(10),
 	@EmailAddress nvarchar(255) OUTPUT
 	)
   AS
@@ -8,12 +8,12 @@
 
 	BEGIN TRY
 
-	SELECT @EmailAddress = COALESCE(EmailAddress, '') FROM Subject.tbSubject WHERE AccountCode = @AccountCode;
+	SELECT @EmailAddress = COALESCE(EmailAddress, '') FROM Subject.tbSubject WHERE SubjectCode = @SubjectCode;
 
 	IF (LEN(@EmailAddress) = 0)
 		SELECT @EmailAddress = EmailAddress
 		FROM Subject.tbContact
-		WHERE AccountCode = @AccountCode AND NOT (EmailAddress IS NULL);
+		WHERE SubjectCode = @SubjectCode AND NOT (EmailAddress IS NULL);
 
 	SET @EmailAddress = COALESCE(@EmailAddress, '');
 

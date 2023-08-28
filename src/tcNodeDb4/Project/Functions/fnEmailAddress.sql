@@ -9,14 +9,14 @@ AS
 
 	IF EXISTS(SELECT     Subject.tbContact.EmailAddress
 		  FROM         Subject.tbContact INNER JOIN
-								tbProject ON Subject.tbContact.AccountCode = Project.tbProject.AccountCode AND Subject.tbContact.ContactName = Project.tbProject.ContactName
+								tbProject ON Subject.tbContact.SubjectCode = Project.tbProject.SubjectCode AND Subject.tbContact.ContactName = Project.tbProject.ContactName
 		  WHERE     ( Project.tbProject.ProjectCode = @ProjectCode)
 		  GROUP BY Subject.tbContact.EmailAddress
 		  HAVING      (NOT ( Subject.tbContact.EmailAddress IS NULL)))
 		BEGIN
 		SELECT    @EmailAddress = Subject.tbContact.EmailAddress
 		FROM         Subject.tbContact INNER JOIN
-							tbProject ON Subject.tbContact.AccountCode = Project.tbProject.AccountCode AND Subject.tbContact.ContactName = Project.tbProject.ContactName
+							tbProject ON Subject.tbContact.SubjectCode = Project.tbProject.SubjectCode AND Subject.tbContact.ContactName = Project.tbProject.ContactName
 		WHERE     ( Project.tbProject.ProjectCode = @ProjectCode)
 		GROUP BY Subject.tbContact.EmailAddress
 		HAVING      (NOT ( Subject.tbContact.EmailAddress IS NULL))	
@@ -25,7 +25,7 @@ AS
 		BEGIN
 		SELECT    @EmailAddress =  Subject.tbSubject.EmailAddress
 		FROM         Subject.tbSubject INNER JOIN
-							 Project.tbProject ON Subject.tbSubject.AccountCode = Project.tbProject.AccountCode
+							 Project.tbProject ON Subject.tbSubject.SubjectCode = Project.tbProject.SubjectCode
 		WHERE     ( Project.tbProject.ProjectCode = @ProjectCode)
 		END
 	

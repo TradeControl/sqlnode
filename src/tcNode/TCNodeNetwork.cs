@@ -19,10 +19,10 @@ namespace TradeControl.Node
             {
                 try
                 {
-                    var owner = (from org in tbOrgs
+                    var owner = (from org in tbSubjects
                                  from opt in tbOptions
-                                 where org.AccountCode == opt.AccountCode
-                                 select org.AccountName).First().ToString();
+                                 where org.SubjectCode == opt.SubjectCode
+                                 select org.SubjectName).First().ToString();
                     return owner;
                 }
                 catch (Exception err)
@@ -94,13 +94,13 @@ namespace TradeControl.Node
                 {
                     Dictionary<string, string> members = new Dictionary<string, string>();
 
-                    var orgs = (from tb in tbOrgs
+                    var orgs = (from tb in tbSubjects
                                 where tb.TransmitStatusCode == (short)TransmitStatus.Deploy
-                                orderby tb.AccountName
-                                select new { tb.AccountCode, tb.AccountName });
+                                orderby tb.SubjectName
+                                select new { tb.SubjectCode, tb.SubjectName});
 
                     foreach (var member in orgs)
-                        members.Add(member.AccountCode, member.AccountName);
+                        members.Add(member.SubjectCode, member.SubjectName);
                     return members;
                 }
                 catch (Exception err)
@@ -120,14 +120,14 @@ namespace TradeControl.Node
                 {
                     Dictionary<string, string> candidates = new Dictionary<string, string>();
 
-                    var orgs = (from tb in tbOrgs
+                    var orgs = (from tb in tbSubjects
                                 where tb.TransmitStatusCode == (short)TransmitStatus.Disconnected
-                                    && tb.AccountCode != (tbOptions.Select(o => o.AccountCode).First().ToString())
-                                orderby tb.AccountName
-                                select new { tb.AccountCode, tb.AccountName });
+                                    && tb.SubjectCode != (tbOptions.Select(o => o.SubjectCode).First().ToString())
+                                orderby tb.SubjectName
+                                select new { tb.SubjectCode, tb.SubjectName });
 
                     foreach (var candidate in orgs)
-                        candidates.Add(candidate.AccountCode, candidate.AccountName);
+                        candidates.Add(candidate.SubjectCode, candidate.SubjectName);
                     return candidates;
                 }
                 catch (Exception err)
@@ -139,13 +139,13 @@ namespace TradeControl.Node
             }
         }
 
-        public Task<bool> AddMember(string accountCode)
+        public Task<bool> AddMember(string subjectCode)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    var org = (from tb in tbOrgs where tb.AccountCode == accountCode select tb).First();
+                    var org = (from tb in tbSubjects where tb.SubjectCode == subjectCode select tb).First();
                     org.TransmitStatusCode = (short)TransmitStatus.Deploy;
                     SubmitChanges();
                     return true;
@@ -161,13 +161,13 @@ namespace TradeControl.Node
         #endregion
 
         #region activities
-        public Task<bool> AllocationTransmitted(string accountCode, string allocationCode)
+        public Task<bool> AllocationTransmitted(string subjectCode, string allocationCode)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    int result = proc_ActivityUpdated(accountCode, allocationCode);
+                    int result = proc_ObjectNetworkUpdated(subjectCode, allocationCode);
                     return result == 0;
                 }
                 catch (Exception err)
@@ -179,13 +179,13 @@ namespace TradeControl.Node
             });
         }
 
-        public Task<bool> MirrorAllocation(string activityCode, string accountCode, string allocationCode)
+        public Task<bool> MirrorAllocation(string objectCode, string subjectCode, string allocationCode)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    int result = proc_MirrorActivity(activityCode, accountCode, allocationCode);
+                    int result = proc_ObjectMirror(objectCode, subjectCode, allocationCode);
                     return result == 0;
                 }
                 catch (Exception err)
@@ -199,14 +199,14 @@ namespace TradeControl.Node
         }
         #endregion
 
-        #region tasks
-        public Task<bool> TaskTransmitted(string taskCode)
+        #region projects
+        public Task<bool> ProjectTransmitted(string projectCode)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    int result = proc_TaskUpdated(taskCode);
+                    int result = proc_ProjectNetworkUpdated(projectCode);
                     return result == 0;
                 }
                 catch (Exception err)
@@ -219,17 +219,17 @@ namespace TradeControl.Node
         }
 
 
-        public Task<bool> TaskAllocation(tbAllocation taskAllocation)
+        public Task<bool> ProjectAllocation(tbAllocation allocation)
         {
             return Task.Run(() =>
             {
 
                 try
                 {
-                    if (tbAllocations.Where(rec => rec.ContractAddress == taskAllocation.ContractAddress).Select(s => s).SingleOrDefault() == null)
-                        TaskAllocationInsert(taskAllocation);
+                    if (tbAllocations.Where(rec => rec.ContractAddress == allocation.ContractAddress).Select(s => s).SingleOrDefault() == null)
+                        ProjectAllocationInsert(allocation);
                     else
-                        TaskAllocationUpdate(taskAllocation);
+                        ProjectAllocationUpdate(allocation);
 
                     SubmitChanges();
 
@@ -244,16 +244,16 @@ namespace TradeControl.Node
             });
         }
 
-        private void TaskAllocationInsert(tbAllocation taskAllocation)
+        private void ProjectAllocationInsert(tbAllocation allocation)
         {
-            tbAllocations.InsertOnSubmit(taskAllocation);
+            tbAllocations.InsertOnSubmit(allocation);
         }
 
-        private void TaskAllocationUpdate(tbAllocation newAllocation)
+        private void ProjectAllocationUpdate(tbAllocation newAllocation)
         {
             tbAllocation existingAllocation = tbAllocations.Where(m => m.ContractAddress == newAllocation.ContractAddress).Single();
 
-            existingAllocation.TaskStatusCode = newAllocation.TaskStatusCode;
+            existingAllocation.ProjectStatusCode = newAllocation.ProjectStatusCode;
             existingAllocation.UnitCharge = newAllocation.UnitCharge;
             existingAllocation.TaxRate = newAllocation.TaxRate;
             existingAllocation.ActionOn = newAllocation.ActionOn;
@@ -263,13 +263,13 @@ namespace TradeControl.Node
         #endregion
 
         #region cash codes
-        public Task<bool> CashCodeTransmitted(string accountCode, string chargeCode)
+        public Task<bool> CashCodeTransmitted(string subjectCode, string chargeCode)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    int result = proc_CashCodeUpdated(accountCode, chargeCode);
+                    int result = proc_CashNetworkUpdated(subjectCode, chargeCode);
                     return result == 0;
                 }
                 catch (Exception err)
@@ -281,13 +281,13 @@ namespace TradeControl.Node
             });
         }
 
-        public Task<bool> MirrorCashCode(string cashCode, string accountCode, string chargeCode)
+        public Task<bool> MirrorCashCode(string cashCode, string subjectCode, string chargeCode)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    int result = proc_MirrorCashCode(cashCode, accountCode, chargeCode);
+                    int result = proc_CashMirror(cashCode, subjectCode, chargeCode);
                     return result == 0;
                 }
                 catch (Exception err)
@@ -321,7 +321,7 @@ namespace TradeControl.Node
             {
                 try
                 {
-                    int result = proc_InvoiceUpdated(invoiceNumber);
+                    int result = proc_InvoiceNetworkUpdated(invoiceNumber);
                     return result == 0;
                 }
                 catch (Exception err)
@@ -373,13 +373,13 @@ namespace TradeControl.Node
             SubmitChanges();
         }
 
-        public Task<bool> InvoiceMirrorTask (tbMirrorTask mirrorTask)
+        public Task<bool> InvoiceMirrorProject (tbMirrorProject mirrorProject)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    tbMirrorTasks.InsertOnSubmit(mirrorTask);
+                    tbMirrorProjects.InsertOnSubmit(mirrorProject);
                     return true;
                 }
                 catch (Exception err)

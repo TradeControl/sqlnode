@@ -443,7 +443,7 @@ namespace TradeControl.Node
                     );
 
                 tcnode.ConfigureNode(
-                    accountCode: tbAccountCode.Text,
+                    subjectCode: tbSubjectCode.Text,
                     businessName: tbBusinessName.Text,
                     fullName: tbFullName.Text,
                     businessAddress: tbBusinessAddress.Text,

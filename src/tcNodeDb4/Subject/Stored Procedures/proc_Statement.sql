@@ -1,5 +1,5 @@
 ﻿
-CREATE   PROCEDURE Subject.proc_Statement (@AccountCode NVARCHAR(10))
+CREATE   PROCEDURE Subject.proc_Statement (@SubjectCode NVARCHAR(10))
 AS
  	SET NOCOUNT, XACT_ABORT ON;
 
@@ -7,7 +7,7 @@ AS
 
 		SELECT *
 		FROM Subject.vwStatement
-		WHERE AccountCode = @AccountCode
+		WHERE SubjectCode = @SubjectCode
 		ORDER BY RowNumber DESC
 
 	END TRY

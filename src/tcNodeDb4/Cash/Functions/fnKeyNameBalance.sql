@@ -1,4 +1,4 @@
-﻿CREATE   FUNCTION Cash.fnKeyNameBalance(@CashAccountCode nvarchar(10), @KeyName nvarchar(50))
+﻿CREATE   FUNCTION Cash.fnKeyNameBalance(@AccountCode nvarchar(10), @KeyName nvarchar(50))
 RETURNS float
 AS
 BEGIN
@@ -7,7 +7,7 @@ BEGIN
 	SELECT @Balance = SUM(COALESCE(change_balance.Balance, 0))
 	FROM Subject.tbAccountKey accountKey
 		JOIN Cash.tbChange change
-			ON accountKey.HDPath = change.HDPath AND accountKey.CashAccountCode = change.CashAccountCode
+			ON accountKey.HDPath = change.HDPath AND accountKey.AccountCode = change.AccountCode
 		OUTER APPLY
 		(
 			SELECT PaymentAddress, SUM(MoneyIn) Balance
@@ -15,7 +15,7 @@ BEGIN
 			WHERE tx.PaymentAddress = change.PaymentAddress AND tx.TxStatusCode = 1
 			GROUP BY PaymentAddress			
 		) change_balance
-	WHERE accountKey.CashAccountCode = @CashAccountCode AND accountKey.KeyName = @KeyName;
+	WHERE accountKey.AccountCode = @AccountCode AND accountKey.KeyName = @KeyName;
 
 	RETURN @Balance;
 END

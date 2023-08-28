@@ -2,7 +2,7 @@
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
-	DECLARE @AccountCode nvarchar(10), @PaymentCode nvarchar(20);
+	DECLARE @SubjectCode nvarchar(10), @PaymentCode nvarchar(20);
 
 	BEGIN TRY
 		BEGIN TRANSACTION;
@@ -137,13 +137,13 @@ AS
 		UPDATE Subject.tbAccount
 		SET CurrentBalance = Cash.vwAccountRebuild.CurrentBalance
 		FROM         Cash.vwAccountRebuild INNER JOIN
-							Subject.tbAccount ON Cash.vwAccountRebuild.CashAccountCode = Subject.tbAccount.CashAccountCode;
+							Subject.tbAccount ON Cash.vwAccountRebuild.AccountCode = Subject.tbAccount.AccountCode;
 	
 		UPDATE Subject.tbAccount
 		SET CurrentBalance = Subject.tbAccount.OpeningBalance
 		FROM         Cash.vwAccountRebuild RIGHT OUTER JOIN
-							  Subject.tbAccount ON Cash.vwAccountRebuild.CashAccountCode = Subject.tbAccount.CashAccountCode
-		WHERE     (Cash.vwAccountRebuild.CashAccountCode IS NULL);
+							  Subject.tbAccount ON Cash.vwAccountRebuild.AccountCode = Subject.tbAccount.AccountCode
+		WHERE     (Cash.vwAccountRebuild.AccountCode IS NULL);
 
 		EXEC Cash.proc_GeneratePeriods;
 	            

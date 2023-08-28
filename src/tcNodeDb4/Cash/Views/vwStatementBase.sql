@@ -3,23 +3,23 @@ AS
 	--invoiced taxes
 	WITH corp_taxcode AS
 	(
-		SELECT TOP (1) AccountCode, CashCode 
+		SELECT TOP (1) SubjectCode, CashCode 
 		FROM Cash.tbTaxType WHERE (TaxTypeCode = 0)
 	), corptax_invoiced_entries AS
 	(
-		SELECT AccountCode, CashCode, StartOn, TaxDue, Balance,
+		SELECT SubjectCode, CashCode, StartOn, TaxDue, Balance,
 			ROW_NUMBER() OVER (ORDER BY StartOn) AS RowNumber 
 		FROM Cash.vwTaxCorpStatement CROSS JOIN corp_taxcode
 		WHERE (Balance <> 0) AND (StartOn >= (SELECT MIN(StartOn) FROM App.tbYearPeriod WHERE CashStatusCode < 2)) --AND (TaxDue > 0) 
 	), corptax_invoiced_owing AS
 	(
-		SELECT AccountCode, CashCode EntryDescription, StartOn AS TransactOn, 4 AS CashEntryTypeCode, 
+		SELECT SubjectCode, CashCode EntryDescription, StartOn AS TransactOn, 4 AS CashEntryTypeCode, 
 			(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 1214) ReferenceCode, 0 AS PayIn,
 			CASE RowNumber WHEN 1 THEN Balance ELSE TaxDue END AS PayOut
 		FROM corptax_invoiced_entries
 	), vat_taxcode AS
 	(
-		SELECT TOP (1) AccountCode, CashCode 
+		SELECT TOP (1) SubjectCode, CashCode 
 		FROM Cash.tbTaxType WHERE (TaxTypeCode = 1)
 	), vat_totals AS
 	(
@@ -29,7 +29,7 @@ AS
 		--WHERE VatDue <> 0
 	), vat_invoiced_owing AS
 	(
-		SELECT AccountCode, CashCode EntryDescription, TransactOn, 5 AS CashEntryTypeCode, 
+		SELECT SubjectCode, CashCode EntryDescription, TransactOn, 5 AS CashEntryTypeCode, 
 			(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 1214) ReferenceCode, 
 			CASE WHEN VatDue < 0 THEN ABS(VatDue) ELSE 0 END AS PayIn,
 			CASE WHEN VatDue >= 0 THEN VatDue ELSE 0 END AS PayOut
@@ -58,7 +58,7 @@ AS
 	)	
 	, corptax_accruals AS
 	(	
-		SELECT AccountCode, CashCode EntryDescription, TransactOn, 4 AS CashEntryTypeCode, 
+		SELECT SubjectCode, CashCode EntryDescription, TransactOn, 4 AS CashEntryTypeCode, 
 				(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 1215) ReferenceCode, 
 				CASE WHEN TaxDue < 0 THEN ABS(TaxDue) ELSE 0 END AS PayIn,
 				CASE WHEN TaxDue >= 0 THEN TaxDue ELSE 0 END AS PayOut
@@ -83,7 +83,7 @@ AS
 		GROUP BY TransactOn
 	), vat_accruals AS
 	(
-		SELECT vat_taxcode.AccountCode, vat_taxcode.CashCode EntryDescription, TransactOn, 5 AS CashEntryTypeCode, 
+		SELECT vat_taxcode.SubjectCode, vat_taxcode.CashCode EntryDescription, TransactOn, 5 AS CashEntryTypeCode, 
 				(SELECT CAST(Message AS NVARCHAR) FROM App.tbText WHERE TextId = 1215) ReferenceCode,
 				CASE WHEN TaxDue < 0 THEN ABS(TaxDue) ELSE 0 END AS PayIn,
 				CASE WHEN TaxDue >= 0 THEN TaxDue ELSE 0 END AS PayOut
@@ -113,7 +113,7 @@ AS
 		FROM invoice_desc_candidates
 	), invoices_outstanding AS
 	(
-		SELECT  invoices.AccountCode, invoice_desc.EntryDescription, invoices.ExpectedOn AS TransactOn, 1 AS CashEntryTypeCode, invoices.InvoiceNumber AS ReferenceCode, 
+		SELECT  invoices.SubjectCode, invoice_desc.EntryDescription, invoices.ExpectedOn AS TransactOn, 1 AS CashEntryTypeCode, invoices.InvoiceNumber AS ReferenceCode, 
 					CASE CashPolarityCode WHEN 1 THEN InvoiceValue + TaxValue - (PaidValue + PaidTaxValue) ELSE 0 END AS PayIn, 
 					CASE CashPolarityCode WHEN 0 THEN (InvoiceValue + TaxValue) - (PaidValue + PaidTaxValue) ELSE 0 END AS PayOut
 		FROM  Invoice.tbInvoice invoices
@@ -130,7 +130,7 @@ AS
 		GROUP BY Invoice.tbProject.ProjectCode
 	), Projects_confirmed AS
 	(
-		SELECT Project.tbProject.ProjectCode AS ReferenceCode, Project.tbProject.AccountCode, Project.tbProject.PaymentOn AS TransactOn, Project.tbProject.PaymentOn, 2 AS CashEntryTypeCode, 
+		SELECT Project.tbProject.ProjectCode AS ReferenceCode, Project.tbProject.SubjectCode, Project.tbProject.PaymentOn AS TransactOn, Project.tbProject.PaymentOn, 2 AS CashEntryTypeCode, 
 								 CASE WHEN Cash.tbCategory.CashPolarityCode = 0 THEN (Project.tbProject.UnitCharge + Project.tbProject.UnitCharge * App.tbTaxCode.TaxRate) * (Project.tbProject.Quantity - ISNULL(Project_invoiced_quantity.InvoiceQuantity, 
 								 0)) ELSE 0 END AS PayOut, CASE WHEN Cash.tbCategory.CashPolarityCode = 1 THEN (Project.tbProject.UnitCharge + Project.tbProject.UnitCharge * App.tbTaxCode.TaxRate) 
 								 * (Project.tbProject.Quantity - ISNULL(Project_invoiced_quantity.InvoiceQuantity, 0)) ELSE 0 END AS PayIn, Project.tbProject.ObjectCode EntryDescription
@@ -144,29 +144,29 @@ AS
 	--interbank transfers
 	, transfer_current_account AS
 	(
-		SELECT        Subject.tbAccount.CashAccountCode
+		SELECT        Subject.tbAccount.AccountCode
 		FROM            Subject.tbAccount INNER JOIN
 								 Cash.tbCode ON Subject.tbAccount.CashCode = Cash.tbCode.CashCode INNER JOIN
 								 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode AND Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
 		WHERE        (Cash.tbCategory.CashTypeCode = 2)
 	), transfer_accruals AS
 	(
-		SELECT        Cash.tbPayment.AccountCode, Cash.tbPayment.CashCode EntryDescription, Cash.tbPayment.PaidOn AS TransactOn, Cash.tbPayment.PaymentCode AS ReferenceCode, 
+		SELECT        Cash.tbPayment.SubjectCode, Cash.tbPayment.CashCode EntryDescription, Cash.tbPayment.PaidOn AS TransactOn, Cash.tbPayment.PaymentCode AS ReferenceCode, 
 			6 AS CashEntryTypeCode, Cash.tbPayment.PaidInValue AS PayIn, Cash.tbPayment.PaidOutValue AS PayOut
 		FROM            transfer_current_account INNER JOIN
-								 Cash.tbPayment ON transfer_current_account.CashAccountCode = Cash.tbPayment.CashAccountCode
+								 Cash.tbPayment ON transfer_current_account.AccountCode = Cash.tbPayment.AccountCode
 		WHERE        (Cash.tbPayment.PaymentStatusCode = 2)
 	)
-	SELECT AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM corptax_invoiced_owing
+	SELECT SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM corptax_invoiced_owing
 	UNION
-	SELECT AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM vat_invoiced_owing
+	SELECT SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM vat_invoiced_owing
 	UNION
-	SELECT AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM corptax_accruals
+	SELECT SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM corptax_accruals
 	UNION
-	SELECT AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM vat_accruals
+	SELECT SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM vat_accruals
 	UNION
-	SELECT AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM invoices_outstanding
+	SELECT SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM invoices_outstanding
 	UNION 
-	SELECT AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM Projects_confirmed
+	SELECT SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM Projects_confirmed
 	UNION
-	SELECT AccountCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM transfer_accruals;
+	SELECT SubjectCode, EntryDescription, TransactOn, ReferenceCode, CashEntryTypeCode, PayIn, PayOut FROM transfer_accruals;

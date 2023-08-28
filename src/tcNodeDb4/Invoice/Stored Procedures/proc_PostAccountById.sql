@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE Invoice.proc_PostAccountById(@UserId nvarchar(10), @AccountCode nvarchar(10))
+﻿CREATE   PROCEDURE Invoice.proc_PostAccountById(@UserId nvarchar(10), @SubjectCode nvarchar(10))
 AS
    	SET NOCOUNT, XACT_ABORT ON;
 
@@ -10,7 +10,7 @@ AS
 		DECLARE c1 CURSOR LOCAL FOR
 			SELECT InvoiceTypeCode
 			FROM Invoice.tbEntry
-			WHERE UserId = @UserId AND AccountCode = @AccountCode
+			WHERE UserId = @UserId AND SubjectCode = @SubjectCode
 			GROUP BY InvoiceTypeCode;
 
 		OPEN c1;
@@ -21,13 +21,13 @@ AS
 		
 		WHILE (@@FETCH_STATUS = 0)
 		BEGIN
-			EXEC Invoice.proc_RaiseBlank @AccountCode, @InvoiceTypeCode, @InvoiceNumber output;
+			EXEC Invoice.proc_RaiseBlank @SubjectCode, @InvoiceTypeCode, @InvoiceNumber output;
 
 			WITH invoice_entry AS
 			(
 				SELECT @InvoiceNumber InvoiceNumber, MIN(InvoicedOn) InvoicedOn
 				FROM Invoice.tbEntry
-				WHERE AccountCode = @AccountCode AND InvoiceTypeCode = @InvoiceTypeCode
+				WHERE SubjectCode = @SubjectCode AND InvoiceTypeCode = @InvoiceTypeCode
 			)
 			UPDATE Invoice.tbInvoice
 			SET 
@@ -40,7 +40,7 @@ AS
 			INSERT INTO Invoice.tbItem (InvoiceNumber, CashCode, TaxCode, ItemReference, TotalValue, InvoiceValue)
 			SELECT @InvoiceNumber InvoiceNumber, CashCode, TaxCode, ItemReference, TotalValue, InvoiceValue
 			FROM Invoice.tbEntry
-			WHERE UserId = @UserId AND AccountCode = @AccountCode AND InvoiceTypeCode = @InvoiceTypeCode
+			WHERE UserId = @UserId AND SubjectCode = @SubjectCode AND InvoiceTypeCode = @InvoiceTypeCode
 
 			EXEC Invoice.proc_Accept @InvoiceNumber;
 
@@ -48,7 +48,7 @@ AS
 		END
 
 		DELETE FROM Invoice.tbEntry
-		WHERE UserId = @UserId AND AccountCode = @AccountCode;
+		WHERE UserId = @UserId AND SubjectCode = @SubjectCode;
 
 		COMMIT TRAN;
 

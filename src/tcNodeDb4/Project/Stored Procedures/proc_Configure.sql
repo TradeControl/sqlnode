@@ -8,33 +8,33 @@ AS
 			, @ProjectCode nvarchar(20)
 			, @UserId nvarchar(10)
 			, @ObjectCode nvarchar(50)
-			, @AccountCode nvarchar(10)
-			, @DefaultAccountCode nvarchar(10)
+			, @SubjectCode nvarchar(10)
+			, @DefaultSubjectCode nvarchar(10)
 			, @TaxCode nvarchar(10)
 
 		IF @@NESTLEVEL = 1
 			BEGIN TRANSACTION
 
 		INSERT INTO Subject.tbContact 
-			(AccountCode, ContactName, FileAs, PhoneNumber, EmailAddress)
-		SELECT Project.tbProject.AccountCode, Project.tbProject.ContactName, Project.tbProject.ContactName AS NickName, Subject.tbSubject.PhoneNumber, Subject.tbSubject.EmailAddress
+			(SubjectCode, ContactName, FileAs, PhoneNumber, EmailAddress)
+		SELECT Project.tbProject.SubjectCode, Project.tbProject.ContactName, Project.tbProject.ContactName AS NickName, Subject.tbSubject.PhoneNumber, Subject.tbSubject.EmailAddress
 		FROM  Project.tbProject 
-			INNER JOIN Subject.tbSubject ON Project.tbProject.AccountCode = Subject.tbSubject.AccountCode
+			INNER JOIN Subject.tbSubject ON Project.tbProject.SubjectCode = Subject.tbSubject.SubjectCode
 		WHERE LEN(ISNULL(Project.tbProject.ContactName, '')) > 0 AND (Project.tbProject.ProjectCode = @ParentProjectCode)
 					AND EXISTS (SELECT *
 								FROM Project.tbProject
 								WHERE (ProjectCode = @ParentProjectCode) AND (NOT (ContactName IS NULL)) OR (ProjectCode = @ParentProjectCode) AND (ContactName <> N''))
 				AND NOT EXISTS(SELECT *
 								FROM  Project.tbProject 
-									INNER JOIN Subject.tbContact ON Project.tbProject.AccountCode = Subject.tbContact.AccountCode AND Project.tbProject.ContactName = Subject.tbContact.ContactName
+									INNER JOIN Subject.tbContact ON Project.tbProject.SubjectCode = Subject.tbContact.SubjectCode AND Project.tbProject.ContactName = Subject.tbContact.ContactName
 								WHERE     ( Project.tbProject.ProjectCode = @ParentProjectCode))
 	
 		UPDATE Subject.tbSubject
 		SET SubjectStatusCode = 1
-		FROM Subject.tbSubject INNER JOIN Project.tbProject ON Subject.tbSubject.AccountCode = Project.tbProject.AccountCode
+		FROM Subject.tbSubject INNER JOIN Project.tbProject ON Subject.tbSubject.SubjectCode = Project.tbProject.SubjectCode
 		WHERE ( Project.tbProject.ProjectCode = @ParentProjectCode) AND ( Subject.tbSubject.SubjectStatusCode = 0)				
 			AND EXISTS(SELECT *
-				FROM  Subject.tbSubject INNER JOIN Project.tbProject ON Subject.tbSubject.AccountCode = Project.tbProject.AccountCode
+				FROM  Subject.tbSubject INNER JOIN Project.tbProject ON Subject.tbSubject.SubjectCode = Project.tbProject.SubjectCode
 				WHERE     ( Project.tbProject.ProjectCode = @ParentProjectCode) AND ( Subject.tbSubject.SubjectStatusCode = 0))
 	          
 		UPDATE    Project.tbProject
@@ -79,7 +79,7 @@ AS
 			BEGIN
 			SELECT  
 				@ObjectCode = Object.tbObject.ObjectCode, 
-				@AccountCode = Project.tbProject.AccountCode
+				@SubjectCode = Project.tbProject.SubjectCode
 			FROM Object.tbFlow 
 				INNER JOIN Object.tbObject ON Object.tbFlow.ChildCode = Object.tbObject.ObjectCode 
 				INNER JOIN Project.tbProject ON Object.tbFlow.ParentCode = Project.tbProject.ObjectCode
@@ -88,25 +88,25 @@ AS
 			EXEC Project.proc_NextCode @ObjectCode, @ProjectCode output
 
 			INSERT INTO Project.tbProject
-				(ProjectCode, UserId, AccountCode, ContactName, ObjectCode, ProjectStatusCode, ActionById, ActionOn, ProjectNotes, Quantity, UnitCharge, AddressCodeFrom, AddressCodeTo, CashCode, Printed, ProjectTitle)
-			SELECT  @ProjectCode AS NewProject, Project_tb1.UserId, Project_tb1.AccountCode, Project_tb1.ContactName, Object.tbObject.ObjectCode, Object.tbObject.ProjectStatusCode, 
+				(ProjectCode, UserId, SubjectCode, ContactName, ObjectCode, ProjectStatusCode, ActionById, ActionOn, ProjectNotes, Quantity, UnitCharge, AddressCodeFrom, AddressCodeTo, CashCode, Printed, ProjectTitle)
+			SELECT  @ProjectCode AS NewProject, Project_tb1.UserId, Project_tb1.SubjectCode, Project_tb1.ContactName, Object.tbObject.ObjectCode, Object.tbObject.ProjectStatusCode, 
 						Project_tb1.ActionById, Project_tb1.ActionOn, Object.tbObject.ObjectDescription, Project_tb1.Quantity * Object.tbFlow.UsedOnQuantity AS Quantity,
 						Object.tbObject.UnitCharge, Subject.tbSubject.AddressCode AS AddressCodeFrom, Subject.tbSubject.AddressCode AS AddressCodeTo, 
 						tbObject.CashCode, CASE WHEN Object.tbObject.Printed = 0 THEN 1 ELSE 0 END AS Printed, Project_tb1.ProjectTitle
 			FROM  Object.tbFlow 
 				INNER JOIN Object.tbObject ON Object.tbFlow.ChildCode = Object.tbObject.ObjectCode 
 				INNER JOIN Project.tbProject Project_tb1 ON Object.tbFlow.ParentCode = Project_tb1.ObjectCode 
-				INNER JOIN Subject.tbSubject ON Project_tb1.AccountCode = Subject.tbSubject.AccountCode
+				INNER JOIN Subject.tbSubject ON Project_tb1.SubjectCode = Subject.tbSubject.SubjectCode
 			WHERE     ( Object.tbFlow.StepNumber = @StepNumber) AND ( Project_tb1.ProjectCode = @ParentProjectCode)
 
 			IF EXISTS (SELECT * FROM Project.tbProject 
-							INNER JOIN  Subject.tbSubject ON Project.tbProject.AccountCode = Subject.tbSubject.AccountCode 
+							INNER JOIN  Subject.tbSubject ON Project.tbProject.SubjectCode = Subject.tbSubject.SubjectCode 
 							INNER JOIN App.tbTaxCode ON Subject.tbSubject.TaxCode = App.tbTaxCode.TaxCode AND Subject.tbSubject.TaxCode = App.tbTaxCode.TaxCode)
 				BEGIN
 				UPDATE Project.tbProject
 				SET TaxCode = App.tbTaxCode.TaxCode
 				FROM Project.tbProject 
-					INNER JOIN Subject.tbSubject ON Project.tbProject.AccountCode = Subject.tbSubject.AccountCode 
+					INNER JOIN Subject.tbSubject ON Project.tbProject.SubjectCode = Subject.tbSubject.SubjectCode 
 					INNER JOIN App.tbTaxCode ON Subject.tbSubject.TaxCode = App.tbTaxCode.TaxCode AND Subject.tbSubject.TaxCode = App.tbTaxCode.TaxCode
 				WHERE (Project.tbProject.ProjectCode = @ProjectCode)
 				END
@@ -119,13 +119,13 @@ AS
 				WHERE  (Project.tbProject.ProjectCode = @ProjectCode)
 				END			
 			
-			SELECT @DefaultAccountCode = (SELECT TOP 1  AccountCode FROM Project.tbProject
+			SELECT @DefaultSubjectCode = (SELECT TOP 1  SubjectCode FROM Project.tbProject
 											WHERE   (ObjectCode = (SELECT ObjectCode FROM  Project.tbProject AS tbProject_1 WHERE (ProjectCode = @ProjectCode))) AND (ProjectCode <> @ProjectCode))
 
-			IF NOT @DefaultAccountCode IS NULL
+			IF NOT @DefaultSubjectCode IS NULL
 				BEGIN
 				UPDATE Project.tbProject
-				SET AccountCode = @DefaultAccountCode
+				SET SubjectCode = @DefaultSubjectCode
 				WHERE (ProjectCode = @ProjectCode)
 				END
 					

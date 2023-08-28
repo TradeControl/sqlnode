@@ -1,12 +1,12 @@
-﻿CREATE   PROCEDURE Cash.proc_Mirror(@CashCode nvarchar(50), @AccountCode nvarchar(10), @ChargeCode nvarchar(50))
+﻿CREATE   PROCEDURE Cash.proc_Mirror(@CashCode nvarchar(50), @SubjectCode nvarchar(10), @ChargeCode nvarchar(50))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
 	BEGIN TRY
-		IF NOT EXISTS (SELECT * FROM Cash.tbMirror WHERE CashCode = @CashCode AND AccountCode = @AccountCode AND ChargeCode = @ChargeCode)
+		IF NOT EXISTS (SELECT * FROM Cash.tbMirror WHERE CashCode = @CashCode AND SubjectCode = @SubjectCode AND ChargeCode = @ChargeCode)
 		BEGIN
-			INSERT INTO Cash.tbMirror (CashCode, AccountCode, ChargeCode)
-			VALUES (@CashCode, @AccountCode, @ChargeCode);
+			INSERT INTO Cash.tbMirror (CashCode, SubjectCode, ChargeCode)
+			VALUES (@CashCode, @SubjectCode, @ChargeCode);
 		END
 	END TRY
 	BEGIN CATCH

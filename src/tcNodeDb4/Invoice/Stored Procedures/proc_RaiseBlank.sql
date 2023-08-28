@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE Invoice.proc_RaiseBlank
 	(
-	@AccountCode nvarchar(10),
+	@SubjectCode nvarchar(10),
 	@InvoiceTypeCode smallint,
 	@InvoiceNumber nvarchar(20) = null output
 	)
@@ -42,10 +42,10 @@
 		WHERE     (InvoiceTypeCode = @InvoiceTypeCode)
 	
 		INSERT INTO Invoice.tbInvoice
-								(InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode, PaymentTerms)
-		 SELECT @InvoiceNumber, @UserId, @AccountCode, @InvoiceTypeCode, @InvoicedOn, 0, PaymentTerms
+								(InvoiceNumber, UserId, SubjectCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode, PaymentTerms)
+		 SELECT @InvoiceNumber, @UserId, @SubjectCode, @InvoiceTypeCode, @InvoicedOn, 0, PaymentTerms
 		 FROM Subject.tbSubject
-		 WHERE AccountCode = @AccountCode
+		 WHERE SubjectCode = @SubjectCode
 	
 		COMMIT TRANSACTION
 	

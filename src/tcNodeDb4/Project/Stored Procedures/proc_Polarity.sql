@@ -7,7 +7,7 @@ AS
   	SET NOCOUNT, XACT_ABORT ON;
 
 	BEGIN TRY
-		SELECT     Project.tbProject.AccountCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, Project.tbProject.ActionOn, Project.vwCashPolarity.CashPolarityCode
+		SELECT     Project.tbProject.SubjectCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, Project.tbProject.ActionOn, Project.vwCashPolarity.CashPolarityCode
 		FROM         Project.tbProject LEFT OUTER JOIN
 							  Project.vwCashPolarity ON Project.tbProject.ProjectCode = Project.vwCashPolarity.ProjectCode
 		WHERE     ( Project.tbProject.ProjectCode = @ProjectCode)

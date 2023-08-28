@@ -32,21 +32,21 @@ AS
 
 		--WITH sys_accounts AS
 		--(
-		--	SELECT AccountCode FROM App.tbOptions
+		--	SELECT SubjectCode FROM App.tbOptions
 		--	UNION
-		--	SELECT DISTINCT AccountCode FROM Subject.tbAccount
+		--	SELECT DISTINCT SubjectCode FROM Subject.tbAccount
 		--	UNION
-		--	SELECT DISTINCT AccountCode FROM Cash.tbTaxType
+		--	SELECT DISTINCT SubjectCode FROM Cash.tbTaxType
 		--), candidates AS
 		--(
-		--	SELECT AccountCode
+		--	SELECT SubjectCode
 		--	FROM Subject.tbSubject
 		--	EXCEPT
-		--	SELECT AccountCode 
+		--	SELECT SubjectCode 
 		--	FROM sys_accounts
 		--)
 		--DELETE Subject.tbSubject 
-		--FROM Subject.tbSubject JOIN candidates ON Subject.tbSubject.AccountCode = candidates.AccountCode;
+		--FROM Subject.tbSubject JOIN candidates ON Subject.tbSubject.SubjectCode = candidates.SubjectCode;
 		
 		UPDATE App.tbOptions
 		SET IsAutoOffsetDays = 0;
@@ -175,9 +175,9 @@ AS
 		, ('M/100/70/00', 30, 'INSERT/09', 1, 0, 2)
 		;
 
-		IF (NOT EXISTS(SELECT * FROM Subject.tbSubject WHERE AccountCode = 'TFCSPE'))
+		IF (NOT EXISTS(SELECT * FROM Subject.tbSubject WHERE SubjectCode = 'TFCSPE'))
 		BEGIN
-			INSERT INTO Subject.tbSubject (AccountCode, AccountName, SubjectTypeCode, SubjectStatusCode, TaxCode, AddressCode, PaymentTerms, ExpectedDays, PaymentDays, PayDaysFromMonthEnd, PayBalance, NumberOfEmployees, CompanyNumber, VatNumber, Turnover, OpeningBalance, EUJurisdiction)
+			INSERT INTO Subject.tbSubject (SubjectCode, SubjectName, SubjectTypeCode, SubjectStatusCode, TaxCode, AddressCode, PaymentTerms, ExpectedDays, PaymentDays, PayDaysFromMonthEnd, PayBalance, NumberOfEmployees, CompanyNumber, VatNumber, Turnover, OpeningBalance, EUJurisdiction)
 			VALUES 
 			  ('PACSER', 'PACKING SERVICES', 8, 1, 'T1', 'PACSER_001', 'EOM', 10, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
 			, ('PALSUP', 'PALLET SUPPLIER', 8, 1, 'T1', 'PALSUP_001', 'COD', 0, -10, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
@@ -186,7 +186,7 @@ AS
 			, ('STOBOX', 'STORAGE BOXES', 1, 1, 'T1', 'STOBOX_001', '60 days from invoice', 5, 60, 0, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
 			, ('HAULOG', 'HAULIER LOGISTICS', 8, 1, 'T1', 'HAULOG_001', 'EOM', 0, 30, 1, 1, 0, NULL, NULL, 0.0000, 0.0000, 0)
 			;
-			INSERT INTO Subject.tbAddress (AddressCode, AccountCode, Address)
+			INSERT INTO Subject.tbAddress (AddressCode, SubjectCode, Address)
 			VALUES ('STOBOX_001', 'STOBOX', 'SURREY GU24 9BJ')
 			, ('PACSER_001', 'PACSER', 'FAREHAM, HAMPSHIRE	PO15 5RZ')
 			, ('PLAPRO_001', 'PLAPRO', 'WARRINGTON, CHESHIRE WA1 4RA')
@@ -209,13 +209,13 @@ AS
 
 		EXEC Project.proc_NextCode 'PROJECT', @ParentProjectCode OUTPUT
 		INSERT INTO Project.tbProject
-								 (ProjectCode, UserId, AccountCode, ProjectTitle, ObjectCode, ProjectStatusCode, ActionById)
+								 (ProjectCode, UserId, SubjectCode, ProjectTitle, ObjectCode, ProjectStatusCode, ActionById)
 		VALUES        (@ParentProjectCode,@UserId, 'STOBOX', N'PIGEON HOLE SHELF ASSEMBLY', N'PROJECT', 0,@UserId)
 	
 		EXEC Project.proc_NextCode 'M/00/70/00', @ProjectCode OUTPUT
 		
 		INSERT INTO Project.tbProject
-				(ProjectCode, UserId, AccountCode, ProjectTitle, ContactName, ObjectCode, ProjectStatusCode, ActionById, ProjectNotes, Quantity, CashCode, TaxCode, UnitCharge, AddressCodeFrom, AddressCodeTo, SecondReference, Printed)
+				(ProjectCode, UserId, SubjectCode, ProjectTitle, ContactName, ObjectCode, ProjectStatusCode, ActionById, ProjectNotes, Quantity, CashCode, TaxCode, UnitCharge, AddressCodeFrom, AddressCodeTo, SecondReference, Printed)
 		SELECT @ProjectCode,@UserId, 'STOBOX', ObjectDescription, 'Francis Brown', ObjectCode, 1,@UserId, ObjectDescription, @Quantity, '103', 'T1', UnitCharge, 'STOBOX_001', 'STOBOX_001', N'12354/2', 0		
 		FROM Object.tbObject
 		WHERE ObjectCode = 'M/00/70/00';
@@ -225,28 +225,28 @@ AS
 
 	
 		UPDATE Project.tbProject
-		SET AccountCode = 'PACSER', ContactName = 'John OGroats', AddressCodeFrom = 'PACSER_001', AddressCodeTo = 'PACSER_001'
+		SET SubjectCode = 'PACSER', ContactName = 'John OGroats', AddressCodeFrom = 'PACSER_001', AddressCodeTo = 'PACSER_001'
 		WHERE ObjectCode = 'BOX/41';
 
 		UPDATE Project.tbProject
-		SET AccountCode = 'TFCSPE', ContactName = 'Gary Granger', AddressCodeFrom = 'TFCSPE_001', AddressCodeTo = 'TFCSPE_001'
+		SET SubjectCode = 'TFCSPE', ContactName = 'Gary Granger', AddressCodeFrom = 'TFCSPE_001', AddressCodeTo = 'TFCSPE_001'
 		WHERE ObjectCode = 'INSERT/09';
 
 		UPDATE Project.tbProject
-		SET AccountCode = 'PALSUP', ContactName = 'Allan Rain', AddressCodeFrom = 'PALSUP_001', AddressCodeTo = 'PALSUP_001', CashCode = NULL, UnitCharge = 0
+		SET SubjectCode = 'PALSUP', ContactName = 'Allan Rain', AddressCodeFrom = 'PALSUP_001', AddressCodeTo = 'PALSUP_001', CashCode = NULL, UnitCharge = 0
 		WHERE ObjectCode = 'PALLET/01';
 
 		UPDATE Project.tbProject
-		SET AccountCode = 'PLAPRO', ContactName = 'Kim Burnell', AddressCodeFrom = 'PLAPRO_001', AddressCodeTo = 'PLAPRO_001'
+		SET SubjectCode = 'PLAPRO', ContactName = 'Kim Burnell', AddressCodeFrom = 'PLAPRO_001', AddressCodeTo = 'PLAPRO_001'
 		WHERE ObjectCode = 'PC/999';
 		
 		UPDATE Project.tbProject
-		SET AccountCode = 'HAULOG', ContactName = 'John Iron',  AddressCodeFrom = 'HOME_001', AddressCodeTo = 'STOBOX_001', Quantity = 1, UnitCharge = 25.0 * @ExchangeRate, TotalCharge = 25.0 * @ExchangeRate
+		SET SubjectCode = 'HAULOG', ContactName = 'John Iron',  AddressCodeFrom = 'HOME_001', AddressCodeTo = 'STOBOX_001', Quantity = 1, UnitCharge = 25.0 * @ExchangeRate, TotalCharge = 25.0 * @ExchangeRate
 		WHERE ObjectCode = 'DELIVERY';
 
 		UPDATE Project.tbProject
-		SET AccountCode = (SELECT AccountCode FROM App.tbOptions), ContactName = (SELECT UserName FROM Usr.vwCredentials)
-		WHERE (CashCode IS NULL) AND (AccountCode <> 'PALSUP');
+		SET SubjectCode = (SELECT SubjectCode FROM App.tbOptions), ContactName = (SELECT UserName FROM Usr.vwCredentials)
+		WHERE (CashCode IS NULL) AND (SubjectCode <> 'PALSUP');
 
 		EXEC Project.proc_Schedule @ProjectCode;
 
@@ -273,7 +273,7 @@ AS
 		EXEC Project.proc_NextCode 'PALLET/01', @ProjectCode OUTPUT
 		
 		INSERT INTO Project.tbProject
-				(ProjectCode, UserId, AccountCode, ProjectTitle, ObjectCode, ProjectStatusCode, ActionById)
+				(ProjectCode, UserId, SubjectCode, ProjectTitle, ObjectCode, ProjectStatusCode, ActionById)
 		VALUES        (@ProjectCode,@UserId, 'PALSUP', N'PALLETS', 'PALLET/01', 1, @UserId);
 
 		WITH demand AS
@@ -295,7 +295,7 @@ AS
 			AddressCodeTo = Subject.AddressCode, 
 			Printed = Object.Printed
 		FROM Project.tbProject Project
-			JOIN Subject.tbSubject Subject ON Project.AccountCode = Subject.AccountCode
+			JOIN Subject.tbSubject Subject ON Project.SubjectCode = Subject.SubjectCode
 			JOIN Object.tbObject Object ON Project.ObjectCode = Object.ObjectCode
 			JOIN demand ON Project.ObjectCode = demand.ObjectCode
 		WHERE ProjectCode = @ProjectCode;
@@ -329,24 +329,24 @@ AS
 		SET IsEnabled = 1
 		WHERE CashCode = '214';
 
-		DECLARE @PaymentCode NVARCHAR(20), @CashAccountCode NVARCHAR(10);
-		EXEC Cash.proc_CurrentAccount @CashAccountCode OUTPUT;
+		DECLARE @PaymentCode NVARCHAR(20), @AccountCode NVARCHAR(10);
+		EXEC Cash.proc_CurrentAccount @AccountCode OUTPUT;
 
 		IF @ExchangeRate = 1
 		BEGIN
 			
 			EXEC Cash.proc_NextPaymentCode @PaymentCode OUTPUT
-			INSERT INTO Cash.tbPayment (CashAccountCode, PaymentCode, UserId, AccountCode, CashCode, TaxCode, PaidInValue)
+			INSERT INTO Cash.tbPayment (AccountCode, PaymentCode, UserId, SubjectCode, CashCode, TaxCode, PaidInValue)
 			SELECT TOP 1
-				@CashAccountCode CashAccountCode,
+				@AccountCode AccountCode,
 				@PaymentCode AS PaymentCode, 
 				@UserId AS UserId,
-				AccountCode,
+				SubjectCode,
 				'214' AS CashCode,
 				'T0' AS TaxCode,
 				(SELECT ABS(ROUND(MIN(Balance), -3)) + 1000	FROM Cash.vwStatement) AS PaidInValue
 			FROM Subject.tbAccount 
-			WHERE CashAccountCode = @CashAccountCode
+			WHERE AccountCode = @AccountCode
 
 			EXEC Cash.proc_PaymentPost;
 		END

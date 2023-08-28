@@ -7,7 +7,7 @@ AS
 		@UserId nvarchar(10)
 		, @NextNumber int
 		, @InvoiceSuffix nvarchar(4)
-		, @AccountCode nvarchar(10)
+		, @SubjectCode nvarchar(10)
 		, @InvoiceTypeCode smallint
 	
 		SELECT @UserId = UserId FROM Usr.vwCredentials
@@ -44,12 +44,12 @@ AS
 		WHERE     (InvoiceTypeCode = @InvoiceTypeCode)
 	
 		INSERT INTO Invoice.tbInvoice
-							(InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoicedOn, DueOn, ExpectedOn, InvoiceStatusCode, PaymentTerms)
-		SELECT     @InvoiceNumber AS InvoiceNumber, @UserId AS UserId, mirror.AccountCode, 
+							(InvoiceNumber, UserId, SubjectCode, InvoiceTypeCode, InvoicedOn, DueOn, ExpectedOn, InvoiceStatusCode, PaymentTerms)
+		SELECT     @InvoiceNumber AS InvoiceNumber, @UserId AS UserId, mirror.SubjectCode, 
 				@InvoiceTypeCode AS InvoiceTypeCode, CAST(mirror.InvoicedOn AS DATE) AS InvoicedOn, mirror.DueOn, mirror.DueOn ExpectedOn, 0 AS InvoiceStatusCode, 
 				CASE WHEN Subject.tbSubject.PaymentTerms IS NULL THEN mirror.PaymentTerms ELSE Subject.tbSubject.PaymentTerms END PaymentTerms
 		FROM Invoice.tbMirror mirror
-			JOIN Subject.tbSubject ON mirror.AccountCode = Subject.tbSubject.AccountCode
+			JOIN Subject.tbSubject ON mirror.SubjectCode = Subject.tbSubject.SubjectCode
 		WHERE ContractAddress = @ContractAddress;
 
 		INSERT INTO Invoice.tbMirrorReference (ContractAddress, InvoiceNumber)
@@ -59,22 +59,22 @@ AS
 		(
 			SELECT 0 Allocationid, 
 				allocation.ProjectCode,
-				Object_mirror.ObjectCode, allocation.AccountCode, 
+				Object_mirror.ObjectCode, allocation.SubjectCode, 
 					CASE allocation.CashPolarityCode 
 						WHEN 0 THEN Project_mirror.Quantity * -1
 						WHEN 1 THEN Project_mirror.Quantity
 					END Quantity, allocation.CashPolarityCode
 			FROM Invoice.tbMirror invoice_mirror
 				JOIN Invoice.tbMirrorProject Project_mirror ON invoice_mirror.ContractAddress = Project_mirror.ContractAddress
-				JOIN Project.tbAllocation allocation ON invoice_mirror.AccountCode = allocation.AccountCode AND Project_mirror.ProjectCode = allocation.ProjectCode			
-				JOIN Object.tbMirror Object_mirror ON invoice_mirror.AccountCode = Object_mirror.AccountCode AND allocation.AllocationCode = Object_mirror.AllocationCode
+				JOIN Project.tbAllocation allocation ON invoice_mirror.SubjectCode = allocation.SubjectCode AND Project_mirror.ProjectCode = allocation.ProjectCode			
+				JOIN Object.tbMirror Object_mirror ON invoice_mirror.SubjectCode = Object_mirror.SubjectCode AND allocation.AllocationCode = Object_mirror.AllocationCode
 			WHERE invoice_mirror.ContractAddress = @ContractAddress
 		), Projects AS
 		(
-			SELECT ROW_NUMBER() OVER (PARTITION BY Projects.AccountCode, Projects.ObjectCode ORDER BY ActionOn) Allocationid,
-				Projects.ProjectCode, Projects.ObjectCode, Projects.AccountCode, Projects.Quantity, category.CashPolarityCode
+			SELECT ROW_NUMBER() OVER (PARTITION BY Projects.SubjectCode, Projects.ObjectCode ORDER BY ActionOn) Allocationid,
+				Projects.ProjectCode, Projects.ObjectCode, Projects.SubjectCode, Projects.Quantity, category.CashPolarityCode
 			FROM allocations
-				JOIN Project.tbProject Projects ON Projects.ObjectCode = allocations.ObjectCode AND Projects.AccountCode = allocations.AccountCode
+				JOIN Project.tbProject Projects ON Projects.ObjectCode = allocations.ObjectCode AND Projects.SubjectCode = allocations.SubjectCode
 				JOIN Cash.tbCode cash_code ON Projects.CashCode = cash_code.CashCode
 				JOIN Cash.tbCategory category ON cash_code.CategoryCode = category.CategoryCode
 			WHERE Projects.ProjectStatusCode BETWEEN 1 AND 2
@@ -96,7 +96,7 @@ AS
 			GROUP BY Projects.ProjectCode
 		), deliveries AS
 		(
-			SELECT Allocationid, Projects.ProjectCode, ObjectCode, AccountCode,
+			SELECT Allocationid, Projects.ProjectCode, ObjectCode, SubjectCode,
 						CASE CashPolarityCode 
 							WHEN 0 THEN (Projects.Quantity - order_book.InvoiceQuantity) * -1
 							WHEN 1 THEN Projects.Quantity - order_book.InvoiceQuantity
@@ -111,11 +111,11 @@ AS
 		), svd_projected AS
 		(
 			SELECT *,
-				SUM(Quantity) OVER (PARTITION BY AccountCode, ObjectCode  ORDER BY AllocationId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance
+				SUM(Quantity) OVER (PARTITION BY SubjectCode, ObjectCode  ORDER BY AllocationId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance
 			FROM svd_union
 		), svd_balance AS
 		(
-			SELECT *, LAG(Balance) OVER (PARTITION BY AccountCode, ObjectCode  ORDER BY AllocationId) PreviousBalance
+			SELECT *, LAG(Balance) OVER (PARTITION BY SubjectCode, ObjectCode  ORDER BY AllocationId) PreviousBalance
 			FROM svd_projected
 		), alloc_deliveries AS
 		(
@@ -149,7 +149,7 @@ AS
 				item_mirror.InvoiceValue, item_mirror.ChargeDescription ItemReference
 		FROM Invoice.tbMirror invoice_mirror 
 			JOIN Invoice.tbMirrorItem item_mirror ON invoice_mirror.ContractAddress = item_mirror.ContractAddress			
-			JOIN Cash.tbMirror cash_code_mirror ON item_mirror.ChargeCode = cash_code_mirror.ChargeCode and invoice_mirror.AccountCode = cash_code_mirror.AccountCode
+			JOIN Cash.tbMirror cash_code_mirror ON item_mirror.ChargeCode = cash_code_mirror.ChargeCode and invoice_mirror.SubjectCode = cash_code_mirror.SubjectCode
 			JOIN Cash.tbCode cash_code ON cash_code_mirror.CashCode = cash_code.CashCode
 			JOIN App.tbTaxCode tax_code ON cash_code.TaxCode = tax_code.TaxCode
 		WHERE invoice_mirror.ContractAddress = @ContractAddress

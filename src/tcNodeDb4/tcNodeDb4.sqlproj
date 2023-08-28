@@ -281,7 +281,7 @@
     <Build Include="Project\Views\vwOps.sql" />
     <Build Include="Subject\Views\vwAddressList.sql" />
     <Build Include="Cash\Views\vwTaxVatTotals.sql" />
-    <Build Include="Subject\Views\vwAccountLookupAll.sql" />
+    <Build Include="Subject\Views\vwSubjectLookupAll.sql" />
     <Build Include="Subject\Views\vwDatasheet.sql" />
     <Build Include="Invoice\Views\vwEntry.sql" />
     <Build Include="Subject\Views\vwStatusReport.sql" />
@@ -423,8 +423,8 @@
     <Build Include="Project\Views\vwNetworkChangeLog.sql" />
     <Build Include="Invoice\Views\vwTaxSummary.sql" />
     <Build Include="Invoice\Views\vwCreditSpoolByItem.sql" />
-    <Build Include="Subject\Views\vwAccountLookup.sql" />
-    <Build Include="Subject\Views\vwAccountSources.sql" />
+    <Build Include="Subject\Views\vwSubjectLookup.sql" />
+    <Build Include="Subject\Views\vwSubjectSources.sql" />
     <Build Include="Subject\Views\vwAreaCodes.sql" />
     <Build Include="Subject\Views\vwBalanceOutstanding.sql" />
     <Build Include="Subject\Views\vwCompanyHeader.sql" />
@@ -432,7 +432,7 @@
     <Build Include="Subject\Views\vwContacts.sql" />
     <Build Include="Usr\Views\vwUserMenuList.sql" />
     <Build Include="Subject\Views\vwDepartments.sql" />
-    <Build Include="Subject\Views\vwTasks.sql" />
+    <Build Include="Subject\Views\vwProjects.sql" />
     <Build Include="Project\Views\vwBucket.sql" />
     <Build Include="Subject\Views\vwWallets.sql" />
     <Build Include="Subject\Views\vwInvoiceItems.sql" />
@@ -572,7 +572,7 @@
     <Build Include="Subject\Stored Procedures\proc_AddAddress.sql" />
     <Build Include="Subject\Stored Procedures\proc_AddContact.sql" />
     <Build Include="Subject\Stored Procedures\proc_BalanceToPay.sql" />
-    <Build Include="Subject\Stored Procedures\proc_DefaultAccountCode.sql" />
+    <Build Include="Subject\Stored Procedures\proc_DefaultSubjectCode.sql" />
     <Build Include="Subject\Stored Procedures\proc_DefaultTaxCode.sql" />
     <Build Include="Subject\Stored Procedures\proc_Rebuild.sql" />
     <Build Include="Web\Stored Procedures\proc_ImageTag.sql" />

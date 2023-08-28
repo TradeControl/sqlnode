@@ -7,7 +7,7 @@ AS
 								 App.tbTaxCode.TaxRate, Subject.tbSubject.EUJurisdiction, Invoice.tbItem.CashCode AS IdentityCode, Cash.tbCode.CashDescription As ItemDescription
 		FROM            Invoice.tbItem INNER JOIN
 								 Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
-								 Subject.tbSubject ON Invoice.tbInvoice.AccountCode = Subject.tbSubject.AccountCode INNER JOIN
+								 Subject.tbSubject ON Invoice.tbInvoice.SubjectCode = Subject.tbSubject.SubjectCode INNER JOIN
 								 App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
 								 Cash.tbCode ON Invoice.tbItem.CashCode = Cash.tbCode.CashCode
 		WHERE        (App.tbTaxCode.TaxTypeCode = 1) AND (Invoice.tbItem.InvoiceValue <> 0)
@@ -16,7 +16,7 @@ AS
 								 ROUND(Invoice.tbProject.TaxValue / Invoice.tbProject.InvoiceValue, 3) AS CalcRate, App.tbTaxCode.TaxRate, Subject.tbSubject.EUJurisdiction, Invoice.tbProject.ProjectCode AS IdentityCode, tbProject_1.ProjectTitle As ItemDescription
 		FROM            Invoice.tbProject INNER JOIN
 								 Invoice.tbInvoice ON Invoice.tbProject.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
-								 Subject.tbSubject ON Invoice.tbInvoice.AccountCode = Subject.tbSubject.AccountCode INNER JOIN
+								 Subject.tbSubject ON Invoice.tbInvoice.SubjectCode = Subject.tbSubject.SubjectCode INNER JOIN
 								 App.tbTaxCode ON Invoice.tbProject.TaxCode = App.tbTaxCode.TaxCode INNER JOIN
 								 Project.tbProject AS tbProject_1 ON Invoice.tbProject.ProjectCode = tbProject_1.ProjectCode
 		WHERE        (App.tbTaxCode.TaxTypeCode = 1) AND (Invoice.tbProject.InvoiceValue <> 0)

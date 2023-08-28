@@ -1,6 +1,6 @@
 ﻿CREATE   PROCEDURE Cash.proc_ChangeNew 
 (
-	@CashAccountCode nvarchar(10), 
+	@AccountCode nvarchar(10), 
 	@KeyName nvarchar(50), 
 	@ChangeTypeCode smallint,
 	@PaymentAddress nvarchar(42), 
@@ -13,10 +13,10 @@ AS
 	BEGIN TRY
 		BEGIN TRAN
 
-		INSERT INTO Cash.tbChange (PaymentAddress, CashAccountCode, HDPath, ChangeTypeCode, AddressIndex, Note)
-		SELECT @PaymentAddress, @CashAccountCode, account_key.HDPath, @ChangeTypeCode, @AddressIndex, @Note
+		INSERT INTO Cash.tbChange (PaymentAddress, AccountCode, HDPath, ChangeTypeCode, AddressIndex, Note)
+		SELECT @PaymentAddress, @AccountCode, account_key.HDPath, @ChangeTypeCode, @AddressIndex, @Note
 		FROM Subject.tbAccountKey account_key
-		WHERE account_key.CashAccountCode = @CashAccountCode AND KeyName = @KeyName;
+		WHERE account_key.AccountCode = @AccountCode AND KeyName = @KeyName;
 
 		IF EXISTS (SELECT * FROM Invoice.tbInvoice inv 
 						JOIN Invoice.tbType typ ON inv.InvoiceTypeCode = typ.InvoiceTypeCode  

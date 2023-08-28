@@ -2,20 +2,20 @@
 AS
 	WITH last_entries AS
 	(
-		SELECT     CashAccountCode, StartOn, MAX(EntryNumber) AS LastEntry
+		SELECT     AccountCode, StartOn, MAX(EntryNumber) AS LastEntry
 		FROM         Cash.vwAccountStatement
-		GROUP BY CashAccountCode, StartOn
+		GROUP BY AccountCode, StartOn
 		HAVING      (NOT (StartOn IS NULL))
 	), closing_balance AS
 	(
-		SELECT        Subject.tbAccount.CashAccountCode, Subject.tbAccount.CashCode, last_entries.StartOn, SUM(Cash.vwAccountStatement.PaidBalance) AS ClosingBalance
+		SELECT        Subject.tbAccount.AccountCode, Subject.tbAccount.CashCode, last_entries.StartOn, SUM(Cash.vwAccountStatement.PaidBalance) AS ClosingBalance
 		FROM            last_entries INNER JOIN
-								 Cash.vwAccountStatement ON last_entries.CashAccountCode = Cash.vwAccountStatement.CashAccountCode AND 
+								 Cash.vwAccountStatement ON last_entries.AccountCode = Cash.vwAccountStatement.AccountCode AND 
 								 last_entries.StartOn = Cash.vwAccountStatement.StartOn AND 
 								 last_entries.LastEntry = Cash.vwAccountStatement.EntryNumber INNER JOIN
-								 Subject.tbAccount ON last_entries.CashAccountCode = Subject.tbAccount.CashAccountCode
+								 Subject.tbAccount ON last_entries.AccountCode = Subject.tbAccount.AccountCode
 		WHERE Subject.tbAccount.AccountTypeCode = 0
-		GROUP BY Subject.tbAccount.CashAccountCode, Subject.tbAccount.CashCode, last_entries.StartOn
+		GROUP BY Subject.tbAccount.AccountCode, Subject.tbAccount.CashCode, last_entries.StartOn
 	)
 	SELECT        Format(closing_balance.StartOn, 'yyyy-MM') AS PeriodOn, SUM(closing_balance.ClosingBalance) AS SumOfClosingBalance
 	FROM            closing_balance INNER JOIN

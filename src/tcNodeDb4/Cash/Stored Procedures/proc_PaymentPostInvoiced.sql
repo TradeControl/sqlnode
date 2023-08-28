@@ -4,38 +4,38 @@ AS
 
 	BEGIN TRY
 		DECLARE 
-			@AccountCode nvarchar(10)
+			@SubjectCode nvarchar(10)
 			, @PostValue decimal(18, 5)
 			, @CashCode nvarchar(50);
 
 		SELECT   @PostValue = CASE WHEN PaidInValue = 0 THEN PaidOutValue ELSE PaidInValue * -1 END,
-			@AccountCode = Subject.tbSubject.AccountCode
+			@SubjectCode = Subject.tbSubject.SubjectCode
 		FROM         Cash.tbPayment INNER JOIN
-							  Subject.tbSubject ON Cash.tbPayment.AccountCode = Subject.tbSubject.AccountCode
+							  Subject.tbSubject ON Cash.tbPayment.SubjectCode = Subject.tbSubject.SubjectCode
 		WHERE     ( Cash.tbPayment.PaymentCode = @PaymentCode);
 
-		IF NOT EXISTS (SELECT InvoiceNumber FROM Invoice.tbInvoice WHERE (InvoiceStatusCode BETWEEN 1 AND 2) AND (AccountCode = @AccountCode))
+		IF NOT EXISTS (SELECT InvoiceNumber FROM Invoice.tbInvoice WHERE (InvoiceStatusCode BETWEEN 1 AND 2) AND (SubjectCode = @SubjectCode))
 			RETURN;
 
 		IF EXISTS (SELECT * FROM  Invoice.tbInvoice 
 						INNER JOIN Invoice.tbProject ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbProject.InvoiceNumber
-					WHERE        (Invoice.tbInvoice.AccountCode = @AccountCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3))
+					WHERE        (Invoice.tbInvoice.SubjectCode = @SubjectCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3))
 		BEGIN
 			SELECT  @CashCode = Invoice.tbProject.CashCode
 			FROM  Invoice.tbInvoice 
 				INNER JOIN Invoice.tbProject ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbProject.InvoiceNumber
-			WHERE        (Invoice.tbInvoice.AccountCode = @AccountCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
+			WHERE        (Invoice.tbInvoice.SubjectCode = @SubjectCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
 			GROUP BY Invoice.tbProject.CashCode;
 		END
 		ELSE IF EXISTS (SELECT * FROM Invoice.tbInvoice 
 							INNER JOIN Invoice.tbItem ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbItem.InvoiceNumber
-						WHERE        (Invoice.tbInvoice.AccountCode = @AccountCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
+						WHERE        (Invoice.tbInvoice.SubjectCode = @SubjectCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
 						GROUP BY Invoice.tbItem.CashCode)
 		BEGIN
 			SELECT @CashCode = Invoice.tbItem.CashCode
 			FROM  Invoice.tbInvoice 
 				INNER JOIN Invoice.tbItem ON Invoice.tbInvoice.InvoiceNumber = Invoice.tbItem.InvoiceNumber
-			WHERE        (Invoice.tbInvoice.AccountCode = @AccountCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
+			WHERE        (Invoice.tbInvoice.SubjectCode = @SubjectCode) AND (Invoice.tbInvoice.InvoiceStatusCode < 3)
 			GROUP BY Invoice.tbItem.CashCode;
 		END
 
@@ -49,7 +49,7 @@ AS
 		(
 			SELECT InvoiceNumber, InvoiceStatusCode, PaidValue, PaidTaxValue
 			FROM Invoice.vwStatusLive
-			WHERE AccountCode = @AccountCode
+			WHERE SubjectCode = @SubjectCode
 		)
 		UPDATE invoices
 		SET 
@@ -66,7 +66,7 @@ AS
 		UPDATE  Subject.tbAccount
 		SET CurrentBalance = Subject.tbAccount.CurrentBalance + (@PostValue * -1)
 		FROM         Subject.tbAccount INNER JOIN
-							  Cash.tbPayment ON Subject.tbAccount.CashAccountCode = Cash.tbPayment.CashAccountCode
+							  Cash.tbPayment ON Subject.tbAccount.AccountCode = Cash.tbPayment.AccountCode
 		WHERE Cash.tbPayment.PaymentCode = @PaymentCode
 		
 		COMMIT TRANSACTION

@@ -603,7 +603,7 @@ namespace TradeControl.Node
         #endregion
 
         #region Configuration and Demos
-        public void ConfigureNode(string accountCode,
+        public void ConfigureNode(string subjectCode,
                                     string businessName,
                                     string fullName,
                                     string businessAddress,
@@ -634,8 +634,8 @@ namespace TradeControl.Node
 
                         SqlParameter p1 = command.CreateParameter();
                         p1.DbType = DbType.String;
-                        p1.ParameterName = "@AccountCode";
-                        p1.Value = accountCode;
+                        p1.ParameterName = "@SubjectCode";
+                        p1.Value = subjectCode;
                         command.Parameters.Add(p1);
 
                         SqlParameter p2 = command.CreateParameter();

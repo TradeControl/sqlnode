@@ -8,7 +8,7 @@ AS
 		SELECT DISTINCT InvoiceNumber FROM Invoice.tbChangeLog 
 		WHERE TransmitStatusCode = 1
 	)
-	SELECT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.AccountCode, Invoice.tbInvoice.InvoiceStatusCode,
+	SELECT Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.SubjectCode, Invoice.tbInvoice.InvoiceStatusCode,
 			Invoice.tbInvoice.DueOn, Invoice.tbInvoice.PaidValue, Invoice.tbInvoice.PaidTaxValue, Cash.tbChangeReference.PaymentAddress
 	FROM updates 
 		JOIN Invoice.tbInvoice ON updates.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber 

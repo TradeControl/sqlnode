@@ -4,7 +4,7 @@
 	, @TxId nvarchar(64)
 	, @Spent decimal(18, 5)
 	, @MinerFee decimal(18, 5)
-	, @AccountCode nvarchar(10)
+	, @SubjectCode nvarchar(10)
 )
 AS
 	SET XACT_ABORT, NOCOUNT ON;
@@ -15,7 +15,7 @@ AS
 			@PaymentCode nvarchar(20)
 			, @TxNumber int
 			, @PaidOutValue decimal(18, 5)
-			, @CashAccountCode nvarchar(10) = (SELECT CashAccountCode FROM Cash.tbChange WHERE PaymentAddress = @PaymentAddress)
+			, @AccountCode nvarchar(10) = (SELECT AccountCode FROM Cash.tbChange WHERE PaymentAddress = @PaymentAddress)
 			, @UserId nvarchar(10) = (SELECT UserId FROM Usr.vwCredentials)
 			;
 
@@ -33,8 +33,8 @@ AS
 
 		EXEC Cash.proc_NextPaymentCode @PaymentCode OUTPUT;
 		
-		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaidOn, AccountCode, CashAccountCode, PaidOutValue)
-		VALUES (@PaymentCode, @UserId, CURRENT_TIMESTAMP, @AccountCode, @CashAccountCode, @PaidOutValue);
+		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaidOn, SubjectCode, AccountCode, PaidOutValue)
+		VALUES (@PaymentCode, @UserId, CURRENT_TIMESTAMP, @SubjectCode, @AccountCode, @PaidOutValue);
 
 		EXEC Cash.proc_PaymentPost;
 
@@ -45,8 +45,8 @@ AS
 		BEGIN
 			EXEC Cash.proc_NextPaymentCode @PaymentCode OUTPUT;
 		
-			INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaidOn, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOutValue)
-			SELECT @PaymentCode PaymentCode, @UserId UserId, CURRENT_TIMESTAMP PaidOn, 0 PaymentStatusCode, options.MinerAccountCode AccountCode, @CashAccountCode CashAccountCode,
+			INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaidOn, PaymentStatusCode, SubjectCode, AccountCode, CashCode, TaxCode, PaidOutValue)
+			SELECT @PaymentCode PaymentCode, @UserId UserId, CURRENT_TIMESTAMP PaidOn, 0 PaymentStatusCode, options.MinerAccountCode SubjectCode, @AccountCode AccountCode,
 				cash_code.CashCode CashCode, cash_code.TaxCode TaxCode, @MinerFee PaidOutValue
 			FROM App.tbOptions options
 				JOIN Cash.tbCode cash_code ON options.MinerFeeCode = cash_code.CashCode;				

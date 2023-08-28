@@ -45,7 +45,7 @@
 
 		WITH payment AS
 		(
-			SELECT UserId, AccountCode, PaidOn, PaidInValue, PaidOutValue,
+			SELECT UserId, SubjectCode, PaidOn, PaidInValue, PaidOutValue,
 					CASE TaxRate WHEN 0 THEN 0
 					ELSE
 					(
@@ -69,8 +69,8 @@
 			WHERE     (PaymentCode = @PaymentCode)
 		)
 		INSERT INTO Invoice.tbInvoice
-								 (InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, DueOn, ExpectedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, Printed)
-		SELECT        @InvoiceNumber AS InvoiceNumber, payment.UserId, payment.AccountCode, @InvoiceTypeCode AS InvoiceTypeCode, 3 AS InvoiceStatusCode, 
+								 (InvoiceNumber, UserId, SubjectCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, DueOn, ExpectedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, Printed)
+		SELECT        @InvoiceNumber AS InvoiceNumber, payment.UserId, payment.SubjectCode, @InvoiceTypeCode AS InvoiceTypeCode, 3 AS InvoiceStatusCode, 
 								payment.PaidOn, payment.PaidOn AS DueOn, payment.PaidOn AS ExpectedOn,
 								CASE WHEN PaidInValue > 0 THEN PaidInValue - TaxInValue
 									WHEN PaidOutValue > 0 THEN PaidOutValue - TaxOutValue
@@ -107,7 +107,7 @@
 		UPDATE  Subject.tbAccount
 		SET CurrentBalance = CASE WHEN PaidInValue > 0 THEN Subject.tbAccount.CurrentBalance + PaidInValue ELSE Subject.tbAccount.CurrentBalance - PaidOutValue END
 		FROM         Subject.tbAccount INNER JOIN
-							  Cash.tbPayment ON Subject.tbAccount.CashAccountCode = Cash.tbPayment.CashAccountCode
+							  Cash.tbPayment ON Subject.tbAccount.AccountCode = Cash.tbPayment.AccountCode
 		WHERE Cash.tbPayment.PaymentCode = @PaymentCode
 
 		UPDATE Cash.tbPayment

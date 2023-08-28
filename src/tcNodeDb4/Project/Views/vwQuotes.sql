@@ -1,10 +1,10 @@
 ﻿CREATE   VIEW Project.vwQuotes
 AS
-	SELECT        Project.tbProject.UserId, Cash.tbCategory.CashPolarityCode, Cash.tbPolarity.CashPolarity, Project.tbProject.ActionOn, Project.tbProject.ProjectCode, Project.tbProject.AccountCode, Project.tbProject.ContactName, Project.tbProject.ObjectCode, 
+	SELECT        Project.tbProject.UserId, Cash.tbCategory.CashPolarityCode, Cash.tbPolarity.CashPolarity, Project.tbProject.ActionOn, Project.tbProject.ProjectCode, Project.tbProject.SubjectCode, Project.tbProject.ContactName, Project.tbProject.ObjectCode, 
 							 Project.tbProject.ProjectTitle, Project.tbProject.SecondReference, Project.tbProject.TaxCode, Project.tbProject.Quantity, Project.tbProject.UnitCharge, Project.tbProject.TotalCharge, Project.vwBucket.Period, Project.vwBucket.BucketId, Project.tbProject.CashCode, 
-							 Cash.tbCode.CashDescription, tbUser_1.UserName AS OwnerName, Subject.tbSubject.AccountName, Project.tbProject.RowVer
+							 Cash.tbCode.CashDescription, tbUser_1.UserName AS OwnerName, Subject.tbSubject.SubjectName, Project.tbProject.RowVer
 	FROM            Subject.tbSubject INNER JOIN
-							 Project.tbProject ON Subject.tbSubject.AccountCode = Project.tbProject.AccountCode INNER JOIN
+							 Project.tbProject ON Subject.tbSubject.SubjectCode = Project.tbProject.SubjectCode INNER JOIN
 							 Usr.tbUser AS tbUser_1 ON Project.tbProject.UserId = tbUser_1.UserId INNER JOIN
 							 Project.vwBucket ON Project.tbProject.ProjectCode = Project.vwBucket.ProjectCode INNER JOIN
 							 Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode INNER JOIN

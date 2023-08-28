@@ -13,12 +13,12 @@ SET NOCOUNT, XACT_ABORT ON;
 
 		IF EXISTS(SELECT     Subject.tbContact.ContactName
 				  FROM         Subject.tbContact INNER JOIN
-										Project.tbProject ON Subject.tbContact.AccountCode = Project.tbProject.AccountCode AND Subject.tbContact.ContactName = Project.tbProject.ContactName
+										Project.tbProject ON Subject.tbContact.SubjectCode = Project.tbProject.SubjectCode AND Subject.tbContact.ContactName = Project.tbProject.ContactName
 				  WHERE     ( Project.tbProject.ProjectCode = @ProjectCode))
 			BEGIN
 			SELECT  @NickName = CASE WHEN Subject.tbContact.NickName is null THEN Subject.tbContact.ContactName ELSE Subject.tbContact.NickName END
 						  FROM         Subject.tbContact INNER JOIN
-												tbProject ON Subject.tbContact.AccountCode = Project.tbProject.AccountCode AND Subject.tbContact.ContactName = Project.tbProject.ContactName
+												tbProject ON Subject.tbContact.SubjectCode = Project.tbProject.SubjectCode AND Subject.tbContact.ContactName = Project.tbProject.ContactName
 						  WHERE     ( Project.tbProject.ProjectCode = @ProjectCode)				
 			END
 		ELSE
@@ -30,11 +30,11 @@ SET NOCOUNT, XACT_ABORT ON;
 	
 		EXEC Project.proc_EmailAddress	@ProjectCode, @EmailAddress output
 	
-		SELECT     Project.tbProject.ProjectCode, Project.tbProject.ProjectTitle, Subject.tbSubject.AccountCode, Subject.tbSubject.AccountName, @NickName AS NickName, @EmailAddress AS EmailAddress, 
+		SELECT     Project.tbProject.ProjectCode, Project.tbProject.ProjectTitle, Subject.tbSubject.SubjectCode, Subject.tbSubject.SubjectName, @NickName AS NickName, @EmailAddress AS EmailAddress, 
 							  Project.tbProject.ObjectCode, Project.tbStatus.ProjectStatus, Project.tbProject.ProjectNotes
 		FROM         Project.tbProject INNER JOIN
 							  Project.tbStatus ON Project.tbProject.ProjectStatusCode = Project.tbStatus.ProjectStatusCode INNER JOIN
-							  Subject.tbSubject ON Project.tbProject.AccountCode = Subject.tbSubject.AccountCode
+							  Subject.tbSubject ON Project.tbProject.SubjectCode = Subject.tbSubject.SubjectCode
 		WHERE     ( Project.tbProject.ProjectCode = @ProjectCode)
 
   	END TRY

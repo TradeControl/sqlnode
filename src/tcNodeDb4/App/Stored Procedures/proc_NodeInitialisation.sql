@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE App.proc_NodeInitialisation
 (
-	@AccountCode NVARCHAR(10),
+	@SubjectCode NVARCHAR(10),
 	@BusinessName NVARCHAR(255),
 	@FullName NVARCHAR(100),
 	@BusinessAddress NVARCHAR(MAX),
@@ -20,7 +20,7 @@ AS
 		BEGIN TRAN
 
 		UPDATE Cash.tbTaxType
-		SET AccountCode = null, CashCode = null;
+		SET SubjectCode = null, CashCode = null;
 
 		DELETE FROM App.tbOptions;
 
@@ -381,11 +381,11 @@ AS
 
 		/***************** BUSINESS DATA *****************************************/
 
-		INSERT INTO Subject.tbSubject (AccountCode, AccountName, SubjectTypeCode, SubjectStatusCode, PhoneNumber, EmailAddress, CompanyNumber, VatNumber)
-		VALUES (@AccountCode, @BusinessName, 4, 1, @PhoneNumber, @BusinessEmailAddress, @CompanyNumber, @VatNumber);
+		INSERT INTO Subject.tbSubject (SubjectCode, SubjectName, SubjectTypeCode, SubjectStatusCode, PhoneNumber, EmailAddress, CompanyNumber, VatNumber)
+		VALUES (@SubjectCode, @BusinessName, 4, 1, @PhoneNumber, @BusinessEmailAddress, @CompanyNumber, @VatNumber);
 
-		EXEC Subject.proc_AddContact @AccountCode = @AccountCode, @ContactName = @FullName;
-		EXEC Subject.proc_AddAddress @AccountCode = @AccountCode, @Address = @BusinessAddress;
+		EXEC Subject.proc_AddContact @SubjectCode = @SubjectCode, @ContactName = @FullName;
+		EXEC Subject.proc_AddAddress @SubjectCode = @SubjectCode, @Address = @BusinessAddress;
 
 		INSERT INTO App.tbCalendar (CalendarCode, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday)
 		VALUES (@CalendarCode, 1, 1, 1, 1, 1, 0, 0);
@@ -394,8 +394,8 @@ AS
 		VALUES (CONCAT(LEFT(@FullName, 1), SUBSTRING(@FullName, CHARINDEX(' ', @FullName) + 1, 1)), @FullName, 
 			SUSER_NAME() , 1, 1, @CalendarCode, @UserEmailAddress, @PhoneNumber);
 
-		INSERT INTO App.tbOptions (Identifier, IsInitialised, AccountCode, RegisterName, DefaultPrintMode, BucketIntervalCode, BucketTypeCode, TaxHorizon, IsAutoOffsetDays, UnitOfCharge)
-		VALUES ('TC', 0, @AccountCode, 'Event Log', 2, 1, 1, 730, 0, @UnitOfCharge);
+		INSERT INTO App.tbOptions (Identifier, IsInitialised, SubjectCode, RegisterName, DefaultPrintMode, BucketIntervalCode, BucketTypeCode, TaxHorizon, IsAutoOffsetDays, UnitOfCharge)
+		VALUES ('TC', 0, @SubjectCode, 'Event Log', 2, 1, 1, 730, 0, @UnitOfCharge);
 
 		SET IDENTITY_INSERT [Usr].[tbMenu] ON;
 		INSERT INTO [Usr].[tbMenu] ([MenuId], [MenuName], [InterfaceCode])

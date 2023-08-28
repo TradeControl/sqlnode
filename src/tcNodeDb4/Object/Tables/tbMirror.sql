@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [Object].[tbMirror] (
     [ObjectCode]       NVARCHAR (50) NOT NULL,
-    [AccountCode]        NVARCHAR (10) NOT NULL,
+    [SubjectCode]        NVARCHAR (10) NOT NULL,
     [AllocationCode]     NVARCHAR (50) NOT NULL,
     [TransmitStatusCode] SMALLINT      CONSTRAINT [DF_Object_tbMirror_TransmitStatusCode] DEFAULT ((0)) NOT NULL,
     [InsertedBy]         NVARCHAR (50) CONSTRAINT [DF_Object_tbMirror_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
@@ -8,16 +8,16 @@
     [UpdatedBy]          NVARCHAR (50) CONSTRAINT [DF_Object_tbMirror_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
     [UpdatedOn]          DATETIME      CONSTRAINT [DF_Object_tbMirror_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]             ROWVERSION    NOT NULL,
-    CONSTRAINT [PK_Object_tbMirror] PRIMARY KEY CLUSTERED ([ObjectCode] ASC, [AccountCode] ASC, [AllocationCode] ASC),
+    CONSTRAINT [PK_Object_tbMirror] PRIMARY KEY CLUSTERED ([ObjectCode] ASC, [SubjectCode] ASC, [AllocationCode] ASC),
     CONSTRAINT [FK_Object_tbMirror_tbObject] FOREIGN KEY ([ObjectCode]) REFERENCES [Object].[tbObject] ([ObjectCode]) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT [FK_Object_tbMirror_tbSubject] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT [FK_Object_tbMirror_tbSubject] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT [FK_Object_tbMirror_tbTransmitStatus] FOREIGN KEY ([TransmitStatusCode]) REFERENCES [Subject].[tbTransmitStatus] ([TransmitStatusCode])
 );
 
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Object_tbMirror_AllocationCode]
-    ON [Object].[tbMirror]([AccountCode] ASC, [AllocationCode] ASC)
+    ON [Object].[tbMirror]([SubjectCode] ASC, [AllocationCode] ASC)
     INCLUDE([ObjectCode]);
 
 
@@ -38,8 +38,8 @@ AS
 		UPDATE mirror
 		SET TransmitStatusCode = Subject.TransmitStatusCode
 		FROM Object.tbMirror mirror 
-			JOIN inserted ON mirror.AccountCode = inserted.AccountCode AND mirror.ObjectCode = inserted.ObjectCode
-			JOIN Subject.tbSubject Subject ON inserted.AccountCode = Subject.AccountCode;
+			JOIN inserted ON mirror.SubjectCode = inserted.SubjectCode AND mirror.ObjectCode = inserted.ObjectCode
+			JOIN Subject.tbSubject Subject ON inserted.SubjectCode = Subject.SubjectCode;
 	END TRY
 	BEGIN CATCH
 		EXEC App.proc_ErrorLog;
@@ -61,8 +61,8 @@ AS
 				UpdatedBy = SUSER_NAME(),
 				UpdatedOn = CURRENT_TIMESTAMP
 			FROM Object.tbMirror mirror 
-				JOIN inserted ON mirror.AccountCode = inserted.AccountCode AND mirror.ObjectCode = inserted.ObjectCode
-				JOIN Subject.tbSubject Subject ON inserted.AccountCode = Subject.AccountCode
+				JOIN inserted ON mirror.SubjectCode = inserted.SubjectCode AND mirror.ObjectCode = inserted.ObjectCode
+				JOIN Subject.tbSubject Subject ON inserted.SubjectCode = Subject.SubjectCode
 			WHERE inserted.TransmitStatusCode <> 1;
 		END
 	END TRY

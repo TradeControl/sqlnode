@@ -6,7 +6,7 @@ AS
 		FROM Subject.vwAssetBalances
 		GROUP BY AssetTypeCode, StartOn
 	)
-	SELECT (SELECT CashAccountCode FROM Cash.vwCurrentAccount) AssetCode, asset_type.AssetType AssetName, 
+	SELECT (SELECT AccountCode FROM Cash.vwCurrentAccount) AssetCode, asset_type.AssetType AssetName, 
 		asset_type.AssetTypeCode,
 		CASE asset_type.AssetTypeCode WHEN 0 THEN 1 ELSE 0 END CashPolarityCode,
 		StartOn, Balance

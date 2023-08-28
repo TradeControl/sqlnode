@@ -19,7 +19,7 @@ AS
 				Subject.tbSubject.EUJurisdiction,
 				Cash.tbCategory.CashPolarityCode
 		FROM    Project.tbProject INNER JOIN
-				Subject.tbSubject ON Project.tbProject.AccountCode = Subject.tbSubject.AccountCode INNER JOIN
+				Subject.tbSubject ON Project.tbProject.SubjectCode = Subject.tbSubject.SubjectCode INNER JOIN
 				Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode INNER JOIN
 				Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode INNER JOIN
 				App.tbTaxCode ON Project.tbProject.TaxCode = App.tbTaxCode.TaxCode LEFT OUTER JOIN

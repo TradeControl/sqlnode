@@ -13,12 +13,12 @@ AS
 	BEGIN TRY
 
 		DECLARE 						
-			@AccountCode nvarchar(10)
+			@SubjectCode nvarchar(10)
 			, @TaxCode nvarchar(10)
 			, @PaymentCode nvarchar(20)
 			, @TxNumber int
 			, @PaidOutValue decimal(18, 5)
-			, @CashAccountCode nvarchar(10) = (SELECT CashAccountCode FROM Cash.tbChange WHERE PaymentAddress = @PaymentAddress)
+			, @AccountCode nvarchar(10) = (SELECT AccountCode FROM Cash.tbChange WHERE PaymentAddress = @PaymentAddress)
 			, @UserId nvarchar(10) = (SELECT UserId FROM Usr.vwCredentials)
 			;
 
@@ -26,7 +26,7 @@ AS
 		FROM Cash.tbTx 
 		WHERE PaymentAddress = @PaymentAddress AND TxId = @TxId;
 
-		SELECT @AccountCode = AccountCode FROM App.vwHomeAccount;
+		SELECT @SubjectCode = SubjectCode FROM App.vwHomeAccount;
 		SELECT @TaxCode = TaxCode FROM Cash.tbCode WHERE CashCode = @CashCode;
 
 		BEGIN TRAN
@@ -39,8 +39,8 @@ AS
 
 		EXEC Cash.proc_NextPaymentCode @PaymentCode OUTPUT;
 		
-		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaidOn, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOutValue, PaymentReference)
-		VALUES (@PaymentCode, @UserId, CURRENT_TIMESTAMP, @AccountCode, @CashAccountCode, @CashCode, @TaxCode, @PaidOutValue, @PaymentReference);
+		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaidOn, SubjectCode, AccountCode, CashCode, TaxCode, PaidOutValue, PaymentReference)
+		VALUES (@PaymentCode, @UserId, CURRENT_TIMESTAMP, @SubjectCode, @AccountCode, @CashCode, @TaxCode, @PaidOutValue, @PaymentReference);
 
 		IF EXISTS (SELECT * FROM Cash.tbPayment WHERE PaymentCode = @PaymentCode AND PaymentStatusCode = 2)
 			EXEC Cash.proc_PayAccrual @PaymentCode;
@@ -54,8 +54,8 @@ AS
 		BEGIN
 			EXEC Cash.proc_NextPaymentCode @PaymentCode OUTPUT;
 		
-			INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaidOn, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOutValue, PaymentReference)
-			SELECT @PaymentCode PaymentCode, @UserId UserId, CURRENT_TIMESTAMP PaidOn, 0 PaymentStatusCode, options.MinerAccountCode AccountCode, @CashAccountCode CashAccountCode,
+			INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaidOn, PaymentStatusCode, SubjectCode, AccountCode, CashCode, TaxCode, PaidOutValue, PaymentReference)
+			SELECT @PaymentCode PaymentCode, @UserId UserId, CURRENT_TIMESTAMP PaidOn, 0 PaymentStatusCode, options.MinerAccountCode SubjectCode, @AccountCode AccountCode,
 				cash_code.CashCode CashCode, cash_code.TaxCode TaxCode, @MinerFee PaidOutValue, @PaymentReference PaymentReference
 			FROM App.tbOptions options
 				JOIN Cash.tbCode cash_code ON options.MinerFeeCode = cash_code.CashCode;	

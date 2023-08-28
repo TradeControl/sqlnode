@@ -27,23 +27,23 @@ AS
 
 		WITH sys_accounts AS
 		(
-			SELECT AccountCode FROM App.tbOptions
+			SELECT SubjectCode FROM App.tbOptions
 			UNION
-			SELECT DISTINCT AccountCode FROM Subject.tbAccount
+			SELECT DISTINCT SubjectCode FROM Subject.tbAccount
 			UNION
-			SELECT DISTINCT AccountCode FROM Cash.tbTaxType
+			SELECT DISTINCT SubjectCode FROM Cash.tbTaxType
 			UNION
-			SELECT MinerAccountCode FROM App.tbOptions opt JOIN Subject.tbSubject miner ON opt.MinerAccountCode = miner.AccountCode
+			SELECT MinerAccountCode FROM App.tbOptions opt JOIN Subject.tbSubject miner ON opt.MinerAccountCode = miner.SubjectCode
 		), candidates AS
 		(
-			SELECT AccountCode
+			SELECT SubjectCode
 			FROM Subject.tbSubject
 			EXCEPT
-			SELECT AccountCode 
+			SELECT SubjectCode 
 			FROM sys_accounts
 		)
 		DELETE Subject.tbSubject 
-		FROM Subject.tbSubject JOIN candidates ON Subject.tbSubject.AccountCode = candidates.AccountCode;
+		FROM Subject.tbSubject JOIN candidates ON Subject.tbSubject.SubjectCode = candidates.SubjectCode;
 
 		UPDATE App.tbOptions
 		SET IsAutoOffsetDays = 0;
@@ -380,7 +380,7 @@ AS
 		IF (@CreateOrders = 0)
 			GOTO CommitTran;
 
-		INSERT INTO Subject.tbSubject (AccountCode, AccountName, SubjectTypeCode, SubjectStatusCode, TaxCode, AddressCode, AreaCode, PhoneNumber, EmailAddress, WebSite, AccountSource, PaymentTerms, ExpectedDays, PaymentDays, PayDaysFromMonthEnd, PayBalance)
+		INSERT INTO Subject.tbSubject (SubjectCode, SubjectName, SubjectTypeCode, SubjectStatusCode, TaxCode, AddressCode, AreaCode, PhoneNumber, EmailAddress, WebSite, SubjectSource, PaymentTerms, ExpectedDays, PaymentDays, PayDaysFromMonthEnd, PayBalance)
 		VALUES ('ABCUST', 'AB Customer', 1, 1, 'T1', 'ABCUST_001', null, '+1234 56789', 'email@abcus.com', null, null, '30 days from date of invoice', 0, 30, 0, 0)
 		, ('CDCUST', 'CD Customer', 1, 1, 'T0', 'CDCUST_001', null, '+1234 123456', 'admin@cdcus.com', 'www.cdcus.com#http://www.cdcus.com#', null, '30 days end of month following date of invoice', 0, 30, 1, 0)
 		, ('EFCUST', 'EF Customer', 1, 1, 'T0', 'EFCUST_001', null, '01234 654321', 'accounts@efcust.net', 'www.efcust.net#http://www.efcust.net#', null, '30 days from date of invoice', 15, 30, 0, 1)
@@ -395,7 +395,7 @@ AS
 		, ('THEPAP', 'The Paper Supplier', 8, 1, 'T1', 'THEPAP_001', null, '01254 400000', 'adam@papersupplier.eu', 'www.papersupplier.eu#http://www.papersupplier.eu#', null, '30 days from date of invoice', 30, 0, 0, 1)
 		, ('BRICRA', 'British Crafts', 1, 1, 'T0', 'BRICRA_001', null, '1234 987654', 'ed@britishcrafts.Subject.uk', null, null, '30 days end of month following date of invoice', 10, 30, 1, 1)
 		;
-		INSERT INTO Subject.tbAddress (AddressCode, AccountCode, Address)
+		INSERT INTO Subject.tbAddress (AddressCode, SubjectCode, Address)
 		VALUES ('ABCUST_001', 'ABCUST', '1 The Street
 		Anytown
 		AT1 100')
@@ -437,7 +437,7 @@ AS
 		ThatCounty
 		TT1 1CC')
 		;
-		INSERT INTO Subject.tbContact (AccountCode, ContactName, FileAs, OnMailingList, NameTitle, NickName, JobTitle, PhoneNumber, MobileNumber, EmailAddress)
+		INSERT INTO Subject.tbContact (SubjectCode, ContactName, FileAs, OnMailingList, NameTitle, NickName, JobTitle, PhoneNumber, MobileNumber, EmailAddress)
 		VALUES ('ABCUST', 'Andy Brass', 'Brass, Andy', 1, null, 'Andy', null, null, '07177 897897', 'andy@abcus.com')
 		, ('CDCUST', 'Ben Boyd', 'Boyd, Ben', 1, null, 'Ben', null, null, '07177 777566', 'ben@cdcus.com')
 		, ('EFCUST', 'Christine Cook', 'Cook, Christine', 1, null, 'Chrissie', null, null, '07891 123456', 'chrissie@efcust.net')
@@ -453,7 +453,7 @@ AS
 		, ('ABCUST', 'Ted Baker', 'Baker, Ted', 1, null, 'Ted', 'Accounts/Payments', null, null, 'ted@abcus.com')
 		;
 
-		INSERT INTO Project.tbProject (ProjectCode, UserId, AccountCode, SecondReference, ProjectTitle, ContactName, ObjectCode, ProjectStatusCode, ActionById, ActionOn, ActionedOn, PaymentOn, ProjectNotes, Quantity, CashCode, TaxCode, UnitCharge, TotalCharge, AddressCodeFrom, AddressCodeTo, Spooled, Printed)
+		INSERT INTO Project.tbProject (ProjectCode, UserId, SubjectCode, SecondReference, ProjectTitle, ContactName, ObjectCode, ProjectStatusCode, ActionById, ActionOn, ActionedOn, PaymentOn, ProjectNotes, Quantity, CashCode, TaxCode, UnitCharge, TotalCharge, AddressCodeFrom, AddressCodeTo, Spooled, Printed)
 		VALUES (CONCAT(@UserId, '_10000'), @UserId, 'ABCUST', 'Order No. 12345', 'One-Off Book Order', 'Andy Brass', 'SO Book', 1, @UserId, '20190910', null, '20190910', null, 50, '103', 'T0', 9, 450.0000, 'ABCUST_001', 'ABCUST_002', 0, 0)
 		, (CONCAT(@UserId, '_10007'), @UserId, 'CDCUST', 'Monthly Contract', 'CD Monthly Brochure', 'Ben Boyd', 'SO Brochure or Catalogue', 2, @UserId, '20190126', '20190126', '20190228', null, 5000, '103', 'T1', 0.4, 2000, 'CDCUST_001', 'CDCUST_002', 0, 0)
 		, (CONCAT(@UserId, '_10008'), @UserId, 'CDCUST', 'Monthly Contract', 'CD Monthly Brochure', 'Ben Boyd', 'SO Brochure or Catalogue', 2, @UserId, '20190225', '20190225', '20190329', null, 5000, '103', 'T1', 0.4, 2000, 'CDCUST_001', 'CDCUST_002', 0, 0)
@@ -1040,7 +1040,7 @@ AS
 		IF (@InvoiceOrders = 0)
 			GOTO CommitTran;
 
-		INSERT INTO Invoice.tbInvoice (InvoiceNumber, UserId, AccountCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, ExpectedOn, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, PaymentTerms, Notes, Printed, Spooled)
+		INSERT INTO Invoice.tbInvoice (InvoiceNumber, UserId, SubjectCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, ExpectedOn, DueOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, PaymentTerms, Notes, Printed, Spooled)
 		VALUES (CONCAT('010000.', @UserId), @UserId, 'CDCUST', 0, 1, '20190126', '20190228', '20190228', 2000, 400, 2000, 400, '30 days end of month following date of invoice', null, 0, 0)
 		, (CONCAT('010001.', @UserId), @UserId, 'CDCUST', 0, 1, '20190225', '20190329', '20190329', 2000, 400, 2000, 400, '30 days end of month following date of invoice', null, 0, 0)
 		, (CONCAT('010002.', @UserId), @UserId, 'CDCUST', 0, 1, '20190328', '20190430', '20190430', 2000, 400, 2000, 400, '30 days end of month following date of invoice', null, 0, 0)
@@ -1241,7 +1241,7 @@ AS
 		EXEC Cash.proc_CurrentAccount @CurrentAccount OUTPUT;
 		EXEC Cash.proc_ReserveAccount @ReserveAccount OUTPUT;
 
-		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
+		INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, SubjectCode, AccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
 		VALUES (CONCAT(@UserId, '_20190008_120000'), @UserId, 1, 'CDCUST', @CurrentAccount, '103', 'T1', '20190228', 2400.0000, 0.0000, CONCAT('010000.', @UserId))
 		, (CONCAT(@UserId, '_20190008_120001'), @UserId, 1, 'CDCUST', @CurrentAccount, '103', 'T1', '20190329', 2400.0000, 0.0000, CONCAT('010001.', @UserId))
 		, (CONCAT(@UserId, '_20190008_120002'), @UserId, 1, 'CDCUST', @CurrentAccount, '103', 'T1', '20190430', 2400.0000, 0.0000, CONCAT('010002.', @UserId))
@@ -1293,7 +1293,7 @@ AS
 
 		IF (LEN(COALESCE(@ReserveAccount, '')) > 0)
 		BEGIN
-			INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
+			INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, SubjectCode, AccountCode, CashCode, TaxCode, PaidOn, PaidInValue, PaidOutValue, PaymentReference)
 			VALUES (CONCAT(@UserId, '_20191822_121848'), @UserId, 2, 'HOME', @ReserveAccount, '305', 'N/A', '20190831', 5000.0000, 0.0000, 'Transfer from current account')
 			, (CONCAT(@UserId, '_20192508_042502'), @UserId, 1, 'HOME', @ReserveAccount, '305', 'N/A', '20190601', 5000.0000, 0.0000, 'Transfer from Current Account')
 			, (CONCAT(@UserId, '_20190608_030639'), @UserId, 1, 'BUSOWN', @ReserveAccount, '215', 'N/A', '20190101', 15000.0000, 0.0000, 'owner transfer')

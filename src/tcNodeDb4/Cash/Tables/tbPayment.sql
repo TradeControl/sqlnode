@@ -2,8 +2,8 @@
     [PaymentCode]       NVARCHAR (20)   NOT NULL,
     [UserId]            NVARCHAR (10)   NOT NULL,
     [PaymentStatusCode] SMALLINT        CONSTRAINT [DF_Cash_tbPayment_PaymentStatusCode] DEFAULT ((0)) NOT NULL,
-    [AccountCode]       NVARCHAR (10)   NOT NULL,
-    [CashAccountCode]   NVARCHAR (10)   NOT NULL,
+    [SubjectCode]       NVARCHAR (10)   NOT NULL,
+    [AccountCode]   NVARCHAR (10)   NOT NULL,
     [CashCode]          NVARCHAR (50)   NULL,
     [TaxCode]           NVARCHAR (10)   NULL,
     [PaidOn]            DATETIME        CONSTRAINT [DF_Cash_tbPayment_PaidOn] DEFAULT (CONVERT([date],getdate())) NOT NULL,
@@ -20,8 +20,8 @@
     CONSTRAINT [FK_Cash_tbPayment_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]),
     CONSTRAINT [FK_Cash_tbPayment_Cash_tbCode] FOREIGN KEY ([CashCode]) REFERENCES [Cash].[tbCode] ([CashCode]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Cash_tbPayment_Cash_tbPaymentStatus] FOREIGN KEY ([PaymentStatusCode]) REFERENCES [Cash].[tbPaymentStatus] ([PaymentStatusCode]),
-    CONSTRAINT [FK_Cash_tbPayment_Subject_tbAccount] FOREIGN KEY ([CashAccountCode]) REFERENCES [Subject].[tbAccount] ([CashAccountCode]) ON UPDATE CASCADE,
-    CONSTRAINT [FK_Cash_tbPayment_tbSubject] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]),
+    CONSTRAINT [FK_Cash_tbPayment_Subject_tbAccount] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbAccount] ([AccountCode]) ON UPDATE CASCADE,
+    CONSTRAINT [FK_Cash_tbPayment_tbSubject] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]),
     CONSTRAINT [FK_Cash_tbPayment_Usr_tbUser] FOREIGN KEY ([UserId]) REFERENCES [Usr].[tbUser] ([UserId]) ON UPDATE CASCADE
 );
 
@@ -33,12 +33,12 @@ CREATE NONCLUSTERED INDEX [IX_Cash_tbPayment]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbPayment_AccountCode]
-    ON [Cash].[tbPayment]([AccountCode] ASC, [PaidOn] DESC);
+    ON [Cash].[tbPayment]([SubjectCode] ASC, [PaidOn] DESC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbPayment_CashAccountCode]
-    ON [Cash].[tbPayment]([CashAccountCode] ASC, [PaidOn] ASC);
+    ON [Cash].[tbPayment]([AccountCode] ASC, [PaidOn] ASC);
 
 
 GO
@@ -48,30 +48,30 @@ CREATE NONCLUSTERED INDEX [IX_Cash_tbPayment_CashCode]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbPayment_PaymentCode_Status]
-    ON [Cash].[tbPayment]([AccountCode] ASC, [PaymentStatusCode] ASC, [PaymentCode] ASC)
+    ON [Cash].[tbPayment]([SubjectCode] ASC, [PaymentStatusCode] ASC, [PaymentCode] ASC)
     INCLUDE([PaidInValue], [PaidOutValue]);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbPayment_PaymentCode_TaxCode]
-    ON [Cash].[tbPayment]([AccountCode] ASC, [PaymentCode] ASC, [TaxCode] ASC)
+    ON [Cash].[tbPayment]([SubjectCode] ASC, [PaymentCode] ASC, [TaxCode] ASC)
     INCLUDE([PaymentStatusCode], [PaidInValue], [PaidOutValue]);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbPayment_Status]
     ON [Cash].[tbPayment]([PaymentStatusCode] ASC)
-    INCLUDE([CashAccountCode], [CashCode], [PaidOn], [PaidInValue], [PaidOutValue]);
+    INCLUDE([AccountCode], [CashCode], [PaidOn], [PaidInValue], [PaidOutValue]);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbPayment_Status_AccountCode]
-    ON [Cash].[tbPayment]([PaymentStatusCode] ASC, [AccountCode] ASC);
+    ON [Cash].[tbPayment]([PaymentStatusCode] ASC, [SubjectCode] ASC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbPayment_Status_CashAccount_PaidOn]
-    ON [Cash].[tbPayment]([PaymentStatusCode] ASC, [CashAccountCode] ASC, [PaidOn] ASC)
+    ON [Cash].[tbPayment]([PaymentStatusCode] ASC, [AccountCode] ASC, [PaidOn] ASC)
     INCLUDE([PaymentCode], [PaidInValue], [PaidOutValue]);
 
 
@@ -91,22 +91,22 @@ AS
 
 		WITH assets AS
 		(
-			SELECT account.CashAccountCode FROM deleted d
-				JOIN Subject.tbAccount account ON account.CashAccountCode = d.CashAccountCode
+			SELECT account.AccountCode FROM deleted d
+				JOIN Subject.tbAccount account ON account.AccountCode = d.AccountCode
 			WHERE AccountTypeCode > 1
 		), balance AS
 		(
-			SELECT account.CashAccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
+			SELECT account.AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
 			FROM Subject.tbAccount account
-				JOIN assets ON account.CashAccountCode = assets.CashAccountCode
-				JOIN Cash.tbPayment payment ON account.CashAccountCode = payment.CashAccountCode
+				JOIN assets ON account.AccountCode = assets.AccountCode
+				JOIN Cash.tbPayment payment ON account.AccountCode = payment.AccountCode
 			WHERE payment.PaymentStatusCode = 1
-			GROUP BY account.CashAccountCode
+			GROUP BY account.AccountCode
 		)
 		UPDATE account
 		SET CurrentBalance = balance.CurrentBalance
 		FROM Subject.tbAccount account
-			JOIN balance ON account.CashAccountCode = balance.CashAccountCode;
+			JOIN balance ON account.AccountCode = balance.AccountCode;
 
 	END TRY
 	BEGIN CATCH
@@ -125,29 +125,29 @@ AS
 		SET PaymentStatusCode = 2
 		FROM inserted
 			JOIN Cash.tbPayment payment ON inserted.PaymentCode = payment.PaymentCode
-			JOIN Subject.tbAccount account ON payment.CashAccountCode = account.CashAccountCode
+			JOIN Subject.tbAccount account ON payment.AccountCode = account.AccountCode
 			JOIN Cash.tbCode ON inserted.CashCode = Cash.tbCode.CashCode 
 			JOIN Cash.tbCategory category ON Cash.tbCode.CategoryCode = category.CategoryCode
 		WHERE category.CashTypeCode = 2 AND inserted.PaymentStatusCode = 0 AND account.AccountTypeCode = 0;
 
 		WITH assets AS
 		(
-			SELECT account.CashAccountCode FROM inserted i
-				JOIN Subject.tbAccount account ON account.CashAccountCode = i.CashAccountCode
+			SELECT account.AccountCode FROM inserted i
+				JOIN Subject.tbAccount account ON account.AccountCode = i.AccountCode
 			WHERE AccountTypeCode = 2 AND PaymentStatusCode = 1
 		), balance AS
 		(
-			SELECT account.CashAccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
+			SELECT account.AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
 			FROM Subject.tbAccount account
-				JOIN assets ON account.CashAccountCode = assets.CashAccountCode
-				JOIN Cash.tbPayment payment ON account.CashAccountCode = payment.CashAccountCode
+				JOIN assets ON account.AccountCode = assets.AccountCode
+				JOIN Cash.tbPayment payment ON account.AccountCode = payment.AccountCode
 			WHERE payment.PaymentStatusCode = 1
-			GROUP BY account.CashAccountCode
+			GROUP BY account.AccountCode
 		)
 		UPDATE account
 		SET CurrentBalance = balance.CurrentBalance + OpeningBalance
 		FROM Subject.tbAccount account
-			JOIN balance ON account.CashAccountCode = balance.CashAccountCode;
+			JOIN balance ON account.AccountCode = balance.AccountCode;
 
 	END TRY
 	BEGIN CATCH
@@ -168,22 +168,22 @@ AS
 		IF UPDATE(PaidInValue) OR UPDATE(PaidOutValue)
 		BEGIN
 			IF EXISTS (SELECT * FROM inserted i
-					JOIN Subject.tbAccount account ON i.CashAccountCode = account.CashAccountCode AND account.AccountTypeCode = 0
+					JOIN Subject.tbAccount account ON i.AccountCode = account.AccountCode AND account.AccountTypeCode = 0
 				WHERE i.PaymentStatusCode = 1)
 			BEGIN
-				DECLARE @AccountCode NVARCHAR(10)
+				DECLARE @SubjectCode NVARCHAR(10)
 				DECLARE Subject CURSOR LOCAL FOR 
-					SELECT i.AccountCode 
+					SELECT i.SubjectCode 
 					FROM inserted i
-						JOIN Subject.tbAccount account ON i.CashAccountCode = account.CashAccountCode AND account.AccountTypeCode = 0
+						JOIN Subject.tbAccount account ON i.AccountCode = account.AccountCode AND account.AccountTypeCode = 0
 					WHERE i.PaymentStatusCode = 1
 
 				OPEN Subject
-				FETCH NEXT FROM Subject INTO @AccountCode
+				FETCH NEXT FROM Subject INTO @SubjectCode
 				WHILE (@@FETCH_STATUS = 0)
 					BEGIN		
-					EXEC Subject.proc_Rebuild @AccountCode
-					FETCH NEXT FROM Subject INTO @AccountCode
+					EXEC Subject.proc_Rebuild @SubjectCode
+					FETCH NEXT FROM Subject INTO @SubjectCode
 				END
 
 				CLOSE Subject
@@ -195,22 +195,22 @@ AS
 		BEGIN
 			WITH assets AS
 			(
-				SELECT account.CashAccountCode FROM inserted i
-					JOIN Subject.tbAccount account ON account.CashAccountCode = i.CashAccountCode
+				SELECT account.AccountCode FROM inserted i
+					JOIN Subject.tbAccount account ON account.AccountCode = i.AccountCode
 				WHERE AccountTypeCode = 2
 			), balance AS
 			(
-				SELECT account.CashAccountCode, SUM(PaidInValue + (PaidOutValue * -1)) AS CurrentBalance
+				SELECT account.AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) AS CurrentBalance
 				FROM Subject.tbAccount account
-					JOIN assets ON account.CashAccountCode = assets.CashAccountCode
-					JOIN Cash.tbPayment payment ON account.CashAccountCode = payment.CashAccountCode
+					JOIN assets ON account.AccountCode = assets.AccountCode
+					JOIN Cash.tbPayment payment ON account.AccountCode = payment.AccountCode
 				WHERE payment.PaymentStatusCode = 1
-				GROUP BY account.CashAccountCode
+				GROUP BY account.AccountCode
 			)
 			UPDATE account
 			SET CurrentBalance = balance.CurrentBalance + OpeningBalance
 			FROM Subject.tbAccount account
-				JOIN balance ON account.CashAccountCode = balance.CashAccountCode;
+				JOIN balance ON account.AccountCode = balance.AccountCode;
 		END
 
 	END TRY

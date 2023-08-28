@@ -27,7 +27,7 @@ namespace TradeControl.Node
         {
             get
             {
-                return (from tb in this.vwWallets orderby tb.CashAccountCode select tb.CashAccountCode).ToList<string>();
+                return (from tb in this.vwWallets orderby tb.AccountCode select tb.AccountCode).ToList<string>();
             }
         }
 
@@ -37,26 +37,26 @@ namespace TradeControl.Node
             {
                 var v = vwInvoicedReceipts;
 
-                return (from tb in this.vwWallets where tb.CashCode != null select tb.CashAccountCode).FirstOrDefault();
+                return (from tb in this.vwWallets where tb.CashCode != null select tb.AccountCode).FirstOrDefault();
             }
         }
 
-        public CoinType GetCoinType(string cashAccountCode)
+        public CoinType GetCoinType(string accountCode)
         {
-            var coinType = vwWallets.Where(w => w.CashAccountCode == cashAccountCode).Select(acc => acc.CoinTypeCode).First();
+            var coinType = vwWallets.Where(w => w.AccountCode == accountCode).Select(acc => acc.CoinTypeCode).First();
             return (CoinType)coinType;
         }
 
-        public bool AddReceiptKey(string cashAccountCode, string paymentAddress, string hdPath, int addressIndex, string notes)
+        public bool AddReceiptKey(string accountCode, string paymentAddress, string hdPath, int addressIndex, string notes)
         {
-            return AddReceiptKey(cashAccountCode, paymentAddress, hdPath, addressIndex, null, notes);
+            return AddReceiptKey(accountCode, paymentAddress, hdPath, addressIndex, null, notes);
         }
 
-        public bool AddReceiptKey(string cashAccountCode, string paymentAddress, string keyName, int addressIndex, string notes, string invoiceNumber)
+        public bool AddReceiptKey(string accountCode, string paymentAddress, string keyName, int addressIndex, string notes, string invoiceNumber)
         {
             try
             {
-                int rc = proc_ChangeNew(cashAccountCode, keyName, (short?)CoinChangeType.Receipt, paymentAddress, addressIndex, invoiceNumber, notes);
+                int rc = proc_ChangeNew(accountCode, keyName, (short?)CoinChangeType.Receipt, paymentAddress, addressIndex, invoiceNumber, notes);
                 return rc == 0;
             }
             catch (Exception err)
@@ -97,12 +97,12 @@ namespace TradeControl.Node
             }
         }
 
-        public bool TxPayIn(string cashAccountCode, string paymentAddress, string txId, string accountCode, string cashCode, DateTime paidOn, string paymentReference)
+        public bool TxPayIn(string accountCode, string paymentAddress, string txId, string subjectCode, string cashCode, DateTime paidOn, string paymentReference)
         {
             try
             {
                 string paymentCode = string.Empty;
-                proc_TxPayIn(cashAccountCode, paymentAddress, txId, accountCode, cashCode, paidOn, paymentReference, ref paymentCode);
+                proc_TxPayIn(accountCode, paymentAddress, txId, subjectCode, cashCode, paidOn, paymentReference, ref paymentCode);
                 return paymentCode.Length > 0;
             }
             catch (Exception err)
@@ -113,13 +113,13 @@ namespace TradeControl.Node
             }
         }
 
-        public Task<double> NamespaceBalance (string cashAccountCode, string keyName)
+        public Task<double> NamespaceBalance (string accountCode, string keyName)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    double balance = (double)fnNamespaceBalance(cashAccountCode, keyName);
+                    double balance = (double)fnNamespaceBalance(accountCode, keyName);
                     return balance;
                 }
                 catch (Exception err)
@@ -131,13 +131,13 @@ namespace TradeControl.Node
             });
         }
 
-        public Task<double> KeyNameBalance(string cashAccountCode, string keyName)
+        public Task<double> KeyNameBalance(string accountCode, string keyName)
         {
             return Task.Run(() =>
             {
                 try
                 {
-                    double balance = (double)fnKeyNameBalance(cashAccountCode, keyName);
+                    double balance = (double)fnKeyNameBalance(accountCode, keyName);
                     return balance;
                 }
                 catch (Exception err)
@@ -149,14 +149,14 @@ namespace TradeControl.Node
             });
         }
 
-        public Task<double> AccountBalance(string accountCode)
+        public Task<double> AccountBalance(string subjectCode)
         {
             return Task.Run(() =>
             {
                 try
                 {
                     decimal? balance = 0;
-                    proc_BalanceToPay(accountCode, ref balance);
+                    proc_BalanceToPay(subjectCode, ref balance);
                     return (double)balance * -1;
                 }
                 catch (Exception err)

@@ -7,7 +7,7 @@ CREATE   PROCEDURE Project.proc_WorkFlow
    	SET NOCOUNT, XACT_ABORT ON;
 
 	BEGIN TRY
-		SELECT     Project.tbFlow.ParentProjectCode, Project.tbFlow.StepNumber, Project.tbProject.ProjectCode, Project.tbProject.AccountCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, 
+		SELECT     Project.tbFlow.ParentProjectCode, Project.tbFlow.StepNumber, Project.tbProject.ProjectCode, Project.tbProject.SubjectCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, 
 							  Project.tbProject.ActionOn, Project.vwCashPolarity.CashPolarityCode, Project.tbFlow.OffsetDays
 		FROM         Project.tbProject INNER JOIN
 							  Project.tbFlow ON Project.tbProject.ProjectCode = Project.tbFlow.ChildProjectCode LEFT OUTER JOIN

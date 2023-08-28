@@ -15,12 +15,12 @@ AS
 			, @ProjectStatusCode smallint
 			, @StepNumber smallint
 			, @UserId nvarchar(10)
-			, @AccountCode nvarchar(10)
+			, @SubjectCode nvarchar(10)
 
 		SELECT @UserId = UserId FROM Usr.vwCredentials
 	
 		SELECT  
-			@AccountCode = Project.tbProject.AccountCode,
+			@SubjectCode = Project.tbProject.SubjectCode,
 			@ProjectStatusCode = Object.tbObject.ProjectStatusCode, 
 			@ObjectCode = Project.tbProject.ObjectCode, 
 			@Printed = CASE WHEN Object.tbObject.Printed = 0 THEN 1 ELSE 0 END
@@ -34,9 +34,9 @@ AS
 			BEGIN TRANSACTION;
 
 		INSERT INTO Project.tbProject
-							  (ProjectCode, UserId, AccountCode, ProjectTitle, ContactName, ObjectCode, ProjectStatusCode, ActionById, ActionOn, ActionedOn, ProjectNotes, Quantity, 
+							  (ProjectCode, UserId, SubjectCode, ProjectTitle, ContactName, ObjectCode, ProjectStatusCode, ActionById, ActionOn, ActionedOn, ProjectNotes, Quantity, 
 							  SecondReference, CashCode, TaxCode, UnitCharge, TotalCharge, AddressCodeFrom, AddressCodeTo, Printed)
-		SELECT     @ToProjectCode AS ToProjectCode, @UserId AS Owner, AccountCode, ProjectTitle, ContactName, ObjectCode, @ProjectStatusCode AS ProjectStatus, 
+		SELECT     @ToProjectCode AS ToProjectCode, @UserId AS Owner, SubjectCode, ProjectTitle, ContactName, ObjectCode, @ProjectStatusCode AS ProjectStatus, 
 							  @UserId AS ActionUserId, CAST(CURRENT_TIMESTAMP AS date) AS ActionOn, 
 							  CASE WHEN @ProjectStatusCode > 1 THEN CAST(CURRENT_TIMESTAMP AS date) ELSE NULL END AS ActionedOn, ProjectNotes, 
 							  Quantity, SecondReference, CashCode, TaxCode, UnitCharge, TotalCharge, AddressCodeFrom, AddressCodeTo, @Printed AS Printed

@@ -26,7 +26,7 @@ AS
 	BEGIN TRY
 		WITH deliveries AS
 		(
-			SELECT mirror.AccountCode, inserted.ProjectCode, 
+			SELECT mirror.SubjectCode, inserted.ProjectCode, 
 				CASE mirror.InvoiceTypeCode
 					WHEN 0 THEN inserted.Quantity
 					WHEN 1 THEN inserted.Quantity * -1
@@ -40,7 +40,7 @@ AS
 		UPDATE allocs
 		SET QuantityDelivered += deliveries.QuantityDelivered
 		FROM Project.tbAllocation allocs
-			JOIN deliveries ON allocs.AccountCode = deliveries.AccountCode AND allocs.ProjectCode = deliveries.ProjectCode;
+			JOIN deliveries ON allocs.SubjectCode = deliveries.SubjectCode AND allocs.ProjectCode = deliveries.ProjectCode;
 
 	END TRY
 	BEGIN CATCH

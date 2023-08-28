@@ -7,7 +7,7 @@ AS
 								 Invoice.tbItem.TaxValue, Subject.tbSubject.EUJurisdiction, Invoice.tbItem.CashCode AS IdentityCode
 		FROM   App.vwVatTaxCashCodes cash_codes INNER JOIN  Invoice.tbItem ON cash_codes.CashCode = Invoice.tbItem.CashCode 
 				INNER JOIN Invoice.tbInvoice ON Invoice.tbItem.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
-								 Subject.tbSubject ON Invoice.tbInvoice.AccountCode = Subject.tbSubject.AccountCode INNER JOIN
+								 Subject.tbSubject ON Invoice.tbInvoice.SubjectCode = Subject.tbSubject.SubjectCode INNER JOIN
 								 App.tbTaxCode ON Invoice.tbItem.TaxCode = App.tbTaxCode.TaxCode
 		WHERE        (App.tbTaxCode.TaxTypeCode = 1)
 		UNION
@@ -16,7 +16,7 @@ AS
 								 Invoice.tbProject.TaxValue, Subject.tbSubject.EUJurisdiction, Invoice.tbProject.ProjectCode AS IdentityCode
 		FROM    App.vwVatTaxCashCodes cash_codes INNER JOIN  Invoice.tbProject ON cash_codes.CashCode = Invoice.tbProject.CashCode 
 					INNER JOIN Invoice.tbInvoice ON Invoice.tbProject.InvoiceNumber = Invoice.tbInvoice.InvoiceNumber INNER JOIN
-								 Subject.tbSubject ON Invoice.tbInvoice.AccountCode = Subject.tbSubject.AccountCode INNER JOIN
+								 Subject.tbSubject ON Invoice.tbInvoice.SubjectCode = Subject.tbSubject.SubjectCode INNER JOIN
 								 App.tbTaxCode ON Invoice.tbProject.TaxCode = App.tbTaxCode.TaxCode
 		WHERE        (App.tbTaxCode.TaxTypeCode = 1)
 	), vat_detail AS

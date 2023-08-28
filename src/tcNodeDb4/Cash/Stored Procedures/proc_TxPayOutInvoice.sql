@@ -1,6 +1,6 @@
 ﻿CREATE   PROCEDURE Cash.proc_TxPayOutInvoice 
 (
-	@AccountCode nvarchar(10),
+	@SubjectCode nvarchar(10),
 	@CashCode nvarchar(50),
 	@TaxCode nvarchar(10),
 	@ItemReference nvarchar(50),
@@ -13,7 +13,7 @@ AS
 		
 		BEGIN TRANSACTION
 		
-		EXEC Invoice.proc_RaiseBlank @AccountCode, 2, @InvoiceNumber OUTPUT;
+		EXEC Invoice.proc_RaiseBlank @SubjectCode, 2, @InvoiceNumber OUTPUT;
 		
 		INSERT INTO Invoice.tbItem (InvoiceNumber, CashCode, TaxCode, ItemReference, TotalValue)
 		VALUES (@InvoiceNumber, @CashCode, @TaxCode, @ItemReference, @PaidOutValue);

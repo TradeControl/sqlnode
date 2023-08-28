@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [Subject].[tbSector] (
-    [AccountCode]    NVARCHAR (10) NOT NULL,
+    [SubjectCode]    NVARCHAR (10) NOT NULL,
     [IndustrySector] NVARCHAR (50) NOT NULL,
     [RowVer]         ROWVERSION    NOT NULL,
-    CONSTRAINT [PK_Subject_tbSector] PRIMARY KEY CLUSTERED ([AccountCode] ASC, [IndustrySector] ASC) WITH (FILLFACTOR = 90),
-    CONSTRAINT [FK_Subject_tbSector_Subject_tb] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [PK_Subject_tbSector] PRIMARY KEY CLUSTERED ([SubjectCode] ASC, [IndustrySector] ASC) WITH (FILLFACTOR = 90),
+    CONSTRAINT [FK_Subject_tbSector_Subject_tb] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 

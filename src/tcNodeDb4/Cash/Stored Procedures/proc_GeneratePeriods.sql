@@ -90,7 +90,7 @@ AS
 					WHEN 1 THEN PaidInValue + (PaidOutValue * -1)
 				END AssetValue
 			FROM Cash.tbPayment payment
-				JOIN Subject.tbAccount account ON payment.CashAccountCode = account.CashAccountCode
+				JOIN Subject.tbAccount account ON payment.AccountCode = account.AccountCode
 				JOIN Cash.tbCode cash_code ON account.CashCode = cash_code.CashCode
 				JOIN Cash.tbCategory cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
 			WHERE account.AccountTypeCode = 2 AND payment.IsProfitAndLoss <> 0 AND PaidOn < (SELECT StartOn FROM App.fnActivePeriod())

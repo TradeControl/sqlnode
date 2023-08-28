@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [Invoice].[tbMirror] (
     [ContractAddress]   NVARCHAR (42)   NOT NULL,
-    [AccountCode]       NVARCHAR (10)   NOT NULL,
+    [SubjectCode]       NVARCHAR (10)   NOT NULL,
     [InvoiceNumber]     NVARCHAR (50)   NOT NULL,
     [InvoiceTypeCode]   SMALLINT        NOT NULL,
     [InvoiceStatusCode] SMALLINT        NOT NULL,
@@ -16,7 +16,7 @@
     [PaidTaxValue]      DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbMirror_PaidTaxValue] DEFAULT ((0)) NOT NULL,
     [PaymentAddress]    NVARCHAR (42)   NULL,
     CONSTRAINT [PK_Invoice_tbMirror] PRIMARY KEY CLUSTERED ([ContractAddress] ASC),
-    CONSTRAINT [FK_Invoice_tbMirror_tbSubject] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]),
+    CONSTRAINT [FK_Invoice_tbMirror_tbSubject] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]),
     CONSTRAINT [FK_Invoice_tbMirror_tbStatus] FOREIGN KEY ([InvoiceStatusCode]) REFERENCES [Invoice].[tbStatus] ([InvoiceStatusCode]),
     CONSTRAINT [FK_Invoice_tbMirror_tbType] FOREIGN KEY ([InvoiceTypeCode]) REFERENCES [Invoice].[tbType] ([InvoiceTypeCode])
 );
@@ -24,7 +24,7 @@
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Invoice_tbMirror_InvoiceNumber]
-    ON [Invoice].[tbMirror]([AccountCode] ASC, [InvoiceNumber] ASC);
+    ON [Invoice].[tbMirror]([SubjectCode] ASC, [InvoiceNumber] ASC);
 
 
 GO

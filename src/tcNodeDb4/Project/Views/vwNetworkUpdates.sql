@@ -8,7 +8,7 @@ AS
 		SELECT DISTINCT ProjectCode FROM Project.tbChangeLog 
 		WHERE TransmitStatusCode = 1
 	)
-	SELECT Project.tbProject.ProjectCode, Project.tbProject.AccountCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, Project.tbStatus.ProjectStatus, Project.tbProject.ActionOn, Project.tbProject.Quantity, App.tbTaxCode.TaxRate, Project.tbProject.UnitCharge
+	SELECT Project.tbProject.ProjectCode, Project.tbProject.SubjectCode, Project.tbProject.ObjectCode, Project.tbProject.ProjectStatusCode, Project.tbStatus.ProjectStatus, Project.tbProject.ActionOn, Project.tbProject.Quantity, App.tbTaxCode.TaxRate, Project.tbProject.UnitCharge
 	FROM  updates 
 		JOIN Project.tbProject ON updates.ProjectCode = Project.tbProject.ProjectCode 
 		JOIN Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode 

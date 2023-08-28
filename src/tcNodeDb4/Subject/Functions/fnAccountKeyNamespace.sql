@@ -1,6 +1,6 @@
 ﻿CREATE   FUNCTION Subject.fnAccountKeyNamespace
 (
-	@CashAccountCode nvarchar(10),
+	@AccountCode nvarchar(10),
 	@HDPath hierarchyid
 ) RETURNS NVARCHAR(512)
 AS
@@ -11,14 +11,14 @@ BEGIN
 	(
 		SELECT HDPath, HDPath.GetAncestor(1) Ancestor, CAST(KeyName as nvarchar(512)) KeyNamespace
 		FROM Subject.tbAccountKey
-		WHERE CashAccountCode = @CashAccountCode AND HDPath = @HDPath
+		WHERE AccountCode = @AccountCode AND HDPath = @HDPath
 
 		UNION ALL
 
 		SELECT parent_key.HDPath, parent_key.HDPath.GetAncestor(1) Ancestor, CAST(CONCAT(parent_key.KeyName, '.', key_namespace.KeyNamespace) as nvarchar(512)) KeyNamespace
 		FROM Subject.tbAccountKey parent_key
 			JOIN key_namespace ON parent_key.HDPath = key_namespace.Ancestor
-		WHERE CashAccountCode = @CashAccountCode
+		WHERE AccountCode = @AccountCode
 	)
 	SELECT @KeyNamespace = REPLACE(UPPER(KeyNamespace), ' ', '_')
 	FROM key_namespace

@@ -5,18 +5,18 @@ AS
 	BEGIN TRY
 		WITH wallets AS
 		(
-			SELECT wallet.CashAccountCode
+			SELECT wallet.AccountCode
 			FROM Subject.vwWallets AS wallet 
-				LEFT OUTER JOIN Subject.tbAccountKey AS nspace ON wallet.CashAccountCode = nspace.CashAccountCode
-			WHERE        (nspace.CashAccountCode IS NULL)
+				LEFT OUTER JOIN Subject.tbAccountKey AS nspace ON wallet.AccountCode = nspace.AccountCode
+			WHERE        (nspace.AccountCode IS NULL)
 		), hdrootName AS
 		(
-			SELECT AccountName KeyName
+			SELECT SubjectName KeyName
 			FROM Subject.tbSubject Subjects
-				JOIN App.tbOptions opts ON opts.AccountCode = Subjects.AccountCode
+				JOIN App.tbOptions opts ON opts.SubjectCode = Subjects.SubjectCode
 		)
-		INSERT INTO Subject.tbAccountKey (CashAccountCode, HDPath, KeyName)
-		SELECT CashAccountCode, '/' HDPath, (SELECT KeyName FROM hdrootName) KeyName
+		INSERT INTO Subject.tbAccountKey (AccountCode, HDPath, KeyName)
+		SELECT AccountCode, '/' HDPath, (SELECT KeyName FROM hdrootName) KeyName
 		FROM wallets;
 	END TRY
 	BEGIN CATCH

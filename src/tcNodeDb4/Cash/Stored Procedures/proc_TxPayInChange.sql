@@ -1,9 +1,9 @@
 ﻿CREATE   PROCEDURE Cash.proc_TxPayInChange
 (
-	@CashAccountCode nvarchar(10), 
+	@AccountCode nvarchar(10), 
 	@PaymentAddress nvarchar(42),
 	@TxId nvarchar(64),
-	@AccountCode nvarchar(10), 
+	@SubjectCode nvarchar(10), 
 	@CashCode nvarchar(50),
 	@PaymentReference nvarchar(50) = null
 )
@@ -18,10 +18,10 @@ AS
 
 		EXECUTE Cash.proc_NextPaymentCode  @PaymentCode OUTPUT
 
-		INSERT INTO Cash.tbPayment (UserId, PaymentCode, CashAccountCode, PaidOn, AccountCode, PaymentStatusCode, PaidInValue, CashCode, TaxCode, PaymentReference)
+		INSERT INTO Cash.tbPayment (UserId, PaymentCode, AccountCode, PaidOn, SubjectCode, PaymentStatusCode, PaidInValue, CashCode, TaxCode, PaymentReference)
 		SELECT 
 			(SELECT UserId FROM Usr.vwCredentials) UserId,
-			@PaymentCode PaymentCode, @CashAccountCode CashAccountCode, CURRENT_TIMESTAMP PaidOn, @AccountCode AccountCode, 1 PaymentStatusCode, MoneyIn, 
+			@PaymentCode PaymentCode, @AccountCode AccountCode, CURRENT_TIMESTAMP PaidOn, @SubjectCode SubjectCode, 1 PaymentStatusCode, MoneyIn, 
 			@CashCode CashCode, @TaxCode TaxCode, @PaymentReference PaymentReference
 		FROM Cash.tbTx
 		WHERE TxId = @TxId AND PaymentAddress = @PaymentAddress;
@@ -29,7 +29,7 @@ AS
 		UPDATE  Subject.tbAccount
 		SET CurrentBalance = Subject.tbAccount.CurrentBalance + PaidInValue
 		FROM         Subject.tbAccount INNER JOIN
-							  Cash.tbPayment ON Subject.tbAccount.CashAccountCode = Cash.tbPayment.CashAccountCode
+							  Cash.tbPayment ON Subject.tbAccount.AccountCode = Cash.tbPayment.AccountCode
 		WHERE Cash.tbPayment.PaymentCode = @PaymentCode
 
 		UPDATE Cash.tbTx

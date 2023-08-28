@@ -25,8 +25,8 @@ AS
 		BEGIN
 			EXEC Cash.proc_NextPaymentCode @PaymentCode output;
 
-			INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, AccountCode, CashAccountCode, PaidInValue, PaymentReference)
-			SELECT @PaymentCode PaymentCode, (SELECT UserId FROM Usr.vwCredentials) UserId, 0 PaymentStatusCode, invoice.AccountCode, change.CashAccountCode, tx.MoneyIn - tx.MoneyOut PaidInValue, invoice.InvoiceNumber
+			INSERT INTO Cash.tbPayment (PaymentCode, UserId, PaymentStatusCode, SubjectCode, AccountCode, PaidInValue, PaymentReference)
+			SELECT @PaymentCode PaymentCode, (SELECT UserId FROM Usr.vwCredentials) UserId, 0 PaymentStatusCode, invoice.SubjectCode, change.AccountCode, tx.MoneyIn - tx.MoneyOut PaidInValue, invoice.InvoiceNumber
 			FROM Cash.tbTx tx
 				JOIN Cash.tbChange change ON tx.PaymentAddress = change.PaymentAddress
 				JOIN Cash.tbChangeReference ref ON change.PaymentAddress = ref.PaymentAddress

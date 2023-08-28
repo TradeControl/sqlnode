@@ -1,7 +1,7 @@
 ﻿
 CREATE   PROCEDURE Subject.proc_NextAddressCode 
 	(
-	@AccountCode nvarchar(10),
+	@SubjectCode nvarchar(10),
 	@AddressCode nvarchar(15) OUTPUT
 	)
   AS
@@ -12,10 +12,10 @@ CREATE   PROCEDURE Subject.proc_NextAddressCode
 
 		SELECT @AddCount = ISNULL(COUNT(AddressCode), 0) 
 		FROM         Subject.tbAddress
-		WHERE     (AccountCode = @AccountCode)
+		WHERE     (SubjectCode = @SubjectCode)
 	
 		SET @AddCount += 1
-		SET @AddressCode = CONCAT(UPPER(@AccountCode), '_', FORMAT(@AddCount, '000'))
+		SET @AddressCode = CONCAT(UPPER(@SubjectCode), '_', FORMAT(@AddCount, '000'))
 	
   	END TRY
 	BEGIN CATCH

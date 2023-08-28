@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [Subject].[tbContact] (
-    [AccountCode]   NVARCHAR (10)  NOT NULL,
+    [SubjectCode]   NVARCHAR (10)  NOT NULL,
     [ContactName]   NVARCHAR (100) NOT NULL,
     [FileAs]        NVARCHAR (100) NULL,
     [OnMailingList] BIT            CONSTRAINT [DF_Subject_tbContact_OnMailingList] DEFAULT ((1)) NOT NULL,
@@ -21,8 +21,8 @@
     [UpdatedBy]     NVARCHAR (50)  CONSTRAINT [DF_Subject_tbContact_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
     [UpdatedOn]     DATETIME       CONSTRAINT [DF_Subject_tbContact_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]        ROWVERSION     NOT NULL,
-    CONSTRAINT [PK_Subject_tbContact] PRIMARY KEY NONCLUSTERED ([AccountCode] ASC, [ContactName] ASC) WITH (FILLFACTOR = 90),
-    CONSTRAINT [FK_Subject_tbContact_AccountCode] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbSubject] ([AccountCode]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [PK_Subject_tbContact] PRIMARY KEY NONCLUSTERED ([SubjectCode] ASC, [ContactName] ASC) WITH (FILLFACTOR = 90),
+    CONSTRAINT [FK_Subject_tbContact_AccountCode] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
@@ -43,7 +43,7 @@ CREATE NONCLUSTERED INDEX [IX_Subject_tbContactNameTitle]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Subject_tbContact_AccountCode]
-    ON [Subject].[tbContact]([AccountCode] ASC) WITH (FILLFACTOR = 90);
+    ON [Subject].[tbContact]([SubjectCode] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
@@ -62,7 +62,7 @@ BEGIN
 				WHEN CHARINDEX(' ', tbContact.ContactName, 0) = 0 THEN tbContact.ContactName 
 				ELSE LEFT(tbContact.ContactName, CHARINDEX(' ', tbContact.ContactName, 0)) END),
 			FileAs = Subject.fnContactFileAs(tbContact.ContactName)
-		FROM Subject.tbContact INNER JOIN inserted AS i ON tbContact.AccountCode = i.AccountCode AND tbContact.ContactName = i.ContactName;
+		FROM Subject.tbContact INNER JOIN inserted AS i ON tbContact.SubjectCode = i.SubjectCode AND tbContact.ContactName = i.ContactName;
 
 	END TRY
 	BEGIN CATCH
@@ -86,12 +86,12 @@ BEGIN
 			UPDATE Subject.tbContact
 			SET 
 				FileAs = Subject.fnContactFileAs(tbContact.ContactName)
-			FROM Subject.tbContact INNER JOIN inserted AS i ON tbContact.AccountCode = i.AccountCode AND tbContact.ContactName = i.ContactName;
+			FROM Subject.tbContact INNER JOIN inserted AS i ON tbContact.SubjectCode = i.SubjectCode AND tbContact.ContactName = i.ContactName;
 		END
 
 		UPDATE Subject.tbContact
 		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
-		FROM Subject.tbContact INNER JOIN inserted AS i ON tbContact.AccountCode = i.AccountCode AND tbContact.ContactName = i.ContactName;
+		FROM Subject.tbContact INNER JOIN inserted AS i ON tbContact.SubjectCode = i.SubjectCode AND tbContact.ContactName = i.ContactName;
 
 	END TRY
 	BEGIN CATCH

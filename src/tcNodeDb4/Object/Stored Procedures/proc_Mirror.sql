@@ -1,12 +1,12 @@
-﻿CREATE   PROCEDURE Object.proc_Mirror(@ObjectCode nvarchar(50), @AccountCode nvarchar(10), @AllocationCode nvarchar(50))
+﻿CREATE   PROCEDURE Object.proc_Mirror(@ObjectCode nvarchar(50), @SubjectCode nvarchar(10), @AllocationCode nvarchar(50))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
 	BEGIN TRY
-		IF NOT EXISTS (SELECT * FROM Object.tbMirror WHERE ObjectCode = @ObjectCode AND AccountCode = @AccountCode AND AllocationCode = @AllocationCode)
+		IF NOT EXISTS (SELECT * FROM Object.tbMirror WHERE ObjectCode = @ObjectCode AND SubjectCode = @SubjectCode AND AllocationCode = @AllocationCode)
 		BEGIN
-			INSERT INTO Object.tbMirror (ObjectCode, AccountCode, AllocationCode)
-			VALUES (@ObjectCode, @AccountCode, @AllocationCode);
+			INSERT INTO Object.tbMirror (ObjectCode, SubjectCode, AllocationCode)
+			VALUES (@ObjectCode, @SubjectCode, @AllocationCode);
 		END
 	END TRY
 	BEGIN CATCH
