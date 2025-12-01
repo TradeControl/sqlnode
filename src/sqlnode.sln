@@ -5,7 +5,8 @@ VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C96737FC-9A30-4203-837B-8F7ADE497CBC}"
 	ProjectSection(SolutionItems) = preProject
-		..\changelog.md = ..\changelog.md
+		..\docs\changelog.md = ..\docs\changelog.md
+		..\docs\installation.md = ..\docs\installation.md
 		..\readme.md = ..\readme.md
 		..\docs\tc_coding_practice.md = ..\docs\tc_coding_practice.md
 	EndProjectSection
@@ -22,8 +23,6 @@ EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "tcNodeInstaller", "tcNodeInstaller\tcNodeInstaller.vdproj", "{5A947FDB-FB3C-4E56-9D27-208A217F1D6A}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcNodeDb", "tcNodeDb\tcNodeDb.sqlproj", "{38FE62E1-74AF-4DB6-8532-C5541432C1CC}"
-EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcNodeDb4", "tcNodeDb4\tcNodeDb4.sqlproj", "{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "archive", "archive", "{554B6C10-71AE-474E-B230-40706ACB9D07}"
 EndProject
@@ -93,12 +92,6 @@ Global
 		{38FE62E1-74AF-4DB6-8532-C5541432C1CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38FE62E1-74AF-4DB6-8532-C5541432C1CC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{38FE62E1-74AF-4DB6-8532-C5541432C1CC}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
