@@ -1,5 +1,10 @@
 # Installation Guide
 
+# ⚠️ Deprecation Notice
+
+This feature was **deprecated** on 1 December 2025.
+
+
 ## Sql Server
 
 The Trade Control schema can run on any Sql Server instance supporting Compatibility Level 2016 (130) or higher.

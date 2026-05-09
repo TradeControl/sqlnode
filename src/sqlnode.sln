@@ -68,6 +68,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "V3", "V3", "{2B8A0B81-09A9-
 		archive\V3\tc_upgrade_3_34_8.sql = archive\V3\tc_upgrade_3_34_8.sql
 	EndProjectSection
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcNodeDb4", "tcNodeDb4\tcNodeDb4.sqlproj", "{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,12 @@ Global
 		{38FE62E1-74AF-4DB6-8532-C5541432C1CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38FE62E1-74AF-4DB6-8532-C5541432C1CC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{38FE62E1-74AF-4DB6-8532-C5541432C1CC}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6A8BE87-D50B-45DB-A9D3-7E53270DA8BF}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

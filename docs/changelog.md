@@ -1,6 +1,35 @@
 # Change Log
 
-Changes to 3.33.1, released February 2021. Previous releases are logged in the [development history archive](https://github.com/iamonnox/tradecontrol).
+Previous releases are logged in the [development history archive](https://github.com/iamonnox/tradecontrol).
+
+## Version 4
+
+The purpose of Version 4 is to bring the schema naming conventions into alignment with the apps underlying [Production Theory](https://tradecontrol.github.io/articles/tc_production/).
+
+[Sql Server project tcNodeDb4](https://github.com/TradeControl/sqlnode/tree/HEAD/src/tcNodeDb4)
+
+### 4.1.1
+
+Name changes:
+
+V3 Name | V4 Name
+ -- | --
+Activity | Object
+Organisation | Subject
+Org | Subject
+Task | Project
+tbMode | tbPolarity
+CashMode | CashPolarity
+AccountCode | SubjectCode
+AccountName | SubjectName
+AccountSource | SubjectSource
+DefaultAccountCode | DefaultSubjectCode
+AccountLookup | SubjectLookup
+CashAccountCode | AccountCode
+CashAccountName | AccountName
+Task.proc_IsProject | Project.proc_IsProjected
+Task.proc_Project | Project.proc_Root
+Task.proc_Mode | Task.proc_Polarity
 
 ## Version 3
 
@@ -11,13 +40,13 @@ Changes to 3.33.1, released February 2021. Previous releases are logged in the [
 Completion of the [costing system](https://tradecontrol.github.io/tutorials/manufacturing#job-costing)
 
 - [x] [Task.tbCostSet](src/tcNodeDb/Task/Tables/tbCostSet.sql) - active set of user quotes for costing
-- [x] [Task.Task_tbTask_TriggerUpdate](src/tcNodeDb/Task/Tables/tbTask.sql) - remove tasks from cost set when set to ordered 
+- [x] [Task.Task_tbTask_TriggerUpdate](src/tcNodeDb/Task/Tables/tbTask.sql) - remove tasks from cost set when set to ordered
 - [x] [Task.vwQuotes](src/tcNodeDb/Task/Views/vwQuotes.sql) - quotes available for selection
-- [x] [Task.vwCostSet](src/tcNodeDb/Task/Views/vwCostSet.sql) - current user's set of quotes 
+- [x] [Task.vwCostSet](src/tcNodeDb/Task/Views/vwCostSet.sql) - current user's set of quotes
 - [x] [Task.proc_CostSetAdd](src/tcNodeDb/Task/Stored%20Procedures/proc_CostSetAdd.sql) - include task in the set
 - [x] [Cash.vwStatementBase](src/tcNodeDb/Cash/Views/vwStatementBase.sql) - split out the live company statement from the balance projection
 - [x] [Cash.vwStatement](src/tcNodeDb/Cash/Views/vwStatement.sql) - derive the company statement from the base dataset
-- [x] [Cash.vwStatementWhatIf](src/tcNodeDb/Cash/Views/vwStatementWhatIf.sql) - integrate the quotes, vat and company tax into the company statement 
+- [x] [Cash.vwStatementWhatIf](src/tcNodeDb/Cash/Views/vwStatementWhatIf.sql) - integrate the quotes, vat and company tax into the company statement
 
 ### 3.34.2
 
@@ -29,7 +58,7 @@ Authorisation and authentication support for the [Asp.Net Core interface](https:
 
 - [x] Standard Asp.Net Core schema design. Unfortunately it uses the default dbo schema instead of AspNet.TableName.
 
-### 3.34.4 
+### 3.34.4
 
 Integrates setup templates into the [Node Configuration](https://tradecontrol.github.io/tutorials/installing-sqlnode#basic-setup) program. There are only two at this stage, but more can be added.
 
