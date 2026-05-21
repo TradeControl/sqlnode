@@ -1,5 +1,11 @@
-﻿CREATE   VIEW Invoice.vwTypes
+CREATE VIEW Invoice.vwTypes
 AS
-	SELECT Invoice.tbType.InvoiceTypeCode, Invoice.tbType.InvoiceType, Invoice.tbType.CashPolarityCode, Cash.tbPolarity.CashPolarity, Invoice.tbType.NextNumber
-	FROM Invoice.tbType 
-		JOIN Cash.tbPolarity ON Invoice.tbType.CashPolarityCode = Cash.tbPolarity.CashPolarityCode;
+    SELECT
+        t.InvoiceTypeCode,
+        t.InvoiceType,
+        t.CashPolarityCode,
+        p.CashPolarity,
+        t.NextNumber
+    FROM Invoice.tbType t
+        INNER JOIN Cash.tbPolarity p
+            ON t.CashPolarityCode = p.CashPolarityCode;

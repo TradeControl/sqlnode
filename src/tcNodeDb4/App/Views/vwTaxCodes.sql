@@ -1,8 +1,18 @@
-﻿CREATE VIEW App.vwTaxCodes
+CREATE VIEW App.vwTaxCodes
 AS
-	SELECT        App.tbTaxCode.TaxCode, App.tbTaxCode.TaxDescription, Cash.tbTaxType.TaxType, App.tbTaxCode.TaxTypeCode, App.tbTaxCode.RoundingCode, App.tbRounding.Rounding, App.tbTaxCode.TaxRate, App.tbTaxCode.Decimals, 
-							 App.tbTaxCode.UpdatedBy, App.tbTaxCode.UpdatedOn
-	FROM            App.tbTaxCode INNER JOIN
-							 Cash.tbTaxType ON App.tbTaxCode.TaxTypeCode = Cash.tbTaxType.TaxTypeCode INNER JOIN
-							 App.tbRounding ON App.tbTaxCode.RoundingCode = App.tbRounding.RoundingCode
-
+    SELECT
+        tc.TaxCode,
+        tc.TaxDescription,
+        tt.TaxType,
+        tc.TaxTypeCode,
+        tc.RoundingCode,
+        r.Rounding,
+        tc.TaxRate,
+        tc.Decimals,
+        tc.UpdatedBy,
+        tc.UpdatedOn
+    FROM App.tbTaxCode tc
+        INNER JOIN Cash.tbTaxType tt
+            ON tc.TaxTypeCode = tt.TaxTypeCode
+        INNER JOIN App.tbRounding r
+            ON tc.RoundingCode = r.RoundingCode;

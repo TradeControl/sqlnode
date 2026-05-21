@@ -714,6 +714,7 @@
     <Build Include="Subject\Stored Procedures\proc_Reparent.sql" />
     <Build Include="Subject\Stored Procedures\proc_AddParentPreview.sql" />
     <Build Include="Subject\Stored Procedures\proc_AddParent.sql" />
+    <Build Include="Cash\Stored Procedures\proc_AssetReversal.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />

@@ -1,6 +1,15 @@
-﻿CREATE   VIEW App.vwYears
+CREATE VIEW App.vwYears
 AS
-	SELECT App.tbYear.YearNumber, CONCAT(App.tbMonth.MonthName, ' ', App.tbYear.YearNumber) StartMonth, App.tbYear.CashStatusCode, Cash.tbStatus.CashStatus, App.tbYear.Description, App.tbYear.InsertedBy, App.tbYear.InsertedOn
-	FROM App.tbYear 
-		JOIN Cash.tbStatus ON App.tbYear.CashStatusCode = Cash.tbStatus.CashStatusCode 
-		JOIN App.tbMonth ON App.tbYear.StartMonth = App.tbMonth.MonthNumber AND App.tbYear.StartMonth = App.tbMonth.MonthNumber;
+    SELECT
+        y.YearNumber,
+        CONCAT(m.MonthName, ' ', y.YearNumber) AS StartMonth,
+        y.CashStatusCode,
+        s.CashStatus,
+        y.Description,
+        y.InsertedBy,
+        y.InsertedOn
+    FROM App.tbYear y
+        INNER JOIN Cash.tbStatus s
+            ON y.CashStatusCode = s.CashStatusCode
+        INNER JOIN App.tbMonth m
+            ON y.StartMonth = m.MonthNumber;

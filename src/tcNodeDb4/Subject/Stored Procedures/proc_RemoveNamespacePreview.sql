@@ -15,12 +15,15 @@ BEGIN TRY
         @AffectedSubjectCount int = 0,
         @InvoiceCount int = 0,
         @PaymentCount int = 0,
-        @ProjectCount int = 0;
+        @ProjectCount int = 0,
+        @IsRootDelete bit = 0;
 
-    IF NULLIF(LTRIM(RTRIM(@ParentSubjectCode)), N'') IS NULL
-       OR NULLIF(LTRIM(RTRIM(@ChildSubjectCode)), N'') IS NULL
+    SET @ParentSubjectCode = NULLIF(LTRIM(RTRIM(@ParentSubjectCode)), N'');
+    SET @ChildSubjectCode = NULLIF(LTRIM(RTRIM(@ChildSubjectCode)), N'');
+
+    IF @ChildSubjectCode IS NULL
     BEGIN
-        SET @Message = N'ParentSubjectCode and ChildSubjectCode are required.';
+        SET @Message = N'ChildSubjectCode is required.';
         SELECT
             @ActionCode AS ActionCode,
             @CanProceed AS CanProceed,
@@ -33,51 +36,98 @@ BEGIN TRY
         RETURN;
     END
 
-    IF NOT EXISTS
-    (
-        SELECT 1
-        FROM Subject.tbNamespace
-        WHERE ParentSubjectCode = @ParentSubjectCode
-          AND ChildSubjectCode = @ChildSubjectCode
-    )
+    SET @IsRootDelete = CASE WHEN @ParentSubjectCode IS NULL THEN 1 ELSE 0 END;
+
+    IF @IsRootDelete = 1
     BEGIN
-        SET @Message = N'The selected namespace relationship was not found.';
-        SELECT
-            @ActionCode AS ActionCode,
-            @CanProceed AS CanProceed,
-            @Message AS Message,
-            @HasOtherParents AS HasOtherParents,
-            @AffectedSubjectCount AS AffectedSubjectCount,
-            @InvoiceCount AS InvoiceCount,
-            @PaymentCount AS PaymentCount,
-            @ProjectCount AS ProjectCount;
-        RETURN;
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM Subject.tbSubject
+            WHERE SubjectCode = @ChildSubjectCode
+        )
+        BEGIN
+            SET @Message = N'The selected Subject was not found.';
+            SELECT
+                @ActionCode AS ActionCode,
+                @CanProceed AS CanProceed,
+                @Message AS Message,
+                @HasOtherParents AS HasOtherParents,
+                @AffectedSubjectCount AS AffectedSubjectCount,
+                @InvoiceCount AS InvoiceCount,
+                @PaymentCount AS PaymentCount,
+                @ProjectCount AS ProjectCount;
+            RETURN;
+        END
+
+        IF EXISTS
+        (
+            SELECT 1
+            FROM Subject.tbNamespace
+            WHERE ChildSubjectCode = @ChildSubjectCode
+        )
+        BEGIN
+            SET @Message = N'The selected Subject is not a root namespace node.';
+            SELECT
+                @ActionCode AS ActionCode,
+                @CanProceed AS CanProceed,
+                @Message AS Message,
+                @HasOtherParents AS HasOtherParents,
+                @AffectedSubjectCount AS AffectedSubjectCount,
+                @InvoiceCount AS InvoiceCount,
+                @PaymentCount AS PaymentCount,
+                @ProjectCount AS ProjectCount;
+            RETURN;
+        END
     END
-
-    IF EXISTS
-    (
-        SELECT 1
-        FROM Subject.tbNamespace
-        WHERE ChildSubjectCode = @ChildSubjectCode
-          AND ParentSubjectCode <> @ParentSubjectCode
-    )
+    ELSE
     BEGIN
-        SET @ActionCode = 1;
-        SET @CanProceed = 1;
-        SET @HasOtherParents = 1;
-        SET @AffectedSubjectCount = 1;
-        SET @Message = N'This will remove the namespace relationship only. The Subject remains available through other namespace paths.';
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM Subject.tbNamespace
+            WHERE ParentSubjectCode = @ParentSubjectCode
+              AND ChildSubjectCode = @ChildSubjectCode
+        )
+        BEGIN
+            SET @Message = N'The selected namespace relationship was not found.';
+            SELECT
+                @ActionCode AS ActionCode,
+                @CanProceed AS CanProceed,
+                @Message AS Message,
+                @HasOtherParents AS HasOtherParents,
+                @AffectedSubjectCount AS AffectedSubjectCount,
+                @InvoiceCount AS InvoiceCount,
+                @PaymentCount AS PaymentCount,
+                @ProjectCount AS ProjectCount;
+            RETURN;
+        END
 
-        SELECT
-            @ActionCode AS ActionCode,
-            @CanProceed AS CanProceed,
-            @Message AS Message,
-            @HasOtherParents AS HasOtherParents,
-            @AffectedSubjectCount AS AffectedSubjectCount,
-            @InvoiceCount AS InvoiceCount,
-            @PaymentCount AS PaymentCount,
-            @ProjectCount AS ProjectCount;
-        RETURN;
+        IF EXISTS
+        (
+            SELECT 1
+            FROM Subject.tbNamespace
+            WHERE ChildSubjectCode = @ChildSubjectCode
+              AND ParentSubjectCode <> @ParentSubjectCode
+        )
+        BEGIN
+            SET @ActionCode = 1;
+            SET @CanProceed = 1;
+            SET @HasOtherParents = 1;
+            SET @AffectedSubjectCount = 1;
+            SET @Message = N'This will remove the namespace relationship only. The Subject remains available through other namespace paths.';
+
+            SELECT
+                @ActionCode AS ActionCode,
+                @CanProceed AS CanProceed,
+                @Message AS Message,
+                @HasOtherParents AS HasOtherParents,
+                @AffectedSubjectCount AS AffectedSubjectCount,
+                @InvoiceCount AS InvoiceCount,
+                @PaymentCount AS PaymentCount,
+                @ProjectCount AS ProjectCount;
+            RETURN;
+        END
     END
 
     DECLARE @DetachedClosure TABLE
@@ -117,10 +167,14 @@ BEGIN TRY
             FROM @DetachedClosure AS p
             WHERE p.SubjectCode = n.ParentSubjectCode
         )
-          AND NOT
+          AND
           (
-              n.ParentSubjectCode = @ParentSubjectCode
-              AND n.ChildSubjectCode = @ChildSubjectCode
+              @IsRootDelete = 1
+              OR NOT
+              (
+                  n.ParentSubjectCode = @ParentSubjectCode
+                  AND n.ChildSubjectCode = @ChildSubjectCode
+              )
           )
     )
     BEGIN
@@ -176,6 +230,10 @@ BEGIN TRY
     SET @ActionCode = 2;
     SET @CanProceed = 1;
     SET @Message = CASE
+        WHEN @IsRootDelete = 1 AND @AffectedSubjectCount = 1
+            THEN N'This will delete the root Subject.'
+        WHEN @IsRootDelete = 1
+            THEN CONCAT(N'This will delete the root closure of ', @AffectedSubjectCount, N' Subjects.')
         WHEN @AffectedSubjectCount = 1
             THEN N'This will delete the detached Subject.'
         ELSE CONCAT(N'This will delete the detached closure of ', @AffectedSubjectCount, N' Subjects.')

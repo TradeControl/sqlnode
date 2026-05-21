@@ -3,10 +3,11 @@ CREATE TABLE [Cash].[tbPayment] (
     [UserId]            NVARCHAR (10)   NOT NULL,
     [PaymentStatusCode] SMALLINT        CONSTRAINT [DF_Cash_tbPayment_PaymentStatusCode] DEFAULT ((0)) NOT NULL,
     [SubjectCode]       NVARCHAR (50)   NOT NULL,
-    [AccountCode]   NVARCHAR (10)   NOT NULL,
+    [ParentSubjectCode] NVARCHAR (50)   NULL,
+    [AccountCode]       NVARCHAR (10)   NOT NULL,
     [CashCode]          NVARCHAR (50)   NULL,
     [TaxCode]           NVARCHAR (10)   NULL,
-    [PaidOn]            DATETIME        CONSTRAINT [DF_Cash_tbPayment_PaidOn] DEFAULT (CONVERT([date],getdate())) NOT NULL,
+    [PaidOn]            DATETIME        CONSTRAINT [DF_Cash_tbPayment_PaidOn] DEFAULT (CONVERT([date], getdate())) NOT NULL,
     [PaidInValue]       DECIMAL (18, 5) CONSTRAINT [DF_Cash_tbPayment_PaidInValue] DEFAULT ((0)) NOT NULL,
     [PaidOutValue]      DECIMAL (18, 5) CONSTRAINT [DF_Cash_tbPayment_PaidOutValue] DEFAULT ((0)) NOT NULL,
     [PaymentReference]  NVARCHAR (50)   NULL,
@@ -21,6 +22,7 @@ CREATE TABLE [Cash].[tbPayment] (
     CONSTRAINT [FK_Cash_tbPayment_Cash_tbPaymentStatus] FOREIGN KEY ([PaymentStatusCode]) REFERENCES [Cash].[tbPaymentStatus] ([PaymentStatusCode]),
     CONSTRAINT [FK_Cash_tbPayment_Subject_tbAccount] FOREIGN KEY ([AccountCode]) REFERENCES [Subject].[tbAccount] ([AccountCode]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Cash_tbPayment_tbSubject] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]),
+    CONSTRAINT [FK_Cash_tbPayment_ParentSubjectCode] FOREIGN KEY ([ParentSubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]),
     CONSTRAINT [FK_Cash_tbPayment_Usr_tbUser] FOREIGN KEY ([UserId]) REFERENCES [Usr].[tbUser] ([UserId]) ON UPDATE CASCADE
 );
 
@@ -81,185 +83,321 @@ CREATE NONCLUSTERED INDEX [IX_tbPayment_TaxCode]
 
 
 GO
-CREATE   TRIGGER Cash.Cash_tbPayment_TriggerDelete
+CREATE TRIGGER Cash.Cash_tbPayment_TriggerDelete
 ON Cash.tbPayment
 FOR DELETE
 AS
-	SET NOCOUNT ON;
-	BEGIN TRY
+    SET NOCOUNT ON;
+    BEGIN TRY
 
-		WITH assets AS
-		(
-			SELECT account.AccountCode FROM deleted d
-				JOIN Subject.tbAccount account ON account.AccountCode = d.AccountCode
-			WHERE AccountTypeCode > 1
-		), balance AS
-		(
-			SELECT account.AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
-			FROM Subject.tbAccount account
-				JOIN assets ON account.AccountCode = assets.AccountCode
-				JOIN Cash.tbPayment payment ON account.AccountCode = payment.AccountCode
-			WHERE payment.PaymentStatusCode = 1
-			GROUP BY account.AccountCode
-		)
-		UPDATE account
-		SET CurrentBalance = balance.CurrentBalance
-		FROM Subject.tbAccount account
-			JOIN balance ON account.AccountCode = balance.AccountCode;
+        WITH assets AS
+        (
+            SELECT account.AccountCode
+            FROM deleted d
+                JOIN Subject.tbAccount account ON account.AccountCode = d.AccountCode
+            WHERE AccountTypeCode > 1
+        ),
+        balance AS
+        (
+            SELECT account.AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
+            FROM Subject.tbAccount account
+                JOIN assets ON account.AccountCode = assets.AccountCode
+                JOIN Cash.tbPayment payment ON account.AccountCode = payment.AccountCode
+            WHERE payment.PaymentStatusCode = 1
+            GROUP BY account.AccountCode
+        )
+        UPDATE account
+        SET CurrentBalance = balance.CurrentBalance
+        FROM Subject.tbAccount account
+            JOIN balance ON account.AccountCode = balance.AccountCode;
 
-	END TRY
-	BEGIN CATCH
-		EXEC App.proc_ErrorLog;
-	END CATCH
-
+    END TRY
+    BEGIN CATCH
+        EXEC App.proc_ErrorLog;
+    END CATCH
 GO
+
 CREATE TRIGGER Cash.Cash_tbPayment_TriggerInsert
 ON Cash.tbPayment
 FOR INSERT
 AS
-	SET NOCOUNT ON;
-	BEGIN TRY
+    SET NOCOUNT ON;
+    BEGIN TRY
 
-		UPDATE payment
-		SET PaymentStatusCode = 2
-		FROM inserted
-			JOIN Cash.tbPayment payment ON inserted.PaymentCode = payment.PaymentCode
-			JOIN Subject.tbAccount account ON payment.AccountCode = account.AccountCode
-			JOIN Cash.tbCode ON inserted.CashCode = Cash.tbCode.CashCode 
-			JOIN Cash.tbCategory category ON Cash.tbCode.CategoryCode = category.CategoryCode
-		WHERE category.CashTypeCode = 2 AND inserted.PaymentStatusCode = 0 AND account.AccountTypeCode = 0;
+        ;WITH namespace_candidates AS
+        (
+            SELECT
+                payment.PaymentCode,
+                payment.SubjectCode,
+                payment.ParentSubjectCode,
+                ParentCount = (
+                    SELECT COUNT(*)
+                    FROM Subject.tbNamespace tbNamespace
+                    WHERE tbNamespace.ChildSubjectCode = payment.SubjectCode
+                ),
+                SingleParentSubjectCode = (
+                    SELECT MIN(tbNamespace.ParentSubjectCode)
+                    FROM Subject.tbNamespace tbNamespace
+                    WHERE tbNamespace.ChildSubjectCode = payment.SubjectCode
+                )
+            FROM Cash.tbPayment payment
+                JOIN inserted i ON payment.PaymentCode = i.PaymentCode
+        )
+        UPDATE payment
+        SET ParentSubjectCode = namespace_candidates.SingleParentSubjectCode
+        FROM Cash.tbPayment payment
+            JOIN namespace_candidates ON payment.PaymentCode = namespace_candidates.PaymentCode
+        WHERE namespace_candidates.ParentSubjectCode IS NULL
+          AND namespace_candidates.ParentCount = 1;
 
-		WITH assets AS
-		(
-			SELECT account.AccountCode FROM inserted i
-				JOIN Subject.tbAccount account ON account.AccountCode = i.AccountCode
-			WHERE AccountTypeCode = 2 AND PaymentStatusCode = 1
-		), balance AS
-		(
-			SELECT account.AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
-			FROM Subject.tbAccount account
-				JOIN assets ON account.AccountCode = assets.AccountCode
-				JOIN Cash.tbPayment payment ON account.AccountCode = payment.AccountCode
-			WHERE payment.PaymentStatusCode = 1
-			GROUP BY account.AccountCode
-		)
-		UPDATE account
-		SET CurrentBalance = balance.CurrentBalance + OpeningBalance
-		FROM Subject.tbAccount account
-			JOIN balance ON account.AccountCode = balance.AccountCode;
+        IF EXISTS
+        (
+            SELECT 1
+            FROM Cash.tbPayment payment
+                JOIN inserted i ON payment.PaymentCode = i.PaymentCode
+            WHERE payment.ParentSubjectCode IS NULL
+              AND (
+                    SELECT COUNT(*)
+                    FROM Subject.tbNamespace tbNamespace
+                    WHERE tbNamespace.ChildSubjectCode = payment.SubjectCode
+                  ) > 1
+        )
+        BEGIN
+            RAISERROR('ParentSubjectCode must be selected when Subject has multiple namespace parents.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
 
-		----------------------------------------------------------------
-		-- Balance constraints (asset accounts only, posted rows only)
-		----------------------------------------------------------------
-		IF EXISTS
-		(
-			SELECT 1
-			FROM inserted i
-				JOIN Subject.tbAccount a
-					ON a.AccountCode = i.AccountCode
-			WHERE i.PaymentStatusCode = 1
-			  AND a.AccountTypeCode = 2
-			  AND
-			  (
-					(a.BalanceConstraintCode = 1 AND a.CurrentBalance < 0)  -- NoNegatives
-				 OR (a.BalanceConstraintCode = 2 AND a.CurrentBalance > 0)  -- NoPositives
-			  )
-		)
-		BEGIN
-			RAISERROR('Balance constraint violation on asset account.', 16, 1);
-			ROLLBACK TRANSACTION;
-			RETURN;
-		END
+        IF EXISTS
+        (
+            SELECT 1
+            FROM Cash.tbPayment payment
+                JOIN inserted i ON payment.PaymentCode = i.PaymentCode
+            WHERE payment.ParentSubjectCode IS NOT NULL
+              AND NOT EXISTS
+              (
+                  SELECT 1
+                  FROM Subject.tbNamespace tbNamespace
+                  WHERE tbNamespace.ChildSubjectCode = payment.SubjectCode
+                    AND tbNamespace.ParentSubjectCode = payment.ParentSubjectCode
+              )
+        )
+        BEGIN
+            RAISERROR('ParentSubjectCode must reference a valid namespace parent for the Subject.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
 
-	END TRY
-	BEGIN CATCH
-		EXEC App.proc_ErrorLog;
-	END CATCH
+        UPDATE payment
+        SET PaymentStatusCode = 2
+        FROM inserted
+            JOIN Cash.tbPayment payment ON inserted.PaymentCode = payment.PaymentCode
+            JOIN Subject.tbAccount account ON payment.AccountCode = account.AccountCode
+            JOIN Cash.tbCode ON inserted.CashCode = Cash.tbCode.CashCode
+            JOIN Cash.tbCategory category ON Cash.tbCode.CategoryCode = category.CategoryCode
+        WHERE category.CashTypeCode = 2
+          AND inserted.PaymentStatusCode = 0
+          AND account.AccountTypeCode = 0;
 
+        WITH assets AS
+        (
+            SELECT account.AccountCode
+            FROM inserted i
+                JOIN Subject.tbAccount account ON account.AccountCode = i.AccountCode
+            WHERE AccountTypeCode = 2
+              AND PaymentStatusCode = 1
+        ),
+        balance AS
+        (
+            SELECT account.AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) CurrentBalance
+            FROM Subject.tbAccount account
+                JOIN assets ON account.AccountCode = assets.AccountCode
+                JOIN Cash.tbPayment payment ON account.AccountCode = payment.AccountCode
+            WHERE payment.PaymentStatusCode = 1
+            GROUP BY account.AccountCode
+        )
+        UPDATE account
+        SET CurrentBalance = balance.CurrentBalance + OpeningBalance
+        FROM Subject.tbAccount account
+            JOIN balance ON account.AccountCode = balance.AccountCode;
+
+        IF EXISTS
+        (
+            SELECT 1
+            FROM inserted i
+                JOIN Subject.tbAccount a ON a.AccountCode = i.AccountCode
+            WHERE i.PaymentStatusCode = 1
+              AND a.AccountTypeCode = 2
+              AND
+              (
+                    (a.BalanceConstraintCode = 1 AND a.CurrentBalance < 0)
+                 OR (a.BalanceConstraintCode = 2 AND a.CurrentBalance > 0)
+              )
+        )
+        BEGIN
+            RAISERROR('Balance constraint violation on asset account.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+
+    END TRY
+    BEGIN CATCH
+        EXEC App.proc_ErrorLog;
+    END CATCH
 GO
+
 CREATE TRIGGER Cash.Cash_tbPayment_TriggerUpdate
 ON Cash.tbPayment
 FOR UPDATE
 AS
-	SET NOCOUNT ON;
-	BEGIN TRY
-		UPDATE Cash.tbPayment
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
-		FROM Cash.tbPayment INNER JOIN inserted AS i ON tbPayment.PaymentCode = i.PaymentCode;
+    SET NOCOUNT ON;
+    BEGIN TRY
 
-		IF UPDATE(PaidInValue) OR UPDATE(PaidOutValue)
-		BEGIN
-			IF EXISTS (SELECT * FROM inserted i
-					JOIN Subject.tbAccount account ON i.AccountCode = account.AccountCode AND account.AccountTypeCode = 0
-				WHERE i.PaymentStatusCode = 1)
-			BEGIN
-				DECLARE @SubjectCode NVARCHAR(10)
-				DECLARE Subject CURSOR LOCAL FOR 
-					SELECT i.SubjectCode 
-					FROM inserted i
-						JOIN Subject.tbAccount account ON i.AccountCode = account.AccountCode AND account.AccountTypeCode = 0
-					WHERE i.PaymentStatusCode = 1
+        ;WITH namespace_candidates AS
+        (
+            SELECT
+                payment.PaymentCode,
+                payment.SubjectCode,
+                payment.ParentSubjectCode,
+                ParentCount = (
+                    SELECT COUNT(*)
+                    FROM Subject.tbNamespace tbNamespace
+                    WHERE tbNamespace.ChildSubjectCode = payment.SubjectCode
+                ),
+                SingleParentSubjectCode = (
+                    SELECT MIN(tbNamespace.ParentSubjectCode)
+                    FROM Subject.tbNamespace tbNamespace
+                    WHERE tbNamespace.ChildSubjectCode = payment.SubjectCode
+                )
+            FROM Cash.tbPayment payment
+                JOIN inserted i ON payment.PaymentCode = i.PaymentCode
+        )
+        UPDATE payment
+        SET ParentSubjectCode = namespace_candidates.SingleParentSubjectCode
+        FROM Cash.tbPayment payment
+            JOIN namespace_candidates ON payment.PaymentCode = namespace_candidates.PaymentCode
+        WHERE namespace_candidates.ParentSubjectCode IS NULL
+          AND namespace_candidates.ParentCount = 1;
 
-				OPEN Subject
-				FETCH NEXT FROM Subject INTO @SubjectCode
-				WHILE (@@FETCH_STATUS = 0)
-					BEGIN		
-					EXEC Subject.proc_Rebuild @SubjectCode
-					FETCH NEXT FROM Subject INTO @SubjectCode
-				END
+        IF EXISTS
+        (
+            SELECT 1
+            FROM Cash.tbPayment payment
+                JOIN inserted i ON payment.PaymentCode = i.PaymentCode
+            WHERE payment.ParentSubjectCode IS NULL
+              AND (
+                    SELECT COUNT(*)
+                    FROM Subject.tbNamespace tbNamespace
+                    WHERE tbNamespace.ChildSubjectCode = payment.SubjectCode
+                  ) > 1
+        )
+        BEGIN
+            RAISERROR('ParentSubjectCode must be selected when Subject has multiple namespace parents.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
 
-				CLOSE Subject
-				DEALLOCATE Subject
-			END
-		END
+        IF EXISTS
+        (
+            SELECT 1
+            FROM Cash.tbPayment payment
+                JOIN inserted i ON payment.PaymentCode = i.PaymentCode
+            WHERE payment.ParentSubjectCode IS NOT NULL
+              AND NOT EXISTS
+              (
+                  SELECT 1
+                  FROM Subject.tbNamespace tbNamespace
+                  WHERE tbNamespace.ChildSubjectCode = payment.SubjectCode
+                    AND tbNamespace.ParentSubjectCode = payment.ParentSubjectCode
+              )
+        )
+        BEGIN
+            RAISERROR('ParentSubjectCode must reference a valid namespace parent for the Subject.', 16, 1);
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
 
-		IF UPDATE(PaymentStatusCode) OR UPDATE(PaidInValue) OR UPDATE(PaidOutValue)
-		BEGIN
-			WITH assets AS
-			(
-				SELECT account.AccountCode FROM inserted i
-					JOIN Subject.tbAccount account ON account.AccountCode = i.AccountCode
-				WHERE AccountTypeCode = 2
-			), balance AS
-			(
-				SELECT account.AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) AS CurrentBalance
-				FROM Subject.tbAccount account
-					JOIN assets ON account.AccountCode = assets.AccountCode
-					JOIN Cash.tbPayment payment ON account.AccountCode = payment.AccountCode
-				WHERE payment.PaymentStatusCode = 1
-				GROUP BY account.AccountCode
-			)
-			UPDATE account
-			SET CurrentBalance = balance.CurrentBalance + OpeningBalance
-			FROM Subject.tbAccount account
-				JOIN balance ON account.AccountCode = balance.AccountCode;
+        UPDATE Cash.tbPayment
+        SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+        FROM Cash.tbPayment
+            INNER JOIN inserted AS i ON tbPayment.PaymentCode = i.PaymentCode;
 
-			----------------------------------------------------------------
-			-- Balance constraints (asset accounts only, posted rows only)
-			----------------------------------------------------------------
-			IF EXISTS
-			(
-				SELECT 1
-				FROM inserted i
-					JOIN Subject.tbAccount a
-						ON a.AccountCode = i.AccountCode
-				WHERE i.PaymentStatusCode = 1
-				  AND a.AccountTypeCode = 2
-				  AND
-				  (
-						(a.BalanceConstraintCode = 1 AND a.CurrentBalance < 0)  -- NoNegatives
-					 OR (a.BalanceConstraintCode = 2 AND a.CurrentBalance > 0)  -- NoPositives
-				  )
-			)
-			BEGIN
-				RAISERROR('Balance constraint violation on asset account.', 16, 1);
-				ROLLBACK TRANSACTION;
-				RETURN;
-			END
-		END
+        IF UPDATE(PaidInValue) OR UPDATE(PaidOutValue)
+        BEGIN
+            IF EXISTS
+            (
+                SELECT *
+                FROM inserted i
+                    JOIN Subject.tbAccount account ON i.AccountCode = account.AccountCode AND account.AccountTypeCode = 0
+                WHERE i.PaymentStatusCode = 1
+            )
+            BEGIN
+                DECLARE @SubjectCode NVARCHAR(10);
 
-	END TRY
-	BEGIN CATCH
-		EXEC App.proc_ErrorLog;
-	END CATCH
+                DECLARE Subject CURSOR LOCAL FOR
+                    SELECT i.SubjectCode
+                    FROM inserted i
+                        JOIN Subject.tbAccount account ON i.AccountCode = account.AccountCode AND account.AccountTypeCode = 0
+                    WHERE i.PaymentStatusCode = 1;
+
+                OPEN Subject;
+                FETCH NEXT FROM Subject INTO @SubjectCode;
+                WHILE (@@FETCH_STATUS = 0)
+                BEGIN
+                    EXEC Subject.proc_Rebuild @SubjectCode;
+                    FETCH NEXT FROM Subject INTO @SubjectCode;
+                END
+
+                CLOSE Subject;
+                DEALLOCATE Subject;
+            END
+        END
+
+        IF UPDATE(PaymentStatusCode) OR UPDATE(PaidInValue) OR UPDATE(PaidOutValue)
+        BEGIN
+            WITH assets AS
+            (
+                SELECT account.AccountCode
+                FROM inserted i
+                    JOIN Subject.tbAccount account ON account.AccountCode = i.AccountCode
+                WHERE AccountTypeCode = 2
+            ),
+            balance AS
+            (
+                SELECT account.AccountCode, SUM(PaidInValue + (PaidOutValue * -1)) AS CurrentBalance
+                FROM Subject.tbAccount account
+                    JOIN assets ON account.AccountCode = assets.AccountCode
+                    JOIN Cash.tbPayment payment ON account.AccountCode = payment.AccountCode
+                WHERE payment.PaymentStatusCode = 1
+                GROUP BY account.AccountCode
+            )
+            UPDATE account
+            SET CurrentBalance = balance.CurrentBalance + OpeningBalance
+            FROM Subject.tbAccount account
+                JOIN balance ON account.AccountCode = balance.AccountCode;
+
+            IF EXISTS
+            (
+                SELECT 1
+                FROM inserted i
+                    JOIN Subject.tbAccount a ON a.AccountCode = i.AccountCode
+                WHERE i.PaymentStatusCode = 1
+                  AND a.AccountTypeCode = 2
+                  AND
+                  (
+                        (a.BalanceConstraintCode = 1 AND a.CurrentBalance < 0)
+                     OR (a.BalanceConstraintCode = 2 AND a.CurrentBalance > 0)
+                  )
+            )
+            BEGIN
+                RAISERROR('Balance constraint violation on asset account.', 16, 1);
+                ROLLBACK TRANSACTION;
+                RETURN;
+            END
+        END
+
+    END TRY
+    BEGIN CATCH
+        EXEC App.proc_ErrorLog;
+    END CATCH
 GO

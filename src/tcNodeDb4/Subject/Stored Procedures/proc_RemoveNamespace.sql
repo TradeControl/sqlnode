@@ -16,12 +16,15 @@ BEGIN TRY
         @InvoiceCount int = 0,
         @PaymentCount int = 0,
         @ProjectCount int = 0,
-        @RemovedWasDefault bit = 0;
+        @RemovedWasDefault bit = 0,
+        @IsRootDelete bit = 0;
 
-    IF NULLIF(LTRIM(RTRIM(@ParentSubjectCode)), N'') IS NULL
-       OR NULLIF(LTRIM(RTRIM(@ChildSubjectCode)), N'') IS NULL
+    SET @ParentSubjectCode = NULLIF(LTRIM(RTRIM(@ParentSubjectCode)), N'');
+    SET @ChildSubjectCode = NULLIF(LTRIM(RTRIM(@ChildSubjectCode)), N'');
+
+    IF @ChildSubjectCode IS NULL
     BEGIN
-        SET @Message = N'ParentSubjectCode and ChildSubjectCode are required.';
+        SET @Message = N'ChildSubjectCode is required.';
         SELECT
             @ActionCode AS ActionCode,
             @CanProceed AS CanProceed,
@@ -34,88 +37,38 @@ BEGIN TRY
         RETURN;
     END
 
-    IF NOT EXISTS
-    (
-        SELECT 1
-        FROM Subject.tbNamespace
-        WHERE ParentSubjectCode = @ParentSubjectCode
-          AND ChildSubjectCode = @ChildSubjectCode
-    )
-    BEGIN
-        SET @Message = N'The selected namespace relationship was not found.';
-        SELECT
-            @ActionCode AS ActionCode,
-            @CanProceed AS CanProceed,
-            @Message AS Message,
-            @HasOtherParents AS HasOtherParents,
-            @AffectedSubjectCount AS AffectedSubjectCount,
-            @InvoiceCount AS InvoiceCount,
-            @PaymentCount AS PaymentCount,
-            @ProjectCount AS ProjectCount;
-        RETURN;
-    END
+    SET @IsRootDelete = CASE WHEN @ParentSubjectCode IS NULL THEN 1 ELSE 0 END;
 
-    IF EXISTS
-    (
-        SELECT 1
-        FROM Subject.tbNamespace
-        WHERE ChildSubjectCode = @ChildSubjectCode
-          AND ParentSubjectCode <> @ParentSubjectCode
-    )
+    IF @IsRootDelete = 1
     BEGIN
-        SET @ActionCode = 1;
-        SET @CanProceed = 1;
-        SET @HasOtherParents = 1;
-        SET @AffectedSubjectCount = 1;
-    END
-    ELSE
-    BEGIN
-        DECLARE @DetachedClosure TABLE
+        IF NOT EXISTS
         (
-            SubjectCode nvarchar(50) NOT NULL PRIMARY KEY
-        );
-
-        ;WITH Subtree AS
-        (
-            SELECT @ChildSubjectCode AS SubjectCode
-
-            UNION ALL
-
-            SELECT n.ChildSubjectCode
-            FROM Subject.tbNamespace AS n
-            INNER JOIN Subtree AS s
-                ON n.ParentSubjectCode = s.SubjectCode
+            SELECT 1
+            FROM Subject.tbSubject
+            WHERE SubjectCode = @ChildSubjectCode
         )
-        INSERT INTO @DetachedClosure (SubjectCode)
-        SELECT SubjectCode
-        FROM Subtree
-        GROUP BY SubjectCode
-        OPTION (MAXRECURSION 32767);
-
-        SELECT @AffectedSubjectCount = COUNT(*)
-        FROM @DetachedClosure;
+        BEGIN
+            SET @Message = N'The selected Subject was not found.';
+            SELECT
+                @ActionCode AS ActionCode,
+                @CanProceed AS CanProceed,
+                @Message AS Message,
+                @HasOtherParents AS HasOtherParents,
+                @AffectedSubjectCount AS AffectedSubjectCount,
+                @InvoiceCount AS InvoiceCount,
+                @PaymentCount AS PaymentCount,
+                @ProjectCount AS ProjectCount;
+            RETURN;
+        END
 
         IF EXISTS
         (
             SELECT 1
-            FROM Subject.tbNamespace AS n
-            INNER JOIN @DetachedClosure AS c
-                ON c.SubjectCode = n.ChildSubjectCode
-            WHERE NOT EXISTS
-            (
-                SELECT 1
-                FROM @DetachedClosure AS p
-                WHERE p.SubjectCode = n.ParentSubjectCode
-            )
-              AND NOT
-              (
-                  n.ParentSubjectCode = @ParentSubjectCode
-                  AND n.ChildSubjectCode = @ChildSubjectCode
-              )
+            FROM Subject.tbNamespace
+            WHERE ChildSubjectCode = @ChildSubjectCode
         )
         BEGIN
-            SET @Message = N'The detached closure still has namespace links outside the selected branch and cannot be deleted by this operation.';
-
+            SET @Message = N'The selected Subject is not a root namespace node.';
             SELECT
                 @ActionCode AS ActionCode,
                 @CanProceed AS CanProceed,
@@ -127,30 +80,18 @@ BEGIN TRY
                 @ProjectCount AS ProjectCount;
             RETURN;
         END
-
-        SELECT @InvoiceCount = COUNT(*)
-        FROM Invoice.tbInvoice AS i
-        INNER JOIN @DetachedClosure AS c
-            ON c.SubjectCode = i.SubjectCode;
-
-        SELECT @PaymentCount = COUNT(*)
-        FROM Cash.tbPayment AS p
-        INNER JOIN @DetachedClosure AS c
-            ON c.SubjectCode = p.SubjectCode;
-
-        SELECT @ProjectCount = COUNT(*)
-        FROM Project.tbProject AS p
-        INNER JOIN @DetachedClosure AS c
-            ON c.SubjectCode = p.SubjectCode;
-
-        IF (@InvoiceCount + @PaymentCount + @ProjectCount) > 0
+    END
+    ELSE
+    BEGIN
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM Subject.tbNamespace
+            WHERE ParentSubjectCode = @ParentSubjectCode
+              AND ChildSubjectCode = @ChildSubjectCode
+        )
         BEGIN
-            SET @Message = CONCAT(
-                N'The detached closure contains transactions and cannot be deleted. ',
-                N'Invoices: ', @InvoiceCount, N', ',
-                N'Payments: ', @PaymentCount, N', ',
-                N'Projects: ', @ProjectCount, N'.');
-
+            SET @Message = N'The selected namespace relationship was not found.';
             SELECT
                 @ActionCode AS ActionCode,
                 @CanProceed AS CanProceed,
@@ -163,34 +104,19 @@ BEGIN TRY
             RETURN;
         END
 
-        SET @ActionCode = 2;
-        SET @CanProceed = 1;
-
-        BEGIN TRANSACTION;
-
-        DELETE s
-        FROM Subject.tbSubject AS s
-        INNER JOIN @DetachedClosure AS c
-            ON c.SubjectCode = s.SubjectCode;
-
-        COMMIT TRANSACTION;
-
-        SET @Message = CASE
-            WHEN @AffectedSubjectCount = 1
-                THEN N'The detached Subject was deleted.'
-            ELSE CONCAT(N'The detached closure of ', @AffectedSubjectCount, N' Subjects was deleted.')
-        END;
-
-        SELECT
-            @ActionCode AS ActionCode,
-            @CanProceed AS CanProceed,
-            @Message AS Message,
-            @HasOtherParents AS HasOtherParents,
-            @AffectedSubjectCount AS AffectedSubjectCount,
-            @InvoiceCount AS InvoiceCount,
-            @PaymentCount AS PaymentCount,
-            @ProjectCount AS ProjectCount;
-        RETURN;
+        IF EXISTS
+        (
+            SELECT 1
+            FROM Subject.tbNamespace
+            WHERE ChildSubjectCode = @ChildSubjectCode
+              AND ParentSubjectCode <> @ParentSubjectCode
+        )
+        BEGIN
+            SET @ActionCode = 1;
+            SET @CanProceed = 1;
+            SET @HasOtherParents = 1;
+            SET @AffectedSubjectCount = 1;
+        END
     END
 
     IF @ActionCode = 1
@@ -241,6 +167,125 @@ BEGIN TRY
             @ProjectCount AS ProjectCount;
         RETURN;
     END
+
+    DECLARE @DetachedClosure TABLE
+    (
+        SubjectCode nvarchar(50) NOT NULL PRIMARY KEY
+    );
+
+    ;WITH Subtree AS
+    (
+        SELECT @ChildSubjectCode AS SubjectCode
+
+        UNION ALL
+
+        SELECT n.ChildSubjectCode
+        FROM Subject.tbNamespace AS n
+        INNER JOIN Subtree AS s
+            ON n.ParentSubjectCode = s.SubjectCode
+    )
+    INSERT INTO @DetachedClosure (SubjectCode)
+    SELECT SubjectCode
+    FROM Subtree
+    GROUP BY SubjectCode
+    OPTION (MAXRECURSION 32767);
+
+    SELECT @AffectedSubjectCount = COUNT(*)
+    FROM @DetachedClosure;
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM Subject.tbNamespace AS n
+        INNER JOIN @DetachedClosure AS c
+            ON c.SubjectCode = n.ChildSubjectCode
+        WHERE NOT EXISTS
+        (
+            SELECT 1
+            FROM @DetachedClosure AS p
+            WHERE p.SubjectCode = n.ParentSubjectCode
+        )
+          AND
+          (
+              @IsRootDelete = 1
+              OR NOT
+              (
+                  n.ParentSubjectCode = @ParentSubjectCode
+                  AND n.ChildSubjectCode = @ChildSubjectCode
+              )
+          )
+    )
+    BEGIN
+        SET @Message = N'The detached closure still has namespace links outside the selected branch and cannot be deleted by this operation.';
+
+        SELECT
+            @ActionCode AS ActionCode,
+            @CanProceed AS CanProceed,
+            @Message AS Message,
+            @HasOtherParents AS HasOtherParents,
+            @AffectedSubjectCount AS AffectedSubjectCount,
+            @InvoiceCount AS InvoiceCount,
+            @PaymentCount AS PaymentCount,
+            @ProjectCount AS ProjectCount;
+        RETURN;
+    END
+
+    SELECT @InvoiceCount = COUNT(*)
+    FROM Invoice.tbInvoice AS i
+    INNER JOIN @DetachedClosure AS c
+        ON c.SubjectCode = i.SubjectCode;
+
+    SELECT @PaymentCount = COUNT(*)
+    FROM Cash.tbPayment AS p
+    INNER JOIN @DetachedClosure AS c
+        ON c.SubjectCode = p.SubjectCode;
+
+    SELECT @ProjectCount = COUNT(*)
+    FROM Project.tbProject AS p
+    INNER JOIN @DetachedClosure AS c
+        ON c.SubjectCode = p.SubjectCode;
+
+    IF (@InvoiceCount + @PaymentCount + @ProjectCount) > 0
+    BEGIN
+        SET @Message = CONCAT(
+            N'The detached closure contains transactions and cannot be deleted. ',
+            N'Invoices: ', @InvoiceCount, N', ',
+            N'Payments: ', @PaymentCount, N', ',
+            N'Projects: ', @ProjectCount, N'.');
+
+        SELECT
+            @ActionCode AS ActionCode,
+            @CanProceed AS CanProceed,
+            @Message AS Message,
+            @HasOtherParents AS HasOtherParents,
+            @AffectedSubjectCount AS AffectedSubjectCount,
+            @InvoiceCount AS InvoiceCount,
+            @PaymentCount AS PaymentCount,
+            @ProjectCount AS ProjectCount;
+        RETURN;
+    END
+
+    SET @ActionCode = 2;
+    SET @CanProceed = 1;
+
+    BEGIN TRANSACTION;
+
+    DELETE s
+    FROM Subject.tbSubject AS s
+    INNER JOIN @DetachedClosure AS c
+        ON c.SubjectCode = s.SubjectCode;
+
+    COMMIT TRANSACTION;
+
+    SET @Message = CASE
+        WHEN @IsRootDelete = 1 AND @AffectedSubjectCount = 1
+            THEN N'The root Subject was deleted.'
+        WHEN @IsRootDelete = 1
+            THEN CONCAT(N'The root closure of ', @AffectedSubjectCount, N' Subjects was deleted.')
+        WHEN @AffectedSubjectCount = 1
+            THEN N'The detached Subject was deleted.'
+        ELSE CONCAT(N'The detached closure of ', @AffectedSubjectCount, N' Subjects was deleted.')
+    END;
 
     SELECT
         @ActionCode AS ActionCode,
