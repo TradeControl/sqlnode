@@ -1,12 +1,30 @@
-﻿CREATE   VIEW Subject.vwCurrentBalance
+CREATE VIEW Subject.vwCurrentBalance
 AS
-	WITH current_balance AS
-	(
-		SELECT SubjectCode, MAX(RowNumber) CurrentBalanceRow
-		FROM Subject.vwStatement
-		GROUP BY SubjectCode
-	)
-	SELECT Subject_statement.SubjectCode, Subject_statement.Balance
-	FROM Subject.vwStatement Subject_statement
-		JOIN current_balance ON Subject_statement.SubjectCode = current_balance.SubjectCode 
-			AND Subject_statement.RowNumber = current_balance.CurrentBalanceRow
+    WITH current_balance AS
+    (
+        SELECT
+            SubjectCode,
+            ParentSubjectCode,
+            MAX(RowNumber) AS CurrentBalanceRow
+        FROM Subject.vwStatement
+        GROUP BY
+            SubjectCode,
+            ParentSubjectCode
+    )
+    SELECT
+        statement.SubjectCode,
+        statement.ParentSubjectCode,
+        statement.Balance
+    FROM Subject.vwStatement AS statement
+        JOIN current_balance
+            ON statement.SubjectCode = current_balance.SubjectCode
+           AND
+           (
+               statement.ParentSubjectCode = current_balance.ParentSubjectCode
+               OR
+               (
+                   statement.ParentSubjectCode IS NULL
+                   AND current_balance.ParentSubjectCode IS NULL
+               )
+           )
+           AND statement.RowNumber = current_balance.CurrentBalanceRow;

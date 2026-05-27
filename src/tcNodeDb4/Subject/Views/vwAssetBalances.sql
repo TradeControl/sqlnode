@@ -1,76 +1,202 @@
-﻿CREATE VIEW Subject.vwAssetBalances
+CREATE VIEW Subject.vwAssetBalances
 AS
-	WITH financial_periods AS
-	(
-		SELECT pd.StartOn
-		FROM App.tbYear yr
-			JOIN App.tbYearPeriod pd ON yr.YearNumber = pd.YearNumber
-		WHERE (yr.CashStatusCode BETWEEN 1 AND 2)
-	), Subject_periods AS
-	(
-		SELECT SubjectCode, StartOn
-		FROM Subject.tbSubject Subjects
-			CROSS JOIN financial_periods	
-	)
-	, Subject_statements AS
-	(
-		SELECT StartOn, 
-			SubjectCode, os.RowNumber, TransactedOn, Balance,
-			MAX(RowNumber) OVER (PARTITION BY SubjectCode, StartOn ORDER BY StartOn) LastRowNumber 
-		FROM Subject.vwAssetStatement os
-		WHERE TransactedOn >= (SELECT StartOn FROM Cash.vwBalanceStartOn)
-	)
-	, Subject_balances AS
-	(
-		SELECT SubjectCode, StartOn, Balance
-		FROM Subject_statements
-		WHERE RowNumber = LastRowNumber
-	)
-	, Subject_ordered AS
-	(
-		SELECT ROW_NUMBER() OVER (ORDER BY Subject_periods.SubjectCode, Subject_periods.StartOn) EntryNumber,
-			Subject_periods.SubjectCode, Subject_periods.StartOn, 
-			COALESCE(Balance, 0) Balance,
-			CASE WHEN Subject_balances.StartOn IS NULL THEN 0 ELSE 1 END IsEntry
-		FROM Subject_periods
-			LEFT OUTER JOIN Subject_balances 
-				ON Subject_periods.SubjectCode = Subject_balances.SubjectCode AND Subject_periods.StartOn = Subject_balances.StartOn
-	), Subject_ranked AS
-	(
-		SELECT *,
-			RANK() OVER (PARTITION BY SubjectCode, IsEntry ORDER BY EntryNumber) RNK
-		FROM Subject_ordered
-	), Subject_grouped AS
-	(
-		SELECT EntryNumber, SubjectCode, StartOn, IsEntry, Balance,
-			MAX(CASE IsEntry WHEN 0 THEN 0 ELSE RNK END) OVER (PARTITION BY SubjectCode ORDER BY EntryNumber) RNK
-		FROM Subject_ranked
-	)
-	, Subject_projected AS
-	(
-		SELECT EntryNumber, SubjectCode, StartOn, IsEntry,
-			CASE IsEntry WHEN 0 THEN
-				MAX(Balance) OVER (PARTITION BY SubjectCode, RNK ORDER BY EntryNumber) +
-				MIN(Balance) OVER (PARTITION BY SubjectCode, RNK ORDER BY EntryNumber) 
-			ELSE
-				Balance
-			END
-			AS Balance
-		FROM Subject_grouped	
-	), Subject_entries AS
-	(
-		SELECT SubjectCode, EntryNumber, StartOn, Balance * -1 AS Balance,
-			CASE 
-				WHEN Balance < 0 THEN 0 
-				ELSE 1
-			END AS AssetTypeCode, 
-			CASE WHEN Balance <> 0 THEN 1 ELSE IsEntry END AS IsEntry
-		FROM Subject_projected
-	)
-	SELECT SubjectCode, StartOn, Balance, 
-		CASE 
-			WHEN Balance <> 0 THEN AssetTypeCode 
-			ELSE
-				COALESCE(LAG(AssetTypeCode) OVER (PARTITION BY SubjectCode ORDER BY EntryNumber), 0)
-		END AssetTypeCode
-	FROM Subject_entries WHERE IsEntry = 1;
+    WITH financial_periods AS
+    (
+        SELECT period.StartOn
+        FROM App.tbYear AS year
+            INNER JOIN App.tbYearPeriod AS period
+                ON year.YearNumber = period.YearNumber
+        WHERE year.CashStatusCode BETWEEN 1 AND 2
+    ),
+    subject_instances AS
+    (
+        SELECT
+            ns.ChildSubjectCode AS SubjectCode,
+            ns.ParentSubjectCode
+        FROM Subject.tbNamespace AS ns
+
+        UNION
+
+        SELECT
+            subject.SubjectCode,
+            CAST(NULL AS nvarchar(50)) AS ParentSubjectCode
+        FROM Subject.tbSubject AS subject
+        WHERE NOT EXISTS
+        (
+            SELECT 1
+            FROM Subject.tbNamespace AS ns
+            WHERE ns.ChildSubjectCode = subject.SubjectCode
+        )
+    ),
+    subject_periods AS
+    (
+        SELECT
+            instance.SubjectCode,
+            instance.ParentSubjectCode,
+            period.StartOn
+        FROM subject_instances AS instance
+            CROSS JOIN financial_periods AS period
+    ),
+    subject_statements AS
+    (
+        SELECT
+            statement.StartOn,
+            statement.SubjectCode,
+            statement.ParentSubjectCode,
+            statement.RowNumber,
+            statement.TransactedOn,
+            statement.Balance,
+            MAX(statement.RowNumber) OVER
+            (
+                PARTITION BY
+                    statement.SubjectCode,
+                    statement.ParentSubjectCode,
+                    statement.StartOn
+                ORDER BY statement.StartOn
+            ) AS LastRowNumber
+        FROM Subject.vwAssetStatement AS statement
+        WHERE statement.TransactedOn >= (SELECT StartOn FROM Cash.vwBalanceStartOn)
+    ),
+    subject_balances AS
+    (
+        SELECT
+            SubjectCode,
+            ParentSubjectCode,
+            StartOn,
+            Balance
+        FROM subject_statements
+        WHERE RowNumber = LastRowNumber
+    ),
+    subject_ordered AS
+    (
+        SELECT
+            ROW_NUMBER() OVER
+            (
+                ORDER BY
+                    period.SubjectCode,
+                    period.ParentSubjectCode,
+                    period.StartOn
+            ) AS EntryNumber,
+            period.SubjectCode,
+            period.ParentSubjectCode,
+            period.StartOn,
+            COALESCE(balance.Balance, 0) AS Balance,
+            CASE
+                WHEN balance.StartOn IS NULL THEN 0
+                ELSE 1
+            END AS IsEntry
+        FROM subject_periods AS period
+            LEFT OUTER JOIN subject_balances AS balance
+                ON period.SubjectCode = balance.SubjectCode
+               AND
+               (
+                   period.ParentSubjectCode = balance.ParentSubjectCode
+                   OR
+                   (
+                       period.ParentSubjectCode IS NULL
+                       AND balance.ParentSubjectCode IS NULL
+                   )
+               )
+               AND period.StartOn = balance.StartOn
+    ),
+    subject_ranked AS
+    (
+        SELECT
+            *,
+            RANK() OVER
+            (
+                PARTITION BY
+                    SubjectCode,
+                    ParentSubjectCode,
+                    IsEntry
+                ORDER BY EntryNumber
+            ) AS RNK
+        FROM subject_ordered
+    ),
+    subject_grouped AS
+    (
+        SELECT
+            EntryNumber,
+            SubjectCode,
+            ParentSubjectCode,
+            StartOn,
+            IsEntry,
+            Balance,
+            MAX(CASE IsEntry WHEN 0 THEN 0 ELSE RNK END) OVER
+            (
+                PARTITION BY
+                    SubjectCode,
+                    ParentSubjectCode
+                ORDER BY EntryNumber
+            ) AS RNK
+        FROM subject_ranked
+    ),
+    subject_projected AS
+    (
+        SELECT
+            EntryNumber,
+            SubjectCode,
+            ParentSubjectCode,
+            StartOn,
+            IsEntry,
+            CASE IsEntry
+                WHEN 0 THEN
+                    MAX(Balance) OVER
+                    (
+                        PARTITION BY
+                            SubjectCode,
+                            ParentSubjectCode,
+                            RNK
+                        ORDER BY EntryNumber
+                    ) +
+                    MIN(Balance) OVER
+                    (
+                        PARTITION BY
+                            SubjectCode,
+                            ParentSubjectCode,
+                            RNK
+                        ORDER BY EntryNumber
+                    )
+                ELSE Balance
+            END AS Balance
+        FROM subject_grouped
+    ),
+    subject_entries AS
+    (
+        SELECT
+            SubjectCode,
+            ParentSubjectCode,
+            EntryNumber,
+            StartOn,
+            Balance * -1 AS Balance,
+            CASE
+                WHEN Balance < 0 THEN 0
+                ELSE 1
+            END AS AssetTypeCode,
+            CASE
+                WHEN Balance <> 0 THEN 1
+                ELSE IsEntry
+            END AS IsEntry
+        FROM subject_projected
+    )
+    SELECT
+        SubjectCode,
+        ParentSubjectCode,
+        StartOn,
+        Balance,
+        CASE
+            WHEN Balance <> 0 THEN AssetTypeCode
+            ELSE COALESCE
+            (
+                LAG(AssetTypeCode) OVER
+                (
+                    PARTITION BY
+                        SubjectCode,
+                        ParentSubjectCode
+                    ORDER BY EntryNumber
+                ),
+                0
+            )
+        END AS AssetTypeCode
+    FROM subject_entries
+    WHERE IsEntry = 1;

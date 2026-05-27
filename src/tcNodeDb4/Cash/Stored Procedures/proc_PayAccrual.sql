@@ -4,16 +4,14 @@ AS
 
 	BEGIN TRY
 		
-		IF EXISTS (	SELECT        *
-					FROM            Cash.tbPayment 
-					WHERE        (PaymentStatusCode = 2) 
+		IF EXISTS (	SELECT *
+					FROM Cash.tbPayment 
+					WHERE (PaymentStatusCode = 2) 
 						AND UserId = (SELECT UserId FROM Usr.vwCredentials))
 		BEGIN
-
 			BEGIN TRANSACTION
 			EXEC Cash.proc_PaymentPostMisc @PaymentCode	
-			COMMIT TRANSACTION
-			
+			COMMIT TRANSACTION			
 		END
 
   	END TRY
