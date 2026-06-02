@@ -69,7 +69,7 @@ CREATE PROCEDURE Cash.proc_PaymentPostMisc
 
 		WITH payment AS
 		(
-			SELECT UserId, SubjectCode, PaidOn, PaidInValue, PaidOutValue,
+			SELECT UserId, SubjectCode, ParentSubjectCode, PaidOn, PaidInValue, PaidOutValue,
 					CASE TaxRate WHEN 0 THEN 0
 					ELSE
 					(
@@ -93,8 +93,8 @@ CREATE PROCEDURE Cash.proc_PaymentPostMisc
 			WHERE     (PaymentCode = @PaymentCode)
 		)
 		INSERT INTO Invoice.tbInvoice
-								 (InvoiceNumber, UserId, SubjectCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, DueOn, ExpectedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, Printed)
-		SELECT        @InvoiceNumber AS InvoiceNumber, payment.UserId, payment.SubjectCode, @InvoiceTypeCode AS InvoiceTypeCode, 3 AS InvoiceStatusCode, 
+								 (InvoiceNumber, UserId, SubjectCode, ParentSubjectCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, DueOn, ExpectedOn, InvoiceValue, TaxValue, PaidValue, PaidTaxValue, Printed)
+		SELECT        @InvoiceNumber AS InvoiceNumber, payment.UserId, payment.SubjectCode, payment.ParentSubjectCode, @InvoiceTypeCode AS InvoiceTypeCode, 3 AS InvoiceStatusCode, 
 								payment.PaidOn, payment.PaidOn AS DueOn, payment.PaidOn AS ExpectedOn,
 								CASE WHEN PaidInValue > 0 THEN PaidInValue - TaxInValue
 									WHEN PaidOutValue > 0 THEN PaidOutValue - TaxOutValue

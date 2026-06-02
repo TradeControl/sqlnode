@@ -715,6 +715,10 @@
     <Build Include="Subject\Stored Procedures\proc_AddParentPreview.sql" />
     <Build Include="Subject\Stored Procedures\proc_AddParent.sql" />
     <Build Include="Cash\Stored Procedures\proc_AssetReversal.sql" />
+    <Build Include="Subject\Functions\fnNamespaceClosure.sql" />
+    <Build Include="Subject\Functions\fnStatementDag.sql" />
+    <Build Include="Subject\Functions\fnInvoiceDag.sql" />
+    <Build Include="Subject\Functions\fnPaymentDag.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />
@@ -725,6 +729,8 @@
     <None Include="Scripts\PROOF_CashStatementReconciliation.sql" />
     <None Include="Scripts\MTDSoleTraderMappingEnquiry.sql" />
     <None Include="Scripts\NamespaceSelector_testscript.sql" />
+    <None Include="Scripts\EXEC_PaymentPost.sql" />
+    <None Include="Subject\Stored Procedures\proc_AddRoot.sql" />
   </ItemGroup>
   <ItemGroup>
     <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\150\SqlSchemas\master.dacpac">
