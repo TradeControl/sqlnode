@@ -1,4 +1,4 @@
-CREATE PROCEDURE [App].[proc_NodeBusinessInit]
+﻿CREATE PROCEDURE [App].[proc_NodeBusinessInit]
 (
 	@SubjectCode NVARCHAR(50),
 	@BusinessName NVARCHAR(255),
@@ -57,9 +57,9 @@ BEGIN TRY
 	INSERT INTO App.tbCalendar (CalendarCode, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday)
 	VALUES (@CalendarCode, 1, 1, 1, 1, 1, 0, 0);
 		
-	INSERT INTO Usr.tbUser (UserId, UserName, LogonName, IsAdministrator, IsEnabled, CalendarCode, EmailAddress, PhoneNumber)
+	INSERT INTO Usr.tbUser (UserId, UserName, LogonName, IsAdministrator, IsEnabled, CalendarCode, EmailAddress, PhoneNumber, ThemeCode)
 	VALUES (CONCAT(LEFT(@FullName, 1), SUBSTRING(@FullName, CHARINDEX(' ', @FullName) + 1, 1)), @FullName, 
-		SUSER_NAME() , 1, 1, @CalendarCode, @UserEmailAddress, @PhoneNumber);
+		SUSER_NAME() , 1, 1, @CalendarCode, @UserEmailAddress, @PhoneNumber, 'ORANGE');
 
 	IF NOT EXISTS (SELECT 1 FROM Web.tbTemplate WHERE TemplateFileName = 'support_request.html')
 		INSERT INTO Web.tbTemplate (TemplateFileName) VALUES ('support_request.html');

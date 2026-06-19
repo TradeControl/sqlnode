@@ -719,6 +719,7 @@
     <Build Include="Subject\Functions\fnStatementDag.sql" />
     <Build Include="Subject\Functions\fnInvoiceDag.sql" />
     <Build Include="Subject\Functions\fnPaymentDag.sql" />
+    <Build Include="Usr\Tables\tbTheme.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />

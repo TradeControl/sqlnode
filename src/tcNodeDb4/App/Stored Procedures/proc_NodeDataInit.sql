@@ -1,4 +1,4 @@
-CREATE PROCEDURE App.proc_NodeDataInit
+﻿CREATE PROCEDURE App.proc_NodeDataInit
 AS
 SET NOCOUNT, XACT_ABORT ON;
 BEGIN TRY
@@ -634,6 +634,21 @@ BEGIN TRY
             (0, 'Unknown'),
             (1, 'Valid'),
             (2, 'Invalid');
+
+    IF NOT EXISTS (SELECT * FROM Usr.tbTheme)
+        INSERT INTO Usr.tbTheme
+        (
+            ThemeCode,
+            ThemeName,
+            CssFile
+        )
+        VALUES
+        ('ORANGE', 'Orange', 'theme-orange.css'),
+        ('BLUE',   'Blue',   'theme-blue.css'),
+        ('GREEN',  'Green',  'theme-green.css'),
+        ('DARK',   'Dark',   'theme-dark.css'),
+        ('PINK', 'Pink', 'theme-pink.css'),
+        ('RED', 'Red', 'theme-red.css');
 
 	IF NOT EXISTS(SELECT * FROM App.tbText)
 	BEGIN
