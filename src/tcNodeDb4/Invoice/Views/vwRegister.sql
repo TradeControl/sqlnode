@@ -1,22 +1,73 @@
-﻿CREATE VIEW Invoice.vwRegister
+CREATE VIEW Invoice.vwRegister
 AS
-	WITH register AS 
-	(
-		SELECT       (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= Invoice.tbInvoice.InvoicedOn) ORDER BY p.StartOn DESC) AS StartOn,  
-				Invoice.tbInvoice.InvoiceNumber, Invoice.tbInvoice.SubjectCode, Invoice.tbInvoice.InvoiceTypeCode, Invoice.tbInvoice.InvoiceStatusCode, 
-								 Invoice.tbInvoice.InvoicedOn, Invoice.tbInvoice.DueOn, Invoice.tbInvoice.ExpectedOn, CASE WHEN Invoice.tbType.CashPolarityCode = 0 THEN Invoice.tbInvoice.InvoiceValue * - 1 ELSE Invoice.tbInvoice.InvoiceValue END AS InvoiceValue, 
-								 CASE WHEN Invoice.tbType.CashPolarityCode = 0 THEN Invoice.tbInvoice.TaxValue * - 1 ELSE Invoice.tbInvoice.TaxValue END AS TaxValue, 
-								 CASE WHEN Invoice.tbType.CashPolarityCode = 0 THEN Invoice.tbInvoice.PaidValue * - 1 ELSE Invoice.tbInvoice.PaidValue END AS PaidValue, 
-								 CASE WHEN Invoice.tbType.CashPolarityCode = 0 THEN Invoice.tbInvoice.PaidTaxValue * - 1 ELSE Invoice.tbInvoice.PaidTaxValue END AS PaidTaxValue, Invoice.tbInvoice.PaymentTerms, Invoice.tbInvoice.Notes, 
-								 Invoice.tbInvoice.Printed, Subject.tbSubject.SubjectName, Usr.tbUser.UserName, Invoice.tbInvoice.UserId, Invoice.tbStatus.InvoiceStatus, Invoice.tbType.CashPolarityCode, Invoice.tbType.InvoiceType
-		FROM            Invoice.tbInvoice INNER JOIN
-								 Subject.tbSubject ON Invoice.tbInvoice.SubjectCode = Subject.tbSubject.SubjectCode INNER JOIN
-								 Invoice.tbType ON Invoice.tbInvoice.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode INNER JOIN
-								 Invoice.tbStatus ON Invoice.tbInvoice.InvoiceStatusCode = Invoice.tbStatus.InvoiceStatusCode INNER JOIN
-								 Usr.tbUser ON Invoice.tbInvoice.UserId = Usr.tbUser.UserId
-	)
-	SELECT COALESCE(StartOn, CAST(getdate() as date)) StartOn, InvoiceNumber, SubjectCode, InvoiceTypeCode, InvoiceStatusCode, InvoicedOn, DueOn, ExpectedOn,
-		CAST(InvoiceValue as float) InvoiceValue, CAST(TaxValue as float) TaxValue, CAST((InvoiceValue + TaxValue) as float) TotalInvoiceValue, 
-		CAST(PaidValue as float) PaidValue, CAST(PaidTaxValue as float) PaidTaxValue, CAST((PaidValue + PaidTaxValue) as float) TotalPaidValue,
-		PaymentTerms, Notes, Printed, SubjectName, UserName, UserId, InvoiceStatus, CashPolarityCode, InvoiceType
-	FROM register;
+WITH register AS (
+    SELECT
+        -- Period start
+        (
+            SELECT TOP (1) p.StartOn
+            FROM App.tbYearPeriod p
+            WHERE p.StartOn <= i.InvoicedOn
+            ORDER BY p.StartOn DESC
+        ) AS StartOn,
+
+        -- Keys
+        i.InvoiceNumber,
+        i.SubjectCode,
+        i.InvoiceTypeCode,
+        i.InvoiceStatusCode,
+
+        -- Dates
+        i.InvoicedOn,
+        i.DueOn,
+        i.ExpectedOn,
+
+        -- Polarity-adjusted values
+        CASE WHEN t.CashPolarityCode = 0 THEN i.InvoiceValue * -1 ELSE i.InvoiceValue END AS InvoiceValue,
+        CASE WHEN t.CashPolarityCode = 0 THEN i.TaxValue     * -1 ELSE i.TaxValue     END AS TaxValue,
+        CASE WHEN t.CashPolarityCode = 0 THEN i.PaidValue    * -1 ELSE i.PaidValue    END AS PaidValue,
+        CASE WHEN t.CashPolarityCode = 0 THEN i.PaidTaxValue * -1 ELSE i.PaidTaxValue END AS PaidTaxValue,
+
+        -- Metadata
+        i.PaymentTerms,
+        i.Notes,
+        i.Printed,
+        s.SubjectName,
+        u.UserName,
+        i.UserId,
+        st.InvoiceStatus,
+        t.CashPolarityCode,
+        t.InvoiceType
+    FROM Invoice.tbInvoice i
+    JOIN Subject.tbSubject s ON i.SubjectCode = s.SubjectCode
+    JOIN Invoice.tbType t ON i.InvoiceTypeCode = t.InvoiceTypeCode
+    JOIN Invoice.tbStatus st ON i.InvoiceStatusCode = st.InvoiceStatusCode
+    JOIN Usr.tbUser u ON i.UserId = u.UserId
+)
+SELECT
+    COALESCE(StartOn, CAST(GETDATE() AS date)) AS StartOn,
+    InvoiceNumber,
+    SubjectCode,
+    InvoiceTypeCode,
+    InvoiceStatusCode,
+    InvoicedOn,
+    DueOn,
+    ExpectedOn,
+
+    CAST(InvoiceValue AS float) AS InvoiceValue,
+    CAST(TaxValue AS float) AS TaxValue,
+    CAST(InvoiceValue + TaxValue AS float) AS TotalInvoiceValue,
+
+    CAST(PaidValue AS float) AS PaidValue,
+    CAST(PaidTaxValue AS float) AS PaidTaxValue,
+    CAST(PaidValue + PaidTaxValue AS float) AS TotalPaidValue,
+
+    PaymentTerms,
+    Notes,
+    Printed,
+    SubjectName,
+    UserName,
+    UserId,
+    InvoiceStatus,
+    CashPolarityCode,
+    InvoiceType
+FROM register;

@@ -1,4 +1,4 @@
-CREATE VIEW Invoice.vwRegisterItems
+CREATE VIEW Invoice.vwRegisterProjects
 AS
 SELECT
     (
@@ -9,11 +9,15 @@ SELECT
     ) AS StartOn,
 
     i.InvoiceNumber,
-    it.CashCode AS ProjectCode,
+    ip.ProjectCode,
+    pr.ProjectTitle,
+    pr.ObjectCode,
+    o.ObjectDescription,
     c.CashCode,
     c.CashDescription,
-    it.TaxCode,
+    ip.TaxCode,
     tc.TaxDescription,
+
     i.SubjectCode,
     i.InvoiceTypeCode,
     i.InvoiceStatusCode,
@@ -21,10 +25,9 @@ SELECT
     i.DueOn,
     i.ExpectedOn,
 
-    CASE WHEN t.CashPolarityCode = 0 THEN it.InvoiceValue * -1 ELSE it.InvoiceValue END AS InvoiceValue,
-    CASE WHEN t.CashPolarityCode = 0 THEN it.TaxValue     * -1 ELSE it.TaxValue     END AS TaxValue,
-
-    CAST(it.ItemReference AS nvarchar(100)) AS ItemReference,
+    ip.Quantity,
+    CASE WHEN t.CashPolarityCode = 0 THEN ip.InvoiceValue * -1 ELSE ip.InvoiceValue END AS InvoiceValue,
+    CASE WHEN t.CashPolarityCode = 0 THEN ip.TaxValue     * -1 ELSE ip.TaxValue     END AS TaxValue,
 
     i.PaymentTerms,
     i.Printed,
@@ -39,7 +42,8 @@ JOIN Subject.tbSubject s ON i.SubjectCode = s.SubjectCode
 JOIN Invoice.tbType t ON i.InvoiceTypeCode = t.InvoiceTypeCode
 JOIN Invoice.tbStatus st ON i.InvoiceStatusCode = st.InvoiceStatusCode
 JOIN Usr.tbUser u ON i.UserId = u.UserId
-JOIN Invoice.tbItem it ON i.InvoiceNumber = it.InvoiceNumber
-JOIN Cash.tbCode c ON it.CashCode = c.CashCode
-LEFT JOIN App.tbTaxCode tc ON it.TaxCode = tc.TaxCode;
-
+JOIN Invoice.tbProject ip ON i.InvoiceNumber = ip.InvoiceNumber
+JOIN Cash.tbCode c ON ip.CashCode = c.CashCode
+JOIN Project.tbProject pr ON ip.ProjectCode = pr.ProjectCode
+JOIN Object.tbObject o ON pr.ObjectCode = o.ObjectCode
+LEFT JOIN App.tbTaxCode tc ON ip.TaxCode = tc.TaxCode;
