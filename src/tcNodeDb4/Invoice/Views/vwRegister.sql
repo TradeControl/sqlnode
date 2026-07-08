@@ -13,6 +13,7 @@ WITH register AS (
         -- Keys
         i.InvoiceNumber,
         i.SubjectCode,
+        i.ParentSubjectCode,
         i.InvoiceTypeCode,
         i.InvoiceStatusCode,
 
@@ -47,6 +48,7 @@ SELECT
     COALESCE(StartOn, CAST(GETDATE() AS date)) AS StartOn,
     InvoiceNumber,
     SubjectCode,
+    ParentSubjectCode,
     InvoiceTypeCode,
     InvoiceStatusCode,
     InvoicedOn,

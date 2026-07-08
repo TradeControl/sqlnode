@@ -1,11 +1,11 @@
-﻿CREATE PROCEDURE Invoice.proc_Cancel
+CREATE PROCEDURE Invoice.proc_Cancel
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 
 	BEGIN TRY
 		
 		DECLARE @UserId nvarchar(10) = (SELECT TOP 1 UserId FROM Usr.vwCredentials)
-		EXEC Invoice.proc_CancelById @UserId
+		EXEC Invoice.proc_CancelByUserId @UserId
 
   	END TRY
 	BEGIN CATCH

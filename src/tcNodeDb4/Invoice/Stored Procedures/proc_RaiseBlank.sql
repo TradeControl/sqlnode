@@ -6,6 +6,7 @@ CREATE PROCEDURE Invoice.proc_RaiseBlank
     @ParentSubjectCode nvarchar(50) = NULL
 )
 AS
+BEGIN
     SET NOCOUNT, XACT_ABORT ON;
 
     BEGIN TRY
@@ -14,7 +15,8 @@ AS
             @NextNumber int,
             @InvoiceSuffix nvarchar(4),
             @InvoicedOn datetime,
-            @ParentCount int;
+            @ParentCount int,
+            @DefaultParentCount int;
 
         SELECT @UserId = UserId
         FROM Usr.vwCredentials;
@@ -36,7 +38,22 @@ AS
             END
             ELSE IF @ParentCount > 1
             BEGIN
-                RAISERROR('A namespace must be selected for the invoice subject.', 16, 1);
+                SELECT @DefaultParentCount = COUNT(*)
+                FROM Subject.tbNamespace
+                WHERE ChildSubjectCode = @SubjectCode
+                  AND IsDefault = 1;
+
+                IF @DefaultParentCount = 1
+                BEGIN
+                    SELECT @ParentSubjectCode = ParentSubjectCode
+                    FROM Subject.tbNamespace
+                    WHERE ChildSubjectCode = @SubjectCode
+                      AND IsDefault = 1;
+                END
+                ELSE
+                BEGIN
+                    RAISERROR('A namespace must be selected for the invoice subject.', 16, 1);
+                END
             END
         END
         ELSE IF NOT EXISTS
@@ -54,7 +71,7 @@ AS
         FROM Invoice.tbType
         WHERE InvoiceTypeCode = @InvoiceTypeCode;
 
-        SELECT @InvoiceNumber = FORMAT(@NextNumber, '000000') + @InvoiceSuffix;
+        SELECT @InvoiceNumber = RIGHT(REPLICATE('0', 6) + CAST(@NextNumber AS nvarchar(20)), 6) + @InvoiceSuffix;
 
         WHILE EXISTS
         (
@@ -64,7 +81,7 @@ AS
         )
         BEGIN
             SET @NextNumber = @NextNumber + 1;
-            SET @InvoiceNumber = FORMAT(@NextNumber, '000000') + @InvoiceSuffix;
+            SET @InvoiceNumber = RIGHT(REPLICATE('0', 6) + CAST(@NextNumber AS nvarchar(20)), 6) + @InvoiceSuffix;
         END;
 
         SET @InvoicedOn = CAST(CURRENT_TIMESTAMP AS date);
@@ -105,3 +122,4 @@ AS
     BEGIN CATCH
         EXEC App.proc_ErrorLog;
     END CATCH
+END

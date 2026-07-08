@@ -19,6 +19,7 @@ SELECT
     tc.TaxDescription,
 
     i.SubjectCode,
+    i.ParentSubjectCode,
     i.InvoiceTypeCode,
     i.InvoiceStatusCode,
     i.InvoicedOn,

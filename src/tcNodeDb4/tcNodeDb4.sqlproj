@@ -508,7 +508,7 @@
     <Build Include="Object\Stored Procedures\proc_NextOperationNumber.sql" />
     <Build Include="Object\Stored Procedures\proc_NextStepNumber.sql" />
     <Build Include="Object\Stored Procedures\proc_Parent.sql" />
-    <Build Include="Invoice\Stored Procedures\proc_PostEntriesById.sql" />
+    <Build Include="Invoice\Stored Procedures\proc_PostEntriesByUserId.sql" />
     <Build Include="Object\Stored Procedures\proc_WorkFlow.sql" />
     <Build Include="Object\Stored Procedures\proc_WorkFlowMultiLevel.sql" />
     <Build Include="App\Stored Procedures\proc_AddCalDateRange.sql" />
@@ -518,7 +518,7 @@
     <Build Include="App\Stored Procedures\proc_DocDespoolAll.sql" />
     <Build Include="Cash\Stored Procedures\proc_TxInvoice.sql" />
     <Build Include="App\Stored Procedures\proc_DocDespool.sql" />
-    <Build Include="Invoice\Stored Procedures\proc_CancelById.sql" />
+    <Build Include="Invoice\Stored Procedures\proc_CancelByUserId.sql" />
     <Build Include="Cash\Stored Procedures\proc_ChangeAssign.sql" />
     <Build Include="App\Stored Procedures\proc_Initialised.sql" />
     <Build Include="Cash\Stored Procedures\proc_TaxAdjustment.sql" />
@@ -570,9 +570,9 @@
     <Build Include="Subject\Stored Procedures\proc_DefaultTaxCode.sql" />
     <Build Include="Subject\Stored Procedures\proc_Rebuild.sql" />
     <Build Include="Web\Stored Procedures\proc_ImageTag.sql" />
-    <Build Include="Invoice\Stored Procedures\proc_PostEntryById.sql" />
+    <Build Include="Invoice\Stored Procedures\proc_PostEntryByUserId.sql" />
     <Build Include="Subject\Stored Procedures\proc_Statement.sql" />
-    <Build Include="Invoice\Stored Procedures\proc_PostAccountById.sql" />
+    <Build Include="Invoice\Stored Procedures\proc_PostAccountByUserId.sql" />
     <Build Include="Project\Stored Procedures\proc_AssignToParent.sql" />
     <Build Include="Project\Stored Procedures\proc_NextCode.sql" />
     <Build Include="Project\Stored Procedures\proc_Configure.sql" />
@@ -720,6 +720,8 @@
     <Build Include="Subject\Functions\fnInvoiceDag.sql" />
     <Build Include="Subject\Functions\fnPaymentDag.sql" />
     <Build Include="Usr\Tables\tbTheme.sql" />
+    <Build Include="Invoice\Stored Procedures\proc_DefaultEntryCode.sql" />
+    <Build Include="Invoice\Stored Procedures\proc_RaiseDefaults.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />

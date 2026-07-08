@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE Invoice.proc_CancelById(@UserId nvarchar(10))
+CREATE   PROCEDURE Invoice.proc_CancelByUserId(@UserId nvarchar(10))
 AS
   	SET NOCOUNT, XACT_ABORT ON;
 

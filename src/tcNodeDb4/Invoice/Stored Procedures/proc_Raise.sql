@@ -47,8 +47,8 @@ AS
 		WHERE     (InvoiceTypeCode = @InvoiceTypeCode)
 	
 		INSERT INTO Invoice.tbInvoice
-							(InvoiceNumber, UserId, SubjectCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode, PaymentTerms)
-		SELECT     @InvoiceNumber AS InvoiceNumber, @UserId AS UserId, Project.tbProject.SubjectCode, @InvoiceTypeCode AS InvoiceTypeCode, @InvoicedOn AS InvoicedOn, 
+							(InvoiceNumber, UserId, SubjectCode, ParentSubjectCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode, PaymentTerms)
+		SELECT     @InvoiceNumber AS InvoiceNumber, @UserId AS UserId, Project.tbProject.SubjectCode, tbProject.ParentSubjectCode, @InvoiceTypeCode AS InvoiceTypeCode, @InvoicedOn AS InvoicedOn, 
 							0 AS InvoiceStatusCode, Subject.tbSubject.PaymentTerms
 		FROM         Project.tbProject INNER JOIN
 							Subject.tbSubject ON Project.tbProject.SubjectCode = Subject.tbSubject.SubjectCode
