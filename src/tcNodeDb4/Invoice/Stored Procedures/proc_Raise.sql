@@ -15,6 +15,7 @@ AS
 		, @NextNumber int
 		, @InvoiceSuffix nvarchar(4)
 		, @SubjectCode nvarchar(50)
+        , @Printed bit = CASE WHEN @InvoiceTypeCode < 2 THEN 0 ELSE 1 END;
 	
 		SELECT @UserId = UserId FROM Usr.vwCredentials
 
@@ -47,9 +48,9 @@ AS
 		WHERE     (InvoiceTypeCode = @InvoiceTypeCode)
 	
 		INSERT INTO Invoice.tbInvoice
-							(InvoiceNumber, UserId, SubjectCode, ParentSubjectCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode, PaymentTerms)
+							(InvoiceNumber, UserId, SubjectCode, ParentSubjectCode, InvoiceTypeCode, InvoicedOn, InvoiceStatusCode, PaymentTerms, Printed)
 		SELECT     @InvoiceNumber AS InvoiceNumber, @UserId AS UserId, Project.tbProject.SubjectCode, tbProject.ParentSubjectCode, @InvoiceTypeCode AS InvoiceTypeCode, @InvoicedOn AS InvoicedOn, 
-							0 AS InvoiceStatusCode, Subject.tbSubject.PaymentTerms
+							0 AS InvoiceStatusCode, Subject.tbSubject.PaymentTerms, @Printed Printed
 		FROM         Project.tbProject INNER JOIN
 							Subject.tbSubject ON Project.tbProject.SubjectCode = Subject.tbSubject.SubjectCode
 		WHERE     ( Project.tbProject.ProjectCode = @ProjectCode)

@@ -16,7 +16,8 @@ BEGIN
             @InvoiceSuffix nvarchar(4),
             @InvoicedOn datetime,
             @ParentCount int,
-            @DefaultParentCount int;
+            @DefaultParentCount int,
+            @Printed bit = CASE WHEN @InvoiceTypeCode < 2 THEN 0 ELSE 1 END;
 
         SELECT @UserId = UserId
         FROM Usr.vwCredentials;
@@ -103,7 +104,8 @@ BEGIN
             InvoiceTypeCode,
             InvoicedOn,
             InvoiceStatusCode,
-            PaymentTerms
+            PaymentTerms,
+            Printed
         )
         SELECT
             @InvoiceNumber,
@@ -113,7 +115,8 @@ BEGIN
             @InvoiceTypeCode,
             @InvoicedOn,
             0,
-            subject.PaymentTerms
+            subject.PaymentTerms,
+            @Printed
         FROM Subject.tbSubject AS subject
         WHERE subject.SubjectCode = @SubjectCode;
 

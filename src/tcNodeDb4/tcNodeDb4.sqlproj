@@ -285,15 +285,11 @@
     <Build Include="Invoice\Views\vwEntry.sql" />
     <Build Include="Subject\Views\vwStatusReport.sql" />
     <Build Include="Cash\Views\vwTaxBizTotals.sql" />
-    <Build Include="Invoice\Views\vwRegisterSales.sql" />
-    <Build Include="Invoice\Views\vwRegisterExpenses.sql" />
-    <Build Include="Invoice\Views\vwRegisterPurchases.sql" />
     <Build Include="Cash\Views\vwSummary.sql" />
     <Build Include="Invoice\Views\vwHistoryPurchases.sql" />
     <Build Include="App\Views\vwHomeAccount.sql" />
     <Build Include="Invoice\Views\vwHistorySales.sql" />
     <Build Include="Cash\Views\vwBankAccounts.sql" />
-    <Build Include="Invoice\Views\vwRegisterOverdue.sql" />
     <Build Include="App\Views\vwGraphBankBalance.sql" />
     <Build Include="Usr\Views\vwUserMenus.sql" />
     <Build Include="Invoice\Views\vwChangeLog.sql" />
@@ -407,9 +403,7 @@
     <Build Include="Invoice\Views\vwDocTask.sql" />
     <Build Include="Invoice\Views\vwItems.sql" />
     <Build Include="Project\Views\vwAllocationSvD.sql" />
-    <Build Include="Invoice\Views\vwRegisterPurchasesOverdue.sql" />
     <Build Include="App\Views\vwVersion.sql" />
-    <Build Include="Invoice\Views\vwRegisterSalesOverdue.sql" />
     <Build Include="Project\Views\vwNetworkAllocations.sql" />
     <Build Include="Invoice\Views\vwSalesInvoiceSpool.sql" />
     <Build Include="Usr\Views\vwCredentials.sql" />
@@ -444,18 +438,15 @@
     <Build Include="Subject\Views\vwListAll.sql" />
     <Build Include="Invoice\Views\vwRegisterItems.sql" />
     <Build Include="Subject\Views\vwNameTitles.sql" />
-    <Build Include="Invoice\Views\vwRegisterProjects.sql" />
     <Build Include="Invoice\Views\vwRegisterDetail.sql" />
     <Build Include="Invoice\Views\vwRegisterCashCodes.sql" />
     <Build Include="Project\Views\vwQuotes.sql" />
     <Build Include="Invoice\Views\vwRegister.sql" />
     <Build Include="Subject\Views\vwPaymentTerms.sql" />
     <Build Include="Project\Views\vwCostSet.sql" />
-    <Build Include="Invoice\Views\vwRegisterPurchaseProjects.sql" />
     <Build Include="Cash\Views\vwStatementBase.sql" />
     <Build Include="Subject\Views\vwStatement.sql" />
     <Build Include="Project\Views\vwCostSetTasks.sql" />
-    <Build Include="Invoice\Views\vwRegisterSaleProjects.sql" />
     <Build Include="Subject\Views\vwTypeLookup.sql" />
     <Build Include="Cash\Views\vwStatementWhatIf.sql" />
     <Build Include="Project\Views\vwActiveStatusCodes.sql" />
@@ -722,6 +713,7 @@
     <Build Include="Usr\Tables\tbTheme.sql" />
     <Build Include="Invoice\Stored Procedures\proc_DefaultEntryCode.sql" />
     <Build Include="Invoice\Stored Procedures\proc_RaiseDefaults.sql" />
+    <Build Include="Invoice\Views\vwRegisterProjects.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />
