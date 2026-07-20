@@ -298,8 +298,8 @@ AS
 			Notes = s.Notes;
 
 	DECLARE
-		@OpeningAR decimal(18,5) = (CASE @EnableOpeningBalance WHEN 1 THEN 1200.00000 ELSE 0 END),
-		@OpeningAP decimal(18,5) = (CASE @EnableOpeningBalance WHEN 1 THEN -800.00000 ELSE 0 END);
+		@OpeningAR decimal(18,5) = (CASE @EnableOpeningBalance WHEN 1 THEN -1200.00000 ELSE 0 END),
+		@OpeningAP decimal(18,5) = (CASE @EnableOpeningBalance WHEN 1 THEN 800.00000 ELSE 0 END);
 
 	DECLARE
 		@OpeningCustomerCode nvarchar(50) =

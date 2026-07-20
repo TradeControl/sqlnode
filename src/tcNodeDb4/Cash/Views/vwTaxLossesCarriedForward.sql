@@ -1,8 +1,9 @@
-CREATE VIEW Cash.vwTaxLossesCarriedForward
+﻿
+CREATE VIEW [Cash].[vwTaxLossesCarriedForward]
 AS
 	WITH tax_dates AS
 	(
-		SELECT PayFrom, PayTo FROM Cash.fnTaxTypeDueDates(0, 0)
+		SELECT PayFrom, PayTo FROM Cash.fnTaxTypeDueDates(Cash.fnGetBizTaxType(), 0)
 	), period_totals AS
 	(
 		SELECT (SELECT PayTo FROM tax_dates WHERE totals.StartOn >= PayFrom AND totals.StartOn < PayTo) AS StartOn, BusinessTax
@@ -19,7 +20,7 @@ AS
 		SELECT Cash.tbPayment.PaidOn AS StartOn, 0 As TaxDue, (Cash.tbPayment.PaidOutValue * -1) + Cash.tbPayment.PaidInValue AS TaxPaid
 		FROM Cash.tbPayment 
 			JOIN Cash.tbTaxType tt ON Cash.tbPayment.CashCode = tt.CashCode
-		WHERE (tt.TaxTypeCode = 0)
+		WHERE (tt.TaxTypeCode = Cash.fnGetBizTaxType())
 
 	), tax_statement AS
 	(

@@ -1,4 +1,5 @@
-﻿CREATE VIEW Cash.vwBalanceSheetPeriods
+﻿
+CREATE VIEW [Cash].[vwBalanceSheetPeriods]
 AS
 	WITH financial_periods AS
 	(
@@ -45,7 +46,7 @@ AS
 			YearNumber, StartOn
 		FROM Cash.tbTaxType
 			CROSS JOIN financial_periods
-		WHERE TaxTypeCode BETWEEN 0 AND 1
+		WHERE TaxTypeCode IN (Cash.fnGetBizTaxType(), 1)
 
 	), asset_code_periods AS
 	(

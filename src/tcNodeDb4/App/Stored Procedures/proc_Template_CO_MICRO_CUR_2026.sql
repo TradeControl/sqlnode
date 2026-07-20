@@ -37,9 +37,9 @@ AS
         -- 2. UK MTD TAX TAG SOURCE, TAGS & TEMPLATE MAPPING
         ----------------------------------------------------------------
         INSERT INTO Cash.tbTaxTagSource
-            (TaxSourceCode, JurisdictionCode, SourceName, SourceDescription)
+            (TaxSourceCode, JurisdictionCode, SourceName, SourceDescription, TaxTypeCode)
         VALUES
-            ('UK-MTD', 'UK', 'MTD', 'UK Making Tax Digital (template defaults)');
+            ('UK-MTD', 'UK', 'MTD', 'UK Making Tax Digital (template defaults)' , 0);
 
         INSERT INTO Cash.tbTaxTag
             (TaxSourceCode, TagCode, TagName, TagClassCode, DisplayOrder)
@@ -73,6 +73,17 @@ AS
             ('UK-MTD', 'AC420', 1, '', 'CC-DEPRC', 1),
             ('UK-MTD', 'AC420', 1, '', 'CC-DEPRJ', 1),
             ('UK-MTD', 'CP46', 1, '', 'CC-DEPRJ', 1);
+
+        ----------------------------------------------------------------
+        -- 3. Business Tax settings for Corporations
+        ----------------------------------------------------------------
+        UPDATE Cash.tbTaxType
+        SET IsEnabled = 1
+        WHERE TaxTypeCode = 0;
+
+        UPDATE Cash.tbTaxType
+        SET IsEnabled = 0
+        WHERE TaxTypeCode IN (4, 5);
 
     END TRY
     BEGIN CATCH

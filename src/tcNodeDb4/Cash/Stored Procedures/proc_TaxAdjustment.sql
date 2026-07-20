@@ -1,4 +1,4 @@
-CREATE   PROCEDURE Cash.proc_TaxAdjustment (@StartOn datetime, @TaxTypeCode smallint, @TaxAdjustment decimal(18, 5))
+CREATE   PROCEDURE [Cash].[proc_TaxAdjustment] (@StartOn datetime, @TaxTypeCode smallint, @TaxAdjustment decimal(18, 5))
 AS
 	SET NOCOUNT, XACT_ABORT ON;
 
@@ -16,7 +16,7 @@ AS
 
 		UPDATE App.tbYearPeriod
 		SET 
-			BusinessTaxAdjustment = CASE @TaxTypeCode WHEN 0 THEN 0 ELSE BusinessTaxAdjustment END,
+			BusinessTaxAdjustment = CASE WHEN @TaxTypeCode IN (0, 4) THEN 0 ELSE BusinessTaxAdjustment END,
 			VatAdjustment = CASE @TaxTypeCode WHEN 1 THEN 0 ELSE VatAdjustment END
 		WHERE StartOn >= @PayFrom AND StartOn < @PayTo;
 
@@ -26,7 +26,7 @@ AS
 
 		UPDATE App.tbYearPeriod
 		SET 
-			BusinessTaxAdjustment = CASE @TaxTypeCode WHEN 0 THEN @TaxAdjustment ELSE BusinessTaxAdjustment END,
+			BusinessTaxAdjustment = CASE WHEN @TaxTypeCode IN (0, 4) THEN @TaxAdjustment ELSE BusinessTaxAdjustment END,
 			VatAdjustment = CASE @TaxTypeCode WHEN 1 THEN @TaxAdjustment ELSE VatAdjustment END
 		WHERE StartOn = @StartOn;
 	END TRY

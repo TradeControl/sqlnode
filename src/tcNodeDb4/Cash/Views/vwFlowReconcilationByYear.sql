@@ -12,7 +12,7 @@ AS
 			ProfitAfterTax,
 			TaxCarry,
 			CapitalMovement,
-			OpeningPosition,
+			OpeningSubjectPosition,
 			OpeningAccountPosition,
 			OpeningLossesCarriedForward,
 			ClosingLossesCarriedForward,
@@ -34,7 +34,7 @@ AS
 	UNION ALL SELECT YearNumber, Description, 30, N'TAX_EXP',    N'Business tax (P&L)', BusinessTax FROM base
 	UNION ALL SELECT YearNumber, Description, 40, N'PROF_AT',    N'Profit after tax', ProfitAfterTax FROM base
 	UNION ALL SELECT YearNumber, Description, 50, N'CAP_MOVE',   N'Capital movement', CapitalMovement FROM base
-	UNION ALL SELECT YearNumber, Description, 60, N'OPEN_POS',   N'Opening position', OpeningPosition FROM base
+	UNION ALL SELECT YearNumber, Description, 60, N'OPEN_POS',   N'Opening Subject position', OpeningSubjectPosition FROM base
 
 	UNION ALL SELECT
 		YearNumber,
@@ -42,7 +42,7 @@ AS
 		70,
 		N'BRIDGE',
 		N'Bridge total (Profit after tax + Capital movement + Opening position + Opening account position)',
-		(ProfitAfterTax + CapitalMovement + OpeningPosition + OpeningAccountPosition)
+		(ProfitAfterTax + CapitalMovement + OpeningAccountPosition)
 	FROM base
 
 	UNION ALL SELECT YearNumber, Description, 80, N'CAP_DELTA',  N'Capital delta (Close - Open)', CapitalDelta FROM base

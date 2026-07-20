@@ -15,10 +15,12 @@
     CONSTRAINT [FK_Invoice_tbEntry_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]),
     CONSTRAINT [FK_Invoice_tbEntry_Cash_tbCode] FOREIGN KEY ([CashCode]) REFERENCES [Cash].[tbCode] ([CashCode]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Invoice_tbEntry_Invoice_tbType] FOREIGN KEY ([InvoiceTypeCode]) REFERENCES [Invoice].[tbType] ([InvoiceTypeCode]),
-    CONSTRAINT [FK_Invoice_tbEntry_Subject_tb] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]),
-    CONSTRAINT [FK_Invoice_tbEntry_Subject_tbNamespace] FOREIGN KEY ([ParentSubjectCode], [SubjectCode]) REFERENCES [Subject].[tbNamespace] ([ParentSubjectCode], [ChildSubjectCode]),
+    CONSTRAINT [FK_Invoice_tbEntry_Subject_tb] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT [FK_Invoice_tbEntry_Subject_tbNamespace] FOREIGN KEY ([ParentSubjectCode], [SubjectCode]) REFERENCES [Subject].[tbNamespace] ([ParentSubjectCode], [ChildSubjectCode]) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT [FK_Invoice_tbEntry_Usr_tb] FOREIGN KEY ([UserId]) REFERENCES [Usr].[tbUser] ([UserId]) ON UPDATE CASCADE
 );
+
+
 
 
 

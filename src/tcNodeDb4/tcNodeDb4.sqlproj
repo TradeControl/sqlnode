@@ -675,7 +675,7 @@
     <Build Include="Cash\Tables\tbTaxTagSource.sql" />
     <Build Include="Cash\Tables\tbTaxTag.sql" />
     <Build Include="Cash\Tables\tbTaxTagMap.sql" />
-    <Build Include="Cash\Functions\func_TaxTagMapValidate.sql" />
+    <Build Include="Cash\Functions\fnTaxTagMapValidate.sql" />
     <Build Include="Cash\Stored Procedures\proc_TaxTagMapValidate.sql" />
     <Build Include="Cash\Tables\tbTaxTagClass.sql" />
     <Build Include="App\Stored Procedures\proc_Template_BASE_MIN_2026.sql" />
@@ -714,6 +714,14 @@
     <Build Include="Invoice\Stored Procedures\proc_DefaultEntryCode.sql" />
     <Build Include="Invoice\Stored Procedures\proc_RaiseDefaults.sql" />
     <Build Include="Invoice\Views\vwRegisterProjects.sql" />
+    <Build Include="Cash\Stored Procedures\proc_TaxObligations.sql" />
+    <Build Include="Cash\Functions\fnGetBizTaxType.sql" />
+    <Build Include="Cash\Functions\fnCategoryCashCodes.sql" />
+    <Build Include="Cash\Views\vwTaxHubSubmission.sql" />
+    <Build Include="Cash\Views\vwTaxHubPayload.sql" />
+    <Build Include="Cash\Views\vwTagCashPeriodMap.sql" />
+    <Build Include="Cash\Views\vwCashCodePeriodValues.sql" />
+    <Build Include="Cash\Views\vwTaxHubPayloadAudit.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />

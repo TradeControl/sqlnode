@@ -1,4 +1,4 @@
-CREATE PROCEDURE Cash.proc_TaxAdjustmentGet
+CREATE PROCEDURE [Cash].[proc_TaxAdjustmentGet]
 (
 	@StartOn datetime,
 	@TaxTypeCode smallint,
@@ -23,9 +23,9 @@ AS
 		WHERE StartOn < @PayTo;
 
 		SELECT @TaxAdjustment =
-			CASE @TaxTypeCode
-				WHEN 0 THEN BusinessTaxAdjustment
-				WHEN 1 THEN VatAdjustment
+			CASE 
+				WHEN @TaxTypeCode IN (0, 4) THEN BusinessTaxAdjustment
+				WHEN @TaxTypeCode = 1 THEN VatAdjustment
 				ELSE 0
 			END
 		FROM App.tbYearPeriod

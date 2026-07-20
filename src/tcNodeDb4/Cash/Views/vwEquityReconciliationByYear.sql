@@ -1,4 +1,4 @@
-CREATE VIEW [Cash].[vwEquityReconciliationByYear]
+CREATE VIEW Cash.vwEquityReconciliationByYear
 AS
 WITH first_period AS (
     SELECT MIN(yp.StartOn) AS StartOn
@@ -6,8 +6,11 @@ WITH first_period AS (
     JOIN App.tbYear y ON yp.YearNumber = y.YearNumber
     WHERE y.CashStatusCode BETWEEN 1 AND 2
 ),
-opening_position AS (
-    SELECT OpeningPosition = -SUM(s.OpeningBalance)
+opening_subject_position AS (
+-- OpeningSubjectPosition is shown for diagnostics only.
+-- It is NOT part of the equity bridge because debtor/creditor
+-- opening balances are already included in ClosingCapital.
+    SELECT OpeningSubjectPosition = -SUM(s.OpeningBalance)
     FROM Subject.tbSubject s
     WHERE s.OpeningBalance <> 0
 ),
@@ -143,9 +146,9 @@ recon AS (
                                - COALESCE(ct.BusinessTaxExpense, 0), 2),
         TaxCarry = ROUND(COALESCE(ct.TaxCarry, 0), 2),
 
-        OpeningPosition =
+        OpeningSubjectPosition =
             CASE WHEN b.OpeningCapital IS NULL
-                 THEN COALESCE((SELECT OpeningPosition FROM opening_position), 0)
+                 THEN COALESCE((SELECT OpeningSubjectPosition FROM opening_subject_position), 0)
                  ELSE 0 END,
 
         OpeningAccountPosition =
@@ -188,7 +191,7 @@ SELECT
     r.ProfitAfterTax,
     r.TaxCarry,
     CapitalMovement = CONVERT(decimal(38,5), r.CapitalMovement),
-    r.OpeningPosition,
+    r.OpeningSubjectPosition,
     r.OpeningAccountPosition,
     r.OpeningLossesCarriedForward,
     r.ClosingLossesCarriedForward,
@@ -199,7 +202,6 @@ SELECT
         r.CapitalDelta
       - (r.ProfitAfterTax
        +  r.CapitalMovement
-       +  r.OpeningPosition
        +  r.OpeningAccountPosition)
     )
 FROM recon r;

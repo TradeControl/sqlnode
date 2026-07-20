@@ -287,7 +287,7 @@ AS
         SET SubjectCode = @SubjectCode,
             CashCode    = 'CC-BIZTX',
             MonthNumber = @FinancialMonth
-        WHERE TaxTypeCode = 0;  -- Business Tax
+        WHERE TaxTypeCode IN (0, 4, 5);  -- Business Tax
 
         UPDATE Cash.tbTaxType
         SET SubjectCode = @SubjectCode,

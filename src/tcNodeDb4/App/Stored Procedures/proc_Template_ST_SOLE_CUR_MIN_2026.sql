@@ -57,11 +57,12 @@ BEGIN TRY
     -- 3. Business Tax settings for Sole Traders
     ----------------------------------------------------------------
     UPDATE Cash.tbTaxType
-    SET MonthNumber = 4,
-        RecurrenceCode = 4,
-        OffsetDays = 300,
-        IsEnabled = 0
+    SET IsEnabled = 0
     WHERE TaxTypeCode = 0;
+
+    UPDATE Cash.tbTaxType
+    SET IsEnabled = 1
+    WHERE TaxTypeCode IN (4, 5);
 
     ----------------------------------------------------------------
     -- 4. Sole trader owner movements (single CASH CODE, polarity driven)
@@ -148,19 +149,19 @@ BEGIN TRY
     IF NOT EXISTS (SELECT 1 FROM Cash.tbTaxTagSource WHERE TaxSourceCode = 'UK-ITSA-SE-QU')
     BEGIN
         INSERT INTO Cash.tbTaxTagSource
-            (TaxSourceCode, JurisdictionCode, SourceName, SourceDescription)
+            (TaxSourceCode, JurisdictionCode, SourceName, SourceDescription, TaxTypeCode)
         VALUES
             ('UK-ITSA-SE-QU', 'UK', 'ITSA',
-             'MTD ITSA Self-Employment (SA103F-aligned) Quarterly Update field set');
+             'MTD ITSA Self-Employment (SA103F-aligned) Quarterly Update field set', 5);
     END;
 
     IF NOT EXISTS (SELECT 1 FROM Cash.tbTaxTagSource WHERE TaxSourceCode = 'UK-ITSA-SE-EOPS')
     BEGIN
         INSERT INTO Cash.tbTaxTagSource
-            (TaxSourceCode, JurisdictionCode, SourceName, SourceDescription)
+            (TaxSourceCode, JurisdictionCode, SourceName, SourceDescription, TaxTypeCode)
         VALUES
             ('UK-ITSA-SE-EOPS', 'UK', 'ITSA',
-             'MTD ITSA Self-Employment (SA103F-aligned) annual business return field set (EOPS)');
+             'MTD ITSA Self-Employment (SA103F-aligned) annual business return field set (EOPS)', 4);
     END;
 
     -- QU tags (existing)
