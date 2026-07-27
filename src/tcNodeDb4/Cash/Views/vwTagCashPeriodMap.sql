@@ -5,7 +5,7 @@ AS
 
 	WITH tagMap AS
 	(
-		SELECT tm.TaxSourceCode, tm.TagCode, tm.CategoryCode SourceCode, cc.CashCode
+		SELECT tm.TaxSourceCode, tm.TagCode, tm.CategoryCode ParentCode, cc.CashCode
 		FROM Cash.tbTaxTagMap tm
 			CROSS APPLY
 			(
@@ -14,13 +14,13 @@ AS
 			) cc	
 		WHERE tm.MapTypeCode = 0 AND IsEnabled != 0
 		UNION
-		SELECT tm.TaxSourceCode, tm.TagCode, cc.CashCode SourceCode, cc.CashCode
+		SELECT tm.TaxSourceCode, tm.TagCode, cc.CashCode ParentCode, cc.CashCode
 		FROM Cash.tbTaxTagMap tm
 			JOIN Cash.tbCode cc
 				on cc.CashCode = tm.CashCode
 		WHERE tm.MapTypeCode = 1 AND tm.IsEnabled != 0 AND cc.IsEnabled != 0
 	)
-	SELECT tm.TaxSourceCode, tm.TagCode, tm.SourceCode, tm.CashCode, ts.PeriodFrom, ts.PeriodTo
+	SELECT tm.TaxSourceCode, tm.TagCode, tm.ParentCode, tm.CashCode, ts.PeriodFrom, ts.PeriodTo
 	FROM tagMap tm
 		CROSS APPLY
 		(

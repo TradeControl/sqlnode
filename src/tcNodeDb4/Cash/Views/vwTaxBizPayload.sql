@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Cash.vwTaxHubPayload 
+CREATE   VIEW Cash.vwTaxBizPayload 
 AS
 WITH period_source AS
 (
@@ -15,7 +15,7 @@ WITH period_source AS
 SELECT
     m.TaxSourceCode,
     m.TagCode,
-    m.SourceCode,
+    m.ParentCode,
     ps.CashCode,
     ps.CategoryCode,
     ps.CashTypeCode,

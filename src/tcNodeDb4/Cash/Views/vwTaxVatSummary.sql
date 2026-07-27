@@ -158,14 +158,14 @@ AS
 	SELECT
 		StartOn,
 		TaxCode,
-		CAST(HomeSales AS float) AS HomeSales,
-		CAST(HomePurchases AS float) AS HomePurchases,
-		CAST(ExportSales AS float) AS ExportSales,
-		CAST(ExportPurchases AS float) AS ExportPurchases,
-		CAST(HomeSalesVat AS float) AS HomeSalesVat,
-		CAST(HomePurchasesVat AS float) AS HomePurchasesVat,
-		CAST(ExportSalesVat AS float) AS ExportSalesVat,
-		CAST(ExportPurchasesVat AS float) AS ExportPurchasesVat,
-		CAST((HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS float) AS VatDue
+		HomeSales AS HomeSales,
+		HomePurchases AS HomePurchases,
+		ExportSales AS ExportSales,
+		ExportPurchases AS ExportPurchases,
+		HomeSalesVat AS HomeSalesVat,
+		HomePurchasesVat AS HomePurchasesVat,
+		ExportSalesVat AS ExportSalesVat,
+		ExportPurchasesVat AS ExportPurchasesVat,
+		(HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS VatDue
 	FROM vatcode_summary;
 GO

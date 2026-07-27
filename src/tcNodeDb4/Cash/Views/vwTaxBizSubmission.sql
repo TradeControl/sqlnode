@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Cash.vwTaxHubSubmission
+CREATE   VIEW Cash.vwTaxBizSubmission
 AS
 SELECT
     TaxSourceCode,
@@ -6,7 +6,7 @@ SELECT
     PeriodFrom,
     PeriodTo,
     SUM(PeriodInvoiceValue) AS TaxableAmount
-FROM Cash.vwTaxHubPayload
+FROM Cash.vwTaxBizPayload
 GROUP BY
     TaxSourceCode,
     TagCode,

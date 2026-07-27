@@ -1,4 +1,4 @@
-﻿CREATE   VIEW Cash.vwTaxHubPayloadAudit
+CREATE VIEW Cash.vwTaxBizPayloadAudit
 AS
 WITH windows AS
 (
@@ -38,7 +38,7 @@ WITH windows AS
         PeriodFrom,
         PeriodTo,
         SUM(PeriodInvoiceValue) AS PayloadTotal
-    FROM Cash.vwTaxHubPayload
+    FROM Cash.vwTaxBizPayload
     GROUP BY
         TaxSourceCode,
         TagCode,

@@ -1,4 +1,4 @@
-﻿
+
 CREATE VIEW [Cash].[vwTaxLossesCarriedForward]
 AS
 	WITH tax_dates AS
@@ -34,6 +34,7 @@ AS
 		FROM tax_statement
 			JOIN App.tbYearPeriod yp ON tax_statement.StartOn = yp.StartOn
 		WHERE tax_statement.StartOn >= (SELECT MIN(StartOn) FROM App.tbYearPeriod p JOIN App.tbYear y ON p.YearNumber = y.YearNumber WHERE y.CashStatusCode < 3)
+			AND BusinessTaxRate != 0
 	)
 	SELECT CONCAT(y.[Description], ' ', mn.MonthName) YearEndDescription,
 		profit_statement.StartOn, TaxDue, TaxBalance,

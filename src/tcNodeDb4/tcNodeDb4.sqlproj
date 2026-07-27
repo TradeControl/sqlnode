@@ -717,11 +717,11 @@
     <Build Include="Cash\Stored Procedures\proc_TaxObligations.sql" />
     <Build Include="Cash\Functions\fnGetBizTaxType.sql" />
     <Build Include="Cash\Functions\fnCategoryCashCodes.sql" />
-    <Build Include="Cash\Views\vwTaxHubSubmission.sql" />
-    <Build Include="Cash\Views\vwTaxHubPayload.sql" />
+    <Build Include="Cash\Views\vwTaxBizSubmission.sql" />
+    <Build Include="Cash\Views\vwTaxBizPayload.sql" />
     <Build Include="Cash\Views\vwTagCashPeriodMap.sql" />
     <Build Include="Cash\Views\vwCashCodePeriodValues.sql" />
-    <Build Include="Cash\Views\vwTaxHubPayloadAudit.sql" />
+    <Build Include="Cash\Views\vwTaxBizPayloadAudit.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />
