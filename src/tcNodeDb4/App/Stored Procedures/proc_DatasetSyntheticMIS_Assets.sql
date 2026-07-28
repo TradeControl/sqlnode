@@ -130,6 +130,7 @@ AS
 	SET
 		SubjectStatusCode = 1,
 		TaxCode = N'N/A',
+		ExportTypeCode = 0,
 		PaymentTerms = N'Immediate',
 		ExpectedDays = 0,
 		PaymentDays = 0,
@@ -160,13 +161,13 @@ AS
 
 	IF NOT EXISTS
 	(
-		SELECT 1
-		FROM Cash.tbPayment p
-		WHERE p.SubjectCode = @SidsCode
-		  AND p.AccountCode = @SettlementAccountCode
-		  AND p.CashCode = N'CC-INCME'
-		  AND CAST(p.PaidOn AS date) = @FirstTradingOn
-		  AND p.PaymentReference = N'Share Capital Subscription'
+			SELECT 1
+			FROM Cash.tbPayment p
+			WHERE p.SubjectCode = @SidsCode
+			  AND p.AccountCode = @SettlementAccountCode
+			  AND p.CashCode = N'CC-INCME'
+			  AND CAST(p.PaidOn AS date) = @FirstTradingOn
+			  AND p.PaymentReference = N'Share Capital Subscription'
 	)
 	BEGIN
 		DECLARE @ShareInPaymentCode nvarchar(20) = NULL;
@@ -332,15 +333,12 @@ AS
 	SET
 		SubjectStatusCode = 1,
 		TaxCode = N'T1',
+		ExportTypeCode = 0,
 		PaymentTerms = N'30 days',
 		ExpectedDays = 0,
 		PaymentDays = 30,
 		PayDaysFromMonthEnd = 0,
 		PayBalance = 1
-	WHERE SubjectCode = @GarageCode;
-
-	UPDATE Subject.tbVirtual
-	SET EUJurisdiction = 0
 	WHERE SubjectCode = @GarageCode;
 
 	IF NOT EXISTS

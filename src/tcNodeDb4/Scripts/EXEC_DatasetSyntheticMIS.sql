@@ -103,7 +103,7 @@ BEGIN
 		BusinessTax,
 		ProfitAfterTax,
 		CAST(CapitalMovement AS decimal(18,2)),
-		CAST(OpeningPosition AS decimal(18,2)),
+		CAST(OpeningCapital AS decimal(18,2)),
 		CAST(OpeningAccountPosition AS decimal(18,2)),
 		CapitalDelta,
 		Variance

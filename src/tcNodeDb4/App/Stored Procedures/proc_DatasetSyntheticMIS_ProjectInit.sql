@@ -29,7 +29,7 @@ AS
 		RootCodeName nvarchar(100) NOT NULL,
 		SubjectTypeCode smallint NOT NULL,
 		TaxCode nvarchar(10) NOT NULL,
-		EUJurisdiction bit NOT NULL,
+		ExportTypeCode tinyint NOT NULL,
 		PaymentTerms nvarchar(100) NOT NULL,
 		ExpectedDays smallint NOT NULL,
 		PaymentDays smallint NOT NULL,
@@ -40,7 +40,7 @@ AS
 
 	INSERT INTO @Company
 	(
-		CodeName, SubjectName, RootCodeName, SubjectTypeCode, TaxCode, EUJurisdiction,
+		CodeName, SubjectName, RootCodeName, SubjectTypeCode, TaxCode, ExportTypeCode,
 		PaymentTerms, ExpectedDays, PaymentDays, PayDaysFromMonthEnd, PayBalance, ContactName
 	)
 	VALUES
@@ -50,7 +50,7 @@ AS
 		(N'PrintCustomerEU', N'Dataset Print Customer EU', N'BuyerRoot', 1, N'T0', 1, N'30 days', 0, 30, 0, 1, N'Sofia Laurent'),
 		(N'MiscCustomer1', N'Dataset Walk-in Customer', N'BuyerRoot', 1, N'T1', 0, N'Immediate', 0, 0, 0, 1, N'Mason Reed'),
 		(N'MiscCustomer2', N'Dataset Online Customer', N'BuyerRoot', 1, N'T1', 0, N'14 days', 0, 14, 0, 1, N'Olivia Hart'),
-		(N'PlasticSupplier', N'Dataset Plastic Supplier', N'SellerRoot', 0, N'T1', 0, N'30 days', 0, 30, 0, 1, N'Peter Walsh'),
+		(N'PlasticSupplier', N'Dataset Plastic Supplier', N'SellerRoot', 0, N'T1', 2, N'30 days', 0, 30, 0, 1, N'Peter Walsh'),
 		(N'InsertSupplier', N'Dataset Inserts Supplier', N'SellerRoot', 0, N'T1', 0, N'30 days', 0, 30, 0, 1, N'Nina Shah'),
 		(N'BoxSupplier', N'Dataset Boxes & Pallets Supplier', N'SellerRoot', 0, N'T1', 0, N'30 days', 0, 30, 0, 1, N'Daniel Brooks'),
 		(N'MouldingHaulier', N'Dataset Haulier (Moulding)', N'SellerRoot', 0, N'T1', 0, N'30 days end of month', 0, 30, 1, 1, N'Gareth Miles'),
@@ -67,7 +67,7 @@ AS
 		@CompanyRootCode nvarchar(50),
 		@CompanySubjectTypeCode smallint,
 		@CompanyTaxCode nvarchar(10),
-		@CompanyEU bit,
+		@CompanyExportTypeCode tinyint,
 		@CompanyTerms nvarchar(100),
 		@CompanyExpectedDays smallint,
 		@CompanyPaymentDays smallint,
@@ -82,7 +82,7 @@ AS
 			RootCodeName,
 			SubjectTypeCode,
 			TaxCode,
-			EUJurisdiction,
+			ExportTypeCode,
 			PaymentTerms,
 			ExpectedDays,
 			PaymentDays,
@@ -98,7 +98,7 @@ AS
 		@CompanyRootCodeName,
 		@CompanySubjectTypeCode,
 		@CompanyTaxCode,
-		@CompanyEU,
+		@CompanyExportTypeCode,
 		@CompanyTerms,
 		@CompanyExpectedDays,
 		@CompanyPaymentDays,
@@ -129,15 +129,12 @@ AS
 		SET
 			SubjectStatusCode = 1,
 			TaxCode = @CompanyTaxCode,
+			ExportTypeCode = @CompanyExportTypeCode,
 			PaymentTerms = @CompanyTerms,
 			ExpectedDays = @CompanyExpectedDays,
 			PaymentDays = @CompanyPaymentDays,
 			PayDaysFromMonthEnd = @CompanyMonthEnd,
 			PayBalance = @CompanyPayBalance
-		WHERE SubjectCode = @Code;
-
-		UPDATE Subject.tbVirtual
-		SET EUJurisdiction = @CompanyEU
 		WHERE SubjectCode = @Code;
 
 		EXEC Subject.proc_AddContact
@@ -162,7 +159,7 @@ AS
 			@CompanyRootCodeName,
 			@CompanySubjectTypeCode,
 			@CompanyTaxCode,
-			@CompanyEU,
+			@CompanyExportTypeCode,
 			@CompanyTerms,
 			@CompanyExpectedDays,
 			@CompanyPaymentDays,
@@ -186,6 +183,7 @@ AS
 	SET
 		SubjectStatusCode = 1,
 		TaxCode = N'N/A',
+		ExportTypeCode = 0,
 		PaymentTerms = N'Immediate',
 		ExpectedDays = 0,
 		PaymentDays = 0,

@@ -45,7 +45,7 @@ AS
 		v.VatNumber,
 		ISNULL(v.Turnover, 0) AS Turnover,
 		s.OpeningBalance,
-		ISNULL(v.EUJurisdiction, 0) AS EUJurisdiction,
+		s.ExportTypeCode,
 		v.BusinessDescription,
 		s.InsertedBy,
 		s.InsertedOn,

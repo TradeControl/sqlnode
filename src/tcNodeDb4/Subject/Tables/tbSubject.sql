@@ -15,6 +15,7 @@ CREATE TABLE [Subject].[tbSubject] (
     [AreaCode]               NVARCHAR (50)   NULL,
     [PhoneNumber]            NVARCHAR (50)   NULL,
     [EmailAddress]           NVARCHAR (255)  NULL,
+    [ExportTypeCode]         TINYINT         CONSTRAINT [DF_Subject_tbSubject_ExportTypeCode] DEFAULT ((0)) NOT NULL,
     [InsertedBy]             NVARCHAR (50)   CONSTRAINT [DF_Subject_tb_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
     [InsertedOn]             DATETIME        CONSTRAINT [DF_Subject_tb_InsertedOn] DEFAULT (getdate()) NOT NULL,
     [UpdatedBy]              NVARCHAR (50)   CONSTRAINT [DF_Subject_tb_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
@@ -25,6 +26,7 @@ CREATE TABLE [Subject].[tbSubject] (
     CONSTRAINT [PK_Subject_tbSubject] PRIMARY KEY NONCLUSTERED ([SubjectCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Subject_tb_App_tbTaxCode] FOREIGN KEY ([TaxCode]) REFERENCES [App].[tbTaxCode] ([TaxCode]) ON UPDATE CASCADE,
     CONSTRAINT [FK_Subject_tb_Subject_tbAddress] FOREIGN KEY ([AddressCode]) REFERENCES [Subject].[tbAddress] ([AddressCode]) NOT FOR REPLICATION,
+    CONSTRAINT [FK_Subject_tbSubject_tbExportType] FOREIGN KEY ([ExportTypeCode]) REFERENCES [Subject].[tbExportType] ([ExportTypeCode]),
     CONSTRAINT [FK_Subject_tbSubject_tbTransmitStatus] FOREIGN KEY ([TransmitStatusCode]) REFERENCES [Subject].[tbTransmitStatus] ([TransmitStatusCode]),
     CONSTRAINT [FK_Subject_tbSubject_tbStatus] FOREIGN KEY ([SubjectStatusCode]) REFERENCES [Subject].[tbStatus] ([SubjectStatusCode]),
     CONSTRAINT [FK_Subject_tbSubject_tbType] FOREIGN KEY ([SubjectTypeCode]) REFERENCES [Subject].[tbType] ([SubjectTypeCode])
@@ -46,6 +48,9 @@ CREATE NONCLUSTERED INDEX [IX_Subject_tb_Status_AccountCode]
 GO
 CREATE NONCLUSTERED INDEX [IX_Subject_tb_SubjectTypeCode]
     ON [Subject].[tbSubject]([SubjectTypeCode] ASC) WITH (FILLFACTOR = 90);
+GO
+CREATE NONCLUSTERED INDEX [IX_Subject_tbSubject_ExportTypeCode]
+    ON [Subject].[tbSubject]([ExportTypeCode] ASC) WITH (FILLFACTOR = 90);
 GO
 CREATE NONCLUSTERED INDEX [IX_tbSubject_tb_AccountCode]
     ON [Subject].[tbSubject]([SubjectCode] ASC)

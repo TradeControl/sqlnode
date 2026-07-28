@@ -279,7 +279,6 @@
     <Build Include="Subject\Views\vwCashAccounts.sql" />
     <Build Include="Project\Views\vwOps.sql" />
     <Build Include="Subject\Views\vwAddressList.sql" />
-    <Build Include="Cash\Views\vwTaxVatTotals.sql" />
     <Build Include="Subject\Views\vwSubjectLookupAll.sql" />
     <Build Include="Subject\Views\vwDatasheet.sql" />
     <Build Include="Invoice\Views\vwEntry.sql" />
@@ -691,7 +690,6 @@
     <Build Include="Subject\Views\vwReal.sql" />
     <Build Include="Subject\Stored Procedures\proc_AddContacts.sql" />
     <Build Include="Subject\Stored Procedures\proc_AddNamespace.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetCreateCompanySubject.sql" />
     <Build Include="Subject\Stored Procedures\proc_DefaultAccountCode.sql" />
     <Build Include="Subject\Views\vwVirtual.sql" />
     <Build Include="Subject\Functions\fnSubjectNamespace.sql" />
@@ -722,6 +720,8 @@
     <Build Include="Cash\Views\vwTagCashPeriodMap.sql" />
     <Build Include="Cash\Views\vwCashCodePeriodValues.sql" />
     <Build Include="Cash\Views\vwTaxBizPayloadAudit.sql" />
+    <Build Include="Subject\Tables\tbExportType.sql" />
+    <Build Include="Cash\Views\vwTaxVatSubmission.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />

@@ -1,15 +1,14 @@
 CREATE TABLE [Subject].[tbVirtual] (
-    [SubjectCode]        NVARCHAR (50)  NOT NULL,
-    [NumberOfEmployees]  INT            CONSTRAINT [DF_Subject_tbVirtual_NumberOfEmployees] DEFAULT ((0)) NOT NULL,
-    [CompanyNumber]      NVARCHAR (20)  NULL,
-    [VatNumber]          NVARCHAR (50)  NULL,
-    [EUJurisdiction]     BIT            CONSTRAINT [DF_Subject_tbVirtual_EUJurisdiction] DEFAULT ((0)) NOT NULL,
-    [BusinessDescription] NVARCHAR(MAX) NULL,
-    [Logo]               VARBINARY(MAX) NULL,
+    [SubjectCode]        NVARCHAR (50)   NOT NULL,
+    [NumberOfEmployees]  INT             CONSTRAINT [DF_Subject_tbVirtual_NumberOfEmployees] DEFAULT ((0)) NOT NULL,
+    [CompanyNumber]      NVARCHAR (20)   NULL,
+    [VatNumber]          NVARCHAR (50)   NULL,
+    [BusinessDescription] NVARCHAR(MAX)  NULL,
+    [Logo]               VARBINARY(MAX)  NULL,
     [Turnover]           DECIMAL (18, 5) CONSTRAINT [DF_Subject_tbVirtual_Turnover] DEFAULT ((0)) NOT NULL,
     [WebSite]            NVARCHAR (255)  NULL,
     [SubjectSource]      NVARCHAR (100)  NULL,
-    [RowVer]             ROWVERSION     NOT NULL,
+    [RowVer]             ROWVERSION      NOT NULL,
     CONSTRAINT [PK_Subject_tbVirtual] PRIMARY KEY NONCLUSTERED ([SubjectCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Subject_tbVirtual_tbSubject] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON DELETE CASCADE ON UPDATE CASCADE
 );

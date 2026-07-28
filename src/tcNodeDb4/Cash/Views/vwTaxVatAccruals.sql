@@ -27,13 +27,11 @@ AS
 			p.UnitCharge * (p.Quantity - ISNULL(iq.InvoiceQuantity, 0)) AS TotalValue,
 			p.UnitCharge * (p.Quantity - ISNULL(iq.InvoiceQuantity, 0)) * tc.TaxRate AS TaxValue,
 			tc.TaxRate,
-			ISNULL(v.EUJurisdiction, 0) AS EUJurisdiction,
+			ISNULL(s.ExportTypeCode, 0) AS ExportTypeCode,
 			cat.CashPolarityCode
 		FROM Project.tbProject AS p
 			INNER JOIN Subject.tbSubject AS s
 				ON p.SubjectCode = s.SubjectCode
-			LEFT OUTER JOIN Subject.tbVirtual AS v
-				ON s.SubjectCode = v.SubjectCode
 			INNER JOIN Cash.tbCode AS c
 				ON p.CashCode = c.CashCode
 			INNER JOIN Cash.tbCategory AS cat
@@ -46,33 +44,79 @@ AS
 			AND p.ProjectStatusCode > 0
 			AND p.ProjectStatusCode < 3
 			AND p.ActionOn <= (SELECT DATEADD(DAY, TaxHorizon, CURRENT_TIMESTAMP) FROM App.tbOptions)
-	),
-	Project_dataset AS
-	(
-		SELECT
-			StartOn,
-			ProjectCode,
-			TaxCode,
-			QuantityRemaining,
-			TotalValue,
-			TaxValue,
-			TaxRate,
-			CAST(CASE WHEN EUJurisdiction = 0 THEN CASE CashPolarityCode WHEN 1 THEN TotalValue ELSE 0 END ELSE 0 END AS float) AS HomeSales,
-			CAST(CASE WHEN EUJurisdiction = 0 THEN CASE CashPolarityCode WHEN 0 THEN TotalValue ELSE 0 END ELSE 0 END AS float) AS HomePurchases,
-			CAST(CASE WHEN EUJurisdiction <> 0 THEN CASE CashPolarityCode WHEN 1 THEN TotalValue ELSE 0 END ELSE 0 END AS float) AS ExportSales,
-			CAST(CASE WHEN EUJurisdiction <> 0 THEN CASE CashPolarityCode WHEN 0 THEN TotalValue ELSE 0 END ELSE 0 END AS float) AS ExportPurchases,
-			CAST(CASE WHEN EUJurisdiction = 0 THEN CASE CashPolarityCode WHEN 1 THEN TaxValue ELSE 0 END ELSE 0 END AS float) AS HomeSalesVat,
-			CAST(CASE WHEN EUJurisdiction = 0 THEN CASE CashPolarityCode WHEN 0 THEN TaxValue ELSE 0 END ELSE 0 END AS float) AS HomePurchasesVat,
-			CAST(CASE WHEN EUJurisdiction <> 0 THEN CASE CashPolarityCode WHEN 1 THEN TaxValue ELSE 0 END ELSE 0 END AS float) AS ExportSalesVat,
-			CAST(CASE WHEN EUJurisdiction <> 0 THEN CASE CashPolarityCode WHEN 0 THEN TaxValue ELSE 0 END ELSE 0 END AS float) AS ExportPurchasesVat
-		FROM Project_transactions
+			AND ISNULL(s.ExportTypeCode, 0) <> 1
 	)
 	SELECT
-		pd.*,
-		(HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS VatDue
-	FROM Project_dataset AS pd
+		pt.StartOn,
+		pt.ProjectCode,
+		pt.TaxCode,
+		pt.TaxRate,
+		pt.TotalValue,
+		pt.TaxValue,
+		pt.QuantityRemaining,
+		CAST
+		(
+			CASE
+				WHEN pt.ExportTypeCode IN (0, 2) AND pt.CashPolarityCode = 1 THEN pt.TaxValue
+				ELSE 0
+			END
+			AS decimal(18,5)
+		) AS vatDueSales,
+		CAST
+		(
+			CASE
+				WHEN pt.ExportTypeCode = 2 AND pt.CashPolarityCode = 0 THEN pt.TaxValue * -1
+				ELSE 0
+			END
+			AS decimal(18,5)
+		) AS vatDueAcquisitions,
+		CAST
+		(
+			CASE
+				WHEN pt.ExportTypeCode = 0 AND pt.CashPolarityCode = 0 THEN pt.TaxValue * -1
+				ELSE 0
+			END
+			AS decimal(18,5)
+		) AS vatReclaimedCurrPeriod,
+		CAST
+		(
+			CASE
+				WHEN pt.ExportTypeCode IN (0, 2) AND pt.CashPolarityCode = 1 THEN pt.TotalValue
+				ELSE 0
+			END
+			AS decimal(18,5)
+		) AS totalValueSalesExVAT,
+		CAST
+		(
+			CASE
+				WHEN pt.ExportTypeCode IN (0, 2) AND pt.CashPolarityCode = 0 THEN pt.TotalValue
+				ELSE 0
+			END
+			AS decimal(18,5)
+		) AS totalValuePurchasesExVAT,
+		CAST(0 AS decimal(18,5)) AS totalValueGoodsSuppliedExVAT,
+		CAST(0 AS decimal(18,5)) AS totalValueGoodsReceivedExVAT,
+		CAST
+		(
+			CASE
+				WHEN pt.ExportTypeCode IN (0, 2) AND pt.CashPolarityCode = 1 THEN pt.TaxValue
+				ELSE 0
+			END
+			+
+			CASE
+				WHEN pt.ExportTypeCode = 0 AND pt.CashPolarityCode = 0 THEN pt.TaxValue * -1
+				ELSE 0
+			END
+			+
+			CASE
+				WHEN pt.ExportTypeCode = 2 AND pt.CashPolarityCode = 0 THEN pt.TaxValue * -1
+				ELSE 0
+			END
+			AS decimal(18,5)
+		) AS netVatDue
+	FROM Project_transactions AS pt
 		INNER JOIN App.tbYearPeriod AS yp
-			ON pd.StartOn = yp.StartOn
+			ON pt.StartOn = yp.StartOn
 		INNER JOIN App.tbYear AS y
 			ON yp.YearNumber = y.YearNumber
 		INNER JOIN App.tbMonth AS m

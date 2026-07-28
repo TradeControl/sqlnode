@@ -9,13 +9,11 @@ AS
 				WHERE yp.StartOn <= i.InvoicedOn
 				ORDER BY yp.StartOn DESC
 			) AS StartOn,
-			i.InvoiceNumber,
-			i.InvoiceTypeCode,
 			it.TaxCode,
+			i.InvoiceTypeCode,
 			it.InvoiceValue,
 			it.TaxValue,
-			ISNULL(v.EUJurisdiction, 0) AS EUJurisdiction,
-			it.CashCode AS IdentityCode
+			ISNULL(s.ExportTypeCode, 0) AS ExportTypeCode
 		FROM App.vwTaxVatCashCodes AS c
 			INNER JOIN Invoice.tbItem AS it
 				ON c.CashCode = it.CashCode
@@ -23,13 +21,11 @@ AS
 				ON it.InvoiceNumber = i.InvoiceNumber
 			INNER JOIN Subject.tbSubject AS s
 				ON i.SubjectCode = s.SubjectCode
-			LEFT OUTER JOIN Subject.tbVirtual AS v
-				ON s.SubjectCode = v.SubjectCode
 			INNER JOIN App.tbTaxCode AS tc
 				ON it.TaxCode = tc.TaxCode
 		WHERE tc.TaxTypeCode = 1
 
-		UNION
+		UNION ALL
 
 		SELECT
 			(
@@ -38,13 +34,11 @@ AS
 				WHERE yp.StartOn <= i.InvoicedOn
 				ORDER BY yp.StartOn DESC
 			) AS StartOn,
-			ip.InvoiceNumber,
-			i.InvoiceTypeCode,
 			ip.TaxCode,
+			i.InvoiceTypeCode,
 			ip.InvoiceValue,
 			ip.TaxValue,
-			ISNULL(v.EUJurisdiction, 0) AS EUJurisdiction,
-			ip.ProjectCode AS IdentityCode
+			ISNULL(s.ExportTypeCode, 0) AS ExportTypeCode
 		FROM App.vwTaxVatCashCodes AS c
 			INNER JOIN Invoice.tbProject AS ip
 				ON c.CashCode = ip.CashCode
@@ -52,120 +46,80 @@ AS
 				ON ip.InvoiceNumber = i.InvoiceNumber
 			INNER JOIN Subject.tbSubject AS s
 				ON i.SubjectCode = s.SubjectCode
-			LEFT OUTER JOIN Subject.tbVirtual AS v
-				ON s.SubjectCode = v.SubjectCode
 			INNER JOIN App.tbTaxCode AS tc
 				ON ip.TaxCode = tc.TaxCode
 		WHERE tc.TaxTypeCode = 1
-	),
-	vat_detail AS
-	(
-		SELECT
-			StartOn,
-			TaxCode,
-			CASE
-				WHEN EUJurisdiction = 0 THEN
-					CASE InvoiceTypeCode
-						WHEN 0 THEN InvoiceValue
-						WHEN 1 THEN InvoiceValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END AS HomeSales,
-			CASE
-				WHEN EUJurisdiction = 0 THEN
-					CASE InvoiceTypeCode
-						WHEN 2 THEN InvoiceValue
-						WHEN 3 THEN InvoiceValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END AS HomePurchases,
-			CASE
-				WHEN EUJurisdiction <> 0 THEN
-					CASE InvoiceTypeCode
-						WHEN 0 THEN InvoiceValue
-						WHEN 1 THEN InvoiceValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END AS ExportSales,
-			CASE
-				WHEN EUJurisdiction <> 0 THEN
-					CASE InvoiceTypeCode
-						WHEN 2 THEN InvoiceValue
-						WHEN 3 THEN InvoiceValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END AS ExportPurchases,
-			CASE
-				WHEN EUJurisdiction = 0 THEN
-					CASE InvoiceTypeCode
-						WHEN 0 THEN TaxValue
-						WHEN 1 THEN TaxValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END AS HomeSalesVat,
-			CASE
-				WHEN EUJurisdiction = 0 THEN
-					CASE InvoiceTypeCode
-						WHEN 2 THEN TaxValue
-						WHEN 3 THEN TaxValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END AS HomePurchasesVat,
-			CASE
-				WHEN EUJurisdiction <> 0 THEN
-					CASE InvoiceTypeCode
-						WHEN 0 THEN TaxValue
-						WHEN 1 THEN TaxValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END AS ExportSalesVat,
-			CASE
-				WHEN EUJurisdiction <> 0 THEN
-					CASE InvoiceTypeCode
-						WHEN 2 THEN TaxValue
-						WHEN 3 THEN TaxValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END AS ExportPurchasesVat
-		FROM vat_transactions
-	),
-	vatcode_summary AS
-	(
-		SELECT
-			StartOn,
-			TaxCode,
-			SUM(HomeSales) AS HomeSales,
-			SUM(HomePurchases) AS HomePurchases,
-			SUM(ExportSales) AS ExportSales,
-			SUM(ExportPurchases) AS ExportPurchases,
-			SUM(HomeSalesVat) AS HomeSalesVat,
-			SUM(HomePurchasesVat) AS HomePurchasesVat,
-			SUM(ExportSalesVat) AS ExportSalesVat,
-			SUM(ExportPurchasesVat) AS ExportPurchasesVat
-		FROM vat_detail
-		GROUP BY
-			StartOn,
-			TaxCode
 	)
 	SELECT
 		StartOn,
 		TaxCode,
-		HomeSales AS HomeSales,
-		HomePurchases AS HomePurchases,
-		ExportSales AS ExportSales,
-		ExportPurchases AS ExportPurchases,
-		HomeSalesVat AS HomeSalesVat,
-		HomePurchasesVat AS HomePurchasesVat,
-		ExportSalesVat AS ExportSalesVat,
-		ExportPurchasesVat AS ExportPurchasesVat,
-		(HomeSalesVat + ExportSalesVat) - (HomePurchasesVat + ExportPurchasesVat) AS VatDue
-	FROM vatcode_summary;
+		CAST(SUM
+		(
+			CASE
+				WHEN ExportTypeCode IN (0, 2) THEN
+					CASE InvoiceTypeCode
+						WHEN 0 THEN TaxValue
+						WHEN 1 THEN TaxValue * -1
+						ELSE 0
+					END
+				ELSE 0
+			END
+		) AS decimal(18,5)) AS vatDueSales,
+		CAST(SUM
+		(
+			CASE
+				WHEN ExportTypeCode = 2 THEN
+					CASE InvoiceTypeCode
+						WHEN 2 THEN TaxValue * -1
+						WHEN 3 THEN TaxValue
+						ELSE 0
+					END
+				ELSE 0
+			END
+		) AS decimal(18,5)) AS vatDueAcquisitions,
+		CAST(SUM
+		(
+			CASE
+				WHEN ExportTypeCode IN (0, 2) THEN
+					CASE InvoiceTypeCode
+						WHEN 0 THEN InvoiceValue
+						WHEN 1 THEN InvoiceValue * -1
+						ELSE 0
+					END
+				ELSE 0
+			END
+		) AS decimal(18,5)) AS totalValueSalesExVAT,
+		CAST(SUM
+		(
+			CASE
+				WHEN ExportTypeCode IN (0, 2) THEN
+					CASE
+						WHEN ExportTypeCode = 0 AND InvoiceTypeCode = 2 THEN InvoiceValue
+						WHEN ExportTypeCode = 0 AND InvoiceTypeCode = 3 THEN InvoiceValue * -1
+						WHEN ExportTypeCode = 2 AND InvoiceTypeCode = 2 THEN InvoiceValue
+						WHEN ExportTypeCode = 2 AND InvoiceTypeCode = 3 THEN InvoiceValue * -1
+						ELSE 0
+					END
+				ELSE 0
+			END
+		) AS decimal(18,5)) AS totalValuePurchasesExVAT,
+		CAST(SUM
+		(
+			CASE
+				WHEN ExportTypeCode = 0 THEN
+					CASE InvoiceTypeCode
+						WHEN 2 THEN TaxValue * -1
+						WHEN 3 THEN TaxValue
+						ELSE 0
+					END
+				ELSE 0
+			END
+		) AS decimal(18,5)) AS vatReclaimedCurrPeriod,
+		CAST(0 AS decimal(18,5)) AS totalValueGoodsSuppliedExVAT,
+		CAST(0 AS decimal(18,5)) AS totalValueGoodsReceivedExVAT
+	FROM vat_transactions
+	WHERE ExportTypeCode <> 1
+	GROUP BY
+		StartOn,
+		TaxCode;
 GO

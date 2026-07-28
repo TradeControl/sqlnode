@@ -46,15 +46,12 @@ AS
 	SET
 		SubjectStatusCode = 1,
 		TaxCode = N'T1',
+		ExportTypeCode = 0,
 		PaymentTerms = N'30 days',
 		ExpectedDays = 0,
 		PaymentDays = 30,
 		PayDaysFromMonthEnd = 0,
 		PayBalance = 1
-	WHERE SubjectCode = @L2_EnergySupplierCode;
-
-	UPDATE Subject.tbVirtual
-	SET EUJurisdiction = 0
 	WHERE SubjectCode = @L2_EnergySupplierCode;
 
 	EXEC Subject.proc_AddNamespace
@@ -67,15 +64,12 @@ AS
 	SET
 		SubjectStatusCode = 1,
 		TaxCode = N'T1',
+		ExportTypeCode = 0,
 		PaymentTerms = N'30 days',
 		ExpectedDays = 0,
 		PaymentDays = 30,
 		PayDaysFromMonthEnd = 0,
 		PayBalance = 1
-	WHERE SubjectCode = @L2_SupermarketSupplierCode;
-
-	UPDATE Subject.tbVirtual
-	SET EUJurisdiction = 0
 	WHERE SubjectCode = @L2_SupermarketSupplierCode;
 
 	DECLARE

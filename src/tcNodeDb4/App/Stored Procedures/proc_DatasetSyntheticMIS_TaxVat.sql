@@ -58,7 +58,7 @@ AS
 	  AND (ABS(CHECKSUM(CONCAT(N'DS:VATADJ:ENABLE:', CONVERT(nvarchar(10), CAST(yp.StartOn AS date), 23)))) % 4) <> 0;
 
     ---------------------------------------------------------------------
-    -- Pay vat balance from Cash.vwVatStatement
+    -- Pay vat balance from Cash.vwTaxVatStatement
     ---------------------------------------------------------------------
 	DECLARE
 		@HmrcSubjectCode nvarchar(50),
@@ -89,7 +89,6 @@ AS
 		IF @LoopGuard > 200
 			THROW 51294, 'DatasetSyntheticMIS_TaxVat: loop guard triggered (too many VAT payment iterations).', 1;
 
-		-- Move the search window forward so we never re-read the last processed PayOn
 		SET @PayOn = DATEADD(month, 1, @PayOn);
 
 		SELECT TOP (1)
@@ -140,6 +139,5 @@ AS
 
 		EXEC Cash.proc_PaymentPost;
 
-		-- reset for next iteration
 		SET @Balance = NULL;
 	END

@@ -16,6 +16,7 @@ BEGIN TRY
 	DELETE FROM Object.tbFlow;
 	DELETE FROM Object.tbObject;
 	DELETE FROM Subject.tbAccount;
+	DELETE FROM Subject.tbVirtual;
 	DELETE FROM Subject.tbSubject;
 	DELETE FROM Usr.tbMenuUser;
 	DELETE FROM Usr.tbMenu;
@@ -32,6 +33,7 @@ BEGIN TRY
 	DELETE FROM Cash.tbCategory;
 	DELETE FROM App.tbTemplate;
     DELETE FROM App.tbJurisdiction;
+	DELETE FROM Subject.tbExportType;
 	
 	IF NOT EXISTS (SELECT * FROM [Usr].[tbMenuView])
 		INSERT INTO [Usr].[tbMenuView] ([MenuViewCode], [MenuView])
@@ -61,6 +63,12 @@ BEGIN TRY
 		, (1, 'Deploy')
 		, (2, 'Update')
 		, (3, 'Processed')
+
+	IF NOT EXISTS (SELECT * FROM [Subject].[tbExportType])
+		INSERT INTO [Subject].[tbExportType] ([ExportTypeCode], [ExportType])
+		VALUES (0, N'Home')
+		, (1, N'Export')
+		, (2, N'Northern Ireland')
 
 	IF NOT EXISTS (SELECT * FROM [App].[tbTemplate])
         INSERT INTO [App].[tbTemplate]
