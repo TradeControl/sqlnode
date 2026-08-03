@@ -1,9 +1,11 @@
-CREATE VIEW Cash.vwBalanceSheetVat
+﻿
+
+CREATE VIEW [Cash].[vwBalanceSheetVat]
 AS
-	WITH vat_due AS 
-	(	
+	WITH vat_due AS
+	(
 		SELECT StartOn, SUM(netVatDue) AS VatDue
-		FROM Cash.vwTaxVatSubmission
+		FROM Cash.vwTaxVatSummary
 		GROUP BY StartOn
 	)
 	, vat_paid AS

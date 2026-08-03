@@ -1,4 +1,4 @@
-CREATE VIEW Cash.vwTaxVatSummary
+﻿CREATE VIEW [Cash].[vwTaxVatSummary]
 AS
 	WITH vat_transactions AS
 	(
@@ -49,77 +49,100 @@ AS
 			INNER JOIN App.tbTaxCode AS tc
 				ON ip.TaxCode = tc.TaxCode
 		WHERE tc.TaxTypeCode = 1
+	), vat_tran AS
+	(
+		SELECT
+			StartOn,
+			TaxCode,
+			CAST(SUM
+			(
+				CASE
+					WHEN ExportTypeCode IN (0, 2) THEN
+						CASE InvoiceTypeCode
+							WHEN 0 THEN TaxValue
+							WHEN 1 THEN TaxValue * -1
+							ELSE 0
+						END
+					ELSE 0
+				END
+			) AS decimal(18,5)) AS vatDueSales,
+			CAST(SUM
+			(
+				CASE
+					WHEN ExportTypeCode = 2 THEN
+						CASE InvoiceTypeCode
+							WHEN 2 THEN TaxValue * -1
+							WHEN 3 THEN TaxValue
+							ELSE 0
+						END
+					ELSE 0
+				END
+			) AS decimal(18,5)) AS vatDueAcquisitions,
+			CAST(SUM
+			(
+				CASE
+					WHEN ExportTypeCode IN (0, 2) THEN
+						CASE InvoiceTypeCode
+							WHEN 0 THEN InvoiceValue
+							WHEN 1 THEN InvoiceValue * -1
+							ELSE 0
+						END
+					ELSE 0
+				END
+			) AS decimal(18,5)) AS totalValueSalesExVAT,
+			CAST(SUM
+			(
+				CASE
+					WHEN ExportTypeCode IN (0, 2) THEN
+						CASE
+							WHEN ExportTypeCode = 0 AND InvoiceTypeCode = 2 THEN InvoiceValue
+							WHEN ExportTypeCode = 0 AND InvoiceTypeCode = 3 THEN InvoiceValue * -1
+							WHEN ExportTypeCode = 2 AND InvoiceTypeCode = 2 THEN InvoiceValue
+							WHEN ExportTypeCode = 2 AND InvoiceTypeCode = 3 THEN InvoiceValue * -1
+							ELSE 0
+						END
+					ELSE 0
+				END
+			) AS decimal(18,5)) AS totalValuePurchasesExVAT,
+			CAST(SUM
+			(
+				CASE
+					WHEN ExportTypeCode = 0 THEN
+						CASE InvoiceTypeCode
+							WHEN 2 THEN TaxValue * -1
+							WHEN 3 THEN TaxValue
+							ELSE 0
+						END
+					ELSE 0
+				END
+			) AS decimal(18,5)) AS vatReclaimedCurrPeriod,
+			CAST(0 AS decimal(18,5)) AS totalValueGoodsSuppliedExVAT,
+			CAST(0 AS decimal(18,5)) AS totalValueGoodsReceivedExVAT
+		FROM vat_transactions
+		WHERE ExportTypeCode <> 1
+		GROUP BY
+			StartOn,
+			TaxCode
 	)
-	SELECT
-		StartOn,
-		TaxCode,
-		CAST(SUM
-		(
-			CASE
-				WHEN ExportTypeCode IN (0, 2) THEN
-					CASE InvoiceTypeCode
-						WHEN 0 THEN TaxValue
-						WHEN 1 THEN TaxValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END
-		) AS decimal(18,5)) AS vatDueSales,
-		CAST(SUM
-		(
-			CASE
-				WHEN ExportTypeCode = 2 THEN
-					CASE InvoiceTypeCode
-						WHEN 2 THEN TaxValue * -1
-						WHEN 3 THEN TaxValue
-						ELSE 0
-					END
-				ELSE 0
-			END
-		) AS decimal(18,5)) AS vatDueAcquisitions,
-		CAST(SUM
-		(
-			CASE
-				WHEN ExportTypeCode IN (0, 2) THEN
-					CASE InvoiceTypeCode
-						WHEN 0 THEN InvoiceValue
-						WHEN 1 THEN InvoiceValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END
-		) AS decimal(18,5)) AS totalValueSalesExVAT,
-		CAST(SUM
-		(
-			CASE
-				WHEN ExportTypeCode IN (0, 2) THEN
-					CASE
-						WHEN ExportTypeCode = 0 AND InvoiceTypeCode = 2 THEN InvoiceValue
-						WHEN ExportTypeCode = 0 AND InvoiceTypeCode = 3 THEN InvoiceValue * -1
-						WHEN ExportTypeCode = 2 AND InvoiceTypeCode = 2 THEN InvoiceValue
-						WHEN ExportTypeCode = 2 AND InvoiceTypeCode = 3 THEN InvoiceValue * -1
-						ELSE 0
-					END
-				ELSE 0
-			END
-		) AS decimal(18,5)) AS totalValuePurchasesExVAT,
-		CAST(SUM
-		(
-			CASE
-				WHEN ExportTypeCode = 0 THEN
-					CASE InvoiceTypeCode
-						WHEN 2 THEN TaxValue * -1
-						WHEN 3 THEN TaxValue
-						ELSE 0
-					END
-				ELSE 0
-			END
-		) AS decimal(18,5)) AS vatReclaimedCurrPeriod,
-		CAST(0 AS decimal(18,5)) AS totalValueGoodsSuppliedExVAT,
-		CAST(0 AS decimal(18,5)) AS totalValueGoodsReceivedExVAT
-	FROM vat_transactions
-	WHERE ExportTypeCode <> 1
-	GROUP BY
-		StartOn,
-		TaxCode;
+	SELECT 
+		vt.StartOn
+		, vt.TaxCode
+		, vt.totalValueGoodsReceivedExVAT
+		, vt.totalValueGoodsSuppliedExVAT
+		, vt.totalValuePurchasesExVAT
+		, vt.totalValueSalesExVAT
+		, vt.vatDueAcquisitions
+		, vt.vatDueSales
+		, vt.vatReclaimedCurrPeriod
+		, p.VatAdjustment vatAdjustment
+		, CAST
+		  (
+			vatDueSales
+			+ vatDueAcquisitions
+			+ vatReclaimedCurrPeriod
+			+ p.VatAdjustment AS decimal(18,5)
+		  ) AS netVatDue
+	FROM vat_tran vt
+		JOIN App.tbYearPeriod AS p
+			ON vt.StartOn = p.StartOn
 GO

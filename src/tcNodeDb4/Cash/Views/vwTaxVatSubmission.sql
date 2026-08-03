@@ -1,4 +1,6 @@
-CREATE VIEW Cash.vwTaxVatSubmission
+﻿
+
+CREATE   VIEW [Cash].[vwTaxVatSubmission]
 AS
 WITH vat_dates AS
 (
@@ -33,19 +35,12 @@ vat_results AS
         SUM(vatDueAcquisitions) AS vatDueAcquisitions,
         SUM(vatReclaimedCurrPeriod) AS vatReclaimedCurrPeriod,
         SUM(totalValueSalesExVAT) AS totalValueSalesExVAT,
-        SUM(totalValuePurchasesExVAT) AS totalValuePurchasesExVAT
+        SUM(totalValuePurchasesExVAT) AS totalValuePurchasesExVAT,
+		SUM(vatCodeDue.vatAdjustment) AS vatAdjustment,
+		SUM(vatCodeDue.netVatDue) AS netVatDue
     FROM Cash.vwTaxVatSummary AS vatCodeDue
         JOIN vatPeriod
             ON vatCodeDue.StartOn = vatPeriod.StartOn
-    GROUP BY
-        VatEndOn
-),
-vat_adjustments AS
-(
-    SELECT
-        VatEndOn,
-        CAST(SUM(VatAdjustment) AS decimal(18, 5)) AS VatAdjustment
-    FROM vatPeriod AS p
     GROUP BY
         VatEndOn
 )
@@ -53,19 +48,18 @@ SELECT
     active_year.YearNumber,
     active_year.Description,
     active_month.MonthName AS Period,
-    vat_results.VatEndOn AS StartOn,
+    year_period.StartOn,
+    DATEADD(DAY, -DATEPART(DAY, year_period.StartOn), DATEADD(MONTH, 1, year_period.StartOn)) AS VatEndOn,
     CAST(vat_results.vatDueSales AS decimal(18, 5)) AS vatDueSales,
     CAST(vat_results.vatDueAcquisitions AS decimal(18, 5)) AS vatDueAcquisitions,
-    CAST(vat_results.vatDueSales + vat_results.vatDueAcquisitions + vat_adjustments.VatAdjustment AS decimal(18, 5)) AS totalVatDue,
+    CAST(vat_results.vatDueSales + vat_results.vatDueAcquisitions + vat_results.VatAdjustment AS decimal(18, 5)) AS totalVatDue,
     CAST(vat_results.vatReclaimedCurrPeriod + vat_results.vatDueAcquisitions AS decimal(18, 5)) AS vatReclaimedCurrPeriod,
-    CAST(vat_results.vatDueSales + vat_results.vatDueAcquisitions + vat_results.vatReclaimedCurrPeriod + vat_adjustments.VatAdjustment AS decimal(18, 5)) AS netVatDue,
+    CAST(vat_results.netVatDue AS decimal(18, 5)) AS netVatDue,
     CAST(vat_results.totalValueSalesExVAT AS decimal(18, 5)) AS totalValueSalesExVAT,
     CAST(vat_results.totalValuePurchasesExVAT AS decimal(18, 5)) AS totalValuePurchasesExVAT,
     CAST(0 AS decimal(18, 5)) AS totalValueGoodsSuppliedExVAT,
     CAST(0 AS decimal(18, 5)) AS totalValueGoodsReceivedExVAT
 FROM vat_results
-    JOIN vat_adjustments
-        ON vat_results.VatEndOn = vat_adjustments.VatEndOn
     JOIN App.tbYearPeriod AS year_period
         ON vat_results.VatEndOn = year_period.StartOn
     JOIN App.tbMonth AS active_month
