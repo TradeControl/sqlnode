@@ -77,22 +77,37 @@ BEGIN TRY
             ('COMIN26',
              'Minimal Micro Company Accounts 2026',
              'App.proc_Template_CO_MICRO_CUR_MIN_2026',
-             'Ultra‑minimal micro‑entity accounts for very simple companies. One sales code, one cost code, one wages code, one admin code. Ideal for side‑hustles, dormant companies, and very small operations.', 1),
+             'Ultra‑minimal micro‑entity accounts for very simple companies. One sales code, one cost code, one wages code, one admin code. Ideal for side‑hustles, dormant companies, and very small operations.',
+             1),
 
             ('COSTD26',
              'Standard Micro Company Accounts 2026',
              'App.proc_Template_CO_MICRO_CUR_STD_2026',
-             'Enhanced micro‑entity accounts with real‑world business categories. Splits sales into labour/materials, direct costs into materials/subs/fuel/travel, full admin breakdown, and detailed depreciation classes. Ideal for tradesmen, small agencies, and micro‑manufacturers who want meaningful reporting without leaving the micro‑entity regime.', 1),
+             'Enhanced micro‑entity accounts with real‑world business categories. Splits sales into labour/materials, direct costs into materials/subs/fuel/travel, full admin breakdown, and detailed depreciation classes. Ideal for tradesmen, small agencies, and micro‑manufacturers who want meaningful reporting without leaving the micro‑entity regime.',
+             1),
+            ('STMIN26-SA',
+             'Minimal Sole Trader Accounts 2026 (SA)',
+             'App.proc_Template_ST_SOLE_CUR_MIN_SA_2026',
+             'Minimal sole trader accounts aligned with SA100/SA103F. Uses the full SA expense taxonomy and supports XML submissions. Ideal for self‑employed individuals filing traditional Self Assessment returns.',
+             0),
 
-            ('STMIN26',
-             'Minimal Sole Trader Accounts 2026',
-             'App.proc_Template_ST_SOLE_CUR_MIN_2026',
-             'Simple, MTD‑ready sole trader accounts. No balance sheet, no corporation tax, optional VAT, and a clean income/expense structure aligned with HMRC reporting groups. Ideal for tradespeople, freelancers, and self‑employed individuals preparing for Making Tax Digital.', 0),
+            ('STSTD26-SA',
+             'Standard Sole Trader Accounts 2026 (SA)',
+             'App.proc_Template_ST_SOLE_CUR_STD_SA_2026',
+             'Standard sole trader accounts aligned with SA100/SA103F. Provides a realistic expense breakdown for accurate SA reporting. Suitable for tradespeople and freelancers filing traditional Self Assessment returns.',
+             0),
 
-            ('STSTD26',
-             'Standard Sole Trader Accounts 2026',
-             'App.proc_Template_ST_SOLE_CUR_STD_2026',
-             'Sole trader accounts with a more realistic expense breakdown (motor, premises, phone, insurance, bank charges, professional fees, advertising, repairs). Designed to reduce manual reclassification before MTD ITSA submissions.', 0);
+            ('STMIN26-MTD',
+             'Minimal Sole Trader Accounts 2026 (MTD)',
+             'App.proc_Template_ST_SOLE_CUR_MIN_MTD_2026',
+             'Minimal MTD ITSA‑ready sole trader accounts. Includes Quarterly Update totals and EOPS adjustments. Ideal for simple businesses transitioning to Making Tax Digital.',
+             0),
+
+            ('STSTD26-MTD',
+             'Standard Sole Trader Accounts 2026 (MTD)',
+             'App.proc_Template_ST_SOLE_CUR_STD_MTD_2026',
+             'Standard MTD ITSA‑ready sole trader accounts. Includes full Quarterly Update totals and EOPS adjustments. Designed for tradespeople and freelancers who need accurate MTD reporting.',
+             0);
 
 	IF NOT EXISTS (SELECT * FROM [App].[tbTemplateDataset])
 		INSERT INTO [App].[tbTemplateDataset]

@@ -722,6 +722,12 @@
     <Build Include="Cash\Views\vwTaxBizPayloadAudit.sql" />
     <Build Include="Subject\Tables\tbExportType.sql" />
     <Build Include="Cash\Views\vwTaxVatSubmission.sql" />
+    <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_MIN_SA_2026.sql" />
+    <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_STD_SA_2026.sql" />
+    <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_MIN_MTD_2026.sql" />
+    <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_STD_MTD_2026.sql" />
+    <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_TAX_SA_2026.sql" />
+    <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_TAX_MTD_2026.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />

@@ -38,7 +38,7 @@ AS
 					THEN N'Standard Micro Company Accounts 2026'
 				WHEN @IsCompany = 1
 					THEN N'Minimal Micro Company Accounts 2026'
-				ELSE N'Standard Sole Trader Accounts 2026'
+				ELSE N'Standard Sole Trader Accounts 2026 (SA)'
 			END;
 
 		-- If caller didn't specify VAT setting, inherit from template default.

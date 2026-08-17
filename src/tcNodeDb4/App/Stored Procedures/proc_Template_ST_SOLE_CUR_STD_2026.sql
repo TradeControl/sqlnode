@@ -1,4 +1,4 @@
-CREATE PROCEDURE [App].[proc_Template_ST_SOLE_CUR_STD_2026]
+CREATE PROCEDURE App.proc_Template_ST_SOLE_CUR_STD_2026
 (
     @FinancialMonth      SMALLINT      = 4,
     @GovAccountName      NVARCHAR(255),
@@ -11,7 +11,7 @@ CREATE PROCEDURE [App].[proc_Template_ST_SOLE_CUR_STD_2026]
     @ReserveAccount      NVARCHAR(50)  = NULL,
     @RA_SortCode         NVARCHAR(10)  = NULL,
     @RA_AccountNumber    NVARCHAR(20)  = NULL,
-    @IsVATRegistered     BIT           = 0
+    @IsVATRegistered     BIT           = 0     -- Sole traders default to non‑VAT
 )
 AS
     SET NOCOUNT, XACT_ABORT ON;
