@@ -30,7 +30,6 @@ DECLARE @RC int
       , @RA_SortCode = @RA_SortCode
       , @RA_AccountNumber = @RA_AccountNumber
       , @IsVATRegistered = @IsVATRegistered
-      , @IsMTD = 1
 
     RETURN @RC;
 END TRY
