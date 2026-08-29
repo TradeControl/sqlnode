@@ -104,6 +104,7 @@
     <Folder Include="Web\Stored Procedures\" />
     <Folder Include="Security\" />
     <Folder Include="Scripts" />
+    <Folder Include="Tests\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Subject\Tables\tbAddress.sql" />
@@ -675,6 +676,7 @@
     <Build Include="Cash\Tables\tbTaxTag.sql" />
     <Build Include="Cash\Tables\tbTaxTagMap.sql" />
     <Build Include="Cash\Functions\fnTaxTagMapValidate.sql" />
+    <Build Include="Cash\Functions\fnTaxBizCumulative.sql" />
     <Build Include="Cash\Stored Procedures\proc_TaxTagMapValidate.sql" />
     <Build Include="Cash\Tables\tbTaxTagClass.sql" />
     <Build Include="App\Stored Procedures\proc_Template_BASE_MIN_2026.sql" />
@@ -719,14 +721,12 @@
     <Build Include="Cash\Views\vwTaxBizPayload.sql" />
     <Build Include="Cash\Views\vwTagCashPeriodMap.sql" />
     <Build Include="Cash\Views\vwCashCodePeriodValues.sql" />
+    <Build Include="Cash\Views\vwTaxTagCashCode.sql" />
     <Build Include="Cash\Views\vwTaxBizPayloadAudit.sql" />
     <Build Include="Subject\Tables\tbExportType.sql" />
     <Build Include="Cash\Views\vwTaxVatSubmission.sql" />
-    <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_MIN_SA_2026.sql" />
-    <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_STD_SA_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_MIN_MTD_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_STD_MTD_2026.sql" />
-    <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_TAX_SA_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_TAX_MTD_2026.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -737,6 +737,7 @@
     <None Include="Scripts\EXEC_DatasetSyntheticMIS.sql" />
     <None Include="Scripts\PROOF_CashStatementReconciliation.sql" />
     <None Include="Scripts\MTDSoleTraderMappingEnquiry.sql" />
+    <None Include="Tests\Phase4D_CumulativeProjection.sql" />
     <None Include="Scripts\NamespaceSelector_testscript.sql" />
     <None Include="Scripts\EXEC_PaymentPost.sql" />
     <None Include="Subject\Stored Procedures\proc_AddRoot.sql" />

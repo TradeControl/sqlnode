@@ -14,7 +14,7 @@ CREATE PROCEDURE App.proc_Template_CO_MICRO_CUR_STD_2026
     @IsVATRegistered BIT = 1      -- Micro entity default to VAT Registered
 )
 AS
-    SET NOCOUNT, XACT_ABORT ON;
+SET NOCOUNT, XACT_ABORT ON;
 
 BEGIN TRY
 

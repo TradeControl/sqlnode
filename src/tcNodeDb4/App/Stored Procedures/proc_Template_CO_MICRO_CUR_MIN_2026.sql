@@ -1,4 +1,4 @@
-CREATE PROCEDURE [App].[proc_Template_CO_MICRO_CUR_MIN_2026]
+CREATE PROCEDURE App.proc_Template_CO_MICRO_CUR_MIN_2026
 (
     @FinancialMonth SMALLINT = 4,
     @GovAccountName NVARCHAR(255),

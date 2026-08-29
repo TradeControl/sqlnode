@@ -10,7 +10,7 @@ AS
 			JOIN App.tbYearPeriod pd ON yr.YearNumber = pd.YearNumber
 		WHERE (yr.CashStatusCode BETWEEN 1 AND 2)
 	)
-	SELECT cc.CategoryCode, cc.CashCode, cat.CashTypeCode, cp.StartOn,
+	SELECT cc.CategoryCode, cc.CashCode, cat.CashTypeCode, cat.CashPolarityCode, cp.StartOn,
 			CASE cat.CashPolarityCode WHEN 0 THEN cp.InvoiceValue * -1 ELSE cp.InvoiceValue END AS InvoiceValue
 	FROM Cash.tbPeriod cp
 		JOIN Cash.tbCode cc

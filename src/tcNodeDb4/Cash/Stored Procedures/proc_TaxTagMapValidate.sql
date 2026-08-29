@@ -1,6 +1,6 @@
 CREATE PROCEDURE Cash.proc_TaxTagMapValidate
 (
-    @TaxSourceCode NVARCHAR(10)
+    @TaxSourceCode NVARCHAR(20)
 )
 AS
 BEGIN
@@ -10,7 +10,7 @@ BEGIN
     (
         RowNo        INT IDENTITY(1,1) NOT NULL,
         IsError      BIT NOT NULL,
-        TagCode      NVARCHAR(20) NULL,
+        TagCode      NVARCHAR(64) NULL,
         TagName      NVARCHAR(100) NULL,
         CashCode     NVARCHAR(50) NULL,
         CategoryCode NVARCHAR(10) NULL,

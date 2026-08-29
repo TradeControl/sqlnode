@@ -85,28 +85,16 @@ BEGIN TRY
              'App.proc_Template_CO_MICRO_CUR_STD_2026',
              'Enhanced micro‑entity accounts with real‑world business categories. Splits sales into labour/materials, direct costs into materials/subs/fuel/travel, full admin breakdown, and detailed depreciation classes. Ideal for tradesmen, small agencies, and micro‑manufacturers who want meaningful reporting without leaving the micro‑entity regime.',
              1),
-            ('STMIN26-SA',
-             'Minimal Sole Trader Accounts 2026 (SA)',
-             'App.proc_Template_ST_SOLE_CUR_MIN_SA_2026',
-             'Minimal sole trader accounts aligned with SA100/SA103F. Uses the full SA expense taxonomy and supports XML submissions. Ideal for self‑employed individuals filing traditional Self Assessment returns.',
-             0),
-
-            ('STSTD26-SA',
-             'Standard Sole Trader Accounts 2026 (SA)',
-             'App.proc_Template_ST_SOLE_CUR_STD_SA_2026',
-             'Standard sole trader accounts aligned with SA100/SA103F. Provides a realistic expense breakdown for accurate SA reporting. Suitable for tradespeople and freelancers filing traditional Self Assessment returns.',
-             0),
-
             ('STMIN26-MTD',
              'Minimal Sole Trader Accounts 2026 (MTD)',
              'App.proc_Template_ST_SOLE_CUR_MIN_MTD_2026',
-             'Minimal MTD ITSA‑ready sole trader accounts. Includes Quarterly Update totals and EOPS adjustments. Ideal for simple businesses transitioning to Making Tax Digital.',
+             'Minimal sole trader accounting for MTD Income Tax. Statutory mappings are configured separately.',
              0),
 
             ('STSTD26-MTD',
              'Standard Sole Trader Accounts 2026 (MTD)',
              'App.proc_Template_ST_SOLE_CUR_STD_MTD_2026',
-             'Standard MTD ITSA‑ready sole trader accounts. Includes full Quarterly Update totals and EOPS adjustments. Designed for tradespeople and freelancers who need accurate MTD reporting.',
+             'Standard sole trader accounting for MTD Income Tax. Statutory mappings are configured separately.',
              0);
 
 	IF NOT EXISTS (SELECT * FROM [App].[tbTemplateDataset])
