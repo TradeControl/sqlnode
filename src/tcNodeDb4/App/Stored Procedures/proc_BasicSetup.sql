@@ -1,6 +1,6 @@
 CREATE PROCEDURE App.proc_BasicSetup
 (
-	@TemplateName NVARCHAR(100),
+	@TemplateCode NVARCHAR(10),
 	@FinancialMonth SMALLINT = 4,
 	@CoinTypeCode SMALLINT,
 	@GovAccountName NVARCHAR(255),
@@ -36,8 +36,11 @@ AS
 		UPDATE App.tbOptions
 		SET CoinTypeCode = @CoinTypeCode;
 
-		DECLARE 
-			@ProcName nvarchar(100) = (SELECT StoredProcedure FROM App.tbTemplate WHERE TemplateName = @TemplateName);		
+		DECLARE @ProcName nvarchar(100) =
+			(SELECT StoredProcedure FROM App.tbTemplate WHERE TemplateCode = @TemplateCode);
+
+		IF @ProcName IS NULL
+			THROW 51001, 'BasicSetup: template was not found in App.tbTemplate.', 1;
 
 		EXEC @ProcName
 				@FinancialMonth = @FinancialMonth,

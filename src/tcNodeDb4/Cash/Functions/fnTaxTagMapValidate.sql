@@ -14,118 +14,148 @@ RETURNS @Result TABLE
 )
 AS
 BEGIN
-    DECLARE @Detailed TABLE (TagCode NVARCHAR(64) PRIMARY KEY);
-    INSERT INTO @Detailed VALUES
-        ('costOfGoods'), ('paymentsToSubcontractors'), ('wagesAndStaffCosts'),
-        ('carVanTravelExpenses'), ('premisesRunningCosts'), ('maintenanceCosts'),
-        ('adminCosts'), ('advertisingCosts'), ('businessEntertainmentCosts'),
-        ('interestOnBankOtherLoans'), ('financeCharges'), ('professionalFees'), ('otherExpenses');
-    DECLARE @Manifest TABLE (TagCode NVARCHAR(64) PRIMARY KEY, StatutoryPolarityCode SMALLINT NOT NULL);
-    INSERT INTO @Manifest VALUES
-        ('turnover', 1), ('otherBusinessIncome', 1), ('consolidatedExpenses', 0),
-        ('costOfGoods', 0), ('paymentsToSubcontractors', 0), ('wagesAndStaffCosts', 0),
-        ('carVanTravelExpenses', 0), ('premisesRunningCosts', 0), ('maintenanceCosts', 0),
-        ('adminCosts', 0), ('advertisingCosts', 0), ('businessEntertainmentCosts', 0),
-        ('interestOnBankOtherLoans', 0), ('financeCharges', 0), ('professionalFees', 0),
-        ('otherExpenses', 0);
+    IF NOT EXISTS (SELECT 1 FROM Cash.tbTaxTagSource WHERE TaxSourceCode = @TaxSourceCode)
+        INSERT INTO @Result VALUES
+            (1, NULL, NULL, NULL, NULL, NULL, N'Tax Source does not exist.');
 
+    ----------------------------------------------------------------
+    -- Only Component tags are eligible for accounting mappings.
+    ----------------------------------------------------------------
+    INSERT INTO @Result
+    SELECT 1, tm.TagCode, t.TagName, NULLIF(tm.CashCode, ''), NULLIF(tm.CategoryCode, ''), NULL,
+           N'Only Component Tax Tags may have Category or CashCode mappings.'
+    FROM Cash.tbTaxTagMap tm
+    JOIN Cash.tbTaxTag t
+      ON t.TaxSourceCode = tm.TaxSourceCode
+     AND t.TagCode = tm.TagCode
+    WHERE tm.TaxSourceCode = @TaxSourceCode
+      AND t.TagClassCode <> 1;
+
+    ----------------------------------------------------------------
+    -- Category roots must exist, be enabled, have an eligible tree type,
+    -- and resolve to at least one enabled nominal CashCode contributor.
+    ----------------------------------------------------------------
     INSERT INTO @Result
     SELECT 1, tm.TagCode, t.TagName, NULL, tm.CategoryCode, NULL,
-           N'Mapped category does not exist or resolves to no enabled non-neutral nominal CashCode.'
+           CASE
+               WHEN c.CategoryCode IS NULL THEN N'Mapped Category does not exist.'
+               WHEN c.IsEnabled = 0 THEN N'Mapped Category is disabled.'
+               WHEN c.CategoryTypeCode NOT IN (0, 1) THEN N'Mapped Category is not a nominal or total Category.'
+               ELSE N'Mapped Category resolves to no enabled nominal CashCode contributor.'
+           END
     FROM Cash.tbTaxTagMap tm
-    LEFT JOIN Cash.tbTaxTag t ON t.TaxSourceCode = tm.TaxSourceCode AND t.TagCode = tm.TagCode
-    WHERE tm.TaxSourceCode = @TaxSourceCode AND tm.IsEnabled = 1 AND tm.MapTypeCode = 0
-      AND NOT EXISTS
+    JOIN Cash.tbTaxTag t
+      ON t.TaxSourceCode = tm.TaxSourceCode
+     AND t.TagCode = tm.TagCode
+    LEFT JOIN Cash.tbCategory c ON c.CategoryCode = tm.CategoryCode
+    WHERE tm.TaxSourceCode = @TaxSourceCode
+      AND tm.IsEnabled = 1
+      AND tm.MapTypeCode = 0
+      AND
       (
-          SELECT 1 FROM Cash.vwTaxTagCashCode ec
-          WHERE ec.TaxSourceCode = tm.TaxSourceCode AND ec.TagCode = tm.TagCode
-            AND ec.MapTypeCode = tm.MapTypeCode AND ec.MappingRoot = tm.CategoryCode
+          c.CategoryCode IS NULL OR c.IsEnabled = 0 OR c.CategoryTypeCode NOT IN (0, 1)
+          OR NOT EXISTS
+          (
+              SELECT 1 FROM Cash.vwTaxTagCashCode ec
+              WHERE ec.TaxSourceCode = tm.TaxSourceCode
+                AND ec.TagCode = tm.TagCode
+                AND ec.MapTypeCode = tm.MapTypeCode
+                AND ec.MappingRoot = tm.CategoryCode
+          )
       );
 
+    ----------------------------------------------------------------
+    -- Direct CashCode roots must be enabled nominal contributors.
+    ----------------------------------------------------------------
     INSERT INTO @Result
-    SELECT 1, tm.TagCode, t.TagName, tm.CashCode, NULL, NULL,
-           N'Mapped CashCode does not exist or is not an enabled non-neutral nominal leaf.'
+    SELECT 1, tm.TagCode, t.TagName, tm.CashCode, cc.CategoryCode, NULL,
+           CASE
+               WHEN cc.CashCode IS NULL THEN N'Mapped CashCode does not exist.'
+               WHEN cc.IsEnabled = 0 THEN N'Mapped CashCode is disabled.'
+               WHEN c.CategoryCode IS NULL OR c.IsEnabled = 0 OR c.CategoryTypeCode <> 0
+                   THEN N'Mapped CashCode is not attached to an enabled nominal Category.'
+               ELSE N'Mapped CashCode is not an eligible effective contributor.'
+           END
     FROM Cash.tbTaxTagMap tm
-    LEFT JOIN Cash.tbTaxTag t ON t.TaxSourceCode = tm.TaxSourceCode AND t.TagCode = tm.TagCode
-    WHERE tm.TaxSourceCode = @TaxSourceCode AND tm.IsEnabled = 1 AND tm.MapTypeCode = 1
-      AND NOT EXISTS
+    JOIN Cash.tbTaxTag t
+      ON t.TaxSourceCode = tm.TaxSourceCode
+     AND t.TagCode = tm.TagCode
+    LEFT JOIN Cash.tbCode cc ON cc.CashCode = tm.CashCode
+    LEFT JOIN Cash.tbCategory c ON c.CategoryCode = cc.CategoryCode
+    WHERE tm.TaxSourceCode = @TaxSourceCode
+      AND tm.IsEnabled = 1
+      AND tm.MapTypeCode = 1
+      AND
       (
-          SELECT 1 FROM Cash.vwTaxTagCashCode ec
-          WHERE ec.TaxSourceCode = tm.TaxSourceCode AND ec.TagCode = tm.TagCode
-            AND ec.MapTypeCode = tm.MapTypeCode AND ec.MappingRoot = tm.CashCode
+          cc.CashCode IS NULL OR cc.IsEnabled = 0
+          OR c.CategoryCode IS NULL OR c.IsEnabled = 0 OR c.CategoryTypeCode <> 0
+          OR NOT EXISTS
+          (
+              SELECT 1 FROM Cash.vwTaxTagCashCode ec
+              WHERE ec.TaxSourceCode = tm.TaxSourceCode
+                AND ec.TagCode = tm.TagCode
+                AND ec.MapTypeCode = tm.MapTypeCode
+                AND ec.MappingRoot = tm.CashCode
+          )
       );
 
+    ----------------------------------------------------------------
+    -- Preserve route multiplicity: duplicate effective inclusion in one tag
+    -- is parent/descendant or multiple-root double counting.
+    ----------------------------------------------------------------
     INSERT INTO @Result
     SELECT 1, ec.TagCode, t.TagName, ec.CashCode, ec.LeafCategoryCode, COUNT(*),
            N'CashCode is included multiple times in this tag through overlapping mapping roots.'
     FROM Cash.vwTaxTagCashCode ec
-    JOIN Cash.tbTaxTag t ON t.TaxSourceCode = ec.TaxSourceCode AND t.TagCode = ec.TagCode
+    JOIN Cash.tbTaxTag t
+      ON t.TaxSourceCode = ec.TaxSourceCode
+     AND t.TagCode = ec.TagCode
+     AND t.TagClassCode = 1
     WHERE ec.TaxSourceCode = @TaxSourceCode
     GROUP BY ec.TagCode, t.TagName, ec.CashCode, ec.LeafCategoryCode
     HAVING COUNT(*) > 1;
 
-    INSERT INTO @Result
-    SELECT 1, MIN(ec.TagCode), NULL, ec.CashCode, ec.LeafCategoryCode,
-           COUNT(DISTINCT ec.TagCode),
-           N'CashCode contributes to more than one mutually exclusive cumulative Tax Tag.'
-    FROM Cash.vwTaxTagCashCode ec
-    WHERE ec.TaxSourceCode = @TaxSourceCode
-      AND @TaxSourceCode = 'UK-ITSA-SE-CUM'
-    GROUP BY ec.CashCode, ec.LeafCategoryCode
-    HAVING COUNT(DISTINCT ec.TagCode) > 1;
-
+    ----------------------------------------------------------------
+    -- The Tax Tag cash orientation is independent of the mapping being checked
+    -- and must match every actual leaf contributor.
+    ----------------------------------------------------------------
     INSERT INTO @Result
     SELECT 1, ec.TagCode, t.TagName, ec.CashCode, ec.LeafCategoryCode, NULL,
-           N'Contributor polarity is neutral, null, or does not match the Tax Tag statutory orientation.'
+           N'Contributor polarity is neutral, null, or does not match the Tax Tag cash polarity.'
     FROM Cash.vwTaxTagCashCode ec
-    JOIN Cash.tbTaxTag t ON t.TaxSourceCode = ec.TaxSourceCode AND t.TagCode = ec.TagCode
+    JOIN Cash.tbTaxTag t
+      ON t.TaxSourceCode = ec.TaxSourceCode
+     AND t.TagCode = ec.TagCode
+     AND t.TagClassCode = 1
     WHERE ec.TaxSourceCode = @TaxSourceCode
-      AND @TaxSourceCode = 'UK-ITSA-SE-CUM'
       AND (ec.CashPolarityCode IS NULL OR ec.CashPolarityCode = 2
-           OR ec.CashPolarityCode <> t.StatutoryPolarityCode);
+           OR ec.CashPolarityCode <> t.CashPolarityCode);
 
-    IF @TaxSourceCode = 'UK-ITSA-SE-CUM'
-    BEGIN
-        IF EXISTS
-           (
-               SELECT m.TagCode, m.StatutoryPolarityCode FROM @Manifest m
-               EXCEPT
-               SELECT t.TagCode, t.StatutoryPolarityCode FROM Cash.tbTaxTag t
-               WHERE t.TaxSourceCode = @TaxSourceCode
-           )
-           OR EXISTS
-           (
-               SELECT t.TagCode, t.StatutoryPolarityCode FROM Cash.tbTaxTag t
-               WHERE t.TaxSourceCode = @TaxSourceCode
-               EXCEPT
-               SELECT m.TagCode, m.StatutoryPolarityCode FROM @Manifest m
-           )
-            INSERT INTO @Result VALUES
-                (1, NULL, NULL, NULL, NULL, NULL,
-                 N'Cumulative source manifest must contain exactly sixteen approved tags with explicit orientations.');
-
-        IF NOT EXISTS (SELECT 1 FROM Cash.vwTaxTagCashCode WHERE TaxSourceCode = @TaxSourceCode AND TagCode = 'turnover')
-           OR NOT EXISTS (SELECT 1 FROM Cash.vwTaxTagCashCode WHERE TaxSourceCode = @TaxSourceCode AND TagCode = 'otherBusinessIncome')
-            INSERT INTO @Result VALUES
-                (1, NULL, NULL, NULL, NULL, NULL, N'Both cumulative income tags must be mapped.');
-
-        DECLARE @HasConsolidated BIT = CASE WHEN EXISTS
-            (SELECT 1 FROM Cash.vwTaxTagCashCode WHERE TaxSourceCode = @TaxSourceCode AND TagCode = 'consolidatedExpenses')
-            THEN 1 ELSE 0 END;
-        DECLARE @DetailedMapped INT =
-            (SELECT COUNT(*) FROM @Detailed d WHERE EXISTS
-                (SELECT 1 FROM Cash.vwTaxTagCashCode ec
-                 WHERE ec.TaxSourceCode = @TaxSourceCode AND ec.TagCode = d.TagCode));
-
-        IF @HasConsolidated = 1 AND @DetailedMapped > 0
-            INSERT INTO @Result VALUES
-                (1, 'consolidatedExpenses', NULL, NULL, NULL, @DetailedMapped,
-                 N'Consolidated and detailed expense patterns cannot coexist.');
-        ELSE IF @HasConsolidated = 0 AND @DetailedMapped <> 13
-            INSERT INTO @Result VALUES
-                (1, NULL, NULL, NULL, NULL, @DetailedMapped,
-                 N'Detailed submission readiness requires all thirteen directed expense tags.');
-    END;
+    ----------------------------------------------------------------
+    -- Warn only for enabled nominal P&L CashCodes in the configured business-
+    -- tax universe which are not covered, directly or indirectly, by this source.
+    ----------------------------------------------------------------
+    INSERT INTO @Result
+    SELECT DISTINCT 0, NULL, NULL, cc.CashCode, cc.CategoryCode, NULL,
+           N'Enabled business-tax CashCode is not covered by any Component Tax Tag mapping for this source.'
+    FROM App.vwTaxBizCashCodes biz
+    JOIN Cash.tbCode cc ON cc.CashCode = biz.CashCode AND cc.IsEnabled = 1
+    JOIN Cash.tbCategory c
+      ON c.CategoryCode = cc.CategoryCode
+     AND c.CategoryTypeCode = 0
+     AND c.IsEnabled = 1
+    WHERE EXISTS (SELECT 1 FROM Cash.tbTaxTagSource WHERE TaxSourceCode = @TaxSourceCode)
+      AND NOT EXISTS
+    (
+        SELECT 1
+        FROM Cash.vwTaxTagCashCode ec
+        JOIN Cash.tbTaxTag t
+          ON t.TaxSourceCode = ec.TaxSourceCode
+         AND t.TagCode = ec.TagCode
+         AND t.TagClassCode = 1
+        WHERE ec.TaxSourceCode = @TaxSourceCode
+          AND ec.CashCode = cc.CashCode
+    );
 
     RETURN;
 END;

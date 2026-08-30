@@ -53,7 +53,7 @@ DECLARE @RC int
         ('UK-ITSA-SE-CUM', 'adminCosts', 0, 'CA-OFFICE', '', 1),
         ('UK-ITSA-SE-CUM', 'advertisingCosts', 0, 'CA-ADVERT', '', 1),
         ('UK-ITSA-SE-CUM', 'businessEntertainmentCosts', 0, 'CA-ENTERT', '', 1),
-        ('UK-ITSA-SE-CUM', 'interestOnBankOtherLoans', 0, 'CA-INTEREST', '', 1),
+        ('UK-ITSA-SE-CUM', 'interestOnBankOtherLoans', 0, 'CA-LOANINT', '', 1),
         ('UK-ITSA-SE-CUM', 'financeCharges', 0, 'CA-FINANCE', '', 1),
         ('UK-ITSA-SE-CUM', 'professionalFees', 0, 'CA-PROF', '', 1),
         ('UK-ITSA-SE-CUM', 'otherExpenses', 0, 'CA-OTHER', '', 1);

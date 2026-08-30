@@ -27,7 +27,7 @@ BEGIN TRY
             ('CA-TRAVEL', 'Travel and Subsistence', 149), ('CA-MOTOR', 'Motor Expenses', 150),
             ('CA-PREMS', 'Premises Running Costs', 151), ('CA-REPAIR', 'Repairs and Maintenance', 152),
             ('CA-OFFICE', 'Phone, Stationery and Office Costs', 153), ('CA-ADVERT', 'Advertising', 154),
-            ('CA-ENTERT', 'Business Entertainment', 155), ('CA-INTEREST', 'Bank and Loan Interest', 156),
+            ('CA-ENTERT', 'Business Entertainment', 155), ('CA-LOANINT', 'Bank and Loan Interest', 156),
             ('CA-FINANCE', 'Other Financial Charges', 157),
             ('CA-PROF', 'Accountancy, Legal and Professional', 158),
             ('CA-OTHER', 'Other Business Expenses', 159)
@@ -45,7 +45,7 @@ BEGIN TRY
         ('CT-CSTSAL', 'CA-COGS'), ('CT-CSTSAL', 'CA-SUBCON'),
         ('CT-OVERHD', 'CA-TRAVEL'), ('CT-OVERHD', 'CA-MOTOR'), ('CT-OVERHD', 'CA-PREMS'),
         ('CT-OVERHD', 'CA-REPAIR'), ('CT-OVERHD', 'CA-OFFICE'), ('CT-OVERHD', 'CA-ADVERT'),
-        ('CT-OVERHD', 'CA-ENTERT'), ('CT-OVERHD', 'CA-INTEREST'),
+        ('CT-OVERHD', 'CA-ENTERT'), ('CT-OVERHD', 'CA-LOANINT'),
         ('CT-OVERHD', 'CA-FINANCE'), ('CT-OVERHD', 'CA-PROF'), ('CT-OVERHD', 'CA-OTHER')
     ) v(ParentCode, ChildCode)
     WHERE NOT EXISTS
@@ -76,7 +76,7 @@ BEGIN TRY
             ('CC-OFFICE', 'Stationery and Office Costs', 'CA-OFFICE', 'T1'),
             ('CC-ADVT', 'Advertising and Marketing', 'CA-ADVERT', 'T1'),
             ('CC-ENTERT', 'Business Entertainment', 'CA-ENTERT', 'N/A'),
-            ('CC-LOINT', 'Loan Interest', 'CA-INTEREST', 'INT'),
+            ('CC-LOINT', 'Loan Interest', 'CA-LOANINT', 'INT'),
             ('CC-FINCH', 'Financial Charges', 'CA-FINANCE', 'N/A'),
             ('CC-BANKC', 'Bank Charges', 'CA-FINANCE', 'N/A'),
             ('CC-PROF', 'Professional Fees', 'CA-PROF', 'T1'),
@@ -93,7 +93,7 @@ BEGIN TRY
     FROM Cash.tbCode cc
     JOIN (VALUES
         ('CC-INSUR', 'CA-PREMS'), ('CC-REPA', 'CA-REPAIR'), ('CC-PHONE', 'CA-OFFICE'),
-        ('CC-ADVT', 'CA-ADVERT'), ('CC-LOINT', 'CA-INTEREST'),
+        ('CC-ADVT', 'CA-ADVERT'), ('CC-LOINT', 'CA-LOANINT'),
         ('CC-BANKC', 'CA-FINANCE'), ('CC-PROF', 'CA-PROF')
     ) c(CashCode, CategoryCode) ON c.CashCode = cc.CashCode;
 

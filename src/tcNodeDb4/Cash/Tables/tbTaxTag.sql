@@ -4,7 +4,7 @@ CREATE TABLE [Cash].[tbTaxTag]
     TagCode          NVARCHAR(64)   NOT NULL,   -- e.g. 'AC12'
     TagName          NVARCHAR(100)  NOT NULL,   -- e.g. 'Turnover'
     TagClassCode     TINYINT        NOT NULL CONSTRAINT DF_Cash_tbTaxTag_TagClassCode DEFAULT 1,
-    StatutoryPolarityCode SMALLINT  NULL,
+    CashPolarityCode  SMALLINT      NOT NULL,
     TagDescription   NVARCHAR(MAX)  NULL,
     DisplayOrder     SMALLINT       NOT NULL CONSTRAINT DF_Cash_tbTaxTag_DisplayOrder DEFAULT 0,
 
@@ -20,11 +20,11 @@ CREATE TABLE [Cash].[tbTaxTag]
         FOREIGN KEY (TagClassCode)
         REFERENCES Cash.tbTaxTagClass(TagClassCode),
 
-    CONSTRAINT FK_Cash_tbTaxTag_StatutoryPolarity
-        FOREIGN KEY (StatutoryPolarityCode)
+    CONSTRAINT FK_Cash_tbTaxTag_CashPolarity
+        FOREIGN KEY (CashPolarityCode)
         REFERENCES Cash.tbPolarity(CashPolarityCode),
 
-    CONSTRAINT CK_Cash_tbTaxTag_StatutoryPolarity
-        CHECK (StatutoryPolarityCode IN (0, 1))
+    CONSTRAINT CK_Cash_tbTaxTag_CashPolarity
+        CHECK (CashPolarityCode IN (0, 1))
 );
 GO

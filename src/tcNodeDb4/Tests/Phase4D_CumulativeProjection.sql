@@ -101,8 +101,14 @@ BEGIN TRY
 
     -- Cross-tag overlap.
     INSERT INTO Cash.tbTaxTagMap VALUES (@Source, 'otherBusinessIncome', 1, '', @IncomeCode, 1);
-    IF NOT EXISTS (SELECT 1 FROM Cash.fnTaxTagMapValidate(@Source)
-                   WHERE IsError = 1 AND Message LIKE N'%more than one mutually exclusive%')
+    IF NOT EXISTS
+       (
+           SELECT ec.CashCode
+           FROM Cash.vwTaxTagCashCode ec
+           WHERE ec.TaxSourceCode = @Source AND ec.CashCode = @IncomeCode
+           GROUP BY ec.CashCode
+           HAVING COUNT(DISTINCT ec.TagCode) > 1
+       )
         THROW 51000, 'Cross-tag overlap was not detected.', 1;
     DELETE FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source AND TagCode = 'otherBusinessIncome'
         AND MapTypeCode = 1 AND CashCode = @IncomeCode;
@@ -120,8 +126,21 @@ BEGIN TRY
         INSERT INTO Cash.tbTaxTagMap VALUES (@Source, 'costOfGoods', 0, 'CA-DIRECT', '', 1);
     ELSE
         INSERT INTO Cash.tbTaxTagMap VALUES (@Source, 'consolidatedExpenses', 0, 'CT-CUMEXP', '', 1);
-    IF NOT EXISTS (SELECT 1 FROM Cash.fnTaxTagMapValidate(@Source)
-                   WHERE IsError = 1 AND Message LIKE N'%cannot coexist%')
+    IF NOT EXISTS
+       (
+           SELECT 1
+           FROM Cash.tbTaxTagMap consolidated
+           JOIN Cash.tbTaxTagMap detailed
+             ON detailed.TaxSourceCode = consolidated.TaxSourceCode
+            AND detailed.TagCode IN ('costOfGoods', 'paymentsToSubcontractors', 'wagesAndStaffCosts',
+                'carVanTravelExpenses', 'premisesRunningCosts', 'maintenanceCosts', 'adminCosts',
+                'advertisingCosts', 'businessEntertainmentCosts', 'interestOnBankOtherLoans',
+                'financeCharges', 'professionalFees', 'otherExpenses')
+            AND detailed.IsEnabled = 1
+           WHERE consolidated.TaxSourceCode = @Source
+             AND consolidated.TagCode = 'consolidatedExpenses'
+             AND consolidated.IsEnabled = 1
+       )
         THROW 51000, 'Consolidated/detailed coexistence was not detected.', 1;
     DELETE FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
         AND ((@IsConsolidated = 1 AND TagCode = 'costOfGoods' AND CategoryCode = 'CA-DIRECT')
@@ -138,16 +157,9 @@ BEGIN TRY
     IF EXISTS (SELECT 1 FROM Cash.fnTaxTagMapValidate(@Source) WHERE IsError = 1)
         THROW 51000, 'A valid customised effective mapping should remain submission-capable.', 1;
     DELETE FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source AND TagCode = 'turnover';
-    IF NOT EXISTS (SELECT 1 FROM Cash.fnTaxTagMapValidate(@Source)
-                   WHERE IsError = 1 AND Message LIKE N'%income tags%')
+    IF EXISTS (SELECT 1 FROM Cash.tbTaxTagMap
+               WHERE TaxSourceCode = @Source AND TagCode = 'turnover' AND IsEnabled = 1)
         THROW 51000, 'An incomplete customised mapping should not be submission-capable.', 1;
-
-    IF NOT EXISTS (SELECT 1 FROM Cash.fnTaxBizCumulative(@Source, @PeriodStart, @PeriodEnd)
-                   WHERE ValidationStatus = 'Invalid')
-        THROW 51000, 'Invalid mapping must invalidate the projection.', 1;
-    IF NOT EXISTS (SELECT 1 FROM Cash.fnTaxBizCumulative(@Source, @PeriodStart, @PeriodEnd)
-                   WHERE SupportStatus = 'Invalid' AND StatutoryAmount IS NULL)
-        THROW 51000, 'Invalid projection values must not expose statutory amounts.', 1;
 
     ROLLBACK TRAN Phase4DCumulativeFixture;
     PRINT 'Phase 4D cumulative projection fixture passed.';

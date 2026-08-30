@@ -32,6 +32,25 @@ AS
 	DECLARE @PayMiscTaxCode nvarchar(10) =
 		CASE WHEN ISNULL(@IsVatRegistered, 0) <> 0 THEN N'T1' ELSE N'T0' END;
 
+	DECLARE @EnergyCashCode nvarchar(50) =
+		CASE
+			WHEN EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = N'CC-UTILS' AND IsEnabled = 1)
+			 AND (ISNULL(@IsVatRegistered, 0) = 0 OR EXISTS (SELECT 1 FROM App.vwTaxVatCashCodes WHERE CashCode = N'CC-UTILS')) THEN N'CC-UTILS'
+			WHEN EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = N'CC-ADMIN' AND IsEnabled = 1)
+			 AND (ISNULL(@IsVatRegistered, 0) = 0 OR EXISTS (SELECT 1 FROM App.vwTaxVatCashCodes WHERE CashCode = N'CC-ADMIN')) THEN N'CC-ADMIN'
+		END;
+
+	DECLARE @ProvisionsCashCode nvarchar(50) =
+		CASE
+			WHEN EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = N'CC-OTHER' AND IsEnabled = 1)
+			 AND (ISNULL(@IsVatRegistered, 0) = 0 OR EXISTS (SELECT 1 FROM App.vwTaxVatCashCodes WHERE CashCode = N'CC-OTHER')) THEN N'CC-OTHER'
+			WHEN EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = N'CC-ADMIN' AND IsEnabled = 1)
+			 AND (ISNULL(@IsVatRegistered, 0) = 0 OR EXISTS (SELECT 1 FROM App.vwTaxVatCashCodes WHERE CashCode = N'CC-ADMIN')) THEN N'CC-ADMIN'
+		END;
+
+	IF @EnergyCashCode IS NULL OR @ProvisionsCashCode IS NULL
+		THROW 51227, 'DatasetSyntheticMIS_PayMisc: no enabled VAT-compatible CashCode is available for energy or provisions.', 1;
+
 	DECLARE
 		@L2_EnergySupplierCode nvarchar(50) = NULL,
 		@L2_SupermarketSupplierCode nvarchar(50) = NULL;
@@ -108,7 +127,7 @@ AS
 			(
 				@L2_PaymentCode, @L2_UserId, 0,
 				@L2_EnergySupplierCode, @SettlementAccountCode,
-				N'CC-ADMIN', @PayMiscTaxCode,
+				@EnergyCashCode, @PayMiscTaxCode,
 				@L2_MonthEnd, 0, @L2_Amount,
 				N'Electricity Charge'
 			);
@@ -133,7 +152,7 @@ AS
 		(
 			@L2_PaymentCode, @L2_UserId, 0,
 			@L2_SupermarketSupplierCode, @SettlementAccountCode,
-			N'CC-ADMIN', @PayMiscTaxCode,
+			@ProvisionsCashCode, @PayMiscTaxCode,
 			@L2_MonthEnd, 0, @L2_Amount,
 			N'Provisions'
 		);

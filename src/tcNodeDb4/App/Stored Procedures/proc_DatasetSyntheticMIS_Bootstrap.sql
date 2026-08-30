@@ -1,6 +1,6 @@
 CREATE PROCEDURE App.proc_DatasetSyntheticMIS_Bootstrap
 (
-	@TemplateName nvarchar(100) = N'Minimal Micro Company Accounts 2026',
+	@TemplateCode nvarchar(10) = N'COMIN26',
 	@IsVatRegistered bit = NULL,
     @EnableOpeningBalance bit = 1
 )
@@ -20,14 +20,14 @@ AS
 		@RA_SortCode nvarchar(10) = NULL,
 		@RA_AccountNumber nvarchar(20) = NULL;
 
-	IF @TemplateName IS NULL OR NOT EXISTS (SELECT 1 FROM App.tbTemplate WHERE TemplateName = @TemplateName)
-		THROW 51001, 'DatasetSyntheticMIS: @TemplateName not found in App.tbTemplate.', 1;
+	IF @TemplateCode IS NULL OR NOT EXISTS (SELECT 1 FROM App.tbTemplate WHERE TemplateCode = @TemplateCode)
+		THROW 51001, 'DatasetSyntheticMIS: @TemplateCode not found in App.tbTemplate.', 1;
 
 	IF @IsVatRegistered IS NULL
 	BEGIN
 		SELECT @IsVatRegistered = IsVatRegistered
 		FROM App.tbTemplate
-		WHERE TemplateName = @TemplateName;
+		WHERE TemplateCode = @TemplateCode;
 	END
 
 	DECLARE
@@ -212,7 +212,7 @@ AS
 		@UnitOfCharge = @UnitOfCharge;
 
 	EXEC App.proc_BasicSetup
-		@TemplateName = @TemplateName,
+		@TemplateCode = @TemplateCode,
 		@FinancialMonth = @FinancialMonth,
 		@CoinTypeCode = @CoinTypeCode,
 		@GovAccountName = @GovAccountName,

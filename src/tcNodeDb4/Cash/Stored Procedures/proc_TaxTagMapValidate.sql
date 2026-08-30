@@ -61,7 +61,7 @@ BEGIN
     ----------------------------------------------------------------
     IF EXISTS (SELECT 1 FROM @Issues WHERE IsError = 1)
     BEGIN
-        DECLARE @Err NVARCHAR(MAX) = CONCAT(N'MTD tag mapping errors for source ', @TaxSourceCode, N':');
+        DECLARE @Err NVARCHAR(MAX) = CONCAT(N'Tax Tag mapping errors for source ', @TaxSourceCode, N':');
         DECLARE @MaxLines INT = 20;
         DECLARE @i INT = 1;
         DECLARE @Line NVARCHAR(4000);

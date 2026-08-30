@@ -28,11 +28,11 @@ BEGIN TRY
             ('financeCharges', 'Finance charges', 0, 210),
             ('professionalFees', 'Professional fees', 0, 220),
             ('otherExpenses', 'Other expenses', 0, 230)
-        ) v(TagCode, TagName, StatutoryPolarityCode, DisplayOrder)
+        ) v(TagCode, TagName, CashPolarityCode, DisplayOrder)
     )
     INSERT INTO Cash.tbTaxTag
-        (TaxSourceCode, TagCode, TagName, TagClassCode, StatutoryPolarityCode, DisplayOrder)
-    SELECT 'UK-ITSA-SE-CUM', TagCode, TagName, 1, StatutoryPolarityCode, DisplayOrder
+        (TaxSourceCode, TagCode, TagName, TagClassCode, CashPolarityCode, DisplayOrder)
+    SELECT 'UK-ITSA-SE-CUM', TagCode, TagName, 1, CashPolarityCode, DisplayOrder
     FROM TagSeed s
     WHERE NOT EXISTS
     (

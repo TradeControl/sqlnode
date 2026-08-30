@@ -32,13 +32,15 @@ AS
 	BEGIN TRY
 		BEGIN TRAN;
 
-		DECLARE @TemplateName nvarchar(100) =
+		DECLARE @TemplateCode nvarchar(10) =
 			CASE
 				WHEN @IsCompany = 1 AND @UseStdCompanyTemplate <> 0
-					THEN N'Standard Micro Company Accounts 2026'
+					THEN N'COSTD26'
 				WHEN @IsCompany = 1
-					THEN N'Minimal Micro Company Accounts 2026'
-				ELSE N'Standard Sole Trader Accounts 2026 (SA)'
+					THEN N'COMIN26'
+				WHEN @UseStdCompanyTemplate <> 0
+					THEN N'STSTD26'
+				ELSE N'STMIN26'
 			END;
 
 		-- If caller didn't specify VAT setting, inherit from template default.
@@ -46,7 +48,7 @@ AS
 		BEGIN
 			SELECT @IsVatRegistered = IsVatRegistered
 			FROM App.tbTemplate
-			WHERE TemplateName = @TemplateName;
+			WHERE TemplateCode = @TemplateCode;
 		END
 
 		---------------------------------------------------------------------
@@ -69,7 +71,7 @@ AS
 		-- 1) Bootstrap (ALWAYS resets node inside the proc)
 		---------------------------------------------------------------------
         EXEC App.proc_DatasetSyntheticMIS_Bootstrap
-	        @TemplateName = @TemplateName,
+	        @TemplateCode = @TemplateCode,
 	        @IsVatRegistered = @IsVatRegistered,
             @EnableOpeningBalance = @EnableOpeningBalance;
 

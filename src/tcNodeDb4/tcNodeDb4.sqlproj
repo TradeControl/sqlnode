@@ -738,6 +738,7 @@
     <None Include="Scripts\PROOF_CashStatementReconciliation.sql" />
     <None Include="Scripts\MTDSoleTraderMappingEnquiry.sql" />
     <None Include="Tests\Phase4D_CumulativeProjection.sql" />
+    <None Include="Tests\TaxTagMapValidator.sql" />
     <None Include="Scripts\NamespaceSelector_testscript.sql" />
     <None Include="Scripts\EXEC_PaymentPost.sql" />
     <None Include="Subject\Stored Procedures\proc_AddRoot.sql" />

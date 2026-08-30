@@ -8,6 +8,10 @@ WITH CategoryTree AS
         tm.CategoryCode AS MappingRoot,
         tm.CategoryCode
     FROM Cash.tbTaxTagMap tm
+    JOIN Cash.tbCategory root
+      ON root.CategoryCode = tm.CategoryCode
+     AND root.CategoryTypeCode IN (0, 1)
+     AND root.IsEnabled = 1
     WHERE tm.MapTypeCode = 0 AND tm.IsEnabled = 1
 
     UNION ALL
@@ -19,6 +23,10 @@ WITH CategoryTree AS
         rel.ChildCode
     FROM CategoryTree ct
     JOIN Cash.tbCategoryTotal rel ON rel.ParentCode = ct.CategoryCode
+    JOIN Cash.tbCategory child
+      ON child.CategoryCode = rel.ChildCode
+     AND child.CategoryTypeCode IN (0, 1)
+     AND child.IsEnabled = 1
 ),
 CategoryMappings AS
 (
