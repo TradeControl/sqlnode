@@ -19,15 +19,8 @@ RETURNS @Projection TABLE
 )
 AS
 BEGIN
-    DECLARE @StartYear SMALLINT =
-        (SELECT TOP (1) YearNumber FROM App.tbYearPeriod WHERE StartOn = @PeriodStart);
     DECLARE @DatesValid BIT = CASE
-        WHEN @PeriodStart <= @PeriodEnd
-         AND MONTH(@PeriodStart) = 4 AND DAY(@PeriodStart) = 6
-         AND @PeriodStart = (SELECT MIN(CAST(StartOn AS DATE)) FROM App.tbYearPeriod WHERE YearNumber = @StartYear)
-         AND EXISTS
-             (SELECT 1 FROM App.tbYearPeriod WHERE CAST(StartOn AS DATE) = DATEADD(DAY, 1, @PeriodEnd))
-        THEN 1 ELSE 0 END;
+        WHEN @PeriodStart <= @PeriodEnd THEN 1 ELSE 0 END;
     DECLARE @MappingsValid BIT = CASE WHEN EXISTS
         (SELECT 1 FROM Cash.fnTaxTagMapValidate(@TaxSourceCode) WHERE IsError = 1)
         THEN 0 ELSE 1 END;

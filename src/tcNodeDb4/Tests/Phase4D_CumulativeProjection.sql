@@ -12,8 +12,27 @@ BEGIN TRY
         (SELECT 1 FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
          AND TagCode = 'consolidatedExpenses' AND IsEnabled = 1) THEN 1 ELSE 0 END;
 
-    IF (SELECT COUNT(*) FROM Cash.tbTaxTag WHERE TaxSourceCode = @Source) <> 16
-        THROW 51000, 'Expected the sixteen-tag cumulative manifest.', 1;
+    IF (SELECT COUNT(*) FROM Cash.tbTaxTag WHERE TaxSourceCode = @Source) <> 18
+        THROW 51000, 'Expected the eighteen-tag cumulative manifest.', 1;
+    IF NOT EXISTS
+       (
+           SELECT 1
+           FROM Cash.tbTaxTag
+           WHERE TaxSourceCode = @Source
+             AND TagCode = 'consolidatedExpenses'
+             AND TagClassCode = 1
+             AND CashPolarityCode = 0
+       )
+        THROW 51000, 'Consolidated expenses must remain a writable expense Component.', 1;
+    IF (SELECT COUNT(*) FROM Cash.tbTaxTag
+        WHERE TaxSourceCode = @Source
+          AND TagCode IN ('irrecoverableDebts', 'depreciation')
+          AND TagClassCode = 1
+          AND CashPolarityCode = 0) <> 2
+        THROW 51000, 'The two new detailed expense tags must be writable expense Components.', 1;
+    IF EXISTS (SELECT 1 FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
+               AND TagCode IN ('irrecoverableDebts', 'depreciation'))
+        THROW 51000, 'Irrecoverable debts and depreciation must be unmapped by default.', 1;
     IF EXISTS (SELECT 1 FROM Cash.fnTaxTagMapValidate(@Source) WHERE IsError = 1)
         THROW 51000, 'Bootstrap mapping must validate.', 1;
 
@@ -21,11 +40,16 @@ BEGIN TRY
     BEGIN
         IF (SELECT COUNT(*) FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source AND IsEnabled = 1) <> 3
             THROW 51000, 'MIN must contain exactly two income roots and one consolidated-expense root.', 1;
+        IF NOT EXISTS (SELECT 1 FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
+                       AND TagCode = 'consolidatedExpenses' AND MapTypeCode = 0
+                       AND CategoryCode = 'CT-CUMEXP' AND CashCode = '' AND IsEnabled = 1)
+            THROW 51000, 'MIN must map CT-CUMEXP to consolidatedExpenses.', 1;
         IF EXISTS (SELECT 1 FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
                    AND TagCode IN ('costOfGoods', 'paymentsToSubcontractors', 'wagesAndStaffCosts',
                        'carVanTravelExpenses', 'premisesRunningCosts', 'maintenanceCosts', 'adminCosts',
                        'advertisingCosts', 'businessEntertainmentCosts', 'interestOnBankOtherLoans',
-                       'financeCharges', 'professionalFees', 'otherExpenses'))
+                       'financeCharges', 'irrecoverableDebts', 'professionalFees', 'depreciation',
+                       'otherExpenses'))
             THROW 51000, 'MIN must not install detailed mappings.', 1;
     END
     ELSE
@@ -40,15 +64,20 @@ BEGIN TRY
             THROW 51000, 'STD coarse posting codes must be disabled.', 1;
     END;
 
+    IF (SELECT COUNT(*) FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
+        AND TagCode IN ('turnover', 'otherBusinessIncome') AND IsEnabled = 1) <> 2
+        THROW 51000, 'Both income Components must retain enabled mappings.', 1;
+
     DECLARE @PeriodStart DATE =
         (SELECT TOP (1) CAST(yp.StartOn AS DATE) FROM App.tbYearPeriod yp
          JOIN App.tbYear y ON y.YearNumber = yp.YearNumber AND y.CashStatusCode BETWEEN 1 AND 2
-         WHERE MONTH(yp.StartOn) = 4 AND DAY(yp.StartOn) = 6 ORDER BY yp.StartOn DESC);
+         WHERE EXISTS (SELECT 1 FROM App.tbYearPeriod nextPeriod WHERE nextPeriod.StartOn > yp.StartOn)
+         ORDER BY yp.StartOn DESC);
     DECLARE @NextBoundary DATE =
         (SELECT MIN(CAST(StartOn AS DATE)) FROM App.tbYearPeriod WHERE StartOn > @PeriodStart);
     DECLARE @PeriodEnd DATE = DATEADD(DAY, -1, @NextBoundary);
     IF @PeriodStart IS NULL OR @NextBoundary IS NULL
-        THROW 51000, 'Fixture needs an April 6 financial-year start and a following configured period.', 1;
+        THROW 51000, 'Fixture needs an active configured period and a following period.', 1;
 
     DECLARE @IncomeCode NVARCHAR(50) =
         (SELECT TOP (1) CashCode FROM Cash.vwTaxTagCashCode
@@ -130,12 +159,13 @@ BEGIN TRY
        (
            SELECT 1
            FROM Cash.tbTaxTagMap consolidated
-           JOIN Cash.tbTaxTagMap detailed
-             ON detailed.TaxSourceCode = consolidated.TaxSourceCode
-            AND detailed.TagCode IN ('costOfGoods', 'paymentsToSubcontractors', 'wagesAndStaffCosts',
-                'carVanTravelExpenses', 'premisesRunningCosts', 'maintenanceCosts', 'adminCosts',
-                'advertisingCosts', 'businessEntertainmentCosts', 'interestOnBankOtherLoans',
-                'financeCharges', 'professionalFees', 'otherExpenses')
+            JOIN Cash.tbTaxTagMap detailed
+              ON detailed.TaxSourceCode = consolidated.TaxSourceCode
+             AND detailed.TagCode IN ('costOfGoods', 'paymentsToSubcontractors', 'wagesAndStaffCosts',
+                 'carVanTravelExpenses', 'premisesRunningCosts', 'maintenanceCosts', 'adminCosts',
+                 'advertisingCosts', 'businessEntertainmentCosts', 'interestOnBankOtherLoans',
+                'financeCharges', 'irrecoverableDebts', 'professionalFees', 'depreciation',
+                'otherExpenses')
             AND detailed.IsEnabled = 1
            WHERE consolidated.TaxSourceCode = @Source
              AND consolidated.TagCode = 'consolidatedExpenses'
@@ -146,10 +176,15 @@ BEGIN TRY
         AND ((@IsConsolidated = 1 AND TagCode = 'costOfGoods' AND CategoryCode = 'CA-DIRECT')
           OR (@IsConsolidated = 0 AND TagCode = 'consolidatedExpenses' AND CategoryCode = 'CT-CUMEXP'));
 
-    -- Explicit dates must coincide with configured financial-period boundaries.
-    IF NOT EXISTS (SELECT 1 FROM Cash.fnTaxBizCumulative(@Source, @PeriodStart, DATEADD(DAY, -1, @PeriodEnd))
+    -- Supplied dates are workflow context; only chronological ordering is generic here.
+    DECLARE @ArbitraryStart DATE = DATEADD(DAY, 1, @PeriodStart);
+    DECLARE @ArbitraryEnd DATE = DATEADD(DAY, -1, @PeriodEnd);
+    IF NOT EXISTS (SELECT 1 FROM Cash.fnTaxBizCumulative(@Source, @ArbitraryStart, @ArbitraryEnd)
+                   WHERE ValidationStatus = 'Ready')
+        THROW 51000, 'An arbitrary chronological supplied date range must be accepted.', 1;
+    IF NOT EXISTS (SELECT 1 FROM Cash.fnTaxBizCumulative(@Source, @ArbitraryEnd, @ArbitraryStart)
                    WHERE ValidationStatus = 'Invalid')
-        THROW 51000, 'A non-boundary cumulative end date must be rejected.', 1;
+        THROW 51000, 'A reversed supplied date range must be rejected.', 1;
 
     -- Customised trees are assessed by effective mapping, not bootstrap root identity.
     DELETE FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source AND TagCode = 'turnover';

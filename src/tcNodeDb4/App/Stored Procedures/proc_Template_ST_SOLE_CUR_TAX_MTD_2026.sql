@@ -26,8 +26,10 @@ BEGIN TRY
             ('businessEntertainmentCosts', 'Business entertainment costs', 0, 190),
             ('interestOnBankOtherLoans', 'Interest on bank and other loans', 0, 200),
             ('financeCharges', 'Finance charges', 0, 210),
-            ('professionalFees', 'Professional fees', 0, 220),
-            ('otherExpenses', 'Other expenses', 0, 230)
+            ('irrecoverableDebts', 'Irrecoverable debts', 0, 220),
+            ('professionalFees', 'Professional fees', 0, 230),
+            ('depreciation', 'Depreciation', 0, 240),
+            ('otherExpenses', 'Other expenses', 0, 250)
         ) v(TagCode, TagName, CashPolarityCode, DisplayOrder)
     )
     INSERT INTO Cash.tbTaxTag

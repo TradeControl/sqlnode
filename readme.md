@@ -13,6 +13,11 @@
 - Current branch in **active redevelopment**: [tcNodeDb4](https://github.com/TradeControl/sqlnode/tree/HEAD/src/tcNodeDb4)
 - ⚠️ New schema not production‑ready and may change without notice
 
+## Repository layout
+
+- [`src/tcNodeDb4`](./src/tcNodeDb4) is the current Trade Control database project.
+- [`src/archive/prototype`](./src/archive/prototype) contains preserved historical and prototype projects, including MIS schema material intended to inform future product development. This material is maintained as a development resource and must not be treated as disposable.
+
 ## Documentation
 
 - [overview](https://tradecontrol.github.io)
