@@ -54,6 +54,59 @@ BEGIN TRY
     END
     ELSE
     BEGIN
+        IF NOT EXISTS
+           (
+               SELECT 1 FROM Cash.tbCategory
+               WHERE CategoryCode = 'CT-ADMIN'
+                 AND Category = 'Administration Costs'
+                 AND CategoryTypeCode = 1
+                 AND IsEnabled = 1
+           )
+            THROW 51000, 'STD must contain the Administration Costs Category Total.', 1;
+        IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE CategoryCode = 'CA-ADMIN'
+                       AND Category = 'Admin Expenses' AND CategoryTypeCode = 0)
+            THROW 51000, 'STD must preserve CA-ADMIN as the Admin Expenses accounting Category.', 1;
+        IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE CategoryCode = 'CA-OFFICE'
+                       AND Category = 'Phone, Stationery and Office Costs' AND CategoryTypeCode = 0)
+            THROW 51000, 'STD must preserve CA-OFFICE as the office-cost accounting Category.', 1;
+        IF (SELECT COUNT(*) FROM Cash.tbCategoryTotal
+            WHERE ParentCode = 'CT-ADMIN' AND ChildCode IN ('CA-ADMIN', 'CA-OFFICE')) <> 2
+            THROW 51000, 'Both administration Categories must be direct children of CT-ADMIN.', 1;
+        IF NOT EXISTS (SELECT 1 FROM Cash.tbCategoryTotal
+                       WHERE ParentCode = 'CT-OVERHD' AND ChildCode = 'CT-ADMIN')
+            THROW 51000, 'CT-ADMIN must remain within the STD overhead hierarchy.', 1;
+        IF EXISTS (SELECT 1 FROM Cash.tbCategoryTotal
+                   WHERE ParentCode = 'CT-OVERHD' AND ChildCode IN ('CA-ADMIN', 'CA-OFFICE'))
+            THROW 51000, 'STD must not retain direct overhead links that bypass CT-ADMIN.', 1;
+        IF (SELECT COUNT(*) FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
+            AND TagCode = 'adminCosts' AND MapTypeCode = 0
+            AND CategoryCode = 'CT-ADMIN' AND CashCode = '' AND IsEnabled = 1) <> 1
+            THROW 51000, 'adminCosts must map exactly once to CT-ADMIN.', 1;
+        IF EXISTS (SELECT 1 FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
+                   AND TagCode = 'adminCosts' AND CategoryCode = 'CA-OFFICE')
+            THROW 51000, 'The previous direct adminCosts to CA-OFFICE mapping must be removed.', 1;
+        IF EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = 'CC-EXPENSE'
+                   AND CategoryCode <> 'CA-ADMIN')
+            THROW 51000, 'Existing CC-EXPENSE accounting classification must remain CA-ADMIN.', 1;
+        IF NOT EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = 'CC-EXPENSE')
+            INSERT INTO Cash.tbCode (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
+            VALUES ('CC-EXPENSE', 'Employee Expenses', 'CA-ADMIN', 'T1', 1);
+        IF (SELECT COUNT(*) FROM Cash.tbCode WHERE CashCode IN ('CC-OFFICE', 'CC-PHONE')
+            AND CategoryCode = 'CA-OFFICE' AND IsEnabled = 1) <> 2
+            THROW 51000, 'STD office Cash Codes must remain enabled beneath CA-OFFICE.', 1;
+        IF (SELECT COUNT(*) FROM Cash.vwTaxTagCashCode WHERE TaxSourceCode = @Source
+            AND TagCode = 'adminCosts' AND CashCode IN ('CC-EXPENSE', 'CC-OFFICE', 'CC-PHONE')) <> 3
+            THROW 51000, 'Generic CT-ADMIN expansion must cover both administration branches.', 1;
+        IF EXISTS
+           (
+               SELECT CashCode FROM Cash.vwTaxTagCashCode
+               WHERE TaxSourceCode = @Source AND TagCode = 'adminCosts'
+               GROUP BY CashCode HAVING COUNT(*) > 1
+           )
+            THROW 51000, 'CT-ADMIN must not introduce duplicate adminCosts contributions.', 1;
+        IF EXISTS (SELECT 1 FROM Cash.fnTaxTagMapValidate(@Source)
+                   WHERE IsError = 0 AND Message LIKE N'%not covered%')
+            THROW 51000, 'STD must not contain unexpected uncovered enabled business-tax CashCodes.', 1;
         IF (SELECT COUNT(DISTINCT TagCode) FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
             AND TagCode NOT IN ('turnover', 'otherBusinessIncome') AND IsEnabled = 1) <> 13
             THROW 51000, 'STD must map all thirteen detailed expense tags.', 1;

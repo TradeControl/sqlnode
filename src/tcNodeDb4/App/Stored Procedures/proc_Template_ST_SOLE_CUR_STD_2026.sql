@@ -20,6 +20,11 @@ BEGIN TRY
         @RA_SortCode = @RA_SortCode, @RA_AccountNumber = @RA_AccountNumber,
         @IsVATRegistered = @IsVATRegistered;
 
+    IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE CategoryCode = 'CT-ADMIN')
+        INSERT INTO Cash.tbCategory
+            (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+        VALUES ('CT-ADMIN', 'Administration Costs', 1, 2, 0, 55, 1);
+
     ;WITH Categories AS
     (
         SELECT * FROM (VALUES
@@ -39,12 +44,17 @@ BEGIN TRY
     FROM Categories c
     WHERE NOT EXISTS (SELECT 1 FROM Cash.tbCategory x WHERE x.CategoryCode = c.CategoryCode);
 
+    DELETE FROM Cash.tbCategoryTotal
+    WHERE ParentCode = 'CT-OVERHD' AND ChildCode IN ('CA-ADMIN', 'CA-OFFICE');
+
     INSERT INTO Cash.tbCategoryTotal (ParentCode, ChildCode)
     SELECT v.ParentCode, v.ChildCode
     FROM (VALUES
         ('CT-CSTSAL', 'CA-COGS'), ('CT-CSTSAL', 'CA-SUBCON'),
+        ('CT-OVERHD', 'CT-ADMIN'),
+        ('CT-ADMIN', 'CA-ADMIN'), ('CT-ADMIN', 'CA-OFFICE'),
         ('CT-OVERHD', 'CA-TRAVEL'), ('CT-OVERHD', 'CA-MOTOR'), ('CT-OVERHD', 'CA-PREMS'),
-        ('CT-OVERHD', 'CA-REPAIR'), ('CT-OVERHD', 'CA-OFFICE'), ('CT-OVERHD', 'CA-ADVERT'),
+        ('CT-OVERHD', 'CA-REPAIR'), ('CT-OVERHD', 'CA-ADVERT'),
         ('CT-OVERHD', 'CA-ENTERT'), ('CT-OVERHD', 'CA-LOANINT'),
         ('CT-OVERHD', 'CA-FINANCE'), ('CT-OVERHD', 'CA-PROF'), ('CT-OVERHD', 'CA-OTHER')
     ) v(ParentCode, ChildCode)

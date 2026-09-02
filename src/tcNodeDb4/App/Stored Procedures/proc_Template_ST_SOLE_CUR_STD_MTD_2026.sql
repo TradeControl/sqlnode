@@ -50,7 +50,7 @@ DECLARE @RC int
         ('UK-ITSA-SE-CUM', 'carVanTravelExpenses', 0, 'CA-TRAVEL', '', 1),
         ('UK-ITSA-SE-CUM', 'premisesRunningCosts', 0, 'CA-PREMS', '', 1),
         ('UK-ITSA-SE-CUM', 'maintenanceCosts', 0, 'CA-REPAIR', '', 1),
-        ('UK-ITSA-SE-CUM', 'adminCosts', 0, 'CA-OFFICE', '', 1),
+        ('UK-ITSA-SE-CUM', 'adminCosts', 0, 'CT-ADMIN', '', 1),
         ('UK-ITSA-SE-CUM', 'advertisingCosts', 0, 'CA-ADVERT', '', 1),
         ('UK-ITSA-SE-CUM', 'businessEntertainmentCosts', 0, 'CA-ENTERT', '', 1),
         ('UK-ITSA-SE-CUM', 'interestOnBankOtherLoans', 0, 'CA-LOANINT', '', 1),
