@@ -13,16 +13,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C96737FC-9
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "installation", "installation", "{91D3D148-DEB2-4E46-B71A-BA4AF18DBE7B}"
 	ProjectSection(SolutionItems) = preProject
-		installation\tcNodeConfig.zip = installation\tcNodeConfig.zip
+		archive\prototype\installation\tcNodeConfig.zip = archive\prototype\installation\tcNodeConfig.zip
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcNode", "tcNode\tcNode.csproj", "{E0B55EBE-7F5E-4703-B983-A43BB9E3B8D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcNode", "archive\prototype\tcNode\tcNode.csproj", "{E0B55EBE-7F5E-4703-B983-A43BB9E3B8D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcNodeSetup", "tcNodeSetup\tcNodeSetup.csproj", "{1122699E-C4C4-4E7A-A3B2-7CE43207B498}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcNodeSetup", "archive\prototype\tcNodeSetup\tcNodeSetup.csproj", "{1122699E-C4C4-4E7A-A3B2-7CE43207B498}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "tcNodeInstaller", "tcNodeInstaller\tcNodeInstaller.vdproj", "{5A947FDB-FB3C-4E56-9D27-208A217F1D6A}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "tcNodeInstaller", "archive\prototype\tcNodeInstaller\tcNodeInstaller.vdproj", "{5A947FDB-FB3C-4E56-9D27-208A217F1D6A}"
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcNodeDb", "tcNodeDb\tcNodeDb.sqlproj", "{38FE62E1-74AF-4DB6-8532-C5541432C1CC}"
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcNodeDb", "archive\prototype\tcNodeDb\tcNodeDb.sqlproj", "{38FE62E1-74AF-4DB6-8532-C5541432C1CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "archive", "archive", "{554B6C10-71AE-474E-B230-40706ACB9D07}"
 EndProject

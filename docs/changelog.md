@@ -33,24 +33,24 @@ Task.proc_Mode | Task.proc_Polarity
 
 ## Version 3
 
-[Sql Server project tcNodeDb](https://github.com/TradeControl/sqlnode/tree/master/src/tcNodeDb)
+[Sql Server project tcNodeDb](https://github.com/TradeControl/sqlnode/tree/master/src/archive/prototype/tcNodeDb)
 
 ### 3.34.1
 
 Completion of the [costing system](https://tradecontrol.github.io/tutorials/manufacturing#job-costing)
 
-- [x] [Task.tbCostSet](src/tcNodeDb/Task/Tables/tbCostSet.sql) - active set of user quotes for costing
-- [x] [Task.Task_tbTask_TriggerUpdate](src/tcNodeDb/Task/Tables/tbTask.sql) - remove tasks from cost set when set to ordered
-- [x] [Task.vwQuotes](src/tcNodeDb/Task/Views/vwQuotes.sql) - quotes available for selection
-- [x] [Task.vwCostSet](src/tcNodeDb/Task/Views/vwCostSet.sql) - current user's set of quotes
-- [x] [Task.proc_CostSetAdd](src/tcNodeDb/Task/Stored%20Procedures/proc_CostSetAdd.sql) - include task in the set
-- [x] [Cash.vwStatementBase](src/tcNodeDb/Cash/Views/vwStatementBase.sql) - split out the live company statement from the balance projection
-- [x] [Cash.vwStatement](src/tcNodeDb/Cash/Views/vwStatement.sql) - derive the company statement from the base dataset
-- [x] [Cash.vwStatementWhatIf](src/tcNodeDb/Cash/Views/vwStatementWhatIf.sql) - integrate the quotes, vat and company tax into the company statement
+- [x] [Task.tbCostSet](../src/archive/prototype/tcNodeDb/Task/Tables/tbCostSet.sql) - active set of user quotes for costing
+- [x] [Task.Task_tbTask_TriggerUpdate](../src/archive/prototype/tcNodeDb/Task/Tables/tbTask.sql) - remove tasks from cost set when set to ordered
+- [x] [Task.vwQuotes](../src/archive/prototype/tcNodeDb/Task/Views/vwQuotes.sql) - quotes available for selection
+- [x] [Task.vwCostSet](../src/archive/prototype/tcNodeDb/Task/Views/vwCostSet.sql) - current user's set of quotes
+- [x] [Task.proc_CostSetAdd](../src/archive/prototype/tcNodeDb/Task/Stored%20Procedures/proc_CostSetAdd.sql) - include task in the set
+- [x] [Cash.vwStatementBase](../src/archive/prototype/tcNodeDb/Cash/Views/vwStatementBase.sql) - split out the live company statement from the balance projection
+- [x] [Cash.vwStatement](../src/archive/prototype/tcNodeDb/Cash/Views/vwStatement.sql) - derive the company statement from the base dataset
+- [x] [Cash.vwStatementWhatIf](../src/archive/prototype/tcNodeDb/Cash/Views/vwStatementWhatIf.sql) - integrate the quotes, vat and company tax into the company statement
 
 ### 3.34.2
 
-- [x] [Task.proc_Pay](src/tcNodeDb/Task/Stored%20Procedures/proc_Pay.sql) - fix auto-invoice date not matching payment on date
+- [x] [Task.proc_Pay](../src/archive/prototype/tcNodeDb/Task/Stored%20Procedures/proc_Pay.sql) - fix auto-invoice date not matching payment on date
 
 ### 3.34.3
 
@@ -62,15 +62,15 @@ Authorisation and authentication support for the [Asp.Net Core interface](https:
 
 Integrates setup templates into the [Node Configuration](https://tradecontrol.github.io/tutorials/installing-sqlnode#basic-setup) program. There are only two at this stage, but more can be added.
 
-- [x] [App.tbTemplate](src/tcNodeDb/App/Tables/tbTemplate.sql) - a list of configuration templates and the associated stored procedure name.
-- [x] [App.proc_TemplateCompanyGeneral](src/tcNodeDb/App/Stored%20Procedures/proc_TemplateCompanyGeneral.sql) - a new template that supports vat and capital accounts
-- [x] [App.proc_TemplateTutorials](src/tcNodeDb/App/Stored%20Procedures/proc_TemplateTutorials.sql) - the original configuration template used by [the tutorials](https://tradecontrol.github.io/tutorials/overview)
-- [x] [App.proc_BasicSetup](src/tcNodeDb/App/Stored%20Procedures/proc_BasicSetup.sql) - @TemplateName param to execute user selected configuration.
+- [x] [App.tbTemplate](../src/archive/prototype/tcNodeDb/App/Tables/tbTemplate.sql) - a list of configuration templates and the associated stored procedure name.
+- [x] [App.proc_TemplateCompanyGeneral](../src/archive/prototype/tcNodeDb/App/Stored%20Procedures/proc_TemplateCompanyGeneral.sql) - a new template that supports vat and capital accounts
+- [x] [App.proc_TemplateTutorials](../src/archive/prototype/tcNodeDb/App/Stored%20Procedures/proc_TemplateTutorials.sql) - the original configuration template used by [the tutorials](https://tradecontrol.github.io/tutorials/overview)
+- [x] [App.proc_BasicSetup](../src/archive/prototype/tcNodeDb/App/Stored%20Procedures/proc_BasicSetup.sql) - @TemplateName param to execute user selected configuration.
 
 ### 3.34.5
 
-- [x] [Cash.vwBalanceSheetAccounts](src/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql) - fix negative m/e balances zeroised
-- [x] [Org.vwStatement](src/tcNodeDb/Org/Views/vwStatement.sql) - remove unposted payments
+- [x] [Cash.vwBalanceSheetAccounts](../src/archive/prototype/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql) - fix negative m/e balances zeroised
+- [x] [Org.vwStatement](../src/archive/prototype/tcNodeDb/Org/Views/vwStatement.sql) - remove unposted payments
 
 ### 3.34.6
 
@@ -78,10 +78,10 @@ Full script for the [Asp.Net Core interface](https://github.com/tradecontrol/tra
 
 ### 3.34.7
 
-- [x] [App.proc_TemplateCompanyHMRC2021](src/tcNodeDb/App/Stored%20Procedures/proc_TemplateCompanyHMRC2021.sql) - initialisation template that maps all the codes used by the HRMC Accounts and Tax Return portal
-- [x] [Cash.vwTaxLossesCarriedForward](src/tcNodeDb/Cash/Views/vwTaxLossesCarriedForward.sql) - calculates available losses that can be carried forward on a tax return
-- [x] [Cash.vwProfitAndLossData](src/tcNodeDb/Cash/Views/vwProfitAndLossData.sql) - add CashTypeCode for accessing Corporation Tax totals
+- [x] [App.proc_TemplateCompanyHMRC2021](../src/archive/prototype/tcNodeDb/App/Stored%20Procedures/proc_TemplateCompanyHMRC2021.sql) - initialisation template that maps all the codes used by the HRMC Accounts and Tax Return portal
+- [x] [Cash.vwTaxLossesCarriedForward](../src/archive/prototype/tcNodeDb/Cash/Views/vwTaxLossesCarriedForward.sql) - calculates available losses that can be carried forward on a tax return
+- [x] [Cash.vwProfitAndLossData](../src/archive/prototype/tcNodeDb/Cash/Views/vwProfitAndLossData.sql) - add CashTypeCode for accessing Corporation Tax totals
 
 ### 3.34.8
 
-- [x] [Cash.vwBalanceSheetAccounts](src/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql) - fix capital balance calculating incorrectly for companies trading with multiple current and reserve accounts
+- [x] [Cash.vwBalanceSheetAccounts](../src/archive/prototype/tcNodeDb/Cash/Views/vwBalanceSheetAccounts.sql) - fix capital balance calculating incorrectly for companies trading with multiple current and reserve accounts
