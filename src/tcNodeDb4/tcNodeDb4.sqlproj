@@ -50,7 +50,6 @@
     <DefineTrace>true</DefineTrace>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <SuppressTSqlWarnings>SQL71502</SuppressTSqlWarnings>
   </PropertyGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
@@ -649,26 +648,26 @@
     <Build Include="App\Stored Procedures\proc_DatasetCreateProjectTemplate.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetProjectPrint.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Bootstrap.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectInit.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTemplates.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTran.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectInvoice.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectPay.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayInit.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayMisc.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayWages.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Expenses.sql" />
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Bootstrap.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectInit.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTemplates.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTran.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectInvoice.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectPay.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayInit.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayMisc.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayWages.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Expenses.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
     <Build Include="App\Functions\fnDatasetMonths.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Assets.sql" />
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Assets.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_TaxVat.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Transfer.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Transfers.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_TaxOnProfit.sql" />
     <Build Include="Cash\Views\vwEquityReconciliationByYear.sql" />
     <Build Include="Cash\Views\vwFlowReconcilationByYear.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderCapitalIntroduced.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderDrawings.sql" />
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderCapitalIntroduced.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderDrawings.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
     <Build Include="Cash\Functions\fnPersonalEffectiveRateCalculator.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderPersonalTaxRate.sql" />
     <Build Include="App\Tables\tbJurisdiction.sql" />
@@ -682,7 +681,7 @@
     <Build Include="App\Stored Procedures\proc_Template_BASE_MIN_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_STD_2026.sql" />
     <Build Include="Subject\Tables\tbBalanceConstraint.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_CompanyLoanPayback.sql" />
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_CompanyLoanPayback.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
     <Build Include="Cash\Tables\tbTaxTagMapType.sql" />
     <Build Include="Subject\Tables\tbClass.sql" />
     <Build Include="Subject\Tables\tbNamespace.sql" />
