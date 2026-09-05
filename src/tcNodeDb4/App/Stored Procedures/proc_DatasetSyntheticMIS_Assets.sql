@@ -401,24 +401,31 @@ AS
 
 	EXEC Cash.proc_PaymentPost;
 
-	DECLARE @EquipCashCode nvarchar(50) =
-	(
-		SELECT CashCode
-		FROM Subject.tbAccount
-		WHERE AccountTypeCode = 2
-		  AND AccountCode = N'EQUIPM'
-		  AND AccountClosed = 0
-	);
+	DECLARE
+		@EquipAccountCode nvarchar(10),
+		@EquipCashCode nvarchar(50);
 
-	IF @EquipCashCode IS NULL
-		THROW 51266, 'DatasetSyntheticMIS_Assets: EQUIPM account missing/closed (expected open for depreciation).', 1;
+	-- STD replaces the MIN EQUIPM/CC-DEPRC account with asset-specific
+	-- depreciation accounts. A white van belongs to Motor Vehicles; retain the
+	-- equipment account as the MIN fallback.
+	SELECT TOP (1)
+		@EquipAccountCode = AccountCode,
+		@EquipCashCode = CashCode
+	FROM Subject.tbAccount
+	WHERE AccountTypeCode = 2
+	  AND AccountClosed = 0
+	  AND CashCode IN (N'CC-DEPMV', N'CC-DEPRC')
+	ORDER BY CASE CashCode WHEN N'CC-DEPMV' THEN 0 ELSE 1 END, AccountCode;
+
+	IF @EquipAccountCode IS NULL OR @EquipCashCode IS NULL
+		THROW 51266, 'DatasetSyntheticMIS_Assets: no open motor-vehicle/equipment depreciation account exists for the selected template.', 1;
 
 	IF NOT EXISTS
 	(
 		SELECT 1
 		FROM Cash.tbPayment p
 		WHERE p.SubjectCode = N'HOME'
-		  AND p.AccountCode = N'EQUIPM'
+		  AND p.AccountCode = @EquipAccountCode
 		  AND p.PaymentReference = N'White Van (Capitalised)'
 		  AND CAST(p.PaidOn AS date) = @Year1LatePurchaseOn
 	)
@@ -446,7 +453,7 @@ AS
 			@UserId,
 			1,
 			N'HOME',
-			N'EQUIPM',
+			@EquipAccountCode,
 			@EquipCashCode,
 			N'N/A',
 			@Year1LatePurchaseOn,
@@ -507,7 +514,7 @@ AS
 			SELECT 1
 			FROM Cash.tbPayment p
 			WHERE p.SubjectCode = N'HOME'
-			  AND p.AccountCode = N'EQUIPM'
+			  AND p.AccountCode = @EquipAccountCode
 			  AND p.PaymentReference = N'Depreciation - White Van'
 			  AND CAST(p.PaidOn AS date) = @WriteOffDate
 		)
@@ -535,7 +542,7 @@ AS
 				@UserId,
 				@PaymentStatusCode,
 				N'HOME',
-				N'EQUIPM',
+				@EquipAccountCode,
 				@EquipCashCode,
 				N'N/A',
 				@WriteOffDate,

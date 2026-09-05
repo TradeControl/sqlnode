@@ -147,6 +147,15 @@ AS
     SET NOCOUNT ON;
     BEGIN TRY
 
+		IF EXISTS
+		(
+			SELECT 1
+			FROM inserted i
+			JOIN Cash.tbCode cash_code ON cash_code.CashCode = i.CashCode
+			WHERE cash_code.IsEnabled = 0
+		)
+			THROW 51013, 'A Project cannot be assigned a disabled CashCode.', 1;
+
         EXEC sys.sp_set_session_context @key = N'ProjectSkipNamespaceValidation', @value = 1;
 
         ;WITH namespace_candidates AS
@@ -300,6 +309,15 @@ AS
     SET NOCOUNT ON;
 
     BEGIN TRY
+
+		IF UPDATE(CashCode) AND EXISTS
+		(
+			SELECT 1
+			FROM inserted i
+			JOIN Cash.tbCode cash_code ON cash_code.CashCode = i.CashCode
+			WHERE cash_code.IsEnabled = 0
+		)
+			THROW 51013, 'A Project cannot be assigned a disabled CashCode.', 1;
 
         IF UPDATE(SubjectCode)
         BEGIN

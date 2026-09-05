@@ -154,12 +154,16 @@ AS
 		SET @ToProject = NULL;
 		EXEC Project.proc_Copy @FromProjectCode = @FromProject, @ParentProjectCode = NULL, @ToProjectCode = @ToProject OUTPUT;
 
-		UPDATE Project.tbProject
+		UPDATE project
 		SET
 			SubjectCode = @SubjectCodeForOrder,
+			TaxCode = subject.TaxCode,
 			ActionOn = @ActionOn,
 			Quantity = @Qty
-		WHERE ProjectCode = @ToProject;
+		FROM Project.tbProject project
+		JOIN Subject.tbSubject subject
+			ON subject.SubjectCode = @SubjectCodeForOrder
+		WHERE project.ProjectCode = @ToProject;
 
 		EXEC Project.proc_Schedule @ToProject;
 
@@ -178,12 +182,16 @@ AS
 		SET @ToProject = NULL;
 		EXEC Project.proc_Copy @FromProjectCode = @FromProject, @ParentProjectCode = NULL, @ToProjectCode = @ToProject OUTPUT;
 
-		UPDATE Project.tbProject
+		UPDATE project
 		SET
 			SubjectCode = @SubjectCodeForOrder,
+			TaxCode = subject.TaxCode,
 			ActionOn = @ActionOn,
 			Quantity = @Qty
-		WHERE ProjectCode = @ToProject;
+		FROM Project.tbProject project
+		JOIN Subject.tbSubject subject
+			ON subject.SubjectCode = @SubjectCodeForOrder
+		WHERE project.ProjectCode = @ToProject;
 
 		EXEC Project.proc_Schedule @ToProject;
 

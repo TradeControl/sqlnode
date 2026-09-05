@@ -90,9 +90,9 @@ BEGIN TRY
         ('CC-BANKC', 'Bank Charges',          'CA-ADMIN',  'T1', 1),
 
         -- Depreciation (STD replacement for CC-DEPRC)
-        ('CC-DEPPL', 'Depreciation – Plant & Tools',  'CA-ASSET', 'N/A', 1),
-        ('CC-DEPMV', 'Depreciation – Motor Vehicles', 'CA-ASSET', 'N/A', 1),
-        ('CC-DEPFX', 'Depreciation – Fixtures',       'CA-ASSET', 'N/A', 1);
+        ('CC-DEPPL', 'Depreciation – Plant & Tools',  'CA-DEPREC', 'N/A', 1),
+        ('CC-DEPMV', 'Depreciation – Motor Vehicles', 'CA-DEPREC', 'N/A', 1),
+        ('CC-DEPFX', 'Depreciation – Fixtures',       'CA-DEPREC', 'N/A', 1);
 
     ----------------------------------------------------------------
     -- 4b. Create capital accounts for the STD depreciation model
@@ -133,21 +133,8 @@ BEGIN TRY
         (@AccountCode, @SubjectCode, @DepAccount, 2, 1, 32, 'CC-DEPFX', 0);
 
     ----------------------------------------------------------------
-    -- 5. UK MTD TEMPLATE MAPPING (STD deltas)
+    -- 5. DELETE CASH CODE INHERITED FROM BASE TEMPLATE (now unused)
     ----------------------------------------------------------------
-    INSERT INTO Cash.tbTaxTagMap
-        (TaxSourceCode, TagCode, MapTypeCode, CategoryCode, CashCode, IsEnabled)
-    VALUES
-        ('UK-MTD', 'CP28', 1, '', 'CC-DEPPL', 1),
-        ('UK-MTD', 'CP28', 1, '', 'CC-DEPMV', 1),
-        ('UK-MTD', 'CP28', 1, '', 'CC-DEPFX', 1);
-
-    ----------------------------------------------------------------
-    -- 6. DELETE CASH CODE INHERITED FROM BASE TEMPLATE (now unused)
-    ----------------------------------------------------------------
-    DELETE FROM Cash.tbTaxTagMap
-    WHERE CashCode = 'CC-DEPRC';
-
     DELETE FROM Cash.tbCode
     WHERE CashCode = 'CC-DEPRC';
 
@@ -161,9 +148,12 @@ BEGIN TRY
         EXEC App.proc_Template_DisableVAT;
 
     ----------------------------------------------------------------
-    -- 8. Check MTD tax mapping
+    -- 8. Compose and validate the company statutory projection
     ----------------------------------------------------------------
-    EXEC Cash.proc_TaxTagMapValidate @TaxSourceCode = 'UK-MTD';
+    EXEC App.proc_Template_CO_MICRO_CUR_TAX_2026;
+
+    EXEC Cash.proc_TaxTagMapValidate @TaxSourceCode = 'UK-CO-ACCTS-2026';
+    EXEC Cash.proc_TaxTagMapValidate @TaxSourceCode = 'UK-CO-CT-2026';
 
     COMMIT TRAN MicroStdTemplate;
 

@@ -20,6 +20,18 @@ AS
 				ELSE 1
 			END;
 
+		DECLARE @DirectCostCashCode nvarchar(50) =
+		(
+			SELECT TOP (1) CashCode
+			FROM Cash.tbCode
+			WHERE CashCode IN (N'CC-DIRCT', N'CC-COGS')
+			  AND IsEnabled = 1
+			ORDER BY CASE CashCode WHEN N'CC-DIRCT' THEN 0 ELSE 1 END
+		);
+
+		IF @DirectCostCashCode IS NULL
+			THROW 51011, 'Dataset: no enabled direct-cost CashCode is available (CC-DIRCT or CC-COGS).', 1;
+
 		DECLARE
 			@MaterialTypeNorm NVARCHAR(20) = UPPER(LTRIM(RTRIM(ISNULL(@MaterialType, N'')))),
 			@ObjectPropertyCode NVARCHAR(2);
@@ -90,11 +102,11 @@ AS
 
 		IF NOT EXISTS (SELECT 1 FROM Object.tbObject WHERE ObjectCode = @PalletCode)
 			INSERT INTO Object.tbObject (ObjectCode, ProjectStatusCode, ObjectDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
-			VALUES (@PalletCode, 1, N'DATASET EURO PALLET', N'each', N'CC-DIRCT', CAST(2.4 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
+			VALUES (@PalletCode, 1, N'DATASET EURO PALLET', N'each', @DirectCostCashCode, CAST(2.4 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
 
 		IF NOT EXISTS (SELECT 1 FROM Object.tbObject WHERE ObjectCode = @Box41Code)
 			INSERT INTO Object.tbObject (ObjectCode, ProjectStatusCode, ObjectDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
-			VALUES (@Box41Code, 1, N'DATASET OUTER BOX', N'each', N'CC-DIRCT', CAST(0.05 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
+			VALUES (@Box41Code, 1, N'DATASET OUTER BOX', N'each', @DirectCostCashCode, CAST(0.05 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
 
 		IF NOT EXISTS (SELECT 1 FROM Object.tbObject WHERE ObjectCode = @Box99Code)
 			INSERT INTO Object.tbObject (ObjectCode, ProjectStatusCode, ObjectDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
@@ -102,15 +114,15 @@ AS
 
 		IF NOT EXISTS (SELECT 1 FROM Object.tbObject WHERE ObjectCode = @MaterialPcCode)
 			INSERT INTO Object.tbObject (ObjectCode, ProjectStatusCode, ObjectDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
-			VALUES (@MaterialPcCode, 1, CONCAT(N'DATASET PLASTIC ', @MaterialTypeNorm), N'kilo', N'CC-DIRCT', CAST(0.22 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
+			VALUES (@MaterialPcCode, 1, CONCAT(N'DATASET PLASTIC ', @MaterialTypeNorm), N'kilo', @DirectCostCashCode, CAST(0.22 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
 
 		IF NOT EXISTS (SELECT 1 FROM Object.tbObject WHERE ObjectCode = @Insert09Code)
 			INSERT INTO Object.tbObject (ObjectCode, ProjectStatusCode, ObjectDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
-			VALUES (@Insert09Code, 1, N'DATASET INSERTS', N'each', N'CC-DIRCT', CAST(0.005 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
+			VALUES (@Insert09Code, 1, N'DATASET INSERTS', N'each', @DirectCostCashCode, CAST(0.005 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
 
 		IF NOT EXISTS (SELECT 1 FROM Object.tbObject WHERE ObjectCode = @DeliveryCode)
 			INSERT INTO Object.tbObject (ObjectCode, ProjectStatusCode, ObjectDescription, UnitOfMeasure, CashCode, UnitCharge, Printed, RegisterName)
-			VALUES (@DeliveryCode, 1, N'DATASET DELIVERY', N'each', N'CC-DIRCT', CAST(100.0000000 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
+			VALUES (@DeliveryCode, 1, N'DATASET DELIVERY', N'each', @DirectCostCashCode, CAST(100.0000000 * @ExchangeRate AS decimal(18,7)), 1, N'Purchase Order');
 
 		---------------------------------------------------------------------
 		-- Attributes (mirror proc_DemoBom set; inject @MaterialTypeNorm for Colour)

@@ -29,6 +29,17 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY	
+		IF EXISTS
+		(
+			SELECT 1
+			FROM inserted i
+			JOIN Cash.tbCode cash_code ON cash_code.CashCode = i.CashCode
+			LEFT JOIN deleted d ON d.ObjectCode = i.ObjectCode
+			WHERE cash_code.IsEnabled = 0
+			  AND (d.ObjectCode IS NULL OR ISNULL(d.CashCode, N'') <> ISNULL(i.CashCode, N''))
+		)
+			THROW 51012, 'An Object cannot be assigned a disabled CashCode.', 1;
+
 		IF EXISTS (SELECT * FROM inserted i WHERE App.fnParsePrimaryKey(ObjectCode) = 0)
 			BEGIN
 			DECLARE @Msg NVARCHAR(MAX);

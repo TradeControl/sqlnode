@@ -69,6 +69,18 @@ AS
 	SET NOCOUNT ON;
 
 	BEGIN TRY
+		IF EXISTS
+		(
+			SELECT 1
+			FROM inserted i
+			JOIN Cash.tbCode cash_code ON cash_code.CashCode = i.CashCode
+			LEFT JOIN deleted d
+				ON d.InvoiceNumber = i.InvoiceNumber
+			   AND d.ProjectCode = i.ProjectCode
+			WHERE cash_code.IsEnabled = 0
+			  AND (d.InvoiceNumber IS NULL OR d.CashCode <> i.CashCode)
+		)
+			THROW 51015, 'An Invoice project cannot be assigned a disabled CashCode.', 1;
 
 		UPDATE Project
 		SET InvoiceValue = inserted.TotalValue / (1 + TaxRate),

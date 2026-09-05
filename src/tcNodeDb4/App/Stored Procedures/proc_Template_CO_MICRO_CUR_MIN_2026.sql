@@ -62,14 +62,12 @@ AS
         WHERE AccountClosed = 1;
 
         ----------------------------------------------------------------
-        -- 4. MTD tax mapping
+        -- 4. Company statutory projection (separate from accounting bootstrap)
         ----------------------------------------------------------------
-        INSERT INTO Cash.tbTaxTagMap
-            (TaxSourceCode, TagCode, MapTypeCode, CategoryCode, CashCode, IsEnabled)
-        VALUES
-            ('UK-MTD', 'CP28', 1, '', 'CC-DEPRC', 1);
+        EXEC App.proc_Template_CO_MICRO_CUR_TAX_2026;
 
-        EXEC Cash.proc_TaxTagMapValidate @TaxSourceCode = 'UK-MTD';
+        EXEC Cash.proc_TaxTagMapValidate @TaxSourceCode = 'UK-CO-ACCTS-2026';
+        EXEC Cash.proc_TaxTagMapValidate @TaxSourceCode = 'UK-CO-CT-2026';
 
         COMMIT TRAN MicroMinTemplate;
 

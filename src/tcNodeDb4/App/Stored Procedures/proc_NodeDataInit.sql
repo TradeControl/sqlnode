@@ -77,13 +77,13 @@ BEGIN TRY
             ('COMIN26',
              'Minimal Micro Company Accounts 2026',
              'App.proc_Template_CO_MICRO_CUR_MIN_2026',
-             'Ultra‑minimal micro‑entity accounts for very simple companies. One sales code, one cost code, one wages code, one admin code. Ideal for side‑hustles, dormant companies, and very small operations.',
+             'Ultra-minimal micro-entity accounting for simple trading companies. One sales code, one cost code, one wages code and one admin code. Statutory mappings are configured separately.',
              1),
 
             ('COSTD26',
              'Standard Micro Company Accounts 2026',
              'App.proc_Template_CO_MICRO_CUR_STD_2026',
-             'Enhanced micro‑entity accounts with real‑world business categories. Splits sales into labour/materials, direct costs into materials/subs/fuel/travel, full admin breakdown, and detailed depreciation classes. Ideal for tradesmen, small agencies, and micro‑manufacturers who want meaningful reporting without leaving the micro‑entity regime.',
+             'Enhanced micro-entity accounting with sales, direct-cost, administration and depreciation classifications. Statutory mappings are configured separately.',
              1),
             ('STMIN26',
              'Minimal Sole Trader Accounts 2026 (MTD)',
@@ -117,6 +117,11 @@ BEGIN TRY
 			('COMIPFVT1', 'COMIN26', 'VAT registered profit scenario', 'Generates a VAT-registered synthetic company dataset with profitable trading assumptions.', 1, 1, 0, 2, 3, 3.0000000, 10.0000000, 0.2500000),
 			('COMILFVT1', 'COMIN26', 'VAT registered loss scenario', 'Generates a VAT-registered synthetic company dataset with loss-making trading assumptions.', 1, 1, 0, 2, 3, 0.5000000, 10.0000000, 0.2500000),			('COMIPFVT0', 'COMIN26', 'Non-VAT profit scenario', 'Generates a non-VAT synthetic company dataset with profitable trading assumptions.', 1, 0, 0, 2, 3, 3.0000000, 10.0000000, 0.2500000),
 			('COMILFVT0', 'COMIN26', 'Non-VAT loss scenario', 'Generates a non-VAT synthetic company dataset with loss-making trading assumptions.', 1, 0, 0, 2, 3, 0.5000000, 10.0000000, 0.2500000),
+
+			('COSIPFVT1', 'COSTD26', 'VAT registered STD profit scenario', 'Generates a VAT-registered synthetic company dataset using the standard template and profitable trading assumptions.', 1, 1, 1, 2, 3, 3.0000000, 10.0000000, 0.2500000),
+			('COSILFVT1', 'COSTD26', 'VAT registered STD loss scenario', 'Generates a VAT-registered synthetic company dataset using the standard template and loss-making trading assumptions.', 1, 1, 1, 2, 3, 0.5000000, 10.0000000, 0.2500000),
+			('COSIPFVT0', 'COSTD26', 'Non-VAT STD profit scenario', 'Generates a non-VAT synthetic company dataset using the standard template and profitable trading assumptions.', 1, 0, 1, 2, 3, 3.0000000, 10.0000000, 0.2500000),
+			('COSILFVT0', 'COSTD26', 'Non-VAT STD loss scenario', 'Generates a non-VAT synthetic company dataset using the standard template and loss-making trading assumptions.', 1, 0, 1, 2, 3, 0.5000000, 10.0000000, 0.2500000),
 
 			('STMIPFVT1', 'STMIN26', 'VAT registered profit scenario', 'Generates a VAT-registered synthetic sole trader dataset using the minimal template and profitable trading assumptions.', 0, 1, 0, 2, 3, 3.0000000, 10.0000000, 0.2500000),
 			('STMILFVT1', 'STMIN26', 'VAT registered loss scenario', 'Generates a VAT-registered synthetic sole trader dataset using the minimal template and loss-making trading assumptions.', 0, 1, 0, 2, 3, 0.5000000, 10.0000000, 0.2500000),

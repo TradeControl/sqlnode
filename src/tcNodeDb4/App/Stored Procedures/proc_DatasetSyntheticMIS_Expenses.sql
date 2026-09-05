@@ -140,6 +140,24 @@ AS
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
+		DECLARE @ClaimCashCode nvarchar(50) = N'CC-EXPENSE';
+
+		-- Exercise the richer standard-company accounting classifications when
+		-- they exist. MIN and non-company profiles retain the generic fallback.
+		IF @IsCompany = 1
+		BEGIN
+			DECLARE @StdClaimCandidate nvarchar(50) =
+				CASE (@L2_ClaimsMonthIndex % 4)
+					WHEN 0 THEN N'CC-TRAV'
+					WHEN 1 THEN N'CC-PHONE'
+					WHEN 2 THEN N'CC-PROF'
+					ELSE N'CC-REPA'
+				END;
+
+			IF EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = @StdClaimCandidate AND IsEnabled = 1)
+				SET @ClaimCashCode = @StdClaimCandidate;
+		END
+
 		SET @ObjectCode = 'EXPENSE';
 		EXEC Project.proc_NextCode @ObjectCode = @ObjectCode, @ProjectCode = @L2_ClaimsChildProjectCode OUTPUT;
 
@@ -167,13 +185,19 @@ AS
 			@L2_ClaimsChildProjectCode,
 			@L2_UserId,
 			@L2_EmployeeSubjectCode,
-			CASE WHEN (@L2_ClaimsMonthIndex % 2) = 0 THEN N'Travel Costs' ELSE N'Entertainment' END,
+			CASE @ClaimCashCode
+				WHEN N'CC-TRAV' THEN N'Travel and subsistence'
+				WHEN N'CC-PHONE' THEN N'Telephone and internet'
+				WHEN N'CC-PROF' THEN N'Professional fees'
+				WHEN N'CC-REPA' THEN N'Repairs and maintenance'
+				ELSE CASE WHEN (@L2_ClaimsMonthIndex % 2) = 0 THEN N'Travel Costs' ELSE N'Entertainment' END
+			END,
 			@ObjectCode,
 			0,
 			@L2_UserId,
 			@L2_ClaimsMonthEnd,
 			1,
-			N'CC-EXPENSE',
+			@ClaimCashCode,
 			N'T0',
 			CAST(25 + (ABS(CHECKSUM(CONCAT(N'DS:L2:CLAIM:', @L2_ClaimsMonthIndex))) % 175) AS decimal(18,7)),
 			0

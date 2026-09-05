@@ -35,9 +35,19 @@ AS
 
 		DECLARE
 			@SoCashCode NVARCHAR(50) = N'CC-SALES',
-			@PoCashCode NVARCHAR(50) = N'CC-DIRCT',
+			@PoCashCode NVARCHAR(50) =
+			(
+				SELECT TOP (1) CashCode
+				FROM Cash.tbCode
+				WHERE CashCode IN (N'CC-DIRCT', N'CC-COGS')
+				  AND IsEnabled = 1
+				ORDER BY CASE CashCode WHEN N'CC-DIRCT' THEN 0 ELSE 1 END
+			),
 			@SoUnitCharge DECIMAL(18, 7) = ISNULL(@UnitCharge, 0.0000000),
 			@PoUnitCharge DECIMAL(18, 7) = CAST(ROUND(ISNULL(@UnitCharge, 0.0000000) * 0.7, 2) AS DECIMAL(18, 7));
+
+		IF @PoCashCode IS NULL
+			THROW 51031, 'Dataset: no enabled direct-cost CashCode is available (CC-DIRCT or CC-COGS).', 1;
 
 		---------------------------------------------------------------------
 		-- Objects
