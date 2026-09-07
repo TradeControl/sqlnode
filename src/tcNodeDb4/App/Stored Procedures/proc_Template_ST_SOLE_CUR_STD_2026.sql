@@ -47,9 +47,13 @@ BEGIN TRY
     DELETE FROM Cash.tbCategoryTotal
     WHERE ParentCode = 'CT-OVERHD' AND ChildCode IN ('CA-ADMIN', 'CA-OFFICE');
 
+    DELETE FROM Cash.tbCategoryTotal
+    WHERE ParentCode = 'CT-VAT' AND ChildCode = 'CA-DIRECT';
+
     INSERT INTO Cash.tbCategoryTotal (ParentCode, ChildCode)
     SELECT v.ParentCode, v.ChildCode
     FROM (VALUES
+        ('CT-VAT', 'CT-CSTSAL'),
         ('CT-CSTSAL', 'CA-COGS'), ('CT-CSTSAL', 'CA-SUBCON'),
         ('CT-OVERHD', 'CT-ADMIN'),
         ('CT-ADMIN', 'CA-ADMIN'), ('CT-ADMIN', 'CA-OFFICE'),
