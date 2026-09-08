@@ -673,7 +673,17 @@
     <Build Include="Cash\Functions\fnPersonalEffectiveRateCalculator.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderPersonalTaxRate.sql" />
     <Build Include="App\Tables\tbJurisdiction.sql" />
+    <Build Include="App\Tables\tbValueType.sql" />
+    <Build Include="App\Tables\tbStatutoryStatus.sql" />
+    <Build Include="App\Tables\tbValueSource.sql" />
+    <Build Include="App\Tables\tbAuthority.sql" />
+    <Build Include="App\Tables\tbRegistrationScheme.sql" />
+    <Build Include="App\Tables\tbReportingType.sql" />
+    <Build Include="App\Tables\tbSettingDefinition.sql" />
     <Build Include="Cash\Tables\tbTaxTagSource.sql" />
+    <Build Include="Subject\Tables\tbRegistration.sql" />
+    <Build Include="Cash\Tables\tbReportingProfile.sql" />
+    <Build Include="Cash\Tables\tbReportingProfileSetting.sql" />
     <Build Include="Cash\Tables\tbTaxTag.sql" />
     <Build Include="Cash\Tables\tbTaxTagMap.sql" />
     <Build Include="Cash\Functions\fnTaxTagMapValidate.sql" />

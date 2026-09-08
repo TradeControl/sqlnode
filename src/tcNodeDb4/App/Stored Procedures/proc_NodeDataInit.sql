@@ -4,6 +4,9 @@ SET NOCOUNT, XACT_ABORT ON;
 BEGIN TRY
 
 	BEGIN TRAN
+	DELETE FROM Cash.tbReportingProfileSetting;
+	DELETE FROM Cash.tbReportingProfile;
+	DELETE FROM Subject.tbRegistration;
 	UPDATE Cash.tbTaxType
 	SET SubjectCode = null, CashCode = null;
 
@@ -32,6 +35,13 @@ BEGIN TRY
 	DELETE FROM Cash.tbTaxType;
 	DELETE FROM Cash.tbCategory;
 	DELETE FROM App.tbTemplate;
+    DELETE FROM App.tbSettingDefinition;
+    DELETE FROM App.tbReportingType;
+    DELETE FROM App.tbRegistrationScheme;
+    DELETE FROM App.tbAuthority;
+    DELETE FROM App.tbValueSource;
+    DELETE FROM App.tbStatutoryStatus;
+    DELETE FROM App.tbValueType;
     DELETE FROM App.tbJurisdiction;
 	DELETE FROM Subject.tbExportType;
 	
@@ -234,6 +244,65 @@ BEGIN TRY
         INSERT INTO App.tbJurisdiction (JurisdictionCode, JurisdictionName, UocCode)
         VALUES
         ('UK', 'United Kingdom', 'GBP');
+
+    IF NOT EXISTS (SELECT * FROM App.tbValueType)
+        INSERT INTO App.tbValueType (ValueTypeCode, ValueTypeName)
+        VALUES
+            (N'TEXT', N'Text'),
+            (N'INTEGER', N'Integer'),
+            (N'DECIMAL', N'Decimal'),
+            (N'DATE', N'Date'),
+            (N'BOOLEAN', N'Boolean');
+
+    IF NOT EXISTS (SELECT * FROM App.tbStatutoryStatus)
+        INSERT INTO App.tbStatutoryStatus (StatusCode, StatusName, IsActive)
+        VALUES
+            (0, N'Draft', 0),
+            (1, N'Active', 1),
+            (2, N'Inactive', 0),
+            (3, N'Expired', 0);
+
+    IF NOT EXISTS (SELECT * FROM App.tbValueSource)
+        INSERT INTO App.tbValueSource (ValueSourceCode, ValueSourceName, RequiresReview)
+        VALUES
+            (N'USER', N'User configured', 1),
+            (N'AUTHORITY', N'Authority confirmed', 0),
+            (N'IMPORTED', N'Imported', 1),
+            (N'SYNTHETIC', N'Synthetic test data', 1);
+
+    IF NOT EXISTS (SELECT * FROM App.tbAuthority)
+        INSERT INTO App.tbAuthority (AuthorityCode, JurisdictionCode, AuthorityName)
+        VALUES
+            (N'HMRC', N'UK', N'HM Revenue and Customs'),
+            (N'COMPANIES-HOUSE', N'UK', N'Companies House');
+
+    IF NOT EXISTS (SELECT * FROM App.tbRegistrationScheme)
+        INSERT INTO App.tbRegistrationScheme
+            (RegistrationSchemeCode, AuthorityCode, SchemeName, ApplicabilityCode, ValueTypeCode, ValidationPattern, IsSensitive, IsSingleValue)
+        VALUES
+            (N'GB-NI', N'HMRC', N'National Insurance number', N'PERSON', N'TEXT', N'^[A-Z]{2}[0-9]{6}[A-D]$', 1, 1),
+            (N'GB-UTR', N'HMRC', N'Unique Taxpayer Reference', N'ANY', N'TEXT', N'^[0-9]{10}$', 1, 1),
+            (N'GB-VRN', N'HMRC', N'VAT registration number', N'ORGANISATION', N'TEXT', NULL, 0, 1),
+            (N'GB-CRN', N'COMPANIES-HOUSE', N'Company registration number', N'ORGANISATION', N'TEXT', NULL, 0, 1);
+
+    IF NOT EXISTS (SELECT * FROM App.tbReportingType)
+        INSERT INTO App.tbReportingType
+            (ReportingTypeCode, AuthorityCode, ReportingTypeName, RequiresTaxSource)
+        VALUES
+            (N'INDIRECT-TAX', N'HMRC', N'Indirect tax reporting', 1),
+            (N'SELF-EMPLOYMENT', N'HMRC', N'Self-employment income reporting', 1),
+            (N'COMPANY-TAX', N'HMRC', N'Company tax reporting', 1),
+            (N'STATUTORY-ACCOUNTS', N'COMPANIES-HOUSE', N'Statutory accounts reporting', 1);
+
+    IF NOT EXISTS (SELECT * FROM App.tbSettingDefinition)
+        INSERT INTO App.tbSettingDefinition
+            (SettingCode, SettingName, JurisdictionCode, AuthorityCode, ReportingTypeCode, ValueTypeCode, AllowedValues)
+        VALUES
+            (N'ACCOUNTING-BASIS', N'Accounting basis', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', N'["CASH","ACCRUAL"]'),
+            (N'QUARTERLY-PERIOD-TYPE', N'Quarterly period type', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', N'["STANDARD","CALENDAR"]'),
+            (N'PERIODS-OF-ACCOUNT', N'Periods of account choice', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', NULL),
+            (N'LATE-DATE-ELECTION', N'Late accounting date rule election', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'BOOLEAN', NULL),
+            (N'CLASS4-EXEMPTION', N'Class 4 exemption reason', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', NULL);
 
 	IF NOT EXISTS (SELECT * FROM [Subject].[tbAccountType])
 		INSERT INTO [Subject].[tbAccountType] ([AccountTypeCode], [AccountType])
@@ -727,6 +796,22 @@ BEGIN TRY
 		, (3018, 'The balance for this account is zero. Check for unposted payments.', 0)
 		;
 	END
+
+	DECLARE
+		@SQLDataVersion REAL = 4,
+		@SQLRelease INT = 1,
+		@SQLBuild INT = 1;
+
+	IF NOT EXISTS
+	(
+		SELECT 1
+		FROM App.tbInstall
+		WHERE SQLDataVersion = @SQLDataVersion
+			AND SQLRelease = @SQLRelease
+			AND SQLBuild = @SQLBuild
+	)
+		INSERT INTO App.tbInstall (SQLDataVersion, SQLRelease, SQLBuild)
+		VALUES (@SQLDataVersion, @SQLRelease, @SQLBuild);
 
 	COMMIT TRAN
 END TRY

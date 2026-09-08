@@ -20,23 +20,27 @@ AS
 		SELECT
 			vat_dates.PayOn AS StartOn,
 			r.netVatDue AS VatDue,
-			0 AS VatPaid
+			0 AS VatPaid,
+			0 AS EventOrder,
+			CAST(N'' AS nvarchar(20)) AS EventCode
 		FROM vat_results r
 			JOIN vat_dates ON r.StartOn = vat_dates.PayTo
 
-		UNION
+		UNION ALL
 
 		SELECT
 			Cash.tbPayment.PaidOn AS StartOn,
 			0 AS VatDue,
-			(Cash.tbPayment.PaidOutValue * -1) + Cash.tbPayment.PaidInValue AS VatPaid
+			(Cash.tbPayment.PaidOutValue * -1) + Cash.tbPayment.PaidInValue AS VatPaid,
+			1 AS EventOrder,
+			Cash.tbPayment.PaymentCode AS EventCode
 		FROM Cash.tbPayment
 			INNER JOIN vat_codes ON Cash.tbPayment.CashCode = vat_codes.CashCode
 	),
 	vat_ordered AS
 	(
 		SELECT
-			ROW_NUMBER() OVER (ORDER BY StartOn, VatDue) AS RowNumber,
+			ROW_NUMBER() OVER (ORDER BY StartOn, EventOrder, EventCode) AS RowNumber,
 			StartOn,
 			VatDue,
 			VatPaid

@@ -10,12 +10,20 @@
 	@CompanyNumber NVARCHAR(20) = null,
 	@VatNumber NVARCHAR(20) = null,
 	@CalendarCode NVARCHAR(10),
-	@UnitOfCharge NVARCHAR(5)
+	@JurisdictionCode NVARCHAR(10),
+	@UnitOfCharge NVARCHAR(5) = NULL
 )
 AS
 SET NOCOUNT, XACT_ABORT ON;
 
 BEGIN TRY
+	IF NOT EXISTS (SELECT 1 FROM App.tbJurisdiction WHERE JurisdictionCode = @JurisdictionCode)
+		THROW 51005, 'NodeBusinessInit: jurisdiction not found.', 1;
+
+	IF @UnitOfCharge IS NULL
+		SELECT @UnitOfCharge = UocCode
+		FROM App.tbJurisdiction
+		WHERE JurisdictionCode = @JurisdictionCode;
 
 	BEGIN TRAN;
 
@@ -96,6 +104,7 @@ BEGIN TRY
 		BucketTypeCode,
 		TaxHorizon,
 		IsAutoOffsetDays,
+		JurisdictionCode,
 		UnitOfCharge,
 		SupportRequestTemplateId,
 		UserRegistrationTemplateId,
@@ -113,6 +122,7 @@ BEGIN TRY
 		1,
 		730,
 		0,
+		@JurisdictionCode,
 		@UnitOfCharge,
 		@SupportRequestTemplateId,
 		@UserRegistrationTemplateId,

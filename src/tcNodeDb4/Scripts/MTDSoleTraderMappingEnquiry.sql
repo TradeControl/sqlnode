@@ -236,7 +236,7 @@ SELECT
 			(
 				SELECT
 					s.TaxSourceCode,
-					s.JurisdictionCode,
+					(SELECT TOP (1) JurisdictionCode FROM App.tbOptions) AS JurisdictionCode,
 					s.SourceName,
 					s.SourceDescription,
 					s.IsEnabled

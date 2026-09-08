@@ -10,13 +10,13 @@ BEGIN TRY
     WHERE TaxSourceCode IN ('UK-MTD', 'UK-CO-ACCTS-2026', 'UK-CO-CT-2026', 'UK-CO-CT600-2026');
 
     INSERT INTO Cash.tbTaxTagSource
-        (TaxSourceCode, JurisdictionCode, SourceName, SourceDescription, TaxTypeCode)
+        (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode)
     VALUES
-        ('UK-CO-ACCTS-2026', 'UK', 'Company Accounts',
+        ('UK-CO-ACCTS-2026', 'Company Accounts',
          'FRS 105 micro-entity statutory accounts semantic projection; FRC 2026 contract family', 0),
-        ('UK-CO-CT-2026', 'UK', 'Corporation Tax',
+        ('UK-CO-CT-2026', 'Corporation Tax',
          'Ordinary company Corporation Tax computation inputs; CT600 V3 RIM 1.994 contract family', 0),
-        ('UK-CO-CT600-2026', 'UK', 'CT600 Return',
+        ('UK-CO-CT600-2026', 'CT600 Return',
          'CT600 return semantic projection; CT600 V3 RIM 1.994 contract family', 0);
 
     INSERT INTO Cash.tbTaxTag

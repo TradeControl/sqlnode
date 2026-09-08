@@ -6,8 +6,8 @@ BEGIN TRY
 
     IF NOT EXISTS (SELECT 1 FROM Cash.tbTaxTagSource WHERE TaxSourceCode = 'UK-ITSA-SE-CUM')
         INSERT INTO Cash.tbTaxTagSource
-            (TaxSourceCode, JurisdictionCode, SourceName, SourceDescription, TaxTypeCode)
-        VALUES ('UK-ITSA-SE-CUM', 'UK', 'ITSA',
+            (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode)
+        VALUES ('UK-ITSA-SE-CUM', 'ITSA',
                 'MTD ITSA Sole Trader cumulative accounting projection', 5);
 
     ;WITH TagSeed AS

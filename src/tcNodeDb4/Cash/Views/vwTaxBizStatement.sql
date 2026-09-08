@@ -1,5 +1,5 @@
-﻿
-CREATE VIEW [Cash].[vwTaxBizStatement]
+
+CREATE VIEW Cash.vwTaxBizStatement
 AS
 	WITH tax_dates AS
 	(

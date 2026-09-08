@@ -14,16 +14,26 @@ ALTER DATABASE [$(DatabaseName)] SET RECURSIVE_TRIGGERS OFF;
 
 DECLARE
     @SQLDataVersion real = 4
-    , @SqlRelease int = 1;
+    , @SqlRelease int = 1
+    , @SqlBuild int = 1;
 
-IF NOT EXISTS (SELECT 1 FROM App.tbInstall WHERE SQLDataVersion = @SQLDataVersion AND SQLRelease = @SqlRelease)
+IF NOT EXISTS
+(
+	SELECT 1
+	FROM App.tbInstall
+	WHERE SQLDataVersion = @SQLDataVersion
+		AND SQLRelease = @SqlRelease
+		AND SQLBuild = @SqlBuild
+)
 	INSERT INTO App.tbInstall
 	(
 		SQLDataVersion,
-		SQLRelease
+		SQLRelease,
+		SQLBuild
 	)
 	VALUES
 	(
 		@SQLDataVersion,
-		@SqlRelease
+		@SqlRelease,
+		@SqlBuild
 	);

@@ -41,6 +41,7 @@ AS
 		@CompanyNumber nvarchar(20) = NULL,
 		@VatNumber nvarchar(20) = NULL,
 		@CalendarCode nvarchar(10) = NULL,
+		@JurisdictionCode nvarchar(10) = NULL,
 		@UnitOfCharge nvarchar(5) = NULL;
 
 	DECLARE
@@ -52,6 +53,7 @@ AS
 
 	SELECT TOP (1)
 		@SubjectCode = opt.SubjectCode,
+		@JurisdictionCode = opt.JurisdictionCode,
 		@UnitOfCharge = opt.UnitOfCharge
 	FROM App.tbOptions opt;
 
@@ -112,7 +114,7 @@ AS
 			@RA_AccountNumber = ra.AccountNumber
 		FROM Cash.vwReserveAccount ra;
 
-	IF @SubjectCode IS NULL OR @BusinessName IS NULL OR @BusinessAddress IS NULL OR @FullName IS NULL OR @CalendarCode IS NULL OR @UnitOfCharge IS NULL
+	IF @SubjectCode IS NULL OR @BusinessName IS NULL OR @BusinessAddress IS NULL OR @FullName IS NULL OR @CalendarCode IS NULL OR @JurisdictionCode IS NULL OR @UnitOfCharge IS NULL
 		THROW 51002, 'DatasetSyntheticMIS: unable to reverse engineer required node configuration.', 1;
 
 	DECLARE @IdentityUserId nvarchar(450);
@@ -209,6 +211,7 @@ AS
 		@CompanyNumber = @CompanyNumber,
 		@VatNumber = @VatNumber,
 		@CalendarCode = @CalendarCode,
+		@JurisdictionCode = @JurisdictionCode,
 		@UnitOfCharge = @UnitOfCharge;
 
 	EXEC App.proc_BasicSetup

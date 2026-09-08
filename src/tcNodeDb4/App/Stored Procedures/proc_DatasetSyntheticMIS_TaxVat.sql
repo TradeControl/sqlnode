@@ -141,3 +141,29 @@ AS
 
 		SET @Balance = NULL;
 	END
+
+	---------------------------------------------------------------------
+	-- Every VAT liability due by the current synthetic period must be
+	-- settled on its due date. This guards against scope changes leaving
+	-- stale synthetic payments in the fixture.
+	---------------------------------------------------------------------
+	IF EXISTS
+	(
+		SELECT 1
+		FROM
+		(
+			SELECT DISTINCT CAST(StartOn AS date) AS StartOn
+			FROM Cash.vwTaxVatStatement
+			WHERE VatDue <> 0
+			  AND CAST(StartOn AS date) <= @CurrentPeriodStartOn
+		) due_statement_dates
+		OUTER APPLY
+		(
+			SELECT TOP (1) statement.Balance
+			FROM Cash.vwTaxVatStatement statement
+			WHERE CAST(statement.StartOn AS date) = due_statement_dates.StartOn
+			ORDER BY statement.RowNumber DESC
+		) closing
+		WHERE closing.Balance IS NULL OR ABS(closing.Balance) > 0.05
+	)
+		THROW 51295, 'DatasetSyntheticMIS_TaxVat: historical VAT liability is not settled within tolerance.', 1;
