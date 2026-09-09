@@ -1,7 +1,7 @@
 CREATE TABLE [Cash].[tbReportingProfileSetting]
 (
-    [ReportingProfileSettingId] INT IDENTITY(1,1) NOT NULL,
-    [ReportingProfileId] INT NOT NULL,
+    [SubjectCode] NVARCHAR(50) NOT NULL,
+    [ReportingProfileCode] NVARCHAR(20) NOT NULL,
     [SettingCode] NVARCHAR(30) NOT NULL,
     [EffectiveFrom] DATE NOT NULL,
     [EffectiveTo] DATE NULL,
@@ -18,7 +18,8 @@ CREATE TABLE [Cash].[tbReportingProfileSetting]
     [UpdatedBy] NVARCHAR(50) NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_UpdatedBy] DEFAULT (suser_sname()),
     [UpdatedOn] DATETIME NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_UpdatedOn] DEFAULT (getdate()),
     [RowVer] ROWVERSION NOT NULL,
-    CONSTRAINT [PK_Cash_tbReportingProfileSetting] PRIMARY KEY CLUSTERED ([ReportingProfileSettingId]),
+    CONSTRAINT [PK_Cash_tbReportingProfileSetting] PRIMARY KEY CLUSTERED
+        ([SubjectCode], [ReportingProfileCode], [SettingCode], [EffectiveFrom]),
     CONSTRAINT [CK_Cash_tbReportingProfileSetting_Validity] CHECK ([EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]),
     CONSTRAINT [CK_Cash_tbReportingProfileSetting_OneValue] CHECK
     (
@@ -28,8 +29,9 @@ CREATE TABLE [Cash].[tbReportingProfileSetting]
         (CASE WHEN [DateValue] IS NULL THEN 0 ELSE 1 END) +
         (CASE WHEN [BooleanValue] IS NULL THEN 0 ELSE 1 END) = 1
     ),
-    CONSTRAINT [FK_Cash_tbReportingProfileSetting_Cash_tbReportingProfile] FOREIGN KEY ([ReportingProfileId])
-        REFERENCES [Cash].[tbReportingProfile] ([ReportingProfileId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_Cash_tbReportingProfileSetting_Cash_tbReportingProfile]
+        FOREIGN KEY ([SubjectCode], [ReportingProfileCode])
+        REFERENCES [Cash].[tbReportingProfile] ([SubjectCode], [ReportingProfileCode]) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT [FK_Cash_tbReportingProfileSetting_App_tbSettingDefinition] FOREIGN KEY ([SettingCode])
         REFERENCES [App].[tbSettingDefinition] ([SettingCode]),
     CONSTRAINT [FK_Cash_tbReportingProfileSetting_App_tbStatutoryStatus] FOREIGN KEY ([StatusCode])
@@ -39,7 +41,7 @@ CREATE TABLE [Cash].[tbReportingProfileSetting]
 );
 GO
 CREATE INDEX [IX_Cash_tbReportingProfileSetting_Resolver]
-    ON [Cash].[tbReportingProfileSetting] ([ReportingProfileId], [SettingCode], [EffectiveFrom], [EffectiveTo]);
+    ON [Cash].[tbReportingProfileSetting] ([SubjectCode], [ReportingProfileCode], [SettingCode], [EffectiveFrom], [EffectiveTo]);
 GO
 CREATE TRIGGER [Cash].[Cash_tbReportingProfileSetting_TriggerIntegrity]
 ON [Cash].[tbReportingProfileSetting]
@@ -53,7 +55,9 @@ BEGIN
         SELECT 1
         FROM inserted candidate
         JOIN App.tbSettingDefinition definition ON definition.SettingCode = candidate.SettingCode
-        JOIN Cash.tbReportingProfile profile ON profile.ReportingProfileId = candidate.ReportingProfileId
+        JOIN Cash.tbReportingProfile profile
+          ON profile.SubjectCode = candidate.SubjectCode
+         AND profile.ReportingProfileCode = candidate.ReportingProfileCode
         JOIN App.tbAuthority authority ON authority.AuthorityCode = profile.AuthorityCode
         WHERE (definition.JurisdictionCode IS NOT NULL AND definition.JurisdictionCode <> authority.JurisdictionCode)
            OR (definition.AuthorityCode IS NOT NULL AND definition.AuthorityCode <> profile.AuthorityCode)
@@ -90,9 +94,10 @@ BEGIN
             ON candidateStatus.StatusCode = candidate.StatusCode
            AND candidateStatus.IsActive = 1
         JOIN Cash.tbReportingProfileSetting existing
-            ON existing.ReportingProfileId = candidate.ReportingProfileId
+            ON existing.SubjectCode = candidate.SubjectCode
+           AND existing.ReportingProfileCode = candidate.ReportingProfileCode
            AND existing.SettingCode = candidate.SettingCode
-           AND existing.ReportingProfileSettingId <> candidate.ReportingProfileSettingId
+           AND existing.EffectiveFrom <> candidate.EffectiveFrom
         JOIN App.tbStatutoryStatus existingStatus
             ON existingStatus.StatusCode = existing.StatusCode
            AND existingStatus.IsActive = 1

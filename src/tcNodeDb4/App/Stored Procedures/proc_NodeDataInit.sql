@@ -6,6 +6,7 @@ BEGIN TRY
 	BEGIN TRAN
 	DELETE FROM Cash.tbReportingProfileSetting;
 	DELETE FROM Cash.tbReportingProfile;
+	DELETE FROM Subject.tbLegalProfile;
 	DELETE FROM Subject.tbRegistration;
 	UPDATE Cash.tbTaxType
 	SET SubjectCode = null, CashCode = null;
@@ -39,6 +40,7 @@ BEGIN TRY
     DELETE FROM App.tbReportingType;
     DELETE FROM App.tbRegistrationScheme;
     DELETE FROM App.tbAuthority;
+    DELETE FROM App.tbLegalForm;
     DELETE FROM App.tbValueSource;
     DELETE FROM App.tbStatutoryStatus;
     DELETE FROM App.tbValueType;
@@ -278,12 +280,12 @@ BEGIN TRY
 
     IF NOT EXISTS (SELECT * FROM App.tbRegistrationScheme)
         INSERT INTO App.tbRegistrationScheme
-            (RegistrationSchemeCode, AuthorityCode, SchemeName, ApplicabilityCode, ValueTypeCode, ValidationPattern, IsSensitive, IsSingleValue)
+            (RegistrationSchemeCode, AuthorityCode, SchemeName, ValueTypeCode, ValidationPattern, IsSensitive, IsSingleValue)
         VALUES
-            (N'GB-NI', N'HMRC', N'National Insurance number', N'PERSON', N'TEXT', N'^[A-Z]{2}[0-9]{6}[A-D]$', 1, 1),
-            (N'GB-UTR', N'HMRC', N'Unique Taxpayer Reference', N'ANY', N'TEXT', N'^[0-9]{10}$', 1, 1),
-            (N'GB-VRN', N'HMRC', N'VAT registration number', N'ORGANISATION', N'TEXT', NULL, 0, 1),
-            (N'GB-CRN', N'COMPANIES-HOUSE', N'Company registration number', N'ORGANISATION', N'TEXT', NULL, 0, 1);
+            (N'GB-NI', N'HMRC', N'National Insurance number', N'TEXT', N'^[A-Z]{2}[0-9]{6}[A-D]$', 1, 1),
+            (N'GB-UTR', N'HMRC', N'Unique Taxpayer Reference', N'TEXT', N'^[0-9]{10}$', 1, 1),
+            (N'GB-VRN', N'HMRC', N'VAT registration number', N'TEXT', NULL, 0, 1),
+            (N'GB-CRN', N'COMPANIES-HOUSE', N'Company registration number', N'TEXT', NULL, 0, 1);
 
     IF NOT EXISTS (SELECT * FROM App.tbReportingType)
         INSERT INTO App.tbReportingType
@@ -800,7 +802,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 1;
+		@SQLBuild INT = 2;
 
 	IF NOT EXISTS
 	(

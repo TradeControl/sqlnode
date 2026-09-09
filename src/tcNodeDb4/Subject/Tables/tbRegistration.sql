@@ -1,7 +1,7 @@
 CREATE TABLE [Subject].[tbRegistration]
 (
-    [RegistrationId] INT IDENTITY(1,1) NOT NULL,
     [SubjectCode] NVARCHAR(50) NOT NULL,
+    [RegistrationCode] NVARCHAR(20) NOT NULL,
     [RegistrationSchemeCode] NVARCHAR(20) NOT NULL,
     [RegistrationValue] NVARCHAR(255) NOT NULL,
     [ValidFrom] DATE NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE [Subject].[tbRegistration]
     [UpdatedBy] NVARCHAR(50) NOT NULL CONSTRAINT [DF_Subject_tbRegistration_UpdatedBy] DEFAULT (suser_sname()),
     [UpdatedOn] DATETIME NOT NULL CONSTRAINT [DF_Subject_tbRegistration_UpdatedOn] DEFAULT (getdate()),
     [RowVer] ROWVERSION NOT NULL,
-    CONSTRAINT [PK_Subject_tbRegistration] PRIMARY KEY CLUSTERED ([RegistrationId]),
+    CONSTRAINT [PK_Subject_tbRegistration] PRIMARY KEY CLUSTERED ([SubjectCode], [RegistrationCode]),
     CONSTRAINT [CK_Subject_tbRegistration_Validity] CHECK ([ValidTo] IS NULL OR [ValidTo] >= [ValidFrom]),
     CONSTRAINT [FK_Subject_tbRegistration_Subject_tbSubject] FOREIGN KEY ([SubjectCode])
         REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON UPDATE CASCADE,
@@ -49,7 +49,7 @@ BEGIN
         JOIN Subject.tbRegistration existing
             ON existing.SubjectCode = candidate.SubjectCode
            AND existing.RegistrationSchemeCode = candidate.RegistrationSchemeCode
-           AND existing.RegistrationId <> candidate.RegistrationId
+           AND existing.RegistrationCode <> candidate.RegistrationCode
         JOIN App.tbStatutoryStatus existingStatus
             ON existingStatus.StatusCode = existing.StatusCode
            AND existingStatus.IsActive = 1

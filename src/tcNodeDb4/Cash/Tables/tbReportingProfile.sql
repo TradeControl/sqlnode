@@ -1,7 +1,7 @@
 CREATE TABLE [Cash].[tbReportingProfile]
 (
-    [ReportingProfileId] INT IDENTITY(1,1) NOT NULL,
     [SubjectCode] NVARCHAR(50) NOT NULL,
+    [ReportingProfileCode] NVARCHAR(20) NOT NULL,
     [TaxSourceCode] NVARCHAR(20) NULL,
     [AuthorityCode] NVARCHAR(20) NOT NULL,
     [ReportingTypeCode] NVARCHAR(20) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE [Cash].[tbReportingProfile]
     [UpdatedBy] NVARCHAR(50) NOT NULL CONSTRAINT [DF_Cash_tbReportingProfile_UpdatedBy] DEFAULT (suser_sname()),
     [UpdatedOn] DATETIME NOT NULL CONSTRAINT [DF_Cash_tbReportingProfile_UpdatedOn] DEFAULT (getdate()),
     [RowVer] ROWVERSION NOT NULL,
-    CONSTRAINT [PK_Cash_tbReportingProfile] PRIMARY KEY CLUSTERED ([ReportingProfileId]),
+    CONSTRAINT [PK_Cash_tbReportingProfile] PRIMARY KEY CLUSTERED ([SubjectCode], [ReportingProfileCode]),
     CONSTRAINT [CK_Cash_tbReportingProfile_Validity] CHECK ([ValidTo] IS NULL OR [ValidTo] >= [ValidFrom]),
     CONSTRAINT [FK_Cash_tbReportingProfile_Subject_tbSubject] FOREIGN KEY ([SubjectCode])
         REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON UPDATE CASCADE,
@@ -69,7 +69,7 @@ BEGIN
            AND existing.AuthorityCode = candidate.AuthorityCode
            AND existing.ReportingTypeCode = candidate.ReportingTypeCode
            AND ISNULL(existing.TaxSourceCode, N'') = ISNULL(candidate.TaxSourceCode, N'')
-           AND existing.ReportingProfileId <> candidate.ReportingProfileId
+           AND existing.ReportingProfileCode <> candidate.ReportingProfileCode
         JOIN App.tbStatutoryStatus existingStatus
             ON existingStatus.StatusCode = existing.StatusCode
            AND existingStatus.IsActive = 1

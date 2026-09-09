@@ -673,6 +673,7 @@
     <Build Include="Cash\Functions\fnPersonalEffectiveRateCalculator.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderPersonalTaxRate.sql" />
     <Build Include="App\Tables\tbJurisdiction.sql" />
+    <Build Include="App\Tables\tbLegalForm.sql" />
     <Build Include="App\Tables\tbValueType.sql" />
     <Build Include="App\Tables\tbStatutoryStatus.sql" />
     <Build Include="App\Tables\tbValueSource.sql" />
@@ -682,8 +683,18 @@
     <Build Include="App\Tables\tbSettingDefinition.sql" />
     <Build Include="Cash\Tables\tbTaxTagSource.sql" />
     <Build Include="Subject\Tables\tbRegistration.sql" />
+    <Build Include="Subject\Stored Procedures\proc_DefaultRegistrationCode.sql" />
+    <Build Include="Subject\Tables\tbAddressDetail.sql" />
+    <Build Include="Subject\Tables\tbLegalProfile.sql" />
     <Build Include="Cash\Tables\tbReportingProfile.sql" />
     <Build Include="Cash\Tables\tbReportingProfileSetting.sql" />
+    <Build Include="Cash\Stored Procedures\proc_DefaultReportingProfileCode.sql" />
+    <Build Include="Subject\Functions\fnStatutoryIdentity.sql" />
+    <Build Include="Subject\Functions\fnRegistration.sql" />
+    <Build Include="Subject\Views\vwStatutoryIdentity.sql" />
+    <Build Include="Cash\Functions\fnReportingProfile.sql" />
+    <Build Include="Cash\Functions\fnReportingProfileSetting.sql" />
+    <Build Include="App\Functions\fnStatutoryContextReadiness.sql" />
     <Build Include="Cash\Tables\tbTaxTag.sql" />
     <Build Include="Cash\Tables\tbTaxTagMap.sql" />
     <Build Include="Cash\Functions\fnTaxTagMapValidate.sql" />

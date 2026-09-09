@@ -3,7 +3,6 @@ CREATE TABLE [App].[tbRegistrationScheme]
     [RegistrationSchemeCode] NVARCHAR(20) NOT NULL,
     [AuthorityCode] NVARCHAR(20) NOT NULL,
     [SchemeName] NVARCHAR(100) NOT NULL,
-    [ApplicabilityCode] NVARCHAR(20) NOT NULL CONSTRAINT [DF_App_tbRegistrationScheme_ApplicabilityCode] DEFAULT (N'ANY'),
     [ValueTypeCode] NVARCHAR(10) NOT NULL,
     [ValidationPattern] NVARCHAR(255) NULL,
     [IsSensitive] BIT NOT NULL CONSTRAINT [DF_App_tbRegistrationScheme_IsSensitive] DEFAULT (0),
@@ -12,7 +11,6 @@ CREATE TABLE [App].[tbRegistrationScheme]
     [RowVer] ROWVERSION NOT NULL,
     CONSTRAINT [PK_App_tbRegistrationScheme] PRIMARY KEY CLUSTERED ([RegistrationSchemeCode]),
     CONSTRAINT [AK_App_tbRegistrationScheme_AuthorityName] UNIQUE ([AuthorityCode], [SchemeName]),
-    CONSTRAINT [CK_App_tbRegistrationScheme_Applicability] CHECK ([ApplicabilityCode] IN (N'ANY', N'PERSON', N'ORGANISATION')),
     CONSTRAINT [FK_App_tbRegistrationScheme_App_tbAuthority] FOREIGN KEY ([AuthorityCode])
         REFERENCES [App].[tbAuthority] ([AuthorityCode]),
     CONSTRAINT [FK_App_tbRegistrationScheme_App_tbValueType] FOREIGN KEY ([ValueTypeCode])
