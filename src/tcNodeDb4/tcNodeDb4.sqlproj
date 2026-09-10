@@ -673,7 +673,6 @@
     <Build Include="Cash\Functions\fnPersonalEffectiveRateCalculator.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderPersonalTaxRate.sql" />
     <Build Include="App\Tables\tbJurisdiction.sql" />
-    <Build Include="App\Tables\tbLegalForm.sql" />
     <Build Include="App\Tables\tbValueType.sql" />
     <Build Include="App\Tables\tbStatutoryStatus.sql" />
     <Build Include="App\Tables\tbValueSource.sql" />
@@ -685,7 +684,6 @@
     <Build Include="Subject\Tables\tbRegistration.sql" />
     <Build Include="Subject\Stored Procedures\proc_DefaultRegistrationCode.sql" />
     <Build Include="Subject\Tables\tbAddressDetail.sql" />
-    <Build Include="Subject\Tables\tbLegalProfile.sql" />
     <Build Include="Cash\Tables\tbReportingProfile.sql" />
     <Build Include="Cash\Tables\tbReportingProfileSetting.sql" />
     <Build Include="Cash\Stored Procedures\proc_DefaultReportingProfileCode.sql" />
@@ -693,8 +691,14 @@
     <Build Include="Subject\Functions\fnRegistration.sql" />
     <Build Include="Subject\Views\vwStatutoryIdentity.sql" />
     <Build Include="Cash\Functions\fnReportingProfile.sql" />
+    <Build Include="Cash\Functions\fnReportingProfileMasked.sql" />
     <Build Include="Cash\Functions\fnReportingProfileSetting.sql" />
     <Build Include="App\Functions\fnStatutoryContextReadiness.sql" />
+    <Build Include="App\Functions\fnIdentifierMask.sql" />
+    <Build Include="Subject\Functions\fnRegistrationMasked.sql" />
+    <Build Include="Subject\Stored Procedures\proc_RegistrationSave.sql" />
+    <Build Include="Cash\Stored Procedures\proc_ReportingProfileSave.sql" />
+    <Build Include="Cash\Stored Procedures\proc_ReportingProfileSettingSave.sql" />
     <Build Include="Cash\Tables\tbTaxTag.sql" />
     <Build Include="Cash\Tables\tbTaxTagMap.sql" />
     <Build Include="Cash\Functions\fnTaxTagMapValidate.sql" />
@@ -750,6 +754,7 @@
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_MIN_MTD_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_STD_MTD_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_TAX_MTD_2026.sql" />
+    <Build Include="App\Stored Procedures\proc_StatutoryContext.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />
@@ -759,6 +764,10 @@
     <None Include="Scripts\EXEC_DatasetSyntheticMIS.sql" />
     <None Include="Scripts\MTDSoleTraderMappingEnquiry.sql" />
     <None Include="Tests\Phase4D_CumulativeProjection.sql" />
+    <None Include="Tests\PhaseDP4_Configuration.sql" />
+    <None Include="Tests\PhaseDP5_Provision.sql" />
+    <None Include="Tests\PhaseDP5_Portability.sql" />
+    <None Include="Tests\PhaseDP5_Verification.sql" />
     <None Include="Tests\TaxTagMapValidator.sql" />
     <None Include="Scripts\NamespaceSelector_testscript.sql" />
     <None Include="Scripts\EXEC_PaymentPost.sql" />

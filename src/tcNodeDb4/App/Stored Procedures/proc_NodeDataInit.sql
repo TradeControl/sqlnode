@@ -6,7 +6,6 @@ BEGIN TRY
 	BEGIN TRAN
 	DELETE FROM Cash.tbReportingProfileSetting;
 	DELETE FROM Cash.tbReportingProfile;
-	DELETE FROM Subject.tbLegalProfile;
 	DELETE FROM Subject.tbRegistration;
 	UPDATE Cash.tbTaxType
 	SET SubjectCode = null, CashCode = null;
@@ -40,7 +39,6 @@ BEGIN TRY
     DELETE FROM App.tbReportingType;
     DELETE FROM App.tbRegistrationScheme;
     DELETE FROM App.tbAuthority;
-    DELETE FROM App.tbLegalForm;
     DELETE FROM App.tbValueSource;
     DELETE FROM App.tbStatutoryStatus;
     DELETE FROM App.tbValueType;
@@ -283,15 +281,13 @@ BEGIN TRY
             (RegistrationSchemeCode, AuthorityCode, SchemeName, ValueTypeCode, ValidationPattern, IsSensitive, IsSingleValue)
         VALUES
             (N'GB-NI', N'HMRC', N'National Insurance number', N'TEXT', N'^[A-Z]{2}[0-9]{6}[A-D]$', 1, 1),
-            (N'GB-UTR', N'HMRC', N'Unique Taxpayer Reference', N'TEXT', N'^[0-9]{10}$', 1, 1),
-            (N'GB-VRN', N'HMRC', N'VAT registration number', N'TEXT', NULL, 0, 1),
-            (N'GB-CRN', N'COMPANIES-HOUSE', N'Company registration number', N'TEXT', NULL, 0, 1);
+            (N'GB-UTR', N'HMRC', N'Unique Taxpayer Reference', N'TEXT', N'^[0-9]{10}$', 1, 1);
 
     IF NOT EXISTS (SELECT * FROM App.tbReportingType)
         INSERT INTO App.tbReportingType
             (ReportingTypeCode, AuthorityCode, ReportingTypeName, RequiresTaxSource)
         VALUES
-            (N'INDIRECT-TAX', N'HMRC', N'Indirect tax reporting', 1),
+            (N'INDIRECT-TAX', N'HMRC', N'Indirect tax reporting', 0),
             (N'SELF-EMPLOYMENT', N'HMRC', N'Self-employment income reporting', 1),
             (N'COMPANY-TAX', N'HMRC', N'Company tax reporting', 1),
             (N'STATUTORY-ACCOUNTS', N'COMPANIES-HOUSE', N'Statutory accounts reporting', 1);
@@ -304,7 +300,11 @@ BEGIN TRY
             (N'QUARTERLY-PERIOD-TYPE', N'Quarterly period type', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', N'["STANDARD","CALENDAR"]'),
             (N'PERIODS-OF-ACCOUNT', N'Periods of account choice', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', NULL),
             (N'LATE-DATE-ELECTION', N'Late accounting date rule election', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'BOOLEAN', NULL),
-            (N'CLASS4-EXEMPTION', N'Class 4 exemption reason', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', NULL);
+            (N'CLASS4-EXEMPTION', N'Class 4 exemption reason', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', NULL),
+            (N'ACCOUNTING-STANDARD', N'Accounting standard', N'UK', NULL, NULL, N'TEXT', N'["FRS-105"]'),
+            (N'ACCOUNTS-TYPE', N'Accounts type', N'UK', NULL, NULL, N'TEXT', N'["MICRO-ENTITY"]'),
+            (N'BALANCE-SHEET-FORMAT', N'Balance sheet format', N'UK', NULL, NULL, N'TEXT', N'["FORMAT-1","FORMAT-2"]'),
+            (N'ACCOUNTING-POLICIES', N'Accounting policies narrative', N'UK', N'COMPANIES-HOUSE', N'STATUTORY-ACCOUNTS', N'TEXT', NULL);
 
 	IF NOT EXISTS (SELECT * FROM [Subject].[tbAccountType])
 		INSERT INTO [Subject].[tbAccountType] ([AccountTypeCode], [AccountType])
@@ -802,7 +802,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 2;
+		@SQLBuild INT = 4;
 
 	IF NOT EXISTS
 	(

@@ -55,21 +55,18 @@ BEGIN
         JOIN Subject.tbAddressDetail detail ON detail.AddressCode = subject.AddressCode
         WHERE subject.SubjectCode = @ResolvedSubjectCode AND detail.IsReviewed = 0;
 
-        IF NOT EXISTS
-           (SELECT 1 FROM Subject.tbLegalProfile profile JOIN App.tbStatutoryStatus status ON status.StatusCode = profile.StatusCode AND status.IsActive = 1
-            WHERE profile.SubjectCode = @ResolvedSubjectCode AND profile.ValidFrom <= @AsOfDate AND (profile.ValidTo IS NULL OR profile.ValidTo >= @AsOfDate))
+        IF Cash.fnGetBizTaxType() = 0
+           AND @ReportingTypeCode IN (N'COMPANY-TAX', N'STATUTORY-ACCOUNTS')
+           AND NOT EXISTS
+           (
+               SELECT 1
+               FROM Subject.tbVirtual virtual
+               CROSS JOIN App.tbOptions options
+               WHERE virtual.SubjectCode = @ResolvedSubjectCode
+                 AND COALESCE(virtual.RegistryJurisdictionCode, options.JurisdictionCode) IS NOT NULL
+           )
             INSERT @Findings VALUES
-                (N'LEGAL-PROFILE-MISSING', N'ERROR', N'LEGAL-PROFILE', NULL, N'No active legal profile applies on the supplied date.');
-
-        INSERT @Findings
-        SELECT N'LEGAL-PROFILE-UNREVIEWED', N'ERROR', N'LEGAL-PROFILE',
-               CONCAT(profile.SubjectCode, N';', profile.LegalFormJurisdictionCode, N';', profile.LegalFormCode, N';', CONVERT(nvarchar(10), profile.ValidFrom, 23)),
-               N'The effective legal profile has not been reviewed.'
-        FROM Subject.tbLegalProfile profile
-        JOIN App.tbStatutoryStatus status ON status.StatusCode = profile.StatusCode AND status.IsActive = 1
-        WHERE profile.SubjectCode = @ResolvedSubjectCode
-          AND profile.ValidFrom <= @AsOfDate AND (profile.ValidTo IS NULL OR profile.ValidTo >= @AsOfDate)
-          AND profile.IsReviewed = 0;
+                (N'REGISTRY-JURISDICTION-MISSING', N'ERROR', N'IDENTITY', NULL, N'The reporting company has no effective registry jurisdiction.');
 
         IF @RegistrationSchemeCode IS NOT NULL
         BEGIN
