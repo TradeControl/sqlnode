@@ -1,7 +1,8 @@
 CREATE PROCEDURE Subject.proc_AddAddress 
 	(
 	@SubjectCode nvarchar(50),
-	@Address nvarchar(max)
+	@Address nvarchar(max),
+	@AddressTypeCode smallint = 0
 	)
 AS
 	SET NOCOUNT, XACT_ABORT ON;
@@ -17,12 +18,14 @@ AS
 		(
 			AddressCode,
 			SubjectCode,
+			AddressTypeCode,
 			Address
 		)
 		VALUES
 		(
 			@AddressCode,
 			@SubjectCode,
+			@AddressTypeCode,
 			@Address
 		);
   	END TRY

@@ -14,8 +14,6 @@ IF DB_NAME() NOT IN
 
 DECLARE @SubjectCode NVARCHAR(50) =
     (SELECT TOP (1) SubjectCode FROM App.tbOptions ORDER BY Identifier);
-DECLARE @AddressCode NVARCHAR(15) =
-    (SELECT AddressCode FROM Subject.tbSubject WHERE SubjectCode = @SubjectCode);
 DECLARE @AsOfDate DATE = CONVERT(date, '20250406');
 DECLARE @BusinessTaxType SMALLINT = Cash.fnGetBizTaxType();
 DECLARE @SyntheticUtr NVARCHAR(10) = CASE @BusinessTaxType
@@ -23,41 +21,37 @@ DECLARE @SyntheticUtr NVARCHAR(10) = CASE @BusinessTaxType
 DECLARE @RegistrationCode NVARCHAR(20);
 DECLARE @ProfileCode NVARCHAR(20);
 
-IF @SubjectCode IS NULL OR @AddressCode IS NULL
-    THROW 51071, 'The sandbox home subject and selected address are required.', 1;
+IF @SubjectCode IS NULL
+    THROW 51071, 'The sandbox home subject is required.', 1;
 
 BEGIN TRAN PhaseDP5Provision;
 BEGIN TRY
-    MERGE Subject.tbAddressDetail AS target
-    USING
-    (
-        SELECT @AddressCode AS AddressCode,
-               N'1 Synthetic Test Way' AS AddressLine1,
-               N'Testborough' AS Locality,
-               N'TE1 1ST' AS PostalCode,
-               N'UK' AS JurisdictionCode
-    ) AS source
-    ON target.AddressCode = source.AddressCode
-    WHEN MATCHED THEN UPDATE SET
-        AddressLine1 = source.AddressLine1,
-        AddressLine2 = NULL,
-        AddressLine3 = NULL,
-        Locality = source.Locality,
-        Region = NULL,
-        PostalCode = source.PostalCode,
-        JurisdictionCode = source.JurisdictionCode,
-        ValueSourceCode = N'SYNTHETIC',
-        IsReviewed = 1
-    WHEN NOT MATCHED THEN INSERT
-    (
-        AddressCode, AddressLine1, Locality, PostalCode,
-        JurisdictionCode, ValueSourceCode, IsReviewed
-    )
-    VALUES
-    (
-        source.AddressCode, source.AddressLine1, source.Locality, source.PostalCode,
-        source.JurisdictionCode, N'SYNTHETIC', 1
-    );
+    IF @BusinessTaxType = 0
+    BEGIN
+        DECLARE @RegisteredAddressCode NVARCHAR(15) =
+        (
+            SELECT AddressCode
+            FROM Subject.tbAddress
+            WHERE SubjectCode = @SubjectCode AND AddressTypeCode = 2
+        );
+
+        IF @RegisteredAddressCode IS NULL
+        BEGIN
+            EXEC Subject.proc_NextAddressCode
+                @SubjectCode = @SubjectCode,
+                @AddressCode = @RegisteredAddressCode OUTPUT;
+
+            INSERT INTO Subject.tbAddress
+                (AddressCode, SubjectCode, AddressTypeCode, Address)
+            VALUES
+                (@RegisteredAddressCode, @SubjectCode, 2,
+                 N'1 Synthetic Registered Office Way' + CHAR(13) + CHAR(10) + N'Testborough' + CHAR(13) + CHAR(10) + N'TE1 1ST');
+        END
+        ELSE
+            UPDATE Subject.tbAddress
+            SET Address = N'1 Synthetic Registered Office Way' + CHAR(13) + CHAR(10) + N'Testborough' + CHAR(13) + CHAR(10) + N'TE1 1ST'
+            WHERE AddressCode = @RegisteredAddressCode;
+    END;
 
     UPDATE Subject.tbVirtual
     SET VatNumber = CASE

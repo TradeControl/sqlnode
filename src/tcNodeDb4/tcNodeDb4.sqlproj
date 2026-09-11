@@ -107,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="Subject\Tables\tbAddress.sql" />
+    <Build Include="Subject\Tables\tbAddressType.sql" />
     <Build Include="dbo\Tables\AspNetRoles.sql" />
     <Build Include="Invoice\Tables\tbMirrorItem.sql" />
     <Build Include="dbo\Tables\AspNetUserClaims.sql" />
@@ -683,7 +684,6 @@
     <Build Include="Cash\Tables\tbTaxTagSource.sql" />
     <Build Include="Subject\Tables\tbRegistration.sql" />
     <Build Include="Subject\Stored Procedures\proc_DefaultRegistrationCode.sql" />
-    <Build Include="Subject\Tables\tbAddressDetail.sql" />
     <Build Include="Cash\Tables\tbReportingProfile.sql" />
     <Build Include="Cash\Tables\tbReportingProfileSetting.sql" />
     <Build Include="Cash\Stored Procedures\proc_DefaultReportingProfileCode.sql" />

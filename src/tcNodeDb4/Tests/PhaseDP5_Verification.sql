@@ -11,11 +11,8 @@ IF NOT EXISTS
     SELECT 1 FROM Subject.fnStatutoryIdentity(@AsOfDate)
     WHERE SubjectCode = @SubjectCode
       AND NULLIF(LTRIM(RTRIM(SubjectName)), N'') IS NOT NULL
-      AND AddressLine1 IS NOT NULL
-      AND IsAddressReviewed = 1
       AND EffectiveRegistryJurisdictionCode IS NOT NULL
       AND OptionsRowVer IS NOT NULL AND SubjectRowVer IS NOT NULL
-      AND AddressRowVer IS NOT NULL AND AddressDetailRowVer IS NOT NULL
       AND VirtualRowVer IS NOT NULL
 )
     THROW 51080, 'The authoritative statutory identity is incomplete.', 1;
@@ -31,8 +28,11 @@ IF @BusinessTaxType = 0
 BEGIN
     IF NOT EXISTS
        (SELECT 1 FROM Subject.fnStatutoryIdentity(@AsOfDate)
-        WHERE SubjectCode = @SubjectCode AND NULLIF(LTRIM(RTRIM(CompanyNumber)), N'') IS NOT NULL)
-        THROW 51082, 'The company number is missing.', 1;
+        WHERE SubjectCode = @SubjectCode
+          AND NULLIF(LTRIM(RTRIM(CompanyNumber)), N'') IS NOT NULL
+          AND NULLIF(LTRIM(RTRIM(RegisteredAddress)), N'') IS NOT NULL
+          AND RegisteredAddressRowVer IS NOT NULL)
+        THROW 51082, 'The company number or registered address is missing.', 1;
 
     IF (SELECT COUNT(DISTINCT AuthorityCode) FROM Cash.fnReportingProfile(@SubjectCode, NULL, NULL, @AsOfDate)) < 2
         THROW 51083, 'The company does not have independent HMRC and Companies House profiles.', 1;
@@ -49,6 +49,14 @@ BEGIN
        (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, N'STATUTORY-ACCOUNTS', N'UK-CO-ACCTS-2026', NULL, N'ACCOUNTING-POLICIES', @AsOfDate))
         THROW 51091, 'The accounting policies suggestion is not ready.', 1;
 END;
+
+IF @BusinessTaxType = 4
+   AND NOT EXISTS
+   (SELECT 1 FROM Subject.fnStatutoryIdentity(@AsOfDate)
+    WHERE SubjectCode = @SubjectCode
+      AND NULLIF(LTRIM(RTRIM(TradingAddress)), N'') IS NOT NULL
+      AND TradingAddressRowVer IS NOT NULL)
+    THROW 51092, 'The sole trader trading address is missing.', 1;
 
 IF @BusinessTaxType = 4
 BEGIN

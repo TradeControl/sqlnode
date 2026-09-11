@@ -14,17 +14,10 @@ RETURN
         subject.SubjectTypeCode,
         type.SubjectClassCode,
         class.SubjectClass,
-        subject.AddressCode,
-        address.Address AS FreeFormAddress,
-        detail.AddressLine1,
-        detail.AddressLine2,
-        detail.AddressLine3,
-        detail.Locality,
-        detail.Region,
-        detail.PostalCode,
-        detail.JurisdictionCode AS AddressJurisdictionCode,
-        detail.ValueSourceCode AS AddressValueSourceCode,
-        detail.IsReviewed AS IsAddressReviewed,
+        subject.AddressCode AS TradingAddressCode,
+        tradingAddress.Address AS TradingAddress,
+        registeredAddress.AddressCode AS RegisteredAddressCode,
+        registeredAddress.Address AS RegisteredAddress,
         subject.PhoneNumber,
         subject.EmailAddress,
         virtual.WebSite,
@@ -35,17 +28,19 @@ RETURN
         COALESCE(virtual.RegistryJurisdictionCode, options.JurisdictionCode) AS EffectiveRegistryJurisdictionCode,
         CONVERT(binary(8), options.RowVer) AS OptionsRowVer,
         CONVERT(binary(8), subject.RowVer) AS SubjectRowVer,
-        CONVERT(binary(8), address.RowVer) AS AddressRowVer,
-        CONVERT(binary(8), detail.RowVer) AS AddressDetailRowVer,
+        CONVERT(binary(8), tradingAddress.RowVer) AS TradingAddressRowVer,
+        CONVERT(binary(8), registeredAddress.RowVer) AS RegisteredAddressRowVer,
         CONVERT(binary(8), virtual.RowVer) AS VirtualRowVer,
         subject.UpdatedOn AS SubjectUpdatedOn,
-        address.UpdatedOn AS AddressUpdatedOn,
-        detail.UpdatedOn AS AddressDetailUpdatedOn
+        tradingAddress.UpdatedOn AS TradingAddressUpdatedOn,
+        registeredAddress.UpdatedOn AS RegisteredAddressUpdatedOn
     FROM App.tbOptions options
     JOIN Subject.tbSubject subject ON subject.SubjectCode = options.SubjectCode
     JOIN Subject.tbType type ON type.SubjectTypeCode = subject.SubjectTypeCode
     JOIN Subject.tbClass class ON class.SubjectClassCode = type.SubjectClassCode
-    LEFT JOIN Subject.tbAddress address ON address.AddressCode = subject.AddressCode
-    LEFT JOIN Subject.tbAddressDetail detail ON detail.AddressCode = address.AddressCode
+    LEFT JOIN Subject.tbAddress tradingAddress ON tradingAddress.AddressCode = subject.AddressCode
+    LEFT JOIN Subject.tbAddress registeredAddress
+        ON registeredAddress.SubjectCode = subject.SubjectCode
+        AND registeredAddress.AddressTypeCode = 2
     LEFT JOIN Subject.tbVirtual virtual ON virtual.SubjectCode = subject.SubjectCode
 );

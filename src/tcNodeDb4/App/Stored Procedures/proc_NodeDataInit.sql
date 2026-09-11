@@ -21,6 +21,7 @@ BEGIN TRY
 	DELETE FROM Subject.tbAccount;
 	DELETE FROM Subject.tbVirtual;
 	DELETE FROM Subject.tbSubject;
+	DELETE FROM Subject.tbAddressType;
 	DELETE FROM Usr.tbMenuUser;
 	DELETE FROM Usr.tbMenu;
 	DELETE FROM Usr.tbUser;
@@ -672,6 +673,12 @@ BEGIN TRY
         , (9, 0, 1, 'Employee')
         , (10, 2, 2, 'External');
 
+    IF NOT EXISTS(SELECT * FROM Subject.tbAddressType)
+        INSERT INTO Subject.tbAddressType (AddressTypeCode, AddressType)
+        VALUES (0, 'Trading')
+        , (2, 'Registered')
+        , (3, 'Finance');
+
 	IF NOT EXISTS(SELECT * FROM Cash.tbCoinType)
 		INSERT INTO Cash.tbCoinType (CoinTypeCode, CoinType)
 		VALUES (0, 'Main')
@@ -802,7 +809,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 4;
+		@SQLBuild INT = 5;
 
 	IF NOT EXISTS
 	(

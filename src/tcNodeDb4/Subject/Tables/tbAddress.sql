@@ -1,6 +1,7 @@
 CREATE TABLE [Subject].[tbAddress] (
     [AddressCode] NVARCHAR (15) NOT NULL,
     [SubjectCode] NVARCHAR (50) NOT NULL,
+    [AddressTypeCode] SMALLINT CONSTRAINT [DF_Subject_tbAddress_AddressTypeCode] DEFAULT ((0)) NOT NULL,
     [Address]     NVARCHAR(MAX)         NOT NULL,
     [InsertedBy]  NVARCHAR (50) CONSTRAINT [DF_Subject_tbAddress_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
     [InsertedOn]  DATETIME      CONSTRAINT [DF_Subject_tbAddress_InsertedOn] DEFAULT (getdate()) NOT NULL,
@@ -8,13 +9,19 @@ CREATE TABLE [Subject].[tbAddress] (
     [UpdatedOn]   DATETIME      CONSTRAINT [DF_Subject_tbAddress_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]      ROWVERSION    NOT NULL,
     CONSTRAINT [PK_Subject_tbAddress] PRIMARY KEY CLUSTERED ([AddressCode] ASC) WITH (FILLFACTOR = 90),
-    CONSTRAINT [FK_Subject_tbAddress_Subject_tb] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT [FK_Subject_tbAddress_Subject_tb] FOREIGN KEY ([SubjectCode]) REFERENCES [Subject].[tbSubject] ([SubjectCode]) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT [FK_Subject_tbAddress_Subject_tbAddressType] FOREIGN KEY ([AddressTypeCode]) REFERENCES [Subject].[tbAddressType] ([AddressTypeCode])
 );
 
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Subject_tbAddress]
     ON [Subject].[tbAddress]([SubjectCode] ASC, [AddressCode] ASC) WITH (FILLFACTOR = 90);
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Subject_tbAddress_Registered]
+    ON [Subject].[tbAddress]([SubjectCode])
+    WHERE [AddressTypeCode] = 2;
 
 
 GO

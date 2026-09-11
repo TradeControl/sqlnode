@@ -34,26 +34,23 @@ BEGIN
             INSERT @Findings VALUES
                 (N'LEGAL-NAME-MISSING', N'ERROR', N'IDENTITY', NULL, N'The reporting subject has no legal name.');
 
-        IF EXISTS
+        IF Cash.fnGetBizTaxType() = 4 AND EXISTS
            (SELECT 1 FROM Subject.tbSubject WHERE SubjectCode = @ResolvedSubjectCode AND AddressCode IS NULL)
             INSERT @Findings VALUES
-                (N'ADDRESS-MISSING', N'ERROR', N'ADDRESS', NULL, N'The reporting subject has no selected address.');
-        ELSE IF NOT EXISTS
-        (
-            SELECT 1
-            FROM Subject.tbSubject subject
-            JOIN Subject.tbAddressDetail detail ON detail.AddressCode = subject.AddressCode
-            WHERE subject.SubjectCode = @ResolvedSubjectCode
-        )
-            INSERT @Findings VALUES
-                (N'ADDRESS-STRUCTURE-MISSING', N'ERROR', N'ADDRESS', NULL, N'The selected address has no authoritative structured representation.');
+                (N'TRADING-ADDRESS-MISSING', N'ERROR', N'ADDRESS', NULL, N'The reporting sole trader has no selected trading address.');
 
-        INSERT @Findings
-        SELECT N'ADDRESS-UNREVIEWED', N'ERROR', N'ADDRESS', NULL,
-               N'The structured address has not been reviewed.'
-        FROM Subject.tbSubject subject
-        JOIN Subject.tbAddressDetail detail ON detail.AddressCode = subject.AddressCode
-        WHERE subject.SubjectCode = @ResolvedSubjectCode AND detail.IsReviewed = 0;
+        IF Cash.fnGetBizTaxType() = 0
+           AND @ReportingTypeCode IN (N'COMPANY-TAX', N'STATUTORY-ACCOUNTS')
+           AND NOT EXISTS
+           (
+               SELECT 1
+               FROM Subject.tbAddress address
+               WHERE address.SubjectCode = @ResolvedSubjectCode
+                 AND address.AddressTypeCode = 2
+                 AND NULLIF(LTRIM(RTRIM(address.Address)), N'') IS NOT NULL
+           )
+            INSERT @Findings VALUES
+                (N'REGISTERED-ADDRESS-MISSING', N'ERROR', N'ADDRESS', NULL, N'The reporting company has no registered address.');
 
         IF Cash.fnGetBizTaxType() = 0
            AND @ReportingTypeCode IN (N'COMPANY-TAX', N'STATUTORY-ACCOUNTS')
