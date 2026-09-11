@@ -116,8 +116,8 @@ BEGIN
     HAVING COUNT(*) > 1;
 
     ----------------------------------------------------------------
-    -- The Tax Tag cash orientation is independent of the mapping being checked
-    -- and must match every actual leaf contributor.
+    -- A directional Tax Tag must match every actual leaf contributor. A neutral
+    -- tag intentionally permits both polarities for a net balance-sheet value.
     ----------------------------------------------------------------
     INSERT INTO @Result
     SELECT 1, ec.TagCode, t.TagName, ec.CashCode, ec.LeafCategoryCode, NULL,
@@ -128,8 +128,15 @@ BEGIN
      AND t.TagCode = ec.TagCode
      AND t.TagClassCode = 1
     WHERE ec.TaxSourceCode = @TaxSourceCode
-      AND (ec.CashPolarityCode IS NULL OR ec.CashPolarityCode = 2
-           OR ec.CashPolarityCode <> t.CashPolarityCode);
+      AND
+      (
+          ec.CashPolarityCode IS NULL
+          OR
+          (
+              t.CashPolarityCode <> 2
+              AND (ec.CashPolarityCode = 2 OR ec.CashPolarityCode <> t.CashPolarityCode)
+          )
+      );
 
     ----------------------------------------------------------------
     -- Warn only for enabled nominal P&L CashCodes in the configured business-

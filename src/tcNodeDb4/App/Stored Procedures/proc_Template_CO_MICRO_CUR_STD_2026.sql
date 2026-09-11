@@ -154,6 +154,7 @@ BEGIN TRY
 
     EXEC Cash.proc_TaxTagMapValidate @TaxSourceCode = 'UK-CO-ACCTS-2026';
     EXEC Cash.proc_TaxTagMapValidate @TaxSourceCode = 'UK-CO-CT-2026';
+    EXEC Cash.proc_TaxTagMapValidate @TaxSourceCode = 'UK-CO-CT600-2026';
 
     COMMIT TRAN MicroStdTemplate;
 

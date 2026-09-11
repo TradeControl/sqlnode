@@ -25,6 +25,6 @@ CREATE TABLE [Cash].[tbTaxTag]
         REFERENCES Cash.tbPolarity(CashPolarityCode),
 
     CONSTRAINT CK_Cash_tbTaxTag_CashPolarity
-        CHECK (CashPolarityCode IN (0, 1))
+        CHECK (CashPolarityCode IN (0, 1, 2))
 );
 GO

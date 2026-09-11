@@ -30,9 +30,10 @@ BEGIN
        (SELECT 1 FROM Subject.fnStatutoryIdentity(@AsOfDate)
         WHERE SubjectCode = @SubjectCode
           AND NULLIF(LTRIM(RTRIM(CompanyNumber)), N'') IS NOT NULL
-          AND NULLIF(LTRIM(RTRIM(RegisteredAddress)), N'') IS NOT NULL
-          AND RegisteredAddressRowVer IS NOT NULL)
-        THROW 51082, 'The company number or registered address is missing.', 1;
+          AND NULLIF(LTRIM(RTRIM(StatutoryAddress)), N'') IS NOT NULL
+          AND StatutoryAddressCode = COALESCE(RegisteredAddressCode, TradingAddressCode)
+          AND StatutoryAddressRowVer IS NOT NULL)
+        THROW 51082, 'The company number or effective statutory address is missing.', 1;
 
     IF (SELECT COUNT(DISTINCT AuthorityCode) FROM Cash.fnReportingProfile(@SubjectCode, NULL, NULL, @AsOfDate)) < 2
         THROW 51083, 'The company does not have independent HMRC and Companies House profiles.', 1;
@@ -54,9 +55,10 @@ IF @BusinessTaxType = 4
    AND NOT EXISTS
    (SELECT 1 FROM Subject.fnStatutoryIdentity(@AsOfDate)
     WHERE SubjectCode = @SubjectCode
-      AND NULLIF(LTRIM(RTRIM(TradingAddress)), N'') IS NOT NULL
-      AND TradingAddressRowVer IS NOT NULL)
-    THROW 51092, 'The sole trader trading address is missing.', 1;
+      AND NULLIF(LTRIM(RTRIM(StatutoryAddress)), N'') IS NOT NULL
+      AND StatutoryAddressCode = COALESCE(RegisteredAddressCode, TradingAddressCode)
+      AND StatutoryAddressRowVer IS NOT NULL)
+    THROW 51092, 'The sole trader statutory address is missing.', 1;
 
 IF @BusinessTaxType = 4
 BEGIN

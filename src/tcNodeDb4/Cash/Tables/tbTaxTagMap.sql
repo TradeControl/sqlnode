@@ -29,7 +29,7 @@ CREATE TABLE Cash.tbTaxTagMap
 );
 GO
 
-CREATE TRIGGER Cash.trgTaxTagMap_Validate
+CREATE TRIGGER Cash.Cash_tbTaxTagMap_TriggerUpdate
 ON Cash.tbTaxTagMap
 AFTER INSERT, UPDATE
 AS

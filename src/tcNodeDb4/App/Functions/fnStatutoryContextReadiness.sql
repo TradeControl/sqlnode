@@ -34,23 +34,20 @@ BEGIN
             INSERT @Findings VALUES
                 (N'LEGAL-NAME-MISSING', N'ERROR', N'IDENTITY', NULL, N'The reporting subject has no legal name.');
 
-        IF Cash.fnGetBizTaxType() = 4 AND EXISTS
-           (SELECT 1 FROM Subject.tbSubject WHERE SubjectCode = @ResolvedSubjectCode AND AddressCode IS NULL)
-            INSERT @Findings VALUES
-                (N'TRADING-ADDRESS-MISSING', N'ERROR', N'ADDRESS', NULL, N'The reporting sole trader has no selected trading address.');
-
-        IF Cash.fnGetBizTaxType() = 0
-           AND @ReportingTypeCode IN (N'COMPANY-TAX', N'STATUTORY-ACCOUNTS')
-           AND NOT EXISTS
+        IF NOT EXISTS
            (
                SELECT 1
-               FROM Subject.tbAddress address
-               WHERE address.SubjectCode = @ResolvedSubjectCode
-                 AND address.AddressTypeCode = 2
-                 AND NULLIF(LTRIM(RTRIM(address.Address)), N'') IS NOT NULL
-           )
+               FROM Subject.tbSubject subject
+               LEFT JOIN Subject.tbAddress registeredAddress
+                   ON registeredAddress.SubjectCode = subject.SubjectCode
+                   AND registeredAddress.AddressTypeCode = 2
+               LEFT JOIN Subject.tbAddress defaultAddress
+                   ON defaultAddress.AddressCode = subject.AddressCode
+               WHERE subject.SubjectCode = @ResolvedSubjectCode
+                 AND NULLIF(LTRIM(RTRIM(COALESCE(registeredAddress.Address, defaultAddress.Address))), N'') IS NOT NULL
+            )
             INSERT @Findings VALUES
-                (N'REGISTERED-ADDRESS-MISSING', N'ERROR', N'ADDRESS', NULL, N'The reporting company has no registered address.');
+                (N'STATUTORY-ADDRESS-MISSING', N'ERROR', N'ADDRESS', NULL, N'The reporting subject has neither a registered address nor a selected default address.');
 
         IF Cash.fnGetBizTaxType() = 0
            AND @ReportingTypeCode IN (N'COMPANY-TAX', N'STATUTORY-ACCOUNTS')

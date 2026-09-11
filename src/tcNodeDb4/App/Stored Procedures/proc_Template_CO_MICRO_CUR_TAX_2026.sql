@@ -36,13 +36,13 @@ BEGIN TRY
         ('UK-CO-ACCTS-2026', 'IncomeStatement.AdministrativeExpenses', 'Administrative expenses', 1, 0, 'Direct accounting component including staff, overhead and depreciation expense.', 40),
         ('UK-CO-ACCTS-2026', 'IncomeStatement.TaxOnProfit', 'Tax on profit', 2, 0, 'Derived from the approved Corporation Tax computation; not mapped to the tax control account.', 50),
         ('UK-CO-ACCTS-2026', 'IncomeStatement.ProfitLossForPeriod', 'Profit or loss for period', 2, 1, 'Derived statement total; polarity may be profit or loss.', 60),
-        ('UK-CO-ACCTS-2026', 'BalanceSheet.FixedAssets', 'Fixed assets', 2, 1, 'Derived from balance-sheet/account balances, not period cash-category mapping.', 100),
+        ('UK-CO-ACCTS-2026', 'BalanceSheet.FixedAssets', 'Fixed assets', 1, 2, 'Net as-at-date asset-account balances selected by configurable Category Tree mappings.', 100),
         ('UK-CO-ACCTS-2026', 'BalanceSheet.CurrentAssets', 'Current assets', 2, 1, 'Derived from balance-sheet/account balances.', 110),
         ('UK-CO-ACCTS-2026', 'BalanceSheet.PrepaymentsAndAccruedIncome', 'Prepayments and accrued income', 2, 1, 'External or derived after period-end adjustments.', 120),
         ('UK-CO-ACCTS-2026', 'BalanceSheet.CreditorsDueWithinOneYear', 'Creditors due within one year', 2, 0, 'Derived from balance-sheet/account balances and maturity classification.', 130),
         ('UK-CO-ACCTS-2026', 'BalanceSheet.NetCurrentAssetsLiabilities', 'Net current assets or liabilities', 2, 1, 'Derived statement total.', 140),
         ('UK-CO-ACCTS-2026', 'BalanceSheet.TotalAssetsLessCurrentLiabilities', 'Total assets less current liabilities', 2, 1, 'Derived statement total.', 150),
-        ('UK-CO-ACCTS-2026', 'BalanceSheet.CreditorsDueAfterOneYear', 'Creditors due after one year', 2, 0, 'Derived using maturity classification.', 160),
+        ('UK-CO-ACCTS-2026', 'BalanceSheet.CreditorsDueAfterOneYear', 'Creditors due after one year', 1, 0, 'As-at-date liability-account balances selected by configurable Category Tree mappings.', 160),
         ('UK-CO-ACCTS-2026', 'BalanceSheet.Provisions', 'Provisions', 2, 0, 'External or derived after statutory review.', 170),
         ('UK-CO-ACCTS-2026', 'BalanceSheet.AccrualsAndDeferredIncome', 'Accruals and deferred income', 2, 0, 'External or derived after period-end adjustments.', 180),
         ('UK-CO-ACCTS-2026', 'BalanceSheet.NetAssetsLiabilities', 'Net assets or liabilities', 2, 1, 'Derived statement total.', 190),
@@ -84,7 +84,6 @@ BEGIN TRY
         ('UK-CO-CT600-2026', 'ComputationsAttached', 'Computations attached', 2, 0, 'Workflow/package declaration.', 110),
         ('UK-CO-CT600-2026', 'SupplementaryPageA', 'CT600A', 2, 0, 'Conditional structured supplementary page; optional when not applicable.', 120),
         ('UK-CO-CT600-2026', 'Declaration', 'Return declaration', 2, 0, 'Contextual workflow name and declaration date.', 130);
-
     INSERT INTO Cash.tbTaxTagMap
         (TaxSourceCode, TagCode, MapTypeCode, CategoryCode, CashCode, IsEnabled)
     VALUES
@@ -92,8 +91,23 @@ BEGIN TRY
         ('UK-CO-ACCTS-2026', 'IncomeStatement.OtherIncome', 0, 'CT-OTHRIN', '', 1),
         ('UK-CO-ACCTS-2026', 'IncomeStatement.CostOfSales', 0, 'CT-CSTSAL', '', 1),
         ('UK-CO-ACCTS-2026', 'IncomeStatement.AdministrativeExpenses', 0, 'CT-STAFFC', '', 1),
-        ('UK-CO-ACCTS-2026', 'IncomeStatement.AdministrativeExpenses', 0, 'CT-OVERHD', '', 1),
-        ('UK-CO-CT-2026', 'AddBacks.AccountingDepreciation', 0, 'CA-DEPREC', '', 1),
+        ('UK-CO-ACCTS-2026', 'IncomeStatement.AdministrativeExpenses', 0, 'CT-OVERHD', '', 1);
+
+    INSERT INTO Cash.tbTaxTagMap
+        (TaxSourceCode, TagCode, MapTypeCode, CategoryCode, CashCode, IsEnabled)
+    VALUES
+        ('UK-CO-ACCTS-2026', 'BalanceSheet.FixedAssets', 0, 'CA-ASSET', '', 1),
+        ('UK-CO-ACCTS-2026', 'BalanceSheet.FixedAssets', 0, 'CA-DEPREC', '', 1),
+        ('UK-CO-ACCTS-2026', 'BalanceSheet.CreditorsDueAfterOneYear', 0, 'CA-LIAB', '', 1);
+
+    INSERT INTO Cash.tbTaxTagMap
+        (TaxSourceCode, TagCode, MapTypeCode, CategoryCode, CashCode, IsEnabled)
+    VALUES
+        ('UK-CO-CT-2026', 'AddBacks.AccountingDepreciation', 0, 'CA-DEPREC', '', 1);
+
+    INSERT INTO Cash.tbTaxTagMap
+        (TaxSourceCode, TagCode, MapTypeCode, CategoryCode, CashCode, IsEnabled)
+    VALUES
         ('UK-CO-CT600-2026', 'Turnover', 0, 'CT-TURNOV', '', 1);
 
     COMMIT TRAN CompanyStatutoryProjection;

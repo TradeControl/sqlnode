@@ -56,8 +56,49 @@ BEGIN TRY
     -- The statutory-composition procedure is deliberately repeatable.
     EXEC App.proc_Template_CO_MICRO_CUR_TAX_2026;
 
-    IF (SELECT COUNT(*) FROM Cash.tbTaxTagMap WHERE TaxSourceCode IN ('UK-CO-ACCTS-2026', 'UK-CO-CT-2026', 'UK-CO-CT600-2026')) <> 7
+    IF (SELECT COUNT(*) FROM Cash.tbTaxTagMap WHERE TaxSourceCode IN ('UK-CO-ACCTS-2026', 'UK-CO-CT-2026', 'UK-CO-CT600-2026')) <> 10
         THROW 51009, 'Rerunning statutory composition changed the mapping cardinality.', 1;
+
+    DECLARE @AccountsEnd DATE = DATEADD(DAY, -1,
+        (SELECT PayTo FROM Cash.fnTaxTypeDueDates(Cash.fnGetBizTaxType(), 0)));
+
+    IF (SELECT COUNT(*) FROM Cash.fnTaxBizBalanceSheet('UK-CO-ACCTS-2026', @AccountsEnd)) <> 11
+        THROW 51012, 'The statutory balance-sheet manifest is incomplete.', 1;
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM Cash.fnTaxBizBalanceSheet('UK-CO-ACCTS-2026', @AccountsEnd)
+        WHERE ValidationStatus <> N'Ready'
+           OR SupportStatus <> N'Supported'
+           OR StatutoryAmount IS NULL
+    )
+        THROW 51013, 'The statutory balance-sheet projection is not ready.', 1;
+
+    ;WITH Balance AS
+    (
+        SELECT
+            FixedAssets = MAX(CASE WHEN TagCode = N'BalanceSheet.FixedAssets' THEN StatutoryAmount END),
+            CurrentAssets = MAX(CASE WHEN TagCode = N'BalanceSheet.CurrentAssets' THEN StatutoryAmount END),
+            CreditorsWithin = MAX(CASE WHEN TagCode = N'BalanceSheet.CreditorsDueWithinOneYear' THEN StatutoryAmount END),
+            NetCurrentAssets = MAX(CASE WHEN TagCode = N'BalanceSheet.NetCurrentAssetsLiabilities' THEN StatutoryAmount END),
+            TotalAssetsLessCurrent = MAX(CASE WHEN TagCode = N'BalanceSheet.TotalAssetsLessCurrentLiabilities' THEN StatutoryAmount END),
+            CreditorsAfter = MAX(CASE WHEN TagCode = N'BalanceSheet.CreditorsDueAfterOneYear' THEN StatutoryAmount END),
+            Provisions = MAX(CASE WHEN TagCode = N'BalanceSheet.Provisions' THEN StatutoryAmount END),
+            Accruals = MAX(CASE WHEN TagCode = N'BalanceSheet.AccrualsAndDeferredIncome' THEN StatutoryAmount END),
+            NetAssets = MAX(CASE WHEN TagCode = N'BalanceSheet.NetAssetsLiabilities' THEN StatutoryAmount END),
+            CapitalAndReserves = MAX(CASE WHEN TagCode = N'BalanceSheet.CapitalAndReserves' THEN StatutoryAmount END)
+        FROM Cash.fnTaxBizBalanceSheet('UK-CO-ACCTS-2026', @AccountsEnd)
+    )
+    IF EXISTS
+    (
+        SELECT 1 FROM Balance
+        WHERE CurrentAssets - CreditorsWithin <> NetCurrentAssets
+           OR FixedAssets + NetCurrentAssets <> TotalAssetsLessCurrent
+           OR TotalAssetsLessCurrent - CreditorsAfter - Provisions - Accruals <> NetAssets
+           OR NetAssets <> CapitalAndReserves
+    )
+        THROW 51014, 'The statutory balance-sheet projection does not reconcile.', 1;
 
     SELECT TaxSourceCode, COUNT(*) AS TagCount
     FROM Cash.tbTaxTag

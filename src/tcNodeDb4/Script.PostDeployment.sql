@@ -15,7 +15,7 @@ ALTER DATABASE [$(DatabaseName)] SET RECURSIVE_TRIGGERS OFF;
 DECLARE
     @SQLDataVersion real = 4
     , @SqlRelease int = 1
-    , @SqlBuild int = 5;
+    , @SqlBuild int = 7;
 
 IF NOT EXISTS
 (

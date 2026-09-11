@@ -34,7 +34,34 @@ AS
              @RA_AccountNumber = @RA_AccountNumber;
 
         ----------------------------------------------------------------
-        -- 2. COMPANY ACCOUNTING CLASSIFICATION
+        -- 2. Registered office default
+        -- Initial business setup supplies one operational address. A company
+        -- starts with the same value in a distinct Registered address row so
+        -- either address can subsequently change without changing its role.
+        ----------------------------------------------------------------
+        DECLARE
+            @SubjectCode NVARCHAR(50) = (SELECT SubjectCode FROM App.tbOptions),
+            @DefaultAddress NVARCHAR(MAX);
+
+        SELECT @DefaultAddress = address.Address
+        FROM Subject.tbSubject subject
+        JOIN Subject.tbAddress address ON address.AddressCode = subject.AddressCode
+        WHERE subject.SubjectCode = @SubjectCode;
+
+        IF @DefaultAddress IS NOT NULL
+           AND NOT EXISTS
+           (
+               SELECT 1
+               FROM Subject.tbAddress
+               WHERE SubjectCode = @SubjectCode AND AddressTypeCode = 2
+           )
+            EXEC Subject.proc_AddAddress
+                @SubjectCode = @SubjectCode,
+                @Address = @DefaultAddress,
+                @AddressTypeCode = 2;
+
+        ----------------------------------------------------------------
+        -- 3. COMPANY ACCOUNTING CLASSIFICATION
         -- Statutory sources are composed by proc_Template_CO_MICRO_CUR_TAX_2026
         -- after the MIN/STD accounting profile has completed its refinements.
         ----------------------------------------------------------------
@@ -51,7 +78,7 @@ AS
         WHERE CashCode = 'CC-DEPRC';
 
         ----------------------------------------------------------------
-        -- 3. Business Tax settings for Corporations
+        -- 4. Business Tax settings for Corporations
         ----------------------------------------------------------------
         UPDATE Cash.tbTaxType
         SET IsEnabled = 1
