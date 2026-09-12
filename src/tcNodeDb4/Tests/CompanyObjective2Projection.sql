@@ -100,6 +100,36 @@ BEGIN TRY
     )
         THROW 51014, 'The statutory balance-sheet projection does not reconcile.', 1;
 
+    DECLARE @PeriodEnd DATE = DATEADD(DAY, 1, @AccountsEnd);
+    DECLARE @PeriodStart DATE = DATEADD(YEAR, -1, @PeriodEnd);
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM Cash.vwTaxBizSubmission submission
+        JOIN Cash.fnTaxBizCumulative('UK-CO-ACCTS-2026', @PeriodStart, @PeriodEnd) projection
+          ON projection.TaxSourceCode = submission.TaxSourceCode
+         AND projection.TagCode = submission.TagCode
+        JOIN Cash.tbTaxTag tag
+          ON tag.TaxSourceCode = submission.TaxSourceCode
+         AND tag.TagCode = submission.TagCode
+        WHERE submission.TaxSourceCode = 'UK-CO-ACCTS-2026'
+          AND CONVERT(DATE, submission.PeriodFrom) = @PeriodStart
+          AND CONVERT(DATE, submission.PeriodTo) = @PeriodEnd
+          AND projection.StatutoryAmount <> CASE tag.CashPolarityCode
+              WHEN 0 THEN submission.TaxableAmount * -1 ELSE submission.TaxableAmount END
+    )
+        THROW 51015, 'The cumulative projection does not reconcile to Cash.vwTaxBizSubmission.', 1;
+
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM Cash.fnTaxBizComputation(@PeriodStart, @PeriodEnd)
+        WHERE CalculatedTaxDue = StatementTaxDue
+          AND IsUniformTaxRate = 1
+    )
+        THROW 51016, 'The Corporation Tax computation does not reconcile to Cash.vwTaxBizStatement.', 1;
+
     SELECT TaxSourceCode, COUNT(*) AS TagCount
     FROM Cash.tbTaxTag
     WHERE TaxSourceCode IN ('UK-CO-ACCTS-2026', 'UK-CO-CT-2026', 'UK-CO-CT600-2026')

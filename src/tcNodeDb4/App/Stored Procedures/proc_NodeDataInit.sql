@@ -809,7 +809,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 8;
+		@SQLBuild INT = 9;
 
 	IF NOT EXISTS
 	(
