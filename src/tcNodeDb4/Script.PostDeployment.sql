@@ -13,27 +13,27 @@ Post-Deployment Script Template
 ALTER DATABASE [$(DatabaseName)] SET RECURSIVE_TRIGGERS OFF;
 
 DECLARE
-    @SQLDataVersion real = 4
-    , @SqlRelease int = 1
-    , @SqlBuild int = 7;
+    @SQLDataVersion REAL = 4,
+    @SQLRelease INT = 1,
+    @SQLBuild INT = 9;
 
 IF NOT EXISTS
 (
-	SELECT 1
-	FROM App.tbInstall
-	WHERE SQLDataVersion = @SQLDataVersion
-		AND SQLRelease = @SqlRelease
-		AND SQLBuild = @SqlBuild
+    SELECT 1
+    FROM App.tbInstall
+    WHERE SQLDataVersion = @SQLDataVersion
+      AND SQLRelease = @SQLRelease
+      AND SQLBuild = @SQLBuild
 )
-	INSERT INTO App.tbInstall
-	(
-		SQLDataVersion,
-		SQLRelease,
-		SQLBuild
-	)
-	VALUES
-	(
-		@SQLDataVersion,
-		@SqlRelease,
-		@SqlBuild
-	);
+    INSERT INTO App.tbInstall
+    (
+        SQLDataVersion,
+        SQLRelease,
+        SQLBuild
+    )
+    VALUES
+    (
+        @SQLDataVersion,
+        @SQLRelease,
+        @SQLBuild
+    );

@@ -50,7 +50,7 @@ RETURN
     JOIN Cash.tbCode cashCode
       ON cashCode.CashCode = effective.CashCode
     WHERE CONVERT(DATE, period.StartOn) >= @PeriodStart
-      AND CONVERT(DATE, period.StartOn) <= @PeriodEnd
-      AND @PeriodStart <= @PeriodEnd
+      AND CONVERT(DATE, period.StartOn) < @PeriodEnd
+      AND @PeriodStart < @PeriodEnd
 );
 GO

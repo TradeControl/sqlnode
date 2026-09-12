@@ -20,7 +20,7 @@ RETURNS @Projection TABLE
 AS
 BEGIN
     DECLARE @DatesValid BIT = CASE
-        WHEN @PeriodStart <= @PeriodEnd THEN 1 ELSE 0 END;
+        WHEN @PeriodStart < @PeriodEnd THEN 1 ELSE 0 END;
     DECLARE @MappingsValid BIT = CASE WHEN EXISTS
         (SELECT 1 FROM Cash.fnTaxTagMapValidate(@TaxSourceCode) WHERE IsError = 1)
         THEN 0 ELSE 1 END;
@@ -41,7 +41,7 @@ BEGIN
           ON p.CashCode = e.CashCode
          AND p.CashPolarityCode = e.CashPolarityCode
          AND CAST(p.StartOn AS DATE) >= @PeriodStart
-         AND CAST(p.StartOn AS DATE) <= @PeriodEnd
+         AND CAST(p.StartOn AS DATE) < @PeriodEnd
         GROUP BY e.TagCode
     )
     INSERT INTO @Projection
