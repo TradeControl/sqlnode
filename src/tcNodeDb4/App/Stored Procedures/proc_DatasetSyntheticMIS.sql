@@ -75,6 +75,8 @@ AS
 	        @IsVatRegistered = @IsVatRegistered,
             @EnableOpeningBalance = @EnableOpeningBalance;
 
+        EXEC App.proc_DatasetSyntheticMIS_StatutoryProfile;
+
 		---------------------------------------------------------------------
 		-- 2) Project side
 		---------------------------------------------------------------------

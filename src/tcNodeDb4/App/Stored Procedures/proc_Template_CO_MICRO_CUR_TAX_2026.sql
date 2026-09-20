@@ -10,14 +10,75 @@ BEGIN TRY
     WHERE TaxSourceCode IN ('UK-MTD', 'UK-CO-ACCTS-2026', 'UK-CO-CT-2026', 'UK-CO-CT600-2026');
 
     INSERT INTO Cash.tbTaxTagSource
-        (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode)
+        (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode, ReportingTypeCode)
     VALUES
         ('UK-CO-ACCTS-2026', 'Company Accounts',
-         'FRS 105 micro-entity statutory accounts semantic projection; FRC 2026 contract family', 0),
+         'FRS 105 micro-entity statutory accounts semantic projection; FRC 2026 contract family', 0, 'STATUTORY-ACCOUNTS'),
         ('UK-CO-CT-2026', 'Corporation Tax',
-         'Ordinary company Corporation Tax computation inputs; CT600 V3 RIM 1.994 contract family', 0),
+         'Ordinary company Corporation Tax computation inputs; CT600 V3 RIM 1.994 contract family', 0, 'COMPANY-TAX'),
         ('UK-CO-CT600-2026', 'CT600 Return',
-         'CT600 return semantic projection; CT600 V3 RIM 1.994 contract family', 0);
+         'CT600 return semantic projection; CT600 V3 RIM 1.994 contract family', 0, 'COMPANY-TAX');
+
+    DECLARE
+        @SubjectCode NVARCHAR(50) = (SELECT SubjectCode FROM App.tbOptions),
+        @ValidFrom DATE = COALESCE((SELECT MIN(CONVERT(DATE, StartOn)) FROM App.tbYearPeriod), CONVERT(DATE, CURRENT_TIMESTAMP)),
+        @ReportingProfileCode NVARCHAR(20) = NULL;
+
+    SELECT @ReportingProfileCode = ReportingProfileCode
+    FROM Cash.tbReportingProfile
+    WHERE SubjectCode = @SubjectCode
+      AND ReportingTypeCode = N'STATUTORY-ACCOUNTS'
+      AND TaxSourceCode = N'UK-CO-ACCTS-2026';
+
+    IF @ReportingProfileCode IS NULL
+        EXEC Cash.proc_ReportingProfileSave
+            @SubjectCode = @SubjectCode,
+            @ReportingTypeCode = N'STATUTORY-ACCOUNTS',
+            @TaxSourceCode = N'UK-CO-ACCTS-2026',
+            @ValidFrom = @ValidFrom,
+            @StatusCode = 0,
+            @ValueSourceCode = N'IMPORTED',
+            @IsReviewed = 0,
+            @ReportingProfileCode = @ReportingProfileCode OUTPUT;
+
+    SET @ReportingProfileCode = NULL;
+
+    SELECT @ReportingProfileCode = ReportingProfileCode
+    FROM Cash.tbReportingProfile
+    WHERE SubjectCode = @SubjectCode
+      AND ReportingTypeCode = N'COMPANY-TAX'
+      AND TaxSourceCode = N'UK-CO-CT-2026';
+
+    IF @ReportingProfileCode IS NULL
+        EXEC Cash.proc_ReportingProfileSave
+            @SubjectCode = @SubjectCode,
+            @ReportingTypeCode = N'COMPANY-TAX',
+            @TaxSourceCode = N'UK-CO-CT-2026',
+            @ValidFrom = @ValidFrom,
+            @StatusCode = 0,
+            @ValueSourceCode = N'IMPORTED',
+            @IsReviewed = 0,
+            @ReportingProfileCode = @ReportingProfileCode OUTPUT;
+
+    IF EXISTS (SELECT 1 FROM Cash.tbTaxType WHERE TaxTypeCode = 1 AND IsEnabled = 1)
+       AND NOT EXISTS
+       (
+           SELECT 1 FROM Cash.tbReportingProfile
+           WHERE SubjectCode = @SubjectCode
+             AND ReportingTypeCode = N'INDIRECT-TAX'
+       )
+    BEGIN
+        SET @ReportingProfileCode = NULL;
+        EXEC Cash.proc_ReportingProfileSave
+            @SubjectCode = @SubjectCode,
+            @ReportingTypeCode = N'INDIRECT-TAX',
+            @TaxSourceCode = NULL,
+            @ValidFrom = @ValidFrom,
+            @StatusCode = 0,
+            @ValueSourceCode = N'IMPORTED',
+            @IsReviewed = 0,
+            @ReportingProfileCode = @ReportingProfileCode OUTPUT;
+    END;
 
     INSERT INTO Cash.tbTaxTag
         (TaxSourceCode, TagCode, TagName, TagClassCode, CashPolarityCode, TagDescription, DisplayOrder)

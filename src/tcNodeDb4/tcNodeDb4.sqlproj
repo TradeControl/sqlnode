@@ -652,6 +652,7 @@
     <Build Include="App\Stored Procedures\proc_DatasetProjectPrint.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Bootstrap.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_StatutoryProfile.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectInit.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTemplates.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTran.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
@@ -680,6 +681,7 @@
     <Build Include="App\Tables\tbAuthority.sql" />
     <Build Include="App\Tables\tbRegistrationScheme.sql" />
     <Build Include="App\Tables\tbReportingType.sql" />
+    <Build Include="App\Tables\tbReportingTypeRegistrationScheme.sql" />
     <Build Include="App\Tables\tbSettingDefinition.sql" />
     <Build Include="Cash\Tables\tbTaxTagSource.sql" />
     <Build Include="Subject\Tables\tbRegistration.sql" />
@@ -771,6 +773,7 @@
     <None Include="Tests\PhaseDP5_Provision.sql" />
     <None Include="Tests\PhaseDP5_Portability.sql" />
     <None Include="Tests\PhaseDP5_Verification.sql" />
+    <None Include="Tests\Phase6A_ReportingProfileReadiness.sql" />
     <None Include="Tests\TaxTagMapValidator.sql" />
     <None Include="Scripts\NamespaceSelector_testscript.sql" />
     <None Include="Scripts\EXEC_PaymentPost.sql" />

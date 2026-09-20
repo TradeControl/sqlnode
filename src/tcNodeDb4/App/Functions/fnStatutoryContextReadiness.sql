@@ -62,38 +62,74 @@ BEGIN
             INSERT @Findings VALUES
                 (N'REGISTRY-JURISDICTION-MISSING', N'ERROR', N'IDENTITY', NULL, N'The reporting company has no effective registry jurisdiction.');
 
+        DECLARE @RequiredRegistrationScheme TABLE
+        (
+            RegistrationSchemeCode NVARCHAR(20) NOT NULL PRIMARY KEY
+        );
+
         IF @RegistrationSchemeCode IS NOT NULL
+            INSERT @RequiredRegistrationScheme (RegistrationSchemeCode)
+            VALUES (@RegistrationSchemeCode);
+        ELSE IF @ReportingTypeCode IS NOT NULL
+            INSERT @RequiredRegistrationScheme (RegistrationSchemeCode)
+            SELECT RegistrationSchemeCode
+            FROM App.tbReportingTypeRegistrationScheme
+            WHERE ReportingTypeCode = @ReportingTypeCode;
+
+        IF EXISTS (SELECT 1 FROM @RequiredRegistrationScheme)
         BEGIN
-            IF NOT EXISTS
-               (SELECT 1 FROM Subject.fnRegistration(@ResolvedSubjectCode, @RegistrationSchemeCode, @AsOfDate))
-                INSERT @Findings
-                SELECT
-                    CASE WHEN EXISTS
-                    (
-                        SELECT 1 FROM Subject.tbRegistration registration
-                        WHERE registration.SubjectCode = @ResolvedSubjectCode
-                          AND registration.RegistrationSchemeCode = @RegistrationSchemeCode
-                          AND (registration.ValidTo < @AsOfDate OR registration.StatusCode = 3)
-                    ) THEN N'REGISTRATION-EXPIRED' ELSE N'REGISTRATION-MISSING' END,
-                    N'ERROR', N'REGISTRATION', NULL,
-                    CASE WHEN EXISTS
-                    (
-                        SELECT 1 FROM Subject.tbRegistration registration
-                        WHERE registration.SubjectCode = @ResolvedSubjectCode
-                          AND registration.RegistrationSchemeCode = @RegistrationSchemeCode
-                          AND (registration.ValidTo < @AsOfDate OR registration.StatusCode = 3)
-                    ) THEN N'The required registration has expired.' ELSE N'The required registration is missing.' END;
+            INSERT @Findings
+            SELECT
+                CASE WHEN EXISTS
+                (
+                    SELECT 1
+                    FROM Subject.tbRegistration registration
+                    WHERE registration.SubjectCode = @ResolvedSubjectCode
+                      AND registration.RegistrationSchemeCode = required.RegistrationSchemeCode
+                      AND (registration.ValidTo < @AsOfDate OR registration.StatusCode = 3)
+                ) THEN N'REGISTRATION-EXPIRED' ELSE N'REGISTRATION-MISSING' END,
+                N'ERROR', N'REGISTRATION', required.RegistrationSchemeCode,
+                CASE WHEN EXISTS
+                (
+                    SELECT 1
+                    FROM Subject.tbRegistration registration
+                    WHERE registration.SubjectCode = @ResolvedSubjectCode
+                      AND registration.RegistrationSchemeCode = required.RegistrationSchemeCode
+                      AND (registration.ValidTo < @AsOfDate OR registration.StatusCode = 3)
+                ) THEN CONCAT(N'The required ', scheme.SchemeName, N' has expired.')
+                  ELSE CONCAT(N'The required ', scheme.SchemeName, N' is missing.') END
+            FROM @RequiredRegistrationScheme required
+            JOIN App.tbRegistrationScheme scheme
+              ON scheme.RegistrationSchemeCode = required.RegistrationSchemeCode
+            WHERE NOT EXISTS
+            (
+                SELECT 1
+                FROM Subject.fnRegistration(@ResolvedSubjectCode, required.RegistrationSchemeCode, @AsOfDate)
+            );
 
             INSERT @Findings
             SELECT N'REGISTRATION-UNREVIEWED', N'ERROR', N'REGISTRATION',
                    CONCAT(registration.SubjectCode, N';', registration.RegistrationCode),
-                   N'The effective registration has not been reviewed.'
-            FROM Subject.fnRegistration(@ResolvedSubjectCode, @RegistrationSchemeCode, @AsOfDate) registration
+                   CONCAT(N'The effective ', scheme.SchemeName, N' has not been reviewed.')
+            FROM @RequiredRegistrationScheme required
+            JOIN App.tbRegistrationScheme scheme
+              ON scheme.RegistrationSchemeCode = required.RegistrationSchemeCode
+            CROSS APPLY Subject.fnRegistration(@ResolvedSubjectCode, required.RegistrationSchemeCode, @AsOfDate) registration
             WHERE registration.IsReviewed = 0;
 
-            IF (SELECT COUNT(*) FROM Subject.fnRegistration(@ResolvedSubjectCode, @RegistrationSchemeCode, @AsOfDate)) > 1
-                INSERT @Findings VALUES
-                    (N'REGISTRATION-DUPLICATE', N'ERROR', N'REGISTRATION', NULL, N'More than one effective registration satisfies the requested scheme.');
+            INSERT @Findings
+            SELECT N'REGISTRATION-DUPLICATE', N'ERROR', N'REGISTRATION',
+                   required.RegistrationSchemeCode,
+                   CONCAT(N'More than one effective ', scheme.SchemeName, N' satisfies the reporting requirement.')
+            FROM @RequiredRegistrationScheme required
+            JOIN App.tbRegistrationScheme scheme
+              ON scheme.RegistrationSchemeCode = required.RegistrationSchemeCode
+            CROSS APPLY
+            (
+                SELECT COUNT(*) RegistrationCount
+                FROM Subject.fnRegistration(@ResolvedSubjectCode, required.RegistrationSchemeCode, @AsOfDate)
+            ) registrations
+            WHERE registrations.RegistrationCount > 1;
         END;
 
         IF @ReportingTypeCode IS NOT NULL

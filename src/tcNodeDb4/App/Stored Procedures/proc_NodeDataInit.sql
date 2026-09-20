@@ -293,6 +293,24 @@ BEGIN TRY
             (N'COMPANY-TAX', N'HMRC', N'Company tax reporting', 1),
             (N'STATUTORY-ACCOUNTS', N'COMPANIES-HOUSE', N'Statutory accounts reporting', 1);
 
+    INSERT INTO App.tbReportingTypeRegistrationScheme
+        (ReportingTypeCode, RegistrationSchemeCode)
+    SELECT seed.ReportingTypeCode, seed.RegistrationSchemeCode
+    FROM
+    (
+        VALUES
+            (N'SELF-EMPLOYMENT', N'GB-NI'),
+            (N'SELF-EMPLOYMENT', N'GB-UTR'),
+            (N'COMPANY-TAX', N'GB-UTR')
+    ) seed (ReportingTypeCode, RegistrationSchemeCode)
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM App.tbReportingTypeRegistrationScheme existing
+        WHERE existing.ReportingTypeCode = seed.ReportingTypeCode
+          AND existing.RegistrationSchemeCode = seed.RegistrationSchemeCode
+    );
+
     IF NOT EXISTS (SELECT * FROM App.tbSettingDefinition)
         INSERT INTO App.tbSettingDefinition
             (SettingCode, SettingName, JurisdictionCode, AuthorityCode, ReportingTypeCode, ValueTypeCode, AllowedValues)
@@ -302,9 +320,9 @@ BEGIN TRY
             (N'PERIODS-OF-ACCOUNT', N'Periods of account choice', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', NULL),
             (N'LATE-DATE-ELECTION', N'Late accounting date rule election', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'BOOLEAN', NULL),
             (N'CLASS4-EXEMPTION', N'Class 4 exemption reason', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', NULL),
-            (N'ACCOUNTING-STANDARD', N'Accounting standard', N'UK', NULL, NULL, N'TEXT', N'["FRS-105"]'),
-            (N'ACCOUNTS-TYPE', N'Accounts type', N'UK', NULL, NULL, N'TEXT', N'["MICRO-ENTITY"]'),
-            (N'BALANCE-SHEET-FORMAT', N'Balance sheet format', N'UK', NULL, NULL, N'TEXT', N'["FORMAT-1","FORMAT-2"]'),
+            (N'ACCOUNTING-STANDARD', N'Accounting standard', N'UK', N'COMPANIES-HOUSE', N'STATUTORY-ACCOUNTS', N'TEXT', N'["FRS-105"]'),
+            (N'ACCOUNTS-TYPE', N'Accounts type', N'UK', N'COMPANIES-HOUSE', N'STATUTORY-ACCOUNTS', N'TEXT', N'["MICRO-ENTITY"]'),
+            (N'BALANCE-SHEET-FORMAT', N'Balance sheet format', N'UK', N'COMPANIES-HOUSE', N'STATUTORY-ACCOUNTS', N'TEXT', N'["FORMAT-1","FORMAT-2"]'),
             (N'ACCOUNTING-POLICIES', N'Accounting policies narrative', N'UK', N'COMPANIES-HOUSE', N'STATUTORY-ACCOUNTS', N'TEXT', NULL);
 
 	IF NOT EXISTS (SELECT * FROM [Subject].[tbAccountType])
@@ -809,7 +827,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 9;
+		@SQLBuild INT = 11;
 
 	IF NOT EXISTS
 	(

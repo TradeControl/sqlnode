@@ -15,7 +15,28 @@ AS
 
     BEGIN TRY
         IF NULLIF(LTRIM(RTRIM(@RegistrationValue)), N'') IS NULL
-            THROW 51030, 'Registration value is required.', 1;
+        BEGIN
+            IF @RegistrationCode IS NULL OR NOT EXISTS
+            (
+                SELECT 1
+                FROM Subject.tbRegistration
+                WHERE SubjectCode = @SubjectCode
+                  AND RegistrationCode = @RegistrationCode
+            )
+                THROW 51030, 'Registration value is required.', 1;
+
+            UPDATE Subject.tbRegistration
+            SET ValidTo = @ValidTo,
+                StatusCode = @StatusCode,
+                ValueSourceCode = @ValueSourceCode,
+                IsReviewed = @IsReviewed,
+                UpdatedBy = suser_sname(),
+                UpdatedOn = current_timestamp
+            WHERE SubjectCode = @SubjectCode
+              AND RegistrationCode = @RegistrationCode;
+
+            RETURN;
+        END;
 
         IF @RegistrationCode IS NULL
             EXEC Subject.proc_DefaultRegistrationCode

@@ -6,9 +6,51 @@ BEGIN TRY
 
     IF NOT EXISTS (SELECT 1 FROM Cash.tbTaxTagSource WHERE TaxSourceCode = 'UK-ITSA-SE-CUM')
         INSERT INTO Cash.tbTaxTagSource
-            (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode)
+            (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode, ReportingTypeCode)
         VALUES ('UK-ITSA-SE-CUM', 'ITSA',
-                'MTD ITSA Sole Trader cumulative accounting projection', 5);
+                'MTD ITSA Sole Trader cumulative accounting projection', 5, 'SELF-EMPLOYMENT');
+
+    DECLARE
+        @SubjectCode NVARCHAR(50) = (SELECT SubjectCode FROM App.tbOptions),
+        @ValidFrom DATE = COALESCE((SELECT MIN(CONVERT(DATE, StartOn)) FROM App.tbYearPeriod), CONVERT(DATE, CURRENT_TIMESTAMP)),
+        @ReportingProfileCode NVARCHAR(20) = NULL;
+
+    SELECT @ReportingProfileCode = ReportingProfileCode
+    FROM Cash.tbReportingProfile
+    WHERE SubjectCode = @SubjectCode
+      AND ReportingTypeCode = N'SELF-EMPLOYMENT'
+      AND TaxSourceCode = N'UK-ITSA-SE-CUM';
+
+    IF @ReportingProfileCode IS NULL
+        EXEC Cash.proc_ReportingProfileSave
+            @SubjectCode = @SubjectCode,
+            @ReportingTypeCode = N'SELF-EMPLOYMENT',
+            @TaxSourceCode = N'UK-ITSA-SE-CUM',
+            @ValidFrom = @ValidFrom,
+            @StatusCode = 0,
+            @ValueSourceCode = N'IMPORTED',
+            @IsReviewed = 0,
+            @ReportingProfileCode = @ReportingProfileCode OUTPUT;
+
+    IF EXISTS (SELECT 1 FROM Cash.tbTaxType WHERE TaxTypeCode = 1 AND IsEnabled = 1)
+       AND NOT EXISTS
+       (
+           SELECT 1 FROM Cash.tbReportingProfile
+           WHERE SubjectCode = @SubjectCode
+             AND ReportingTypeCode = N'INDIRECT-TAX'
+       )
+    BEGIN
+        SET @ReportingProfileCode = NULL;
+        EXEC Cash.proc_ReportingProfileSave
+            @SubjectCode = @SubjectCode,
+            @ReportingTypeCode = N'INDIRECT-TAX',
+            @TaxSourceCode = NULL,
+            @ValidFrom = @ValidFrom,
+            @StatusCode = 0,
+            @ValueSourceCode = N'IMPORTED',
+            @IsReviewed = 0,
+            @ReportingProfileCode = @ReportingProfileCode OUTPUT;
+    END;
 
     ;WITH TagSeed AS
     (
