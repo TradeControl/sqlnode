@@ -774,6 +774,7 @@
     <None Include="Tests\PhaseDP5_Portability.sql" />
     <None Include="Tests\PhaseDP5_Verification.sql" />
     <None Include="Tests\Phase6A_ReportingProfileReadiness.sql" />
+    <None Include="Tests\SoleTraderBusinessTaxRate.sql" />
     <None Include="Tests\TaxTagMapValidator.sql" />
     <None Include="Scripts\NamespaceSelector_testscript.sql" />
     <None Include="Scripts\EXEC_PaymentPost.sql" />

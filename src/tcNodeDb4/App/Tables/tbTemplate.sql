@@ -3,6 +3,7 @@ CREATE TABLE [App].[tbTemplate] (
     [TemplateName]        NVARCHAR (100) NOT NULL,
     [StoredProcedure]     NVARCHAR (100) NOT NULL,
     [TemplateDescription] NVARCHAR (MAX) NULL,
+    [IsCompany]           BIT            CONSTRAINT [DF_App_tbTemplate_IsCompany] DEFAULT ((1)) NOT NULL,
     [IsVatRegistered]     BIT            CONSTRAINT [DF_App_tbTemplate_IsVatRegistered] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_App_tbTemplate] PRIMARY KEY CLUSTERED ([TemplateCode] ASC) WITH (FILLFACTOR = 90)
 );

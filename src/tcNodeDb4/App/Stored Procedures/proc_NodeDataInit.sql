@@ -37,6 +37,7 @@ BEGIN TRY
 	DELETE FROM Cash.tbCategory;
 	DELETE FROM App.tbTemplate;
     DELETE FROM App.tbSettingDefinition;
+    DELETE FROM App.tbReportingTypeRegistrationScheme;
     DELETE FROM App.tbReportingType;
     DELETE FROM App.tbRegistrationScheme;
     DELETE FROM App.tbAuthority;
@@ -83,29 +84,33 @@ BEGIN TRY
 
 	IF NOT EXISTS (SELECT * FROM [App].[tbTemplate])
         INSERT INTO [App].[tbTemplate]
-            ([TemplateCode], [TemplateName], [StoredProcedure], [TemplateDescription], [IsVatRegistered])
+            ([TemplateCode], [TemplateName], [StoredProcedure], [TemplateDescription], [IsCompany], [IsVatRegistered])
         VALUES
             ('COMIN26',
              'Minimal Micro Company Accounts 2026',
              'App.proc_Template_CO_MICRO_CUR_MIN_2026',
              'Ultra-minimal micro-entity accounting for simple trading companies. One sales code, one cost code, one wages code and one admin code. Statutory mappings are configured separately.',
+             1,
              1),
 
             ('COSTD26',
              'Standard Micro Company Accounts 2026',
              'App.proc_Template_CO_MICRO_CUR_STD_2026',
              'Enhanced micro-entity accounting with sales, direct-cost, administration and depreciation classifications. Statutory mappings are configured separately.',
+             1,
              1),
             ('STMIN26',
              'Minimal Sole Trader Accounts 2026 (MTD)',
              'App.proc_Template_ST_SOLE_CUR_MIN_MTD_2026',
              'Minimal sole trader accounting for MTD Income Tax. Statutory mappings are configured separately.',
+             0,
              0),
 
             ('STSTD26',
              'Standard Sole Trader Accounts 2026 (MTD)',
              'App.proc_Template_ST_SOLE_CUR_STD_MTD_2026',
              'Standard sole trader accounting for MTD Income Tax. Statutory mappings are configured separately.',
+             0,
              0);
 
 	IF NOT EXISTS (SELECT * FROM [App].[tbTemplateDataset])
@@ -827,7 +832,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 11;
+		@SQLBuild INT = 12;
 
 	IF NOT EXISTS
 	(

@@ -72,9 +72,6 @@ BEGIN TRY
     SET AccountClosed = 1
     WHERE AccountCode IN ('CALUP');
 
-    UPDATE App.tbYearPeriod
-    SET BusinessTaxRate = 0;
-
     ----------------------------------------------------------------
     -- 4. Business Tax settings for Sole Traders
     ----------------------------------------------------------------

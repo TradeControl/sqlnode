@@ -2,7 +2,8 @@ CREATE PROCEDURE App.proc_DatasetSyntheticMIS_Bootstrap
 (
 	@TemplateCode nvarchar(10) = N'COMIN26',
 	@IsVatRegistered bit = NULL,
-    @EnableOpeningBalance bit = 1
+    @EnableOpeningBalance bit = 1,
+	@ExpectedAnnualProfit decimal(18, 2) = 50000
 )
 AS
 	SET NOCOUNT, XACT_ABORT ON;
@@ -228,7 +229,8 @@ AS
 		@ReserveAccount = @ReserveAccount,
 		@RA_SortCode = @RA_SortCode,
 		@RA_AccountNumber = @RA_AccountNumber,
-		@IsVatRegistered = @IsVatRegistered;
+		@IsVatRegistered = @IsVatRegistered,
+		@ExpectedAnnualProfit = @ExpectedAnnualProfit;
 
 	DECLARE @ExternalRootCode nvarchar(50) = NULL;
 

@@ -55,12 +55,12 @@ AS
 	)
 	SELECT EntryNumber, AssetCode, AssetName, CashPolarityCode, LiquidityLevel, balance_sheet_grouped.StartOn, 
 		year_period.YearNumber, year_period.MonthNumber, IsEntry,
-		CASE IsEntry WHEN 0 THEN
+		CONVERT(decimal(18, 5), CASE IsEntry WHEN 0 THEN
 			MAX(Balance) OVER (PARTITION BY AssetName, CashPolarityCode, RNK ORDER BY EntryNumber) +
 			MIN(Balance) OVER (PARTITION BY AssetName, CashPolarityCode, RNK ORDER BY EntryNumber) 
 		ELSE
 			Balance
-		END AS Balance
+		END) AS Balance
 	FROM balance_sheet_grouped
 		JOIN App.tbYearPeriod year_period ON balance_sheet_grouped.StartOn = year_period.StartOn;
 

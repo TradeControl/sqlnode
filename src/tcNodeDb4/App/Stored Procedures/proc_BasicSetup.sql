@@ -13,11 +13,23 @@ CREATE PROCEDURE App.proc_BasicSetup
 	@ReserveAccount NVARCHAR(50) = null, 
 	@RA_SortCode NVARCHAR(10) = null,
 	@RA_AccountNumber NVARCHAR(20) = null,
-	@IsVatRegistered BIT = 0
+	@IsVatRegistered BIT = 0,
+	@ExpectedAnnualProfit DECIMAL(18, 2) = NULL
 )
 AS
 	DECLARE 
-		@FinancialYear SMALLINT = DATEPART(YEAR, CURRENT_TIMESTAMP);
+		@FinancialYear SMALLINT = DATEPART(YEAR, CURRENT_TIMESTAMP),
+		@IsCompany bit;
+
+	SELECT @IsCompany = IsCompany
+	FROM App.tbTemplate
+	WHERE TemplateCode = @TemplateCode;
+
+	IF @IsCompany IS NULL
+		THROW 51001, 'BasicSetup: template was not found in App.tbTemplate.', 1;
+
+	IF @IsCompany = 0 AND (@ExpectedAnnualProfit IS NULL OR @ExpectedAnnualProfit <= 0)
+		THROW 51002, 'BasicSetup: expected annual profit must be greater than zero for a sole trader.', 1;
 
 		IF EXISTS (SELECT * FROM App.tbOptions WHERE UnitOfCharge <> 'BTC') AND (@CoinTypeCode <> 2)
 			SET @CoinTypeCode = 2;
@@ -38,9 +50,6 @@ AS
 
 		DECLARE @ProcName nvarchar(100) =
 			(SELECT StoredProcedure FROM App.tbTemplate WHERE TemplateCode = @TemplateCode);
-
-		IF @ProcName IS NULL
-			THROW 51001, 'BasicSetup: template was not found in App.tbTemplate.', 1;
 
 		EXEC @ProcName
 				@FinancialMonth = @FinancialMonth,
@@ -70,7 +79,10 @@ AS
 		EXEC Cash.proc_GeneratePeriods;
 
 		UPDATE App.tbYearPeriod
-		SET BusinessTaxRate = 0.19;
+		SET BusinessTaxRate = CASE
+			WHEN @IsCompany <> 0 THEN CAST(0.19 AS decimal(9, 6))
+			ELSE CAST(Cash.fnPersonalEffectiveRateCalculator(@ExpectedAnnualProfit) AS decimal(9, 6))
+		END;
 
 		UPDATE App.tbYearPeriod
 		SET CashStatusCode = 2
