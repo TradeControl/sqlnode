@@ -95,7 +95,7 @@ AS
 	CREATE TABLE #MisRoots
 	(
 		MonthStartOn date NOT NULL,
-		ProjectCode nvarchar(20) COLLATE Latin1_General_CI_AS NOT NULL,
+		ProjectCode nvarchar(20) COLLATE DATABASE_DEFAULT NOT NULL,
 		PRIMARY KEY (ProjectCode)
 	);
 
