@@ -24,7 +24,10 @@ CREATE PROCEDURE App.proc_DatasetSyntheticMIS
 	@EnableTransfers bit = 1,
     @EnableOpeningBalance bit = 0,
 
-	@UseStdCompanyTemplate bit = 0
+	@UseStdCompanyTemplate bit = 0,
+
+	-- Test-only temporal anchor for disposable synthetic nodes. NULL preserves ordinary behaviour.
+	@AsOfDate date = NULL
 )
 AS
 	SET NOCOUNT, XACT_ABORT ON;
@@ -73,9 +76,10 @@ AS
         EXEC App.proc_DatasetSyntheticMIS_Bootstrap
 	        @TemplateCode = @TemplateCode,
 	        @IsVatRegistered = @IsVatRegistered,
-            @EnableOpeningBalance = @EnableOpeningBalance;
+            @EnableOpeningBalance = @EnableOpeningBalance,
+			@AsOfDate = @AsOfDate;
 
-        EXEC App.proc_DatasetSyntheticMIS_StatutoryProfile;
+        EXEC App.proc_DatasetSyntheticMIS_StatutoryProfile @AsOfDate = @AsOfDate;
 
 		---------------------------------------------------------------------
 		-- 2) Project side

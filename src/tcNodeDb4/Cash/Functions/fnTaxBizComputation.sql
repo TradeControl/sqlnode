@@ -21,18 +21,29 @@ RETURN
         FROM DueDates
         WHERE PayFrom = @PeriodStart
           AND PayTo = @PeriodEnd
+    ), RateProfile AS
+    (
+        SELECT
+            MinimumTaxRate = MIN(period.BusinessTaxRate),
+            MaximumTaxRate = MAX(period.BusinessTaxRate)
+        FROM App.tbYearPeriod period
+        WHERE CONVERT(DATE, period.StartOn) >= @PeriodStart
+          AND CONVERT(DATE, period.StartOn) < @PeriodEnd
     ), Periods AS
     (
         SELECT
-            NetProfit = SUM(totals.NetProfit),
-            CalculatedTaxDue = SUM(totals.BusinessTax),
-            BusinessTaxAdjustment = SUM(totals.BusinessTaxAdjustment),
-            MinimumTaxRate = MIN(period.BusinessTaxRate),
-            MaximumTaxRate = MAX(period.BusinessTaxRate)
-        FROM Cash.vwTaxBizTotalsByPeriod totals
-        JOIN App.tbYearPeriod period ON period.StartOn = totals.StartOn
-        WHERE CONVERT(DATE, totals.StartOn) >= @PeriodStart
-          AND CONVERT(DATE, totals.StartOn) < @PeriodEnd
+            NetProfit = computation.TaxableResult,
+            CalculatedTaxDue = computation.TaxDue,
+            computation.BusinessTaxAdjustment,
+            BusinessTaxRate = computation.EffectiveTaxRate,
+            IsUniformTaxRate = CONVERT(BIT, CASE
+                WHEN rates.MinimumTaxRate = rates.MaximumTaxRate THEN 1 ELSE 0 END),
+            PreviousLossesCarriedForward = computation.OpeningLoss,
+            LossesCarriedForward = computation.ClosingLoss
+        FROM Cash.vwTaxBizComputationByYear computation
+        CROSS JOIN RateProfile rates
+        WHERE computation.PeriodStart = @PeriodStart
+          AND DATEADD(day, 1, computation.PeriodEnd) = @PeriodEnd
     )
     SELECT
         PeriodStart = @PeriodStart,
@@ -41,9 +52,8 @@ RETURN
         periods.NetProfit,
         periods.CalculatedTaxDue,
         periods.BusinessTaxAdjustment,
-        BusinessTaxRate = CASE WHEN periods.MinimumTaxRate = periods.MaximumTaxRate
-            THEN periods.MinimumTaxRate END,
-        IsUniformTaxRate = CONVERT(BIT, CASE WHEN periods.MinimumTaxRate = periods.MaximumTaxRate THEN 1 ELSE 0 END),
+        periods.BusinessTaxRate,
+        periods.IsUniformTaxRate,
         StatementTaxDue = COALESCE((
             SELECT SUM(statement.TaxDue)
             FROM Cash.vwTaxBizStatement statement
@@ -58,15 +68,8 @@ RETURN
             FROM Cash.vwTaxBizStatement statement
             WHERE CONVERT(DATE, statement.StartOn) <= due.PayOn
             ORDER BY statement.StartOn DESC, statement.TaxDue DESC), 0),
-        PreviousLossesCarriedForward = COALESCE((
-            SELECT TOP (1) losses.LossesCarriedForward
-            FROM Cash.vwTaxLossesCarriedForward losses
-            WHERE CONVERT(DATE, losses.StartOn) < @PeriodEnd
-            ORDER BY losses.StartOn DESC), 0),
-        LossesCarriedForward = COALESCE((
-            SELECT MAX(losses.LossesCarriedForward)
-            FROM Cash.vwTaxLossesCarriedForward losses
-            WHERE CONVERT(DATE, losses.StartOn) = @PeriodEnd), 0),
+        periods.PreviousLossesCarriedForward,
+        periods.LossesCarriedForward,
         SnapshotRowVer = CONVERT(BINARY(8), @@DBTS)
     FROM SelectedDueDate due
     CROSS JOIN Periods periods

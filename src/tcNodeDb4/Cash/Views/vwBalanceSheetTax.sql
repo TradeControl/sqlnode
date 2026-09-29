@@ -1,16 +1,10 @@
 CREATE VIEW Cash.vwBalanceSheetTax
 AS
-	WITH tax_dates AS
+	WITH period_totals AS
 	(
-		SELECT
-			DATEADD(MONTH, -1, f.PayOn) PayOn,
-			PayFrom,
-			PayTo
-		FROM Cash.fnTaxTypeDueDates(0, 1) f
-	), period_totals AS
-	(
-		SELECT (SELECT PayOn FROM tax_dates WHERE totals.StartOn >= PayFrom AND totals.StartOn < PayTo) AS StartOn, BusinessTax
-		FROM Cash.vwTaxBizTotalsByPeriod totals
+		SELECT DATEFROMPARTS(YEAR(PeriodEnd), MONTH(PeriodEnd), 1) AS StartOn,
+			TaxDue AS BusinessTax
+		FROM Cash.vwTaxBizComputationByYear
 	), tax_entries AS
 	(
 		SELECT StartOn, SUM(BusinessTax) AS TaxDue, 0 AS TaxPaid

@@ -6,8 +6,11 @@ AS
 		SELECT PayOn, PayFrom, PayTo FROM Cash.fnTaxTypeDueDates(Cash.fnGetBizTaxType(), 0)
 	), period_totals AS
 	(
-		SELECT (SELECT PayOn FROM tax_dates WHERE totals.StartOn >= PayFrom AND totals.StartOn < PayTo) AS StartOn, BusinessTax
-		FROM Cash.vwTaxBizTotalsByPeriod totals
+		SELECT due.PayOn AS StartOn, computation.TaxDue AS BusinessTax
+		FROM Cash.vwTaxBizComputationByYear computation
+			JOIN tax_dates due
+				ON CONVERT(date, due.PayFrom) = computation.PeriodStart
+				AND CONVERT(date, due.PayTo) = DATEADD(day, 1, computation.PeriodEnd)
 	), tax_entries AS
 	(
 		SELECT StartOn, SUM(BusinessTax) AS TaxDue, 0 AS TaxPaid

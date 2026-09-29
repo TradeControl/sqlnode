@@ -14,11 +14,14 @@ CREATE PROCEDURE App.proc_BasicSetup
 	@RA_SortCode NVARCHAR(10) = null,
 	@RA_AccountNumber NVARCHAR(20) = null,
 	@IsVatRegistered BIT = 0,
-	@ExpectedAnnualProfit DECIMAL(18, 2) = NULL
+	@ExpectedAnnualProfit DECIMAL(18, 2) = NULL,
+	@AsOfDate DATE = NULL
 )
 AS
+	SET @AsOfDate = COALESCE(@AsOfDate, CONVERT(DATE, CURRENT_TIMESTAMP));
+
 	DECLARE 
-		@FinancialYear SMALLINT = DATEPART(YEAR, CURRENT_TIMESTAMP),
+		@FinancialYear SMALLINT = DATEPART(YEAR, @AsOfDate),
 		@IsCompany bit;
 
 	SELECT @IsCompany = IsCompany
@@ -34,7 +37,7 @@ AS
 		IF EXISTS (SELECT * FROM App.tbOptions WHERE UnitOfCharge <> 'BTC') AND (@CoinTypeCode <> 2)
 			SET @CoinTypeCode = 2;
 
-		IF DATEPART(MONTH, CURRENT_TIMESTAMP) < @FinancialMonth
+		IF DATEPART(MONTH, @AsOfDate) < @FinancialMonth
 			 SET @FinancialYear -= 1;
 		
 	DECLARE 
@@ -66,7 +69,7 @@ AS
 				@IsVATRegistered = @IsVatRegistered;
 
 		--TIME PERIODS
-		WHILE (@Year < DATEPART(YEAR, CURRENT_TIMESTAMP) + 2)
+		WHILE (@Year < DATEPART(YEAR, @AsOfDate) + 2)
 		BEGIN
 		
 			INSERT INTO App.tbYear (YearNumber, StartMonth, CashStatusCode, Description)
@@ -86,7 +89,7 @@ AS
 
 		UPDATE App.tbYearPeriod
 		SET CashStatusCode = 2
-		WHERE StartOn < DATEADD(MONTH, -1, CURRENT_TIMESTAMP)
+		WHERE StartOn < DATEADD(MONTH, -1, @AsOfDate)
 
 		IF EXISTS(SELECT * FROM App.tbYearPeriod WHERE CashStatusCode = 3)
 			WITH current_month AS

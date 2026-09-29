@@ -257,6 +257,7 @@
     <Build Include="Invoice\Views\vwNetworkDeployments.sql" />
     <Build Include="Usr\Views\vwMenuItemReportMode.sql" />
     <Build Include="Cash\Views\vwTaxBizTotalsByPeriod.sql" />
+    <Build Include="Cash\Views\vwTaxBizComputationByYear.sql" />
     <Build Include="Invoice\Views\vwNetworkDeploymentItems.sql" />
     <Build Include="Cash\Views\vwTaxBizStatement.sql" />
     <Build Include="Invoice\Views\vwNetworkUpdates.sql" />
@@ -484,6 +485,7 @@
     <Build Include="Cash\Stored Procedures\proc_ChangeAddressIndex.sql" />
     <Build Include="Cash\Stored Procedures\proc_ChangeNew.sql" />
     <Build Include="App\Stored Procedures\proc_BasicSetup.sql" />
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_VatSandboxAlign.sql" />
     <Build Include="dbo\Stored Procedures\AspNetGetUserId.sql" />
     <Build Include="Cash\Stored Procedures\proc_Mirror.sql" />
     <Build Include="dbo\Stored Procedures\AspNetGetUserName.sql" />
@@ -767,6 +769,7 @@
   <ItemGroup>
     <None Include="Scripts\DB3-DB4 migration script.sql" />
     <None Include="Scripts\EXEC_DatasetSyntheticMIS.sql" />
+    <None Include="Scripts\PROOF_CashStatementReconciliation.sql" />
     <None Include="Scripts\MTDSoleTraderMappingEnquiry.sql" />
     <None Include="Tests\Phase4D_CumulativeProjection.sql" />
     <None Include="Tests\PhaseDP4_Configuration.sql" />

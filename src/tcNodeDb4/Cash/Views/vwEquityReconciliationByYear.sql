@@ -52,41 +52,13 @@ profit_by_year AS (
     GROUP BY pl.YearNumber
 ),
 
------------------------------------------------------------------
--- Business tax (unified)
------------------------------------------------------------------
-biztax_due_dates AS (
-    SELECT PayOn, PayFrom, PayTo
-    FROM Cash.fnTaxTypeDueDates(0, 0)
-),
-biztax_year_end AS (
-    SELECT yb.YearNumber, yb.YearEndOn,
-           BizTaxPayOn = (
-               SELECT TOP (1) dd.PayOn
-               FROM biztax_due_dates dd
-               WHERE yb.YearEndOn >= dd.PayFrom
-                 AND yb.YearEndOn < dd.PayTo
-               ORDER BY dd.PayOn
-           )
-    FROM year_bounds yb
-),
-biztax_stmt AS (
-    SELECT ye.YearNumber, ye.BizTaxPayOn,
-           TaxDue = COALESCE(st.TaxDue, 0),
-           TaxBalance = COALESCE(st.Balance, 0),
-           BusinessTaxRate = COALESCE(yp.BusinessTaxRate, 0)
-    FROM biztax_year_end ye
-    LEFT JOIN Cash.vwTaxBizStatement st ON st.StartOn = ye.BizTaxPayOn
-    LEFT JOIN App.tbYearPeriod yp ON yp.StartOn = ye.BizTaxPayOn
-),
 biztax_by_year AS (
     SELECT YearNumber,
-           BusinessTaxExpense = SUM(CASE WHEN TaxDue > 0 THEN TaxDue ELSE 0 END),
-           TaxCarry = SUM(CASE WHEN TaxDue < 0 THEN TaxDue ELSE 0 END),
-           TaxBalance = SUM(TaxBalance),
-           BusinessTaxRate = MAX(BusinessTaxRate)
-    FROM biztax_stmt
-    GROUP BY YearNumber
+           BusinessTaxExpense = TaxDue,
+           TaxCarry = TaxReliefApplied,
+           OpeningLoss,
+           ClosingLoss
+    FROM Cash.vwTaxBizComputationByYear
 ),
 
 loss_cf_delta AS (
@@ -95,11 +67,7 @@ loss_cf_delta AS (
            ClosingLossesCarriedForward = LossesCarriedForward
     FROM (
         SELECT YearNumber,
-               LossesCarriedForward =
-                   CASE WHEN BusinessTaxRate = 0 THEN 0
-                        WHEN (TaxBalance / BusinessTaxRate) < 0
-                             THEN ABS(TaxBalance / BusinessTaxRate)
-                        ELSE 0 END
+               LossesCarriedForward = ClosingLoss
         FROM biztax_by_year
     ) x
 ),
