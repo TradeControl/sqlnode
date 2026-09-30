@@ -8,7 +8,7 @@ BEGIN TRY
         INSERT INTO Cash.tbTaxTagSource
             (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode, ReportingTypeCode)
         VALUES ('UK-ITSA-SE-CUM', 'ITSA',
-                'MTD ITSA Sole Trader cumulative accounting projection', 5, 'SELF-EMPLOYMENT');
+                'MTD ITSA Sole Trader cumulative accounting projection', 5, 1);
 
     DECLARE
         @SubjectCode NVARCHAR(50) = (SELECT SubjectCode FROM App.tbOptions),
@@ -18,13 +18,13 @@ BEGIN TRY
     SELECT @ReportingProfileCode = ReportingProfileCode
     FROM Cash.tbReportingProfile
     WHERE SubjectCode = @SubjectCode
-      AND ReportingTypeCode = N'SELF-EMPLOYMENT'
+      AND ReportingTypeCode = 1
       AND TaxSourceCode = N'UK-ITSA-SE-CUM';
 
     IF @ReportingProfileCode IS NULL
         EXEC Cash.proc_ReportingProfileSave
             @SubjectCode = @SubjectCode,
-            @ReportingTypeCode = N'SELF-EMPLOYMENT',
+            @ReportingTypeCode = 1,
             @TaxSourceCode = N'UK-ITSA-SE-CUM',
             @ValidFrom = @ValidFrom,
             @StatusCode = 0,
@@ -37,13 +37,13 @@ BEGIN TRY
        (
            SELECT 1 FROM Cash.tbReportingProfile
            WHERE SubjectCode = @SubjectCode
-             AND ReportingTypeCode = N'INDIRECT-TAX'
+             AND ReportingTypeCode = 0
        )
     BEGIN
         SET @ReportingProfileCode = NULL;
         EXEC Cash.proc_ReportingProfileSave
             @SubjectCode = @SubjectCode,
-            @ReportingTypeCode = N'INDIRECT-TAX',
+            @ReportingTypeCode = 0,
             @TaxSourceCode = NULL,
             @ValidFrom = @ValidFrom,
             @StatusCode = 0,

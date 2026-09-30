@@ -21,12 +21,12 @@ BEGIN TRY
 
     INSERT App.tbReportingType
         (ReportingTypeCode, AuthorityCode, ReportingTypeName, RequiresTaxSource)
-    VALUES (N'ZZ-REPORT', N'ZZ-AUTHORITY', N'Synthetic statutory report', 0);
+    VALUES (99, N'ZZ-AUTHORITY', N'Synthetic statutory report', 0);
 
     INSERT App.tbSettingDefinition
         (SettingCode, SettingName, JurisdictionCode, AuthorityCode, ReportingTypeCode, ValueTypeCode)
     VALUES
-        (N'ZZ-POLICY', N'Synthetic reporting policy', N'ZZ-TEST', N'ZZ-AUTHORITY', N'ZZ-REPORT', N'TEXT');
+        (N'ZZ-POLICY', N'Synthetic reporting policy', N'ZZ-TEST', N'ZZ-AUTHORITY', 99, N'TEXT');
 
     INSERT Subject.tbRegistration
         (SubjectCode, RegistrationCode, RegistrationSchemeCode, RegistrationValue,
@@ -39,7 +39,7 @@ BEGIN TRY
         (SubjectCode, ReportingProfileCode, AuthorityCode, ReportingTypeCode,
          ValidFrom, StatusCode, ValueSourceCode, IsReviewed)
     VALUES
-        (@SubjectCode, N'ZZREPORT', N'ZZ-AUTHORITY', N'ZZ-REPORT',
+        (@SubjectCode, N'ZZREPORT', N'ZZ-AUTHORITY', 99,
          @AsOfDate, 1, N'SYNTHETIC', 1);
 
     INSERT Cash.tbReportingProfileSetting

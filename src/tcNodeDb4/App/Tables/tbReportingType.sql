@@ -1,6 +1,6 @@
 CREATE TABLE [App].[tbReportingType]
 (
-    [ReportingTypeCode] NVARCHAR(20) NOT NULL,
+    [ReportingTypeCode] SMALLINT NOT NULL,
     [AuthorityCode] NVARCHAR(20) NOT NULL,
     [ReportingTypeName] NVARCHAR(100) NOT NULL,
     [RequiresTaxSource] BIT NOT NULL CONSTRAINT [DF_App_tbReportingType_RequiresTaxSource] DEFAULT (1),

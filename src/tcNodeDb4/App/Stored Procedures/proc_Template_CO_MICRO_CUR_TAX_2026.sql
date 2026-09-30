@@ -13,11 +13,11 @@ BEGIN TRY
         (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode, ReportingTypeCode)
     VALUES
         ('UK-CO-ACCTS-2026', 'Company Accounts',
-         'FRS 105 micro-entity statutory accounts semantic projection; FRC 2026 contract family', 0, 'STATUTORY-ACCOUNTS'),
+         'FRS 105 micro-entity statutory accounts semantic projection; FRC 2026 contract family', 0, 3),
         ('UK-CO-CT-2026', 'Corporation Tax',
-         'Ordinary company Corporation Tax computation inputs; CT600 V3 RIM 1.994 contract family', 0, 'COMPANY-TAX'),
+         'Ordinary company Corporation Tax computation inputs; CT600 V3 RIM 1.994 contract family', 0, 2),
         ('UK-CO-CT600-2026', 'CT600 Return',
-         'CT600 return semantic projection; CT600 V3 RIM 1.994 contract family', 0, 'COMPANY-TAX');
+         'CT600 return semantic projection; CT600 V3 RIM 1.994 contract family', 0, 2);
 
     DECLARE
         @SubjectCode NVARCHAR(50) = (SELECT SubjectCode FROM App.tbOptions),
@@ -27,13 +27,13 @@ BEGIN TRY
     SELECT @ReportingProfileCode = ReportingProfileCode
     FROM Cash.tbReportingProfile
     WHERE SubjectCode = @SubjectCode
-      AND ReportingTypeCode = N'STATUTORY-ACCOUNTS'
+      AND ReportingTypeCode = 3
       AND TaxSourceCode = N'UK-CO-ACCTS-2026';
 
     IF @ReportingProfileCode IS NULL
         EXEC Cash.proc_ReportingProfileSave
             @SubjectCode = @SubjectCode,
-            @ReportingTypeCode = N'STATUTORY-ACCOUNTS',
+            @ReportingTypeCode = 3,
             @TaxSourceCode = N'UK-CO-ACCTS-2026',
             @ValidFrom = @ValidFrom,
             @StatusCode = 0,
@@ -46,13 +46,13 @@ BEGIN TRY
     SELECT @ReportingProfileCode = ReportingProfileCode
     FROM Cash.tbReportingProfile
     WHERE SubjectCode = @SubjectCode
-      AND ReportingTypeCode = N'COMPANY-TAX'
+      AND ReportingTypeCode = 2
       AND TaxSourceCode = N'UK-CO-CT-2026';
 
     IF @ReportingProfileCode IS NULL
         EXEC Cash.proc_ReportingProfileSave
             @SubjectCode = @SubjectCode,
-            @ReportingTypeCode = N'COMPANY-TAX',
+            @ReportingTypeCode = 2,
             @TaxSourceCode = N'UK-CO-CT-2026',
             @ValidFrom = @ValidFrom,
             @StatusCode = 0,
@@ -65,13 +65,13 @@ BEGIN TRY
        (
            SELECT 1 FROM Cash.tbReportingProfile
            WHERE SubjectCode = @SubjectCode
-             AND ReportingTypeCode = N'INDIRECT-TAX'
+             AND ReportingTypeCode = 0
        )
     BEGIN
         SET @ReportingProfileCode = NULL;
         EXEC Cash.proc_ReportingProfileSave
             @SubjectCode = @SubjectCode,
-            @ReportingTypeCode = N'INDIRECT-TAX',
+            @ReportingTypeCode = 0,
             @TaxSourceCode = NULL,
             @ValidFrom = @ValidFrom,
             @StatusCode = 0,

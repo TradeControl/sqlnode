@@ -1,7 +1,7 @@
 CREATE FUNCTION [Cash].[fnReportingProfileMasked]
 (
     @SubjectCode NVARCHAR(50),
-    @ReportingTypeCode NVARCHAR(20),
+    @ReportingTypeCode SMALLINT,
     @TaxSourceCode NVARCHAR(20),
     @AsOfDate DATE
 )

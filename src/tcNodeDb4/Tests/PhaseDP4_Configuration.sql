@@ -22,23 +22,23 @@ BEGIN TRY
     DECLARE @SubjectCode NVARCHAR(50) =
         (SELECT TOP (1) SubjectCode FROM App.tbOptions ORDER BY Identifier);
     DECLARE @AsOfDate DATE = CONVERT(date, getdate());
-    DECLARE @ReportingTypeCode NVARCHAR(20) = CASE
+    DECLARE @ReportingTypeCode SMALLINT = CASE
         WHEN EXISTS (SELECT 1 FROM Cash.tbTaxTagSource WHERE TaxSourceCode LIKE N'%ITSA%')
-            THEN N'SELF-EMPLOYMENT'
-        ELSE N'COMPANY-TAX'
+            THEN 1
+        ELSE 2
     END;
     DECLARE @TaxSourceCode NVARCHAR(20) = CASE @ReportingTypeCode
-        WHEN N'SELF-EMPLOYMENT' THEN
+        WHEN 1 THEN
             (SELECT TOP (1) TaxSourceCode FROM Cash.tbTaxTagSource WHERE TaxSourceCode LIKE N'%ITSA%' ORDER BY TaxSourceCode)
         ELSE
             (SELECT TOP (1) TaxSourceCode FROM Cash.tbTaxTagSource WHERE TaxSourceCode LIKE N'%CT%' ORDER BY TaxSourceCode)
     END;
     DECLARE @SettingCode NVARCHAR(30) = CASE @ReportingTypeCode
-        WHEN N'SELF-EMPLOYMENT' THEN N'ACCOUNTING-BASIS'
+        WHEN 1 THEN N'ACCOUNTING-BASIS'
         ELSE N'ACCOUNTING-STANDARD'
     END;
     DECLARE @SettingValue NVARCHAR(30) = CASE @ReportingTypeCode
-        WHEN N'SELF-EMPLOYMENT' THEN N'CASH'
+        WHEN 1 THEN N'CASH'
         ELSE N'FRS-105'
     END;
     DECLARE @RegistrationCode NVARCHAR(20);
@@ -168,7 +168,7 @@ BEGIN TRY
     BEGIN
         EXEC Cash.proc_ReportingProfileSave
             @SubjectCode = @SubjectCode,
-            @ReportingTypeCode = N'STATUTORY-ACCOUNTS',
+            @ReportingTypeCode = 3,
             @TaxSourceCode = @TaxSourceCode,
             @AuthorityReference = N'DP4-ROLLBACK-ACCOUNTS',
             @ValidFrom = @AsOfDate,

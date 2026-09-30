@@ -5,7 +5,7 @@ CREATE TABLE [Cash].[tbTaxTagSource]
     SourceDescription  NVARCHAR(255) NULL,
 
     [TaxTypeCode] SMALLINT NOT NULL, 
-    [ReportingTypeCode] NVARCHAR(20) NOT NULL,
+    [ReportingTypeCode] SMALLINT NOT NULL,
     CONSTRAINT PK_Cash_tbTaxTagSource
         PRIMARY KEY CLUSTERED (TaxSourceCode),
 

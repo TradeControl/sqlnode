@@ -8,14 +8,14 @@ DECLARE
     @AsOfDate DATE = CONVERT(DATE, CURRENT_TIMESTAMP),
     @ActiveStatus SMALLINT = (SELECT TOP (1) StatusCode FROM App.tbStatutoryStatus WHERE IsActive = 1 ORDER BY StatusCode),
     @InactiveStatus SMALLINT = (SELECT TOP (1) StatusCode FROM App.tbStatutoryStatus WHERE IsActive = 0 AND StatusCode <> 3 ORDER BY StatusCode DESC),
-    @ReportingTypeCode NVARCHAR(20),
+    @ReportingTypeCode SMALLINT,
     @TaxSourceCode NVARCHAR(20),
     @RegistrationCode NVARCHAR(20),
     @ExpectedSchemeCount INT;
 
 IF @BusinessTaxType = 0
 BEGIN
-    SET @ReportingTypeCode = N'COMPANY-TAX';
+    SET @ReportingTypeCode = 2;
     SET @ExpectedSchemeCount = 1;
 
     IF NOT EXISTS
@@ -25,7 +25,7 @@ BEGIN
 END
 ELSE IF @BusinessTaxType = 4
 BEGIN
-    SET @ReportingTypeCode = N'SELF-EMPLOYMENT';
+    SET @ReportingTypeCode = 1;
     SET @ExpectedSchemeCount = 2;
 
     IF NOT EXISTS
@@ -44,7 +44,7 @@ IF (SELECT COUNT(*) FROM App.tbReportingTypeRegistrationScheme WHERE ReportingTy
 
 IF EXISTS
    (SELECT 1 FROM App.tbReportingTypeRegistrationScheme
-    WHERE ReportingTypeCode IN (N'INDIRECT-TAX', N'STATUTORY-ACCOUNTS'))
+    WHERE ReportingTypeCode IN (0, 3))
     THROW 51124, 'VAT or statutory accounts acquired an unrelated registration requirement.', 1;
 
 SELECT TOP (1)
@@ -107,14 +107,14 @@ BEGIN TRY
 
     IF EXISTS
        (SELECT 1 FROM App.fnStatutoryContextReadiness
-        (@SubjectCode, N'INDIRECT-TAX', NULL, NULL, NULL, @AsOfDate)
+        (@SubjectCode, 0, NULL, NULL, NULL, @AsOfDate)
         WHERE FindingCode LIKE N'REGISTRATION-%')
         THROW 51128, 'The UTR state incorrectly affected indirect-tax readiness.', 1;
 
     IF @BusinessTaxType = 0
        AND EXISTS
        (SELECT 1 FROM App.fnStatutoryContextReadiness
-        (@SubjectCode, N'STATUTORY-ACCOUNTS', N'UK-CO-ACCTS-2026', NULL, NULL, @AsOfDate)
+        (@SubjectCode, 3, N'UK-CO-ACCTS-2026', NULL, NULL, @AsOfDate)
         WHERE FindingCode LIKE N'REGISTRATION-%')
         THROW 51129, 'The UTR state incorrectly affected statutory-accounts readiness.', 1;
 

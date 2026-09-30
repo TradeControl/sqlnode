@@ -28,7 +28,13 @@ AS
 
 	SELECT
 		ReportingProfileCode,
-		ReportingTypeCode,
+		CASE ReportingTypeCode
+			WHEN 0 THEN N'INDIRECT-TAX'
+			WHEN 1 THEN N'SELF-EMPLOYMENT'
+			WHEN 2 THEN N'COMPANY-TAX'
+			WHEN 3 THEN N'STATUTORY-ACCOUNTS'
+			ELSE CONVERT(NVARCHAR(20), ReportingTypeCode)
+		END AS ReportingTypeCode,
 		AuthorityCode,
 		TaxSourceCode,
 		AuthorityReferenceDisplay,

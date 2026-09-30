@@ -22,6 +22,18 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- The HOME subject VAT number is the canonical indirect-tax identity.
+    -- Keep every profile copy aligned inside the database so callers cannot
+    -- create two competing VAT identities.
+    UPDATE profile
+       SET AuthorityReference = NULLIF(LTRIM(RTRIM(candidate.VatNumber)), N'')
+    FROM Cash.tbReportingProfile profile
+    JOIN inserted candidate ON candidate.SubjectCode = profile.SubjectCode
+    LEFT JOIN deleted previous ON previous.SubjectCode = candidate.SubjectCode
+    WHERE profile.ReportingTypeCode = 0
+      AND ISNULL(NULLIF(LTRIM(RTRIM(candidate.VatNumber)), N''), N'')
+          <> ISNULL(NULLIF(LTRIM(RTRIM(previous.VatNumber)), N''), N'');
+
     BEGIN TRY
         UPDATE s
         SET UpdatedBy = SUSER_SNAME(),

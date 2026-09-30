@@ -54,7 +54,15 @@ profit_by_year AS (
 
 biztax_by_year AS (
     SELECT YearNumber,
-           BusinessTaxExpense = TaxDue,
+           -- Corporation tax is an expense of a company and therefore
+           -- reduces retained profit. A sole trader's income tax is a
+           -- personal liability: it affects business equity only when it
+           -- enters the books as a drawing/payment, not when tax is accrued.
+           BusinessTaxExpense =
+               CASE Cash.fnGetBizTaxType()
+                   WHEN 0 THEN TaxDue
+                   ELSE 0
+               END,
            TaxCarry = TaxReliefApplied,
            OpeningLoss,
            ClosingLoss

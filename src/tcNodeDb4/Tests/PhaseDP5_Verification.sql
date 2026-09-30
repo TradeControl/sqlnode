@@ -39,15 +39,15 @@ BEGIN
         THROW 51083, 'The company does not have independent HMRC and Companies House profiles.', 1;
 
     IF EXISTS
-       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, N'COMPANY-TAX', N'UK-CO-CT-2026', N'GB-UTR', NULL, @AsOfDate))
+       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, 2, N'UK-CO-CT-2026', N'GB-UTR', NULL, @AsOfDate))
         THROW 51084, 'The Corporation Tax context is not ready.', 1;
 
     IF EXISTS
-       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, N'STATUTORY-ACCOUNTS', N'UK-CO-ACCTS-2026', NULL, N'ACCOUNTING-STANDARD', @AsOfDate))
+       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, 3, N'UK-CO-ACCTS-2026', NULL, N'ACCOUNTING-STANDARD', @AsOfDate))
         THROW 51085, 'The statutory accounts context is not ready.', 1;
 
     IF EXISTS
-       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, N'STATUTORY-ACCOUNTS', N'UK-CO-ACCTS-2026', NULL, N'ACCOUNTING-POLICIES', @AsOfDate))
+       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, 3, N'UK-CO-ACCTS-2026', NULL, N'ACCOUNTING-POLICIES', @AsOfDate))
         THROW 51091, 'The accounting policies suggestion is not ready.', 1;
 END;
 
@@ -68,7 +68,7 @@ BEGIN
         THROW 51086, 'The reviewed masked NINO is missing.', 1;
 
     IF EXISTS
-       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, N'SELF-EMPLOYMENT', N'UK-ITSA-SE-CUM', N'GB-NI', N'ACCOUNTING-BASIS', @AsOfDate))
+       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, 1, N'UK-ITSA-SE-CUM', N'GB-NI', N'ACCOUNTING-BASIS', @AsOfDate))
         THROW 51087, 'The self-employment context is not ready.', 1;
 
     DECLARE @HasConsolidated BIT = CASE WHEN EXISTS
@@ -90,7 +90,7 @@ BEGIN
         THROW 51089, 'The VAT number is missing.', 1;
 
     IF EXISTS
-       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, N'INDIRECT-TAX', NULL, NULL, NULL, @AsOfDate))
+       (SELECT 1 FROM App.fnStatutoryContextReadiness(@SubjectCode, 0, NULL, NULL, NULL, @AsOfDate))
         THROW 51090, 'The VAT context is not ready.', 1;
 END;
 

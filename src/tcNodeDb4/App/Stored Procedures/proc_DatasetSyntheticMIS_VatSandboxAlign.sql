@@ -34,7 +34,7 @@ AS
         @TaxSourceCode = TaxSourceCode
     FROM Cash.tbReportingProfile
     WHERE SubjectCode = @SubjectCode
-      AND ReportingTypeCode = N'INDIRECT-TAX'
+      AND ReportingTypeCode = 0
       AND ValueSourceCode = N'SYNTHETIC';
 
     IF @ProfileCode IS NULL
@@ -50,9 +50,13 @@ AS
     )
         THROW 51086, 'VAT sandbox alignment: no exact calculated local VAT submission period exists.', 1;
 
+    UPDATE Subject.tbVirtual
+    SET VatNumber = @SandboxVrn
+    WHERE SubjectCode = @SubjectCode;
+
     EXEC Cash.proc_ReportingProfileSave
         @SubjectCode = @SubjectCode,
-        @ReportingTypeCode = N'INDIRECT-TAX',
+        @ReportingTypeCode = 0,
         @TaxSourceCode = @TaxSourceCode,
         @AuthorityReference = @SandboxVrn,
         @ValidFrom = @ValidFrom,

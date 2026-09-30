@@ -293,10 +293,10 @@ BEGIN TRY
         INSERT INTO App.tbReportingType
             (ReportingTypeCode, AuthorityCode, ReportingTypeName, RequiresTaxSource)
         VALUES
-            (N'INDIRECT-TAX', N'HMRC', N'Indirect tax reporting', 0),
-            (N'SELF-EMPLOYMENT', N'HMRC', N'Self-employment income reporting', 1),
-            (N'COMPANY-TAX', N'HMRC', N'Company tax reporting', 1),
-            (N'STATUTORY-ACCOUNTS', N'COMPANIES-HOUSE', N'Statutory accounts reporting', 1);
+            (0, N'HMRC', N'Indirect tax reporting', 0),
+            (1, N'HMRC', N'Self-employment income reporting', 1),
+            (2, N'HMRC', N'Company tax reporting', 1),
+            (3, N'COMPANIES-HOUSE', N'Statutory accounts reporting', 1);
 
     INSERT INTO App.tbReportingTypeRegistrationScheme
         (ReportingTypeCode, RegistrationSchemeCode)
@@ -304,9 +304,9 @@ BEGIN TRY
     FROM
     (
         VALUES
-            (N'SELF-EMPLOYMENT', N'GB-NI'),
-            (N'SELF-EMPLOYMENT', N'GB-UTR'),
-            (N'COMPANY-TAX', N'GB-UTR')
+            (1, N'GB-NI'),
+            (1, N'GB-UTR'),
+            (2, N'GB-UTR')
     ) seed (ReportingTypeCode, RegistrationSchemeCode)
     WHERE NOT EXISTS
     (
@@ -320,15 +320,15 @@ BEGIN TRY
         INSERT INTO App.tbSettingDefinition
             (SettingCode, SettingName, JurisdictionCode, AuthorityCode, ReportingTypeCode, ValueTypeCode, AllowedValues)
         VALUES
-            (N'ACCOUNTING-BASIS', N'Accounting basis', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', N'["CASH","ACCRUAL"]'),
-            (N'QUARTERLY-PERIOD-TYPE', N'Quarterly period type', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', N'["STANDARD","CALENDAR"]'),
-            (N'PERIODS-OF-ACCOUNT', N'Periods of account choice', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', NULL),
-            (N'LATE-DATE-ELECTION', N'Late accounting date rule election', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'BOOLEAN', NULL),
-            (N'CLASS4-EXEMPTION', N'Class 4 exemption reason', N'UK', N'HMRC', N'SELF-EMPLOYMENT', N'TEXT', NULL),
-            (N'ACCOUNTING-STANDARD', N'Accounting standard', N'UK', N'COMPANIES-HOUSE', N'STATUTORY-ACCOUNTS', N'TEXT', N'["FRS-105"]'),
-            (N'ACCOUNTS-TYPE', N'Accounts type', N'UK', N'COMPANIES-HOUSE', N'STATUTORY-ACCOUNTS', N'TEXT', N'["MICRO-ENTITY"]'),
-            (N'BALANCE-SHEET-FORMAT', N'Balance sheet format', N'UK', N'COMPANIES-HOUSE', N'STATUTORY-ACCOUNTS', N'TEXT', N'["FORMAT-1","FORMAT-2"]'),
-            (N'ACCOUNTING-POLICIES', N'Accounting policies narrative', N'UK', N'COMPANIES-HOUSE', N'STATUTORY-ACCOUNTS', N'TEXT', NULL);
+            (N'ACCOUNTING-BASIS', N'Accounting basis', N'UK', N'HMRC', 1, N'TEXT', N'["CASH","ACCRUAL"]'),
+            (N'QUARTERLY-PERIOD-TYPE', N'Quarterly period type', N'UK', N'HMRC', 1, N'TEXT', N'["STANDARD","CALENDAR"]'),
+            (N'PERIODS-OF-ACCOUNT', N'Periods of account choice', N'UK', N'HMRC', 1, N'TEXT', NULL),
+            (N'LATE-DATE-ELECTION', N'Late accounting date rule election', N'UK', N'HMRC', 1, N'BOOLEAN', NULL),
+            (N'CLASS4-EXEMPTION', N'Class 4 exemption reason', N'UK', N'HMRC', 1, N'TEXT', NULL),
+            (N'ACCOUNTING-STANDARD', N'Accounting standard', N'UK', N'COMPANIES-HOUSE', 3, N'TEXT', N'["FRS-105"]'),
+            (N'ACCOUNTS-TYPE', N'Accounts type', N'UK', N'COMPANIES-HOUSE', 3, N'TEXT', N'["MICRO-ENTITY"]'),
+            (N'BALANCE-SHEET-FORMAT', N'Balance sheet format', N'UK', N'COMPANIES-HOUSE', 3, N'TEXT', N'["FORMAT-1","FORMAT-2"]'),
+            (N'ACCOUNTING-POLICIES', N'Accounting policies narrative', N'UK', N'COMPANIES-HOUSE', 3, N'TEXT', NULL);
 
 	IF NOT EXISTS (SELECT * FROM [Subject].[tbAccountType])
 		INSERT INTO [Subject].[tbAccountType] ([AccountTypeCode], [AccountType])
@@ -832,7 +832,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 12;
+		@SQLBuild INT = 13;
 
 	IF NOT EXISTS
 	(

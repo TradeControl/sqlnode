@@ -105,11 +105,11 @@ BEGIN
 
     SELECT @ProfileCode = ReportingProfileCode
     FROM Cash.tbReportingProfile
-    WHERE SubjectCode = @SubjectCode AND ReportingTypeCode = N'SELF-EMPLOYMENT';
+    WHERE SubjectCode = @SubjectCode AND ReportingTypeCode = 1;
 
     EXEC Cash.proc_ReportingProfileSave
         @SubjectCode = @SubjectCode,
-        @ReportingTypeCode = N'SELF-EMPLOYMENT',
+        @ReportingTypeCode = 1,
         @TaxSourceCode = N'UK-ITSA-SE-CUM',
         @AuthorityReference = N'XQIS00000000001',
         @ValidFrom = @AsOfDate,
@@ -128,10 +128,10 @@ IF @BusinessTaxType = 0
 BEGIN
     SELECT @ProfileCode = ReportingProfileCode
     FROM Cash.tbReportingProfile
-    WHERE SubjectCode = @SubjectCode AND ReportingTypeCode = N'COMPANY-TAX';
+    WHERE SubjectCode = @SubjectCode AND ReportingTypeCode = 2;
 
     EXEC Cash.proc_ReportingProfileSave
-        @SubjectCode = @SubjectCode, @ReportingTypeCode = N'COMPANY-TAX',
+        @SubjectCode = @SubjectCode, @ReportingTypeCode = 2,
         @TaxSourceCode = N'UK-CO-CT-2026', @ValidFrom = @AsOfDate,
         @StatusCode = @StatusCode, @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1,
         @ReportingProfileCode = @ProfileCode OUTPUT;
@@ -139,10 +139,10 @@ BEGIN
     SET @ProfileCode = NULL;
     SELECT @ProfileCode = ReportingProfileCode
     FROM Cash.tbReportingProfile
-    WHERE SubjectCode = @SubjectCode AND ReportingTypeCode = N'STATUTORY-ACCOUNTS';
+    WHERE SubjectCode = @SubjectCode AND ReportingTypeCode = 3;
 
     EXEC Cash.proc_ReportingProfileSave
-        @SubjectCode = @SubjectCode, @ReportingTypeCode = N'STATUTORY-ACCOUNTS',
+        @SubjectCode = @SubjectCode, @ReportingTypeCode = 3,
         @TaxSourceCode = N'UK-CO-ACCTS-2026', @ValidFrom = @AsOfDate,
         @StatusCode = @StatusCode, @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1,
         @ReportingProfileCode = @ProfileCode OUTPUT;
@@ -163,10 +163,10 @@ BEGIN
     SET @ProfileCode = NULL;
     SELECT @ProfileCode = ReportingProfileCode
     FROM Cash.tbReportingProfile
-    WHERE SubjectCode = @SubjectCode AND ReportingTypeCode = N'INDIRECT-TAX';
+    WHERE SubjectCode = @SubjectCode AND ReportingTypeCode = 0;
 
     EXEC Cash.proc_ReportingProfileSave
-        @SubjectCode = @SubjectCode, @ReportingTypeCode = N'INDIRECT-TAX',
+        @SubjectCode = @SubjectCode, @ReportingTypeCode = 0,
         @TaxSourceCode = NULL, @ValidFrom = @AsOfDate,
         @StatusCode = @StatusCode, @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1,
         @ReportingProfileCode = @ProfileCode OUTPUT;

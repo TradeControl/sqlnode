@@ -1,7 +1,7 @@
 CREATE FUNCTION [App].[fnStatutoryContextReadiness]
 (
     @SubjectCode NVARCHAR(50),
-    @ReportingTypeCode NVARCHAR(20),
+    @ReportingTypeCode SMALLINT,
     @TaxSourceCode NVARCHAR(20),
     @RegistrationSchemeCode NVARCHAR(20),
     @SettingCode NVARCHAR(30),
@@ -50,7 +50,7 @@ BEGIN
                 (N'STATUTORY-ADDRESS-MISSING', N'ERROR', N'ADDRESS', NULL, N'The reporting subject has neither a registered address nor a selected default address.');
 
         IF Cash.fnGetBizTaxType() = 0
-           AND @ReportingTypeCode IN (N'COMPANY-TAX', N'STATUTORY-ACCOUNTS')
+           AND @ReportingTypeCode IN (2, 3)
            AND NOT EXISTS
            (
                SELECT 1
@@ -166,6 +166,20 @@ BEGIN
             IF (SELECT COUNT(*) FROM Cash.fnReportingProfile(@ResolvedSubjectCode, @ReportingTypeCode, @TaxSourceCode, @AsOfDate)) > 1
                 INSERT @Findings VALUES
                     (N'REPORTING-PROFILE-DUPLICATE', N'ERROR', N'REPORTING-PROFILE', NULL, N'More than one effective reporting profile satisfies the requested scope.');
+
+            IF @ReportingTypeCode = 0
+               AND EXISTS
+               (
+                   SELECT 1
+                   FROM Cash.vwTaxVatIdentity vatIdentity
+                   WHERE vatIdentity.SubjectCode = @ResolvedSubjectCode
+                     AND vatIdentity.ValidFrom <= @AsOfDate
+                     AND (vatIdentity.ValidTo IS NULL OR vatIdentity.ValidTo >= @AsOfDate)
+                     AND vatIdentity.IsConsistent = 0
+               )
+                INSERT @Findings VALUES
+                    (N'VAT-IDENTITY-MISMATCH', N'ERROR', N'REPORTING-PROFILE', NULL,
+                     N'The active indirect-tax profile does not match the reporting subject VAT registration number.');
 
             IF @SettingCode IS NOT NULL
             BEGIN

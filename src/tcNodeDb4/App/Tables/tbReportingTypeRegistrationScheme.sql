@@ -1,6 +1,6 @@
 CREATE TABLE [App].[tbReportingTypeRegistrationScheme]
 (
-    [ReportingTypeCode] NVARCHAR(20) NOT NULL,
+    [ReportingTypeCode] SMALLINT NOT NULL,
     [RegistrationSchemeCode] NVARCHAR(20) NOT NULL,
     CONSTRAINT [PK_App_tbReportingTypeRegistrationScheme] PRIMARY KEY CLUSTERED
         ([ReportingTypeCode], [RegistrationSchemeCode]),

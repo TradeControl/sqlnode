@@ -1,7 +1,7 @@
 CREATE PROCEDURE [Cash].[proc_ReportingProfileSave]
 (
     @SubjectCode NVARCHAR(50),
-    @ReportingTypeCode NVARCHAR(20),
+    @ReportingTypeCode SMALLINT,
     @TaxSourceCode NVARCHAR(20),
     @AuthorityReference NVARCHAR(100) = NULL,
     @ValidFrom DATE,
@@ -28,6 +28,22 @@ AS
 
         IF @StatusCode = 1 AND @IsReviewed = 0
             THROW 51032, 'An active reporting profile must be reviewed.', 1;
+
+        IF @ReportingTypeCode = 0
+        BEGIN
+            DECLARE @SubjectVatNumber NVARCHAR(50) =
+            (
+                SELECT TOP (1) NULLIF(LTRIM(RTRIM(VatNumber)), N'')
+                FROM Cash.vwTaxVatIdentity
+                WHERE SubjectCode = @SubjectCode
+            );
+
+            IF @SubjectVatNumber IS NOT NULL
+               AND (LEN(@SubjectVatNumber) <> 9 OR @SubjectVatNumber LIKE N'%[^0-9]%')
+                THROW 51033, 'The reporting subject VAT registration number must contain nine digits.', 1;
+
+            SET @AuthorityReference = @SubjectVatNumber;
+        END;
 
         IF @ReportingProfileCode IS NULL
             EXEC Cash.proc_DefaultReportingProfileCode

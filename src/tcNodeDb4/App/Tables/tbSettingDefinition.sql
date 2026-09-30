@@ -4,7 +4,7 @@ CREATE TABLE [App].[tbSettingDefinition]
     [SettingName] NVARCHAR(100) NOT NULL,
     [JurisdictionCode] NVARCHAR(10) NULL,
     [AuthorityCode] NVARCHAR(20) NULL,
-    [ReportingTypeCode] NVARCHAR(20) NULL,
+    [ReportingTypeCode] SMALLINT NULL,
     [ValueTypeCode] NVARCHAR(10) NOT NULL,
     [AllowedValues] NVARCHAR(MAX) NULL,
     [ValidationPattern] NVARCHAR(255) NULL,

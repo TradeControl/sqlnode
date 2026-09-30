@@ -1,7 +1,7 @@
 CREATE PROCEDURE [Cash].[proc_DefaultReportingProfileCode]
 (
     @SubjectCode NVARCHAR(50),
-    @ReportingTypeCode NVARCHAR(20),
+    @ReportingTypeCode SMALLINT,
     @ReportingProfileCode NVARCHAR(20) OUTPUT
 )
 AS

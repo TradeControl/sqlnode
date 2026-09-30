@@ -642,6 +642,7 @@
     <Build Include="App\Stored Procedures\proc_Template_CO_MICRO_CUR_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_CO_MICRO_CUR_TAX_2026.sql" />
     <None Include="Tests\CompanyObjective2Projection.sql" />
+    <None Include="Tests\EquityReconciliationTaxTreatment.sql" />
     <Build Include="App\Stored Procedures\proc_Template_CO_MICRO_CUR_MIN_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_CO_MICRO_CUR_STD_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_CO_MICRO_CUR_STD_EXP_2026.sql" />
@@ -758,6 +759,7 @@
     <Build Include="Cash\Views\vwTaxBizPayloadAudit.sql" />
     <Build Include="Subject\Tables\tbExportType.sql" />
     <Build Include="Cash\Views\vwTaxVatSubmission.sql" />
+    <Build Include="Cash\Views\vwTaxVatIdentity.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_MIN_MTD_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_STD_MTD_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_TAX_MTD_2026.sql" />

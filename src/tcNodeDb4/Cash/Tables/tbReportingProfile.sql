@@ -4,7 +4,7 @@ CREATE TABLE [Cash].[tbReportingProfile]
     [ReportingProfileCode] NVARCHAR(20) NOT NULL,
     [TaxSourceCode] NVARCHAR(20) NULL,
     [AuthorityCode] NVARCHAR(20) NOT NULL,
-    [ReportingTypeCode] NVARCHAR(20) NOT NULL,
+    [ReportingTypeCode] SMALLINT NOT NULL,
     [AuthorityReference] NVARCHAR(100) NULL,
     [ValidFrom] DATE NOT NULL,
     [ValidTo] DATE NULL,
@@ -56,6 +56,26 @@ BEGIN
            OR (reportingType.RequiresTaxSource = 1 AND candidate.TaxSourceCode IS NULL)
     )
         THROW 51021, 'Reporting profile does not satisfy its reporting-type authority or Tax Source requirements.', 1;
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM inserted candidate
+        JOIN Subject.tbVirtual reportingSubject
+          ON reportingSubject.SubjectCode = candidate.SubjectCode
+        WHERE candidate.ReportingTypeCode = 0
+          AND
+          (
+              LEN(NULLIF(LTRIM(RTRIM(candidate.AuthorityReference)), N'')) <> 9
+              OR NULLIF(LTRIM(RTRIM(candidate.AuthorityReference)), N'') LIKE N'%[^0-9]%'
+              OR ISNULL(NULLIF(LTRIM(RTRIM(candidate.AuthorityReference)), N''), N'')
+                 <> ISNULL(NULLIF(LTRIM(RTRIM(reportingSubject.VatNumber)), N''), N'')
+          )
+    )
+    BEGIN
+        IF XACT_STATE() <> 0 ROLLBACK TRANSACTION;
+        THROW 51023, 'An indirect-tax profile must use the reporting subject VAT registration number.', 1;
+    END;
 
     IF EXISTS
     (
