@@ -62,43 +62,66 @@ BEGIN TRY
     DECLARE @AccountsEnd DATE = DATEADD(DAY, -1,
         (SELECT PayTo FROM Cash.fnTaxTypeDueDates(Cash.fnGetBizTaxType(), 0)));
 
-    IF (SELECT COUNT(*) FROM Cash.fnTaxBizBalanceSheet('UK-CO-ACCTS-2026', @AccountsEnd)) <> 11
-        THROW 51012, 'The statutory balance-sheet manifest is incomplete.', 1;
+    IF (SELECT COUNT(*) FROM Cash.fnTaxBizBalanceSheet('UK-CO-ACCTS-2026', @AccountsEnd)) <> 4
+        THROW 51018, 'The generic balance-sheet source projection is incomplete.', 1;
+
+    IF EXISTS
+    (
+        SELECT TagCode
+        FROM Cash.fnTaxBizBalanceSheet('UK-CO-ACCTS-2026', @AccountsEnd)
+        WHERE TagCode NOT IN
+        (
+            N'BalanceSheet.NonCurrentAssets',
+            N'BalanceSheet.CurrentAssets',
+            N'BalanceSheet.CurrentLiabilities',
+            N'BalanceSheet.NonCurrentLiabilities'
+        )
+    )
+        THROW 51019, 'The generic balance-sheet projection exposed jurisdiction-specific semantics.', 1;
+
+    IF (SELECT COUNT(*) FROM Cash.fnTaxBizBalanceSheetUK('UK-CO-ACCTS-2026', @AccountsEnd)) <> 4
+        THROW 51012, 'The ledger-owned balance-sheet source projection is incomplete.', 1;
+
+    -- Protect the exact year-end call that previously exceeded the query optimiser's plan resources.
+    IF (SELECT COUNT(*) FROM Cash.fnTaxBizBalanceSheetUK('UK-CO-ACCTS-2026', '20270331')) <> 4
+        THROW 51017, 'The year-end balance-sheet source projection did not compile and execute.', 1;
 
     IF EXISTS
     (
         SELECT 1
-        FROM Cash.fnTaxBizBalanceSheet('UK-CO-ACCTS-2026', @AccountsEnd)
+        FROM Cash.fnTaxBizBalanceSheetUK('UK-CO-ACCTS-2026', @AccountsEnd)
         WHERE ValidationStatus <> N'Ready'
            OR SupportStatus <> N'Supported'
+           OR ValueState <> N'Source'
            OR StatutoryAmount IS NULL
     )
         THROW 51013, 'The statutory balance-sheet projection is not ready.', 1;
 
-    ;WITH Balance AS
-    (
-        SELECT
-            FixedAssets = MAX(CASE WHEN TagCode = N'BalanceSheet.FixedAssets' THEN StatutoryAmount END),
-            CurrentAssets = MAX(CASE WHEN TagCode = N'BalanceSheet.CurrentAssets' THEN StatutoryAmount END),
-            CreditorsWithin = MAX(CASE WHEN TagCode = N'BalanceSheet.CreditorsDueWithinOneYear' THEN StatutoryAmount END),
-            NetCurrentAssets = MAX(CASE WHEN TagCode = N'BalanceSheet.NetCurrentAssetsLiabilities' THEN StatutoryAmount END),
-            TotalAssetsLessCurrent = MAX(CASE WHEN TagCode = N'BalanceSheet.TotalAssetsLessCurrentLiabilities' THEN StatutoryAmount END),
-            CreditorsAfter = MAX(CASE WHEN TagCode = N'BalanceSheet.CreditorsDueAfterOneYear' THEN StatutoryAmount END),
-            Provisions = MAX(CASE WHEN TagCode = N'BalanceSheet.Provisions' THEN StatutoryAmount END),
-            Accruals = MAX(CASE WHEN TagCode = N'BalanceSheet.AccrualsAndDeferredIncome' THEN StatutoryAmount END),
-            NetAssets = MAX(CASE WHEN TagCode = N'BalanceSheet.NetAssetsLiabilities' THEN StatutoryAmount END),
-            CapitalAndReserves = MAX(CASE WHEN TagCode = N'BalanceSheet.CapitalAndReserves' THEN StatutoryAmount END)
-        FROM Cash.fnTaxBizBalanceSheet('UK-CO-ACCTS-2026', @AccountsEnd)
-    )
     IF EXISTS
     (
-        SELECT 1 FROM Balance
-        WHERE CurrentAssets - CreditorsWithin <> NetCurrentAssets
-           OR FixedAssets + NetCurrentAssets <> TotalAssetsLessCurrent
-           OR TotalAssetsLessCurrent - CreditorsAfter - Provisions - Accruals <> NetAssets
-           OR NetAssets <> CapitalAndReserves
+        SELECT expected.TagCode
+        FROM (VALUES
+            (N'BalanceSheet.FixedAssets'),
+            (N'BalanceSheet.CurrentAssets'),
+            (N'BalanceSheet.CreditorsDueWithinOneYear'),
+            (N'BalanceSheet.CreditorsDueAfterOneYear')
+        ) expected(TagCode)
+        EXCEPT
+        SELECT TagCode FROM Cash.fnTaxBizBalanceSheetUK('UK-CO-ACCTS-2026', @AccountsEnd)
     )
-        THROW 51014, 'The statutory balance-sheet projection does not reconcile.', 1;
+    OR EXISTS
+    (
+        SELECT TagCode FROM Cash.fnTaxBizBalanceSheetUK('UK-CO-ACCTS-2026', @AccountsEnd)
+        EXCEPT
+        SELECT expected.TagCode
+        FROM (VALUES
+            (N'BalanceSheet.FixedAssets'),
+            (N'BalanceSheet.CurrentAssets'),
+            (N'BalanceSheet.CreditorsDueWithinOneYear'),
+            (N'BalanceSheet.CreditorsDueAfterOneYear')
+        ) expected(TagCode)
+    )
+        THROW 51014, 'The balance-sheet source projection returned an unexpected semantic.', 1;
 
     DECLARE @PeriodEnd DATE = DATEADD(DAY, 1, @AccountsEnd);
     DECLARE @PeriodStart DATE = DATEADD(YEAR, -1, @PeriodEnd);
