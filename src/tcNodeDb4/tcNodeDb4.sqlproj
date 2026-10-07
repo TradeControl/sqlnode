@@ -643,6 +643,7 @@
     <Build Include="App\Stored Procedures\proc_Template_CO_MICRO_CUR_TAX_2026.sql" />
     <None Include="Tests\CompanyObjective2Projection.sql" />
     <None Include="Tests\EquityReconciliationTaxTreatment.sql" />
+    <None Include="Tests\SyntheticDatasetCompletedYearHorizon.sql" />
     <Build Include="App\Stored Procedures\proc_Template_CO_MICRO_CUR_MIN_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_CO_MICRO_CUR_STD_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_CO_MICRO_CUR_STD_EXP_2026.sql" />
@@ -772,6 +773,7 @@
   <ItemGroup>
     <None Include="Scripts\DB3-DB4 migration script.sql" />
     <None Include="Scripts\EXEC_DatasetSyntheticMIS.sql" />
+    <None Include="Scripts\EXEC_DatasetSyntheticMIS_Year3_Additive.sql" />
     <None Include="Scripts\PROOF_CashStatementReconciliation.sql" />
     <None Include="Scripts\MTDSoleTraderMappingEnquiry.sql" />
     <None Include="Tests\Phase4D_CumulativeProjection.sql" />

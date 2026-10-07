@@ -25,6 +25,7 @@ CREATE PROCEDURE App.proc_DatasetSyntheticMIS
     @EnableOpeningBalance bit = 0,
 
 	@UseStdCompanyTemplate bit = 0,
+	@CompletedYearCount smallint = 2,
 
 	-- Test-only temporal anchor for disposable synthetic nodes. NULL preserves ordinary behaviour.
 	@AsOfDate date = NULL
@@ -77,6 +78,7 @@ AS
 	        @TemplateCode = @TemplateCode,
 	        @IsVatRegistered = @IsVatRegistered,
             @EnableOpeningBalance = @EnableOpeningBalance,
+			@CompletedYearCount = @CompletedYearCount,
 			@AsOfDate = @AsOfDate;
 
         EXEC App.proc_DatasetSyntheticMIS_StatutoryProfile @AsOfDate = @AsOfDate;

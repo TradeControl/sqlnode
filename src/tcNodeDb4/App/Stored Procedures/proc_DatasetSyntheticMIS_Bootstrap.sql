@@ -4,10 +4,14 @@ CREATE PROCEDURE App.proc_DatasetSyntheticMIS_Bootstrap
 	@IsVatRegistered bit = NULL,
     @EnableOpeningBalance bit = 1,
 	@ExpectedAnnualProfit decimal(18, 2) = 50000,
+	@CompletedYearCount smallint = 2,
 	@AsOfDate date = NULL
 )
 AS
 	SET NOCOUNT, XACT_ABORT ON;
+
+	IF @CompletedYearCount NOT BETWEEN 1 AND 10
+		THROW 51006, 'DatasetSyntheticMIS: @CompletedYearCount must be between 1 and 10.', 1;
 
 	DECLARE
 		@FinancialMonth smallint = NULL,
@@ -310,6 +314,7 @@ AS
 	DECLARE
 		@ExistingMinYear smallint = (SELECT MIN(YearNumber) FROM App.tbYear),
 		@ExistingStartMonth smallint = (SELECT TOP (1) StartMonth FROM App.tbYear WHERE YearNumber = (SELECT MIN(YearNumber) FROM App.tbYear)),
+		@ExistingCompletedYearCount smallint = (SELECT COUNT(*) FROM App.tbYear WHERE CashStatusCode = 2),
 		@PriorYear smallint;
 
 	IF @ExistingMinYear IS NULL
@@ -318,10 +323,13 @@ AS
 	IF @ExistingStartMonth IS NULL
 		SET @ExistingStartMonth = @FinancialMonth;
 
-	SET @PriorYear = @ExistingMinYear - 1;
-
-	IF NOT EXISTS (SELECT 1 FROM App.tbYear WHERE YearNumber = @PriorYear)
+	-- App.proc_BasicSetup creates the ordinary current horizon. Extend only the
+	-- closed historical edge required by the deterministic synthetic scenario.
+	-- The default of two completed years preserves the original generator span.
+	WHILE @ExistingCompletedYearCount < @CompletedYearCount
 	BEGIN
+		SET @PriorYear = @ExistingMinYear - 1;
+
 		INSERT INTO App.tbYear (YearNumber, StartMonth, CashStatusCode, Description)
 		VALUES
 		(
@@ -347,6 +355,9 @@ AS
 		UPDATE App.tbYear
 		SET CashStatusCode = 2
 		WHERE YearNumber = @PriorYear;
+
+		SET @ExistingMinYear = @PriorYear;
+		SET @ExistingCompletedYearCount += 1;
 	END
 
     UPDATE App.tbYearPeriod

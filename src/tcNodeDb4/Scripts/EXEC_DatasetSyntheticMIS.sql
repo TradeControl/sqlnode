@@ -8,6 +8,7 @@ DECLARE
     @EnableWages bit = CASE WHEN @IsCompany = 1 THEN 1 ELSE 0 END
     , @EnableAssets bit = CASE WHEN @IsCompany = 1 THEN 1 ELSE 0 END
     , @UseStdCompanyTemplate bit = 0
+    , @CompletedYearCount smallint = 2
 
 
 IF OBJECT_ID('tempdb..#Scenarios') IS NOT NULL DROP TABLE #Scenarios;
@@ -83,7 +84,8 @@ BEGIN
 		@EnableTax = 1,
 		@EnableTransfers = 1,
 		@EnableOpeningBalance = 1,
-        @UseStdCompanyTemplate = @UseStdCompanyTemplate
+        @UseStdCompanyTemplate = @UseStdCompanyTemplate,
+        @CompletedYearCount = @CompletedYearCount
     ;
 
 	INSERT INTO #EquityRecon
