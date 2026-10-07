@@ -10,7 +10,7 @@
 
     Public evidence dossier
     -----------------------
-    https://github.com/TradeControl/tradecontrol.web/blob/master/docs/projects/Tax%20Hub/companies-house-approval/companies-house-test-submission-evidence.md
+    https://github.com/TradeControl/tradecontrol.web/blob/HEAD/docs/projects/Tax%20Hub/companies-house-approval/companies-house-test-submission-evidence.md
 
     Safety
     ------
