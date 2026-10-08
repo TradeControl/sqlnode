@@ -5,6 +5,7 @@ CREATE PROCEDURE App.proc_DatasetSyntheticMIS_Bootstrap
     @EnableOpeningBalance bit = 1,
 	@ExpectedAnnualProfit decimal(18, 2) = 50000,
 	@CompletedYearCount smallint = 2,
+	@FinancialMonth smallint = NULL,
 	@AsOfDate date = NULL
 )
 AS
@@ -13,8 +14,10 @@ AS
 	IF @CompletedYearCount NOT BETWEEN 1 AND 10
 		THROW 51006, 'DatasetSyntheticMIS: @CompletedYearCount must be between 1 and 10.', 1;
 
+	IF @FinancialMonth IS NOT NULL AND @FinancialMonth NOT BETWEEN 1 AND 12
+		THROW 51007, 'DatasetSyntheticMIS: @FinancialMonth must be between 1 and 12.', 1;
+
 	DECLARE
-		@FinancialMonth smallint = NULL,
 		@GovAccountName nvarchar(255) = NULL,
 		@BankName nvarchar(255) = NULL,
 		@BankAddress nvarchar(max) = NULL,
@@ -79,6 +82,18 @@ AS
 			@CA_SortCode = BankSortCode
 		FROM Usr.vwDoc;
 	END
+
+	-- The copied node identity may pre-date the nine-digit VAT constraint. The
+	-- synthetic rebuild must carry a valid test identity into BasicSetup, which
+	-- creates the indirect-tax reporting profile before the statutory-profile
+	-- normalisation step runs.
+	IF @IsVatRegistered <> 0
+		AND
+		(
+			LEN(LTRIM(RTRIM(COALESCE(@VatNumber, N'')))) <> 9
+			OR LTRIM(RTRIM(COALESCE(@VatNumber, N''))) LIKE N'%[^0-9]%'
+		)
+		SET @VatNumber = N'999000001';
 
 	IF NOT EXISTS (SELECT 1 FROM Usr.vwCredentials)
 		THROW 51001, 'DatasetSyntheticMIS: current user is not registered. Web initialization required.', 1;

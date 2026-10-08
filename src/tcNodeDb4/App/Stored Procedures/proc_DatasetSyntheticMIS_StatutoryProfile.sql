@@ -66,7 +66,12 @@ END;
 UPDATE Subject.tbVirtual
 SET VatNumber = CASE
         WHEN EXISTS (SELECT 1 FROM Cash.tbTaxType WHERE TaxTypeCode = 1 AND IsEnabled = 1)
-            THEN COALESCE(NULLIF(LTRIM(RTRIM(VatNumber)), N''), N'999000001')
+            THEN CASE
+                WHEN LEN(LTRIM(RTRIM(VatNumber))) = 9
+                    AND LTRIM(RTRIM(VatNumber)) NOT LIKE N'%[^0-9]%'
+                    THEN LTRIM(RTRIM(VatNumber))
+                ELSE N'999000001'
+            END
         ELSE VatNumber
     END,
     BusinessDescription = COALESCE(NULLIF(LTRIM(RTRIM(BusinessDescription)), N''), N'Synthetic test business')
