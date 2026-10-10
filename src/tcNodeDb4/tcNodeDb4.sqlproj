@@ -380,10 +380,8 @@
     <Build Include="Cash\Views\vwBalanceSheetTax.sql" />
     <Build Include="Cash\Views\vwVATCodes.sql" />
     <Build Include="Cash\Views\vwBalanceSheetVat.sql" />
-    <Build Include="Invoice\Views\vwAgedDebtPurchases.sql" />
     <Build Include="Subject\Views\vwCurrentBalance.sql" />
     <Build Include="Project\Views\vwNetworkDeployments.sql" />
-    <Build Include="Invoice\Views\vwAgedDebtSales.sql" />
     <Build Include="Invoice\Views\vwStatusLive.sql" />
     <Build Include="Project\Views\vwNetworkUpdates.sql" />
     <Build Include="Invoice\Views\vwCandidateCredits.sql" />
@@ -746,6 +744,10 @@
     <Build Include="Subject\Functions\fnStatementDag.sql" />
     <Build Include="Subject\Functions\fnInvoiceDag.sql" />
     <Build Include="Subject\Functions\fnPaymentDag.sql" />
+    <Build Include="Subject\Functions\fnCurrentAgedInvoiceItems.sql" />
+    <Build Include="Subject\Functions\fnCurrentInvoiceReconciliation.sql" />
+    <Build Include="Subject\Functions\fnCurrentAgedInvoices.sql" />
+    <Build Include="Subject\Functions\fnDatedBalances.sql" />
     <Build Include="Usr\Tables\tbTheme.sql" />
     <Build Include="Invoice\Stored Procedures\proc_DefaultEntryCode.sql" />
     <Build Include="Invoice\Stored Procedures\proc_RaiseDefaults.sql" />
@@ -784,6 +786,7 @@
     <None Include="Tests\Phase6A_ReportingProfileReadiness.sql" />
     <None Include="Tests\SoleTraderBusinessTaxRate.sql" />
     <None Include="Tests\TaxTagMapValidator.sql" />
+    <None Include="Tests\SubjectAgedBalances.sql" />
     <None Include="Scripts\NamespaceSelector_testscript.sql" />
     <None Include="Scripts\EXEC_PaymentPost.sql" />
     <None Include="Subject\Stored Procedures\proc_AddRoot.sql" />
