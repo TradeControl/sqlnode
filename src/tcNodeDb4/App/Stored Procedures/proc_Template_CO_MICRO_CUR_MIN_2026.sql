@@ -46,7 +46,7 @@ AS
         INSERT INTO Cash.tbCategoryExp
             (CategoryCode, Expression, Format, SyntaxTypeCode, IsError, ErrorMessage)
         VALUES
-            ('CE-CO', 'IF([Sales]=0,0,(([Sales]+[Other Income]-[Direct Purchases]-[Wages]-[Admin Expenses])/[Sales]))', 'Pct0', 0, 0, NULL);
+            ('CE-CO', 'IF([CA-SALES]=0,0,(([CA-SALES]+[CT-OTHRIN]-[CA-DIRECT]-[CA-WAGES]-[CA-ADMIN])/[CA-SALES]))', 'Pct0', 0, 0, NULL);
 
         ----------------------------------------------------------------
         -- 2. VAT handling for non‑registered businesses

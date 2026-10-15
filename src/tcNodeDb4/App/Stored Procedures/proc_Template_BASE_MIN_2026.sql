@@ -214,28 +214,28 @@ AS
             (CategoryCode, Expression, Format, SyntaxTypeCode, IsError, ErrorMessage)
         VALUES
             -- Gross Margin %
-            ('CE-GP', 'IF([Sales]=0,0,([Gross Profit]/[Sales]))', 'Pct0', 0, 0, NULL),
+            ('CE-GP', 'IF([CA-SALES]=0,0,([CT-GROSSP]/[CA-SALES]))', 'Pct0', 0, 0, NULL),
 
             -- Net Profit % (use CT-PANDL description)
-            ('CE-NP', 'IF([Sales]=0,0,([Profit and Loss]/[Sales]))', 'Pct0', 0, 0, NULL),
+            ('CE-NP', 'IF([CA-SALES]=0,0,([CT-PANDL]/[CA-SALES]))', 'Pct0', 0, 0, NULL),
 
             -- Wages %
-            ('CE-WP', 'IF([Sales]=0,0,(ABS([Wages])/[Sales]))', 'Num2', 0, 0, NULL),
+            ('CE-WP', 'IF([CA-SALES]=0,0,(ABS([CA-WAGES])/[CA-SALES]))', 'Num2', 0, 0, NULL),
 
             -- Admin Cost %
-            ('CE-AP', 'IF([Sales]=0,0,(ABS([Admin Expenses])/[Sales]))', 'Num2', 0, 0, NULL),
+            ('CE-AP', 'IF([CA-SALES]=0,0,(ABS([CA-ADMIN])/[CA-SALES]))', 'Num2', 0, 0, NULL),
 
             -- Direct Cost %
-            ('CE-DP', 'IF([Sales]=0,0,(ABS([Direct Costs])/[Sales]))', 'Num2', 0, 0, NULL),
+            ('CE-DP', 'IF([CA-SALES]=0,0,(ABS([CA-DIRECT])/[CA-SALES]))', 'Num2', 0, 0, NULL),
 
             -- Depreciation % (Asset Movements)
-            ('CE-DE', 'IF([Sales]=0,0,(ABS([Asset Movements])/[Sales]))', 'Num2', 0, 0, NULL),
+            ('CE-DE', 'IF([CA-SALES]=0,0,(ABS([CA-ASSET])/[CA-SALES]))', 'Num2', 0, 0, NULL),
 
             -- Overhead Coverage Ratio
-            ('CE-OC', 'IF([Admin Expenses]=0,0,([Gross Profit]/ABS([Admin Expenses])))', 'Num2', 0, 0, NULL),
+            ('CE-OC', 'IF([CA-ADMIN]=0,0,([CT-GROSSP]/ABS([CA-ADMIN])))', 'Num2', 0, 0, NULL),
 
             -- Revenue per £ Staff Cost
-            ('CE-RS', 'IF([Wages]=0,0,([Sales]/ABS([Wages])))', 'Num2', 0, 0, NULL);
+            ('CE-RS', 'IF([CA-WAGES]=0,0,([CA-SALES]/ABS([CA-WAGES])))', 'Num2', 0, 0, NULL);
 
         ----------------------------------------------------------------
         -- CRYPTO-ONLY MINER FEE CASH CODE

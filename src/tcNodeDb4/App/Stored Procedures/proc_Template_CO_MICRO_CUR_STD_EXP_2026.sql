@@ -39,51 +39,51 @@ BEGIN
         ('CE-DFX',  'Fixtures Depreciation % of Depreciation', 2, 2, 0, 40, 0);
 
     ----------------------------------------------------------------
-    -- STD-SPECIFIC EXPRESSIONS (DESCRIPTION-BASED)
+    -- STD-SPECIFIC EXPRESSIONS (STABLE CODE REFERENCES)
     ----------------------------------------------------------------
     INSERT INTO Cash.tbCategoryExp
         (CategoryCode, Expression, Format, SyntaxTypeCode, IsError, ErrorMessage)
     VALUES
         -- Structured Cash Operating Surplus %
-        ('CE-COS', 'IF([Turnover]=0,0,([Turnover]-[Cost of Sales]-[Staff Costs]-[Admin Expenses])/[Turnover])', 'Pct0', 0, 0, NULL),
+        ('CE-COS', 'IF([CT-TURNOV]=0,0,([CT-TURNOV]-[CT-CSTSAL]-[CT-STAFFC]-[CA-ADMIN])/[CT-TURNOV])', 'Pct0', 0, 0, NULL),
 
         -- Labour Margin %
-        ('CE-LM', 'IF([Sales – Labour]=0,0,([Sales – Labour]-[Wages & Salaries]-[Employer NI]-[Employer Pension])/[Sales – Labour])', 'Pct0', 0, 0, NULL),
+        ('CE-LM', 'IF([CC-SALAB]=0,0,([CC-SALAB]-[CC-SALRY]-[CC-EMPNI]-[CC-PENSN])/[CC-SALAB])', 'Pct0', 0, 0, NULL),
 
         -- Materials Margin %
-        ('CE-MM', 'IF([Sales – Materials]=0,0,([Sales – Materials]-[Materials])/[Sales – Materials])', 'Pct0', 0, 0, NULL),
+        ('CE-MM', 'IF([CC-SAMAT]=0,0,([CC-SAMAT]-[CC-MAT])/[CC-SAMAT])', 'Pct0', 0, 0, NULL),
 
         -- Subcontractor Dependency Ratio
-        ('CE-SDR', 'IF([Cost of Sales]=0,0,[Subcontractors]/[Cost of Sales])', 'Pct0', 0, 0, NULL),
+        ('CE-SDR', 'IF([CT-CSTSAL]=0,0,[CC-SUB]/[CT-CSTSAL])', 'Pct0', 0, 0, NULL),
 
         -- Effective Tax Rate
         ('CE-ETR',
-            'IF(([Turnover]-[Cost of Sales]-[Staff Costs]-[Admin Expenses])=0,0,(ABS([Tax on Company (Biz)])/([Turnover]-[Cost of Sales]-[Staff Costs]-[Admin Expenses])))',
+            'IF(([CT-TURNOV]-[CT-CSTSAL]-[CT-STAFFC]-[CA-ADMIN])=0,0,(ABS([CA-TAXCO])/([CT-TURNOV]-[CT-CSTSAL]-[CT-STAFFC]-[CA-ADMIN])))',
             'Pct0', 0, 0, NULL),
 
         -- Vehicle Cost Ratio
-        ('CE-VCR', 'IF([Turnover]=0,0,([Fuel & Oil]+[Motor Travel])/[Turnover])', 'Pct0', 0, 0, NULL),
+        ('CE-VCR', 'IF([CT-TURNOV]=0,0,([CC-FUEL]+[CC-MTRAV])/[CT-TURNOV])', 'Pct0', 0, 0, NULL),
 
         -- Staff Cost Structure
-        ('CE-WPR', 'IF([Staff Costs]=0,0,[Wages & Salaries]/[Staff Costs])', 'Pct0', 0, 0, NULL),
-        ('CE-NPR', 'IF([Staff Costs]=0,0,[Employer NI]/[Staff Costs])', 'Pct0', 0, 0, NULL),
-        ('CE-PPR', 'IF([Staff Costs]=0,0,[Employer Pension]/[Staff Costs])', 'Pct0', 0, 0, NULL),
+        ('CE-WPR', 'IF([CT-STAFFC]=0,0,[CC-SALRY]/[CT-STAFFC])', 'Pct0', 0, 0, NULL),
+        ('CE-NPR', 'IF([CT-STAFFC]=0,0,[CC-EMPNI]/[CT-STAFFC])', 'Pct0', 0, 0, NULL),
+        ('CE-PPR', 'IF([CT-STAFFC]=0,0,[CC-PENSN]/[CT-STAFFC])', 'Pct0', 0, 0, NULL),
 
         -- Admin Cost Structure
-        ('CE-RPR', 'IF([Admin Expenses]=0,0,[Rent & Rates]/[Admin Expenses])', 'Pct0', 0, 0, NULL),
-        ('CE-UPR', 'IF([Admin Expenses]=0,0,[Light, Heat & Power]/[Admin Expenses])', 'Pct0', 0, 0, NULL),
-        ('CE-IPR', 'IF([Admin Expenses]=0,0,[Insurance]/[Admin Expenses])', 'Pct0', 0, 0, NULL),
-        ('CE-MPR', 'IF([Admin Expenses]=0,0,[Repairs & Maintenance]/[Admin Expenses])', 'Pct0', 0, 0, NULL),
-        ('CE-TPR', 'IF([Admin Expenses]=0,0,[Telephone & Internet]/[Admin Expenses])', 'Pct0', 0, 0, NULL),
-        ('CE-APR', 'IF([Admin Expenses]=0,0,[Advertising]/[Admin Expenses])', 'Pct0', 0, 0, NULL),
-        ('CE-TRR', 'IF([Admin Expenses]=0,0,[Travel & Subsistence]/[Admin Expenses])', 'Pct0', 0, 0, NULL),
-        ('CE-PFR', 'IF([Admin Expenses]=0,0,[Professional Fees]/[Admin Expenses])', 'Pct0', 0, 0, NULL),
-        ('CE-BCR', 'IF([Admin Expenses]=0,0,[Bank Charges]/[Admin Expenses])', 'Pct0', 0, 0, NULL),
+        ('CE-RPR', 'IF([CA-ADMIN]=0,0,[CC-RENT]/[CA-ADMIN])', 'Pct0', 0, 0, NULL),
+        ('CE-UPR', 'IF([CA-ADMIN]=0,0,[CC-LHEAT]/[CA-ADMIN])', 'Pct0', 0, 0, NULL),
+        ('CE-IPR', 'IF([CA-ADMIN]=0,0,[CC-INS]/[CA-ADMIN])', 'Pct0', 0, 0, NULL),
+        ('CE-MPR', 'IF([CA-ADMIN]=0,0,[CC-REPA]/[CA-ADMIN])', 'Pct0', 0, 0, NULL),
+        ('CE-TPR', 'IF([CA-ADMIN]=0,0,[CC-PHONE]/[CA-ADMIN])', 'Pct0', 0, 0, NULL),
+        ('CE-APR', 'IF([CA-ADMIN]=0,0,[CC-ADVT]/[CA-ADMIN])', 'Pct0', 0, 0, NULL),
+        ('CE-TRR', 'IF([CA-ADMIN]=0,0,[CC-TRAV]/[CA-ADMIN])', 'Pct0', 0, 0, NULL),
+        ('CE-PFR', 'IF([CA-ADMIN]=0,0,[CC-PROF]/[CA-ADMIN])', 'Pct0', 0, 0, NULL),
+        ('CE-BCR', 'IF([CA-ADMIN]=0,0,[CC-BANKC]/[CA-ADMIN])', 'Pct0', 0, 0, NULL),
 
         -- Depreciation Structure
-        ('CE-DPL', 'IF([Depreciation]=0,0,[Depreciation – Plant & Tools]/[Depreciation])', 'Pct0', 0, 0, NULL),
-        ('CE-DMV', 'IF([Depreciation]=0,0,[Depreciation – Motor Vehicles]/[Depreciation])', 'Pct0', 0, 0, NULL),
-        ('CE-DFX', 'IF([Depreciation]=0,0,[Depreciation – Fixtures]/[Depreciation])', 'Pct0', 0, 0, NULL);
+        ('CE-DPL', 'IF([CA-DEPREC]=0,0,[CC-DEPPL]/[CA-DEPREC])', 'Pct0', 0, 0, NULL),
+        ('CE-DMV', 'IF([CA-DEPREC]=0,0,[CC-DEPMV]/[CA-DEPREC])', 'Pct0', 0, 0, NULL),
+        ('CE-DFX', 'IF([CA-DEPREC]=0,0,[CC-DEPFX]/[CA-DEPREC])', 'Pct0', 0, 0, NULL);
 
 END;
 GO
