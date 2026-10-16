@@ -8,6 +8,11 @@ The purpose of Version 4 is to bring the schema naming conventions into alignmen
 
 [Sql Server project tcNodeDb4](https://github.com/TradeControl/sqlnode/tree/HEAD/src/tcNodeDb4)
 
+### 4.1.14
+
+- [x] Cash Statement expressions store stable category and cash-code references while remaining readable in the web editor.
+- [x] LibreOffice expression formats use validated templates shared with the native C# ODS renderer.
+
 ### 4.1.1
 
 Name changes:
