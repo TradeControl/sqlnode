@@ -30,7 +30,7 @@ AS
                 StatusCode = @StatusCode,
                 ValueSourceCode = @ValueSourceCode,
                 IsReviewed = @IsReviewed,
-                UpdatedBy = suser_sname(),
+                UpdatedBy = Usr.fnUserName(),
                 UpdatedOn = current_timestamp
             WHERE SubjectCode = @SubjectCode
               AND RegistrationCode = @RegistrationCode;
@@ -59,7 +59,7 @@ AS
                 StatusCode = @StatusCode,
                 ValueSourceCode = @ValueSourceCode,
                 IsReviewed = @IsReviewed,
-                UpdatedBy = suser_sname(),
+                UpdatedBy = Usr.fnUserName(),
                 UpdatedOn = current_timestamp
             WHERE SubjectCode = @SubjectCode
               AND RegistrationCode = @RegistrationCode;

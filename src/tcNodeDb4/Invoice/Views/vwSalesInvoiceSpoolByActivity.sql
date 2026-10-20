@@ -17,7 +17,7 @@ WITH invoice AS
 	WHERE        EXISTS
 								(SELECT        UserName, DocTypeCode, DocumentNumber, SpooledOn
 									FROM            App.tbDocSpool AS doc
-									WHERE        (DocTypeCode = 4) AND (UserName = SUSER_SNAME()) AND (sales_invoice.InvoiceNumber = DocumentNumber))
+									WHERE        (DocTypeCode = 4) AND (UserName = Usr.fnUserName()) AND (sales_invoice.InvoiceNumber = DocumentNumber))
 	GROUP BY sales_invoice.InvoiceNumber, Invoice.tbType.InvoiceType, sales_invoice.InvoiceStatusCode, Usr.tbUser.UserName, sales_invoice.SubjectCode, Subject.tbSubject.SubjectName, 
 							Invoice.tbStatus.InvoiceStatus, sales_invoice.InvoicedOn, sales_invoice.InvoiceValue, sales_invoice.TaxValue, sales_invoice.PaymentTerms, Subject.tbSubject.EmailAddress, Subject.tbSubject.AddressCode, 
 							Object.tbObject.ObjectCode, Object.tbObject.UnitOfMeasure, tbInvoiceProject.TaxCode

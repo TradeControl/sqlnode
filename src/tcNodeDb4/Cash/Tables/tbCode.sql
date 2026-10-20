@@ -4,9 +4,9 @@
     [CategoryCode]    NVARCHAR (10)  NOT NULL,
     [TaxCode]         NVARCHAR (10)  NOT NULL,
     [IsEnabled]       SMALLINT       CONSTRAINT [DF_Cash_tbCode_IsEnabled] DEFAULT ((1)) NOT NULL,
-    [InsertedBy]      NVARCHAR (50)  CONSTRAINT [DF_Cash_tbCode_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]      NVARCHAR (50)  CONSTRAINT [DF_Cash_tbCode_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]      DATETIME       CONSTRAINT [DF_Cash_tbCode_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]       NVARCHAR (50)  CONSTRAINT [DF_Cash_tbCode_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]       NVARCHAR (50)  CONSTRAINT [DF_Cash_tbCode_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]       DATETIME       CONSTRAINT [DF_Cash_tbCode_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]          ROWVERSION     NOT NULL,
     CONSTRAINT [PK_Cash_tbCode] PRIMARY KEY CLUSTERED ([CashCode] ASC) WITH (FILLFACTOR = 90),
@@ -49,7 +49,7 @@ BEGIN
 		ELSE IF NOT UPDATE(UpdatedBy)
 			BEGIN
 			UPDATE Cash.tbCode
-			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+			SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 			FROM Cash.tbCode INNER JOIN inserted AS i ON tbCode.CashCode = i.CashCode;
 			END
 	END TRY

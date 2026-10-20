@@ -7,9 +7,9 @@
     [AddressIndex]     INT                 CONSTRAINT [DF_Cash_tbChange_AddressIndex] DEFAULT ((0)) NOT NULL,
     [Note]             NVARCHAR (256)      NULL,
     [UpdatedOn]        DATETIME            CONSTRAINT [DF_Cash_tbChange_UpdatedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]        NVARCHAR (50)       CONSTRAINT [DF_Cash_tbChange_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]        NVARCHAR (50)       CONSTRAINT [DF_Cash_tbChange_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]       DATETIME            CONSTRAINT [DF_Cash_tbChange_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [InsertedBy]       NVARCHAR (50)       CONSTRAINT [DF_Cash_tbChange_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]       NVARCHAR (50)       CONSTRAINT [DF_Cash_tbChange_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [RowVer]           ROWVERSION          NOT NULL,
     CONSTRAINT [PK_Cash_tbChange] PRIMARY KEY CLUSTERED ([PaymentAddress] ASC),
     CONSTRAINT [FK__Cash_tbChange_Cash_tbChangeType] FOREIGN KEY ([ChangeTypeCode]) REFERENCES [Cash].[tbChangeType] ([ChangeTypeCode]),
@@ -41,7 +41,7 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
 		UPDATE Cash.tbChange
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+		SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM Cash.tbChange INNER JOIN inserted AS i ON Cash.tbChange.PaymentAddress = i.PaymentAddress;
 	END TRY
 	BEGIN CATCH

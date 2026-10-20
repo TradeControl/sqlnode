@@ -3,7 +3,7 @@
     [LoggedOn]      DATETIME       CONSTRAINT [DF_App_tbLog_LoggedOn] DEFAULT (getdate()) NOT NULL,
     [EventTypeCode] SMALLINT       CONSTRAINT [DF_App_tbLog_EventTypeCode] DEFAULT ((2)) NOT NULL,
     [EventMessage]  NVARCHAR (MAX) NULL,
-    [InsertedBy]    NVARCHAR (50)  CONSTRAINT [DF_App_tbLog_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]    NVARCHAR (50)  CONSTRAINT [DF_App_tbLog_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [RowVer]        ROWVERSION     NOT NULL,
     CONSTRAINT [PK_App_tbEventLog_LogCode] PRIMARY KEY CLUSTERED ([LogCode] ASC),
     CONSTRAINT [FK_tbEventLog_EventType] FOREIGN KEY ([EventTypeCode]) REFERENCES [App].[tbEventType] ([EventTypeCode])

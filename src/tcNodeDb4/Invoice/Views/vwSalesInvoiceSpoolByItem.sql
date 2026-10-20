@@ -14,4 +14,4 @@ AS
 	WHERE        (sales_invoice.InvoiceTypeCode = 0) AND EXISTS
 								 (SELECT        UserName, DocTypeCode, DocumentNumber, SpooledOn, RowVer
 								   FROM            App.tbDocSpool AS doc
-								   WHERE        (DocTypeCode = 4) AND (UserName = SUSER_SNAME()) AND (sales_invoice.InvoiceNumber = DocumentNumber))
+								   WHERE        (DocTypeCode = 4) AND (UserName = Usr.fnUserName()) AND (sales_invoice.InvoiceNumber = DocumentNumber))

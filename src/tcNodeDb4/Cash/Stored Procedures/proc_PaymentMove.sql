@@ -18,7 +18,7 @@
 		UPDATE Cash.tbPayment 
 		SET AccountCode = @AccountCode,
 			UpdatedOn = CURRENT_TIMESTAMP,
-			UpdatedBy = (suser_sname())
+			UpdatedBy = (Usr.fnUserName())
 		WHERE PaymentCode = @PaymentCode	
 
 		EXEC Cash.proc_AccountRebuild @AccountCode

@@ -5,6 +5,6 @@
     [Description] NVARCHAR (50) NOT NULL,
     [RowVer]      ROWVERSION    NOT NULL,
     CONSTRAINT [PK_App_tbDoc] PRIMARY KEY CLUSTERED ([DocTypeCode] ASC, [ReportName] ASC) WITH (FILLFACTOR = 90),
-    CONSTRAINT [FK_App_tbDoc_Usr_tbMenuOpenMode] FOREIGN KEY ([OpenMode]) REFERENCES [Usr].[tbMenuOpenMode] ([OpenMode])
+    CONSTRAINT [FK_App_tbDoc_App_tbDocOpenMode] FOREIGN KEY ([OpenMode]) REFERENCES [App].[tbDocOpenMode] ([OpenMode])
 );
 

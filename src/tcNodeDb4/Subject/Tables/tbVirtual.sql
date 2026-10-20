@@ -36,7 +36,7 @@ BEGIN
 
     BEGIN TRY
         UPDATE s
-        SET UpdatedBy = SUSER_SNAME(),
+        SET UpdatedBy = Usr.fnUserName(),
             UpdatedOn = CURRENT_TIMESTAMP
         FROM Subject.tbSubject AS s
         INNER JOIN

@@ -3,9 +3,9 @@ CREATE TABLE [Cash].[tbMirror] (
     [SubjectCode]        NVARCHAR (50) NOT NULL,
     [ChargeCode]         NVARCHAR (50) NOT NULL,
     [TransmitStatusCode] SMALLINT      CONSTRAINT [DF_Cash_tbMirror_TransmitStatusCode] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]         NVARCHAR (50) CONSTRAINT [DF_Cash_tbMirror_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]         NVARCHAR (50) CONSTRAINT [DF_Cash_tbMirror_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]         DATETIME      CONSTRAINT [DF_Cash_tbMirror_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]          NVARCHAR (50) CONSTRAINT [DF_Cash_tbMirror_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]          NVARCHAR (50) CONSTRAINT [DF_Cash_tbMirror_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]          DATETIME      CONSTRAINT [DF_Cash_tbMirror_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]             ROWVERSION    NOT NULL,
     CONSTRAINT [PK_Cash_tbMirror] PRIMARY KEY CLUSTERED ([CashCode] ASC, [SubjectCode] ASC, [ChargeCode] ASC),
@@ -58,7 +58,7 @@ AS
 			UPDATE mirror
 			SET 
 				TransmitStatusCode = CASE WHEN Subject.TransmitStatusCode = 1 THEN 2 ELSE 0 END,
-				UpdatedBy = SUSER_NAME(),
+				UpdatedBy = Usr.fnUserName(),
 				UpdatedOn = CURRENT_TIMESTAMP
 			FROM Cash.tbMirror mirror 
 				JOIN inserted ON mirror.SubjectCode = inserted.SubjectCode AND mirror.CashCode = inserted.CashCode

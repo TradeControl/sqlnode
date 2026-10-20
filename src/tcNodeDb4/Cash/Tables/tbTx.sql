@@ -8,7 +8,7 @@
     [MoneyOut]       DECIMAL (18, 5) CONSTRAINT [DF_Cash_tbTx_MoneyOut] DEFAULT ((0)) NOT NULL,
     [Confirmations]  INT             CONSTRAINT [DF_Cash_tbTx_Confirmations] DEFAULT ((0)) NOT NULL,
     [TxMessage]      NVARCHAR (50)   NULL,
-    [InsertedBy]     NVARCHAR (50)   CONSTRAINT [DF_Cash_tbTx_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]     NVARCHAR (50)   CONSTRAINT [DF_Cash_tbTx_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     CONSTRAINT [PK_Cash_tbTx] PRIMARY KEY CLUSTERED ([TxNumber] ASC),
     CONSTRAINT [FK_Cash_tbTx_Cash_tbChange] FOREIGN KEY ([PaymentAddress]) REFERENCES [Cash].[tbChange] ([PaymentAddress]) ON DELETE CASCADE,
     CONSTRAINT [FK_Cash_tbTx_Cash_tbTxStatus] FOREIGN KEY ([TxStatusCode]) REFERENCES [Cash].[tbTxStatus] ([TxStatusCode])

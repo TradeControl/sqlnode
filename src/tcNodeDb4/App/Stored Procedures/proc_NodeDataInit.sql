@@ -22,8 +22,6 @@ BEGIN TRY
 	DELETE FROM Subject.tbVirtual;
 	DELETE FROM Subject.tbSubject;
 	DELETE FROM Subject.tbAddressType;
-	DELETE FROM Usr.tbMenuUser;
-	DELETE FROM Usr.tbMenu;
 	DELETE FROM Usr.tbUser;
 	DELETE FROM App.tbCalendar;
 	DELETE FROM App.tbYear;
@@ -47,11 +45,6 @@ BEGIN TRY
     DELETE FROM App.tbJurisdiction;
 	DELETE FROM Subject.tbExportType;
 	
-	IF NOT EXISTS (SELECT * FROM [Usr].[tbMenuView])
-		INSERT INTO [Usr].[tbMenuView] ([MenuViewCode], [MenuView])
-		VALUES (0, 'List')
-	    , (1, 'Tree')
-
 	IF NOT EXISTS (SELECT * FROM [Cash].[tbChangeType])
 		INSERT INTO [Cash].[tbChangeType] ([ChangeTypeCode], [ChangeType])
 		VALUES (0, 'Receipt')
@@ -399,28 +392,12 @@ BEGIN TRY
 		, (11, 'NOV')
 		, (12, 'DEC')
 
-	IF NOT EXISTS (SELECT * FROM [App].[tbText])
-		INSERT INTO [App].[tbText] ([TextId], [Message], [Arguments])
-		VALUES
-		(1220, 'Invoices deployed to the network cannot be deleted. Add a credit/debit note instead.', 0)
-		, (1221, 'Service Log cleared down.', 0)
-		, (1222, 'Task Change Log cleared down.', 0)
-		, (1223, 'Invoice Change Log cleared down.', 0)
-		, (1224, 'Raise corresponding invoices?', 0)
-		, (1225, 'Initialising <1>', 1)
-
 	IF NOT EXISTS (SELECT * FROM [Cash].[tbCoinType])
 		INSERT INTO [Cash].[tbCoinType] ([CoinTypeCode], [CoinType])
 		VALUES
 		(0, 'Main')
 		, (1, 'TestNet')
 		, (2, 'Fiat')
-
-	IF NOT EXISTS (SELECT * FROM [Usr].[tbInterface])
-		INSERT INTO [Usr].[tbInterface] ([InterfaceCode], [Interface])
-		VALUES
-		(0, 'Accounts')
-		, (1, 'MIS')
 
 
 	IF NOT EXISTS(SELECT * FROM App.tbEventType)
@@ -620,17 +597,8 @@ BEGIN TRY
 		, (4, 'Cancelled')
 		, (5, 'Archive');
 
-	IF NOT EXISTS(SELECT * FROM Usr.tbMenuCommand)
-		INSERT INTO Usr.tbMenuCommand (Command, CommandText)
-		VALUES (0, 'Folder')
-		, (1, 'Link')
-		, (2, 'Form In Read Mode')
-		, (3, 'Form In Add Mode')
-		, (4, 'Form In Edit Mode')
-		, (5, 'Report');
-
-	IF NOT EXISTS(SELECT * FROM Usr.tbMenuOpenMode) 
-		INSERT INTO Usr.tbMenuOpenMode (OpenMode, OpenModeDescription)
+	IF NOT EXISTS(SELECT * FROM App.tbDocOpenMode)
+		INSERT INTO App.tbDocOpenMode (OpenMode, OpenModeDescription)
 		VALUES (0, 'Normal')
 		, (1, 'Datasheet')
 		, (2, 'Default Printing')
@@ -739,15 +707,6 @@ BEGIN TRY
 		, (4, 'CASH ACCOUNTS')
 		, (5, 'CAPITAL');
 
-	IF NOT EXISTS(SELECT * FROM Usr.tbMenuView)
-		INSERT INTO Usr.tbMenuView (MenuViewCode, MenuView)
-		VALUES (0, 'List'), (1, 'Tree');
-
-	IF NOT EXISTS(SELECT * FROM Usr.tbInterface)
-		INSERT INTO Usr.tbInterface (InterfaceCode, Interface)
-		VALUES (0, 'Accounts')
-		, (1, 'MIS');
-
     IF NOT EXISTS(SELECT * FROM Web.tbTemplateStatus)
         INSERT INTO Web.tbTemplateStatus (TemplateStatusCode, TemplateStatus)
         VALUES
@@ -770,9 +729,10 @@ BEGIN TRY
         ('PINK', 'Pink', 'theme-pink.css'),
         ('RED', 'Red', 'theme-red.css');
 
-	IF NOT EXISTS(SELECT * FROM App.tbText)
-	BEGIN
-		INSERT INTO App.tbText (TextId, Message, Arguments)
+	INSERT INTO App.tbText (TextId, Message, Arguments)
+	SELECT source.TextId, source.Message, source.Arguments
+	FROM
+	(
 		VALUES (1003, 'Enter new menu name', 0)
 		, (1004, 'Team Menu', 0)
 		, (1005, 'Ok to delete <1>', 1)
@@ -826,8 +786,13 @@ BEGIN TRY
 		, (3016, 'Operations cannot end before they have been started', 0)
 		, (3017, 'Cash codes must be of catagory type MONEY', 0)
 		, (3018, 'The balance for this account is zero. Check for unposted payments.', 0)
-		;
-	END
+	) AS source (TextId, Message, Arguments)
+	WHERE NOT EXISTS
+	(
+		SELECT 1
+		FROM App.tbText target
+		WHERE target.TextId = source.TextId
+	);
 
 	DECLARE
 		@SQLDataVersion REAL = 4,

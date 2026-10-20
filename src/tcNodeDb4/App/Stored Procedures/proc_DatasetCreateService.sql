@@ -10,7 +10,7 @@ AS
 	BEGIN TRY
 		IF NOT EXISTS (SELECT 1 FROM Usr.vwCredentials WHERE IsAdministrator <> 0)
 		BEGIN
-			DECLARE @Msg NVARCHAR(100) = CONCAT('Access Denied: User ', SUSER_SNAME(), ' is not an administrsator');
+			DECLARE @Msg NVARCHAR(100) = CONCAT('Access Denied: User ', Usr.fnUserName(), ' is not an administrsator');
 			RAISERROR ('%s', 13, 1, @Msg);
 		END
 

@@ -74,6 +74,6 @@ AS
 		 App.tbDocSpool AS doc
 		WHERE
 			DocTypeCode = 2
-			AND UserName = SUSER_SNAME()
+			AND UserName = Usr.fnUserName()
 			AND purchase_enquiry.ProjectCode = doc.DocumentNumber
 	);

@@ -16,9 +16,9 @@ CREATE TABLE [Subject].[tbSubject] (
     [PhoneNumber]            NVARCHAR (50)   NULL,
     [EmailAddress]           NVARCHAR (255)  NULL,
     [ExportTypeCode]         TINYINT         CONSTRAINT [DF_Subject_tbSubject_ExportTypeCode] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]             NVARCHAR (50)   CONSTRAINT [DF_Subject_tb_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]             NVARCHAR (50)   CONSTRAINT [DF_Subject_tb_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]             DATETIME        CONSTRAINT [DF_Subject_tb_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]              NVARCHAR (50)   CONSTRAINT [DF_Subject_tb_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]              NVARCHAR (50)   CONSTRAINT [DF_Subject_tb_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]              DATETIME        CONSTRAINT [DF_Subject_tb_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]                 ROWVERSION      NOT NULL,
     -- legacy fields moved to tbVirtual
@@ -79,7 +79,7 @@ BEGIN
         ELSE
         BEGIN
             UPDATE [Subject].[tbSubject]
-            SET UpdatedBy = SUSER_SNAME(),
+            SET UpdatedBy = Usr.fnUserName(),
                 UpdatedOn = CURRENT_TIMESTAMP
             FROM [Subject].[tbSubject]
                 INNER JOIN inserted AS i

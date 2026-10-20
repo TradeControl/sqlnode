@@ -3,6 +3,17 @@ AS
 	SET XACT_ABORT, NOCOUNT ON;
 
 	BEGIN TRY
+		IF NULLIF(LTRIM(RTRIM(@EventMessage)), N'') IS NULL
+		BEGIN
+			SET @EventTypeCode = 1;
+			SET @EventMessage = CONCAT
+			(
+				N'Event message was not supplied. Application=', APP_NAME(),
+				N'; Host=', HOST_NAME(),
+				N'; Login=', ORIGINAL_LOGIN(),
+				N'; Session=', @@SPID
+			);
+		END;
 
 		DECLARE 
 			@UserId nvarchar(10)
@@ -11,6 +22,16 @@ AS
 	
 		SET @UserId = (SELECT TOP 1 Usr.tbUser.UserId FROM Usr.vwCredentials c INNER JOIN
 								Usr.tbUser ON c.UserId = Usr.tbUser.UserId);
+
+		IF @RegisterName IS NULL OR @UserId IS NULL
+		BEGIN
+			SET @LogCode = LEFT(REPLACE(CONVERT(nvarchar(36), NEWID()), '-', ''), 20);
+
+			INSERT INTO App.tbEventLog (LogCode, EventTypeCode, EventMessage, InsertedBy)
+			VALUES (@LogCode, @EventTypeCode, @EventMessage, Usr.fnUserName());
+
+			RETURN;
+		END;
 
 		BEGIN TRANSACTION;
 		
@@ -30,8 +51,8 @@ AS
 				BREAK;
 			END
 
-		INSERT INTO App.tbEventLog (LogCode, EventTypeCode, EventMessage)
-		VALUES (@LogCode, @EventTypeCode, @EventMessage);
+		INSERT INTO App.tbEventLog (LogCode, EventTypeCode, EventMessage, InsertedBy)
+		VALUES (@LogCode, @EventTypeCode, @EventMessage, LEFT(COALESCE(@UserId, Usr.fnUserName()), 50));
 
 		COMMIT TRANSACTION;
 

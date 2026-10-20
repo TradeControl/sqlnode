@@ -3,9 +3,9 @@ CREATE TABLE [Object].[tbMirror] (
     [SubjectCode]        NVARCHAR (50) NOT NULL,
     [AllocationCode]     NVARCHAR (50) NOT NULL,
     [TransmitStatusCode] SMALLINT      CONSTRAINT [DF_Object_tbMirror_TransmitStatusCode] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]         NVARCHAR (50) CONSTRAINT [DF_Object_tbMirror_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]         NVARCHAR (50) CONSTRAINT [DF_Object_tbMirror_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]         DATETIME      CONSTRAINT [DF_Object_tbMirror_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]          NVARCHAR (50) CONSTRAINT [DF_Object_tbMirror_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]          NVARCHAR (50) CONSTRAINT [DF_Object_tbMirror_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]          DATETIME      CONSTRAINT [DF_Object_tbMirror_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]             ROWVERSION    NOT NULL,
     CONSTRAINT [PK_Object_tbMirror] PRIMARY KEY CLUSTERED ([ObjectCode] ASC, [SubjectCode] ASC, [AllocationCode] ASC),
@@ -58,7 +58,7 @@ AS
 			UPDATE mirror
 			SET 
 				TransmitStatusCode = CASE WHEN Subject.TransmitStatusCode = 1 THEN 2 ELSE 0 END,
-				UpdatedBy = SUSER_NAME(),
+				UpdatedBy = Usr.fnUserName(),
 				UpdatedOn = CURRENT_TIMESTAMP
 			FROM Object.tbMirror mirror 
 				JOIN inserted ON mirror.SubjectCode = inserted.SubjectCode AND mirror.ObjectCode = inserted.ObjectCode

@@ -6,7 +6,7 @@ CREATE TABLE [App].[tbYearPeriod] (
     [BusinessTaxRate]      DECIMAL (9, 6)  CONSTRAINT [DF_App_tbYearPeriod_BusinessTaxRate] DEFAULT ((0)) NOT NULL,
     [BusinessTaxAdjustment]           DECIMAL (18, 5) CONSTRAINT [DF_App_tbYearPeriod_BusinessTaxAdjustment] DEFAULT ((0)) NOT NULL,
     [VatAdjustment]           DECIMAL (18, 5) CONSTRAINT [DF_App_tbYearPeriod_VatAdjustment] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]              NVARCHAR (50)   CONSTRAINT [DF_App_tbYearPeriod_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]              NVARCHAR (50)   CONSTRAINT [DF_App_tbYearPeriod_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]              DATETIME        CONSTRAINT [DF_App_tbYearPeriod_InsertedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]                  ROWVERSION      NOT NULL,
     CONSTRAINT [PK_App_tbYearPeriod] PRIMARY KEY CLUSTERED ([YearNumber] ASC, [StartOn] ASC) WITH (FILLFACTOR = 90),

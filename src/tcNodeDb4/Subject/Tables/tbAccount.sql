@@ -12,9 +12,9 @@ CREATE TABLE [Subject].[tbAccount] (
     [BalanceConstraintCode] TINYINT   CONSTRAINT [DF_Subject_tbAccount_BalanceConstraintCode] DEFAULT ((0)) NOT NULL,
     [LiquidityLevel]  SMALLINT        CONSTRAINT [DF_Subject_tbAccount_LiquidityLevel] DEFAULT ((0)) NOT NULL,
     [AccountClosed]   BIT             CONSTRAINT [DF_Subject_tbAccount_AccountClosed] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]      NVARCHAR (50)   CONSTRAINT [DF_Subject_tbAccount_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]      NVARCHAR (50)   CONSTRAINT [DF_Subject_tbAccount_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]      DATETIME        CONSTRAINT [DF_Subject_tbAccount_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]       NVARCHAR (50)   CONSTRAINT [DF_Subject_tbAccount_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]       NVARCHAR (50)   CONSTRAINT [DF_Subject_tbAccount_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]       DATETIME        CONSTRAINT [DF_Subject_tbAccount_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]          ROWVERSION      NOT NULL,
     CONSTRAINT [PK_Subject_tbAccount] PRIMARY KEY CLUSTERED ([AccountCode] ASC) WITH (FILLFACTOR = 90),
@@ -88,7 +88,7 @@ BEGIN
 			END
 
 			UPDATE Subject.tbAccount
-			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+			SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 			FROM Subject.tbAccount INNER JOIN inserted AS i ON Subject.tbAccount.AccountCode = i.AccountCode;
 			END
 	END TRY

@@ -3,7 +3,7 @@ CREATE TABLE [App].[tbTaxCode] (
     [TaxDescription] NVARCHAR (50)   NOT NULL,
     [TaxTypeCode]    SMALLINT        CONSTRAINT [DF_App_tbTaxCode_TaxTypeCode] DEFAULT ((2)) NOT NULL,
     [RoundingCode]   SMALLINT        CONSTRAINT [DF_tbTaxCode_RoundingCode] DEFAULT ((0)) NOT NULL,
-    [UpdatedBy]      NVARCHAR (50)   CONSTRAINT [DF_App_tbTaxCode_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]      NVARCHAR (50)   CONSTRAINT [DF_App_tbTaxCode_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]      DATETIME        CONSTRAINT [DF_App_tbTaxCode_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]         ROWVERSION      NOT NULL,
     [TaxRate]        DECIMAL (18, 4) CONSTRAINT [DF_App_tbTaxCode_TaxRate] DEFAULT ((0)) NOT NULL,
@@ -43,7 +43,7 @@ BEGIN
 		ELSE IF NOT UPDATE(UpdatedBy)
 		BEGIN
 			UPDATE App.tbTaxCode
-			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+			SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 			FROM App.tbTaxCode INNER JOIN inserted AS i ON tbTaxCode.TaxCode = i.TaxCode;
 		END;
 		

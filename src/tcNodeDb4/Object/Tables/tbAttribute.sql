@@ -4,9 +4,9 @@
     [PrintOrder]        SMALLINT       CONSTRAINT [DF_Object_tbAttribute_OrderBy] DEFAULT ((10)) NOT NULL,
     [AttributeTypeCode] SMALLINT       CONSTRAINT [DF_Object_tbAttribute_AttributeTypeCode] DEFAULT ((0)) NOT NULL,
     [DefaultText]       NVARCHAR (400) NULL,
-    [InsertedBy]        NVARCHAR (50)  CONSTRAINT [DF_tbTemplateAttribute_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]        NVARCHAR (50)  CONSTRAINT [DF_tbTemplateAttribute_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]        DATETIME       CONSTRAINT [DF_tbTemplateAttribute_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]         NVARCHAR (50)  CONSTRAINT [DF_tbTemplateAttribute_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]         NVARCHAR (50)  CONSTRAINT [DF_tbTemplateAttribute_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]         DATETIME       CONSTRAINT [DF_tbTemplateAttribute_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]            ROWVERSION     NOT NULL,
     CONSTRAINT [PK_Object_tbAttribute] PRIMARY KEY CLUSTERED ([ObjectCode] ASC, [Attribute] ASC) WITH (FILLFACTOR = 90),
@@ -44,7 +44,7 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY	
 		UPDATE Object.tbAttribute
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+		SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM Object.tbAttribute INNER JOIN inserted AS i ON tbAttribute.ObjectCode = i.ObjectCode AND tbAttribute.Attribute = i.Attribute;
 	END TRY
 	BEGIN CATCH

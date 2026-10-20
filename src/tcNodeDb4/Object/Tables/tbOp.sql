@@ -4,9 +4,9 @@
     [SyncTypeCode]    SMALLINT        CONSTRAINT [DF_Object_tbOp_SyncTypeCode] DEFAULT ((1)) NOT NULL,
     [Operation]       NVARCHAR (50)   NOT NULL,
     [OffsetDays]      SMALLINT        CONSTRAINT [DF_Object_tbOp_OffsetDays] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]      NVARCHAR (50)   CONSTRAINT [DF_Object_tbOp_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]      NVARCHAR (50)   CONSTRAINT [DF_Object_tbOp_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]      DATETIME        CONSTRAINT [DF_Object_tbOp_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]       NVARCHAR (50)   CONSTRAINT [DF_Object_tbOp_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]       NVARCHAR (50)   CONSTRAINT [DF_Object_tbOp_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]       DATETIME        CONSTRAINT [DF_Object_tbOp_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]          ROWVERSION      NOT NULL,
     [Duration]        DECIMAL (18, 4) CONSTRAINT [DF_Object_tbOp_Duration] DEFAULT ((0)) NULL,
@@ -30,7 +30,7 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
 		UPDATE Object.tbOp
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+		SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM Object.tbOp INNER JOIN inserted AS i ON tbOp.ObjectCode = i.ObjectCode AND tbOp.OperationNumber = i.OperationNumber;
 	END TRY
 	BEGIN CATCH

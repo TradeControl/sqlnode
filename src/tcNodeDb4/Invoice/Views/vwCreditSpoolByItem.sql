@@ -14,5 +14,5 @@ AS
 	WHERE        (credit_note.InvoiceTypeCode = 1 OR
 							 credit_note.InvoiceTypeCode = 3) AND EXISTS
 								 (SELECT * FROM  App.tbDocSpool AS doc
-								   WHERE (DocTypeCode BETWEEN 5 AND 6) AND (UserName = SUSER_SNAME()) AND (credit_note.InvoiceNumber = DocumentNumber))
+								   WHERE (DocTypeCode BETWEEN 5 AND 6) AND (UserName = Usr.fnUserName()) AND (credit_note.InvoiceNumber = DocumentNumber))
 							   

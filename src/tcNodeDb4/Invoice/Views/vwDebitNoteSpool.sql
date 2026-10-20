@@ -14,5 +14,5 @@ FROM            Invoice.tbInvoice AS debit_note INNER JOIN
                          Object.tbObject ON Project.tbProject.ObjectCode = Object.tbObject.ObjectCode INNER JOIN
                          Invoice.tbType ON debit_note.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
 WHERE debit_note.InvoiceTypeCode = 3 AND
-	EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 6 AND UserName = SUSER_SNAME() AND debit_note.InvoiceNumber = doc.DocumentNumber);
+	EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 6 AND UserName = Usr.fnUserName() AND debit_note.InvoiceNumber = doc.DocumentNumber);
 

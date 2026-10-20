@@ -6,9 +6,9 @@
     [CashTypeCode]     SMALLINT      CONSTRAINT [DF_Cash_tbCategory_CashTypeCode] DEFAULT ((0)) NULL,
     [DisplayOrder]     SMALLINT      CONSTRAINT [DF_Cash_tbCategory_DisplayOrder] DEFAULT ((0)) NOT NULL,
     [IsEnabled]        SMALLINT      CONSTRAINT [DF_Cash_tbCategory_IsEnabled] DEFAULT ((1)) NOT NULL,
-    [InsertedBy]       NVARCHAR (50) CONSTRAINT [DF_Cash_tbCategory_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]       NVARCHAR (50) CONSTRAINT [DF_Cash_tbCategory_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]       DATETIME      CONSTRAINT [DF_Cash_tbCategory_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]        NVARCHAR (50) CONSTRAINT [DF_Cash_tbCategory_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]        NVARCHAR (50) CONSTRAINT [DF_Cash_tbCategory_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]        DATETIME      CONSTRAINT [DF_Cash_tbCategory_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]           ROWVERSION    NOT NULL,
     CONSTRAINT [PK_Cash_tbCategory] PRIMARY KEY CLUSTERED ([CategoryCode] ASC) WITH (FILLFACTOR = 90),
@@ -67,7 +67,7 @@ BEGIN
 		IF NOT UPDATE(UpdatedBy)
 		BEGIN
 			UPDATE Cash.tbCategory
-			SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+			SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 			FROM Cash.tbCategory INNER JOIN inserted AS i ON tbCategory.CategoryCode = i.CategoryCode;
 		END
 

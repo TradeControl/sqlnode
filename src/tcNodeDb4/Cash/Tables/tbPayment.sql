@@ -11,9 +11,9 @@ CREATE TABLE [Cash].[tbPayment] (
     [PaidInValue]       DECIMAL (18, 5) CONSTRAINT [DF_Cash_tbPayment_PaidInValue] DEFAULT ((0)) NOT NULL,
     [PaidOutValue]      DECIMAL (18, 5) CONSTRAINT [DF_Cash_tbPayment_PaidOutValue] DEFAULT ((0)) NOT NULL,
     [PaymentReference]  NVARCHAR (50)   NULL,
-    [InsertedBy]        NVARCHAR (50)   CONSTRAINT [DF_Cash_tbPayment_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]        NVARCHAR (50)   CONSTRAINT [DF_Cash_tbPayment_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]        DATETIME        CONSTRAINT [DF_Cash_tbPayment_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]         NVARCHAR (50)   CONSTRAINT [DF_Cash_tbPayment_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]         NVARCHAR (50)   CONSTRAINT [DF_Cash_tbPayment_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]         DATETIME        CONSTRAINT [DF_Cash_tbPayment_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]            ROWVERSION      NOT NULL,
     CONSTRAINT [PK_Cash_tbPayment] PRIMARY KEY CLUSTERED ([PaymentCode] ASC),
@@ -336,7 +336,7 @@ AS
         END
 
         UPDATE Cash.tbPayment
-        SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+        SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
         FROM Cash.tbPayment
             INNER JOIN inserted AS i ON tbPayment.PaymentCode = i.PaymentCode;
 

@@ -7,7 +7,7 @@ CREATE TABLE [App].[tbHost] (
     [IsSmtpAuth]      BIT            CONSTRAINT [DF_App_tbHost_IsSmtpAuth] DEFAULT ((1)) NOT NULL,
     [HostName]        NVARCHAR (256) NOT NULL,
     [HostPort]        INT            NULL,
-    [InsertedBy]      NVARCHAR (50)  CONSTRAINT [DF_App_tbHost_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]      NVARCHAR (50)  CONSTRAINT [DF_App_tbHost_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]      DATETIME       CONSTRAINT [DF_App_tbHost_InsertedOn] DEFAULT (getdate()) NOT NULL,
     CONSTRAINT [PK_App_tbHost] PRIMARY KEY NONCLUSTERED ([HostId] ASC)
 );

@@ -5,7 +5,7 @@
     [TransmitStatusCode] SMALLINT        CONSTRAINT [DF_Invoice_tbChangeLog_TransmissionStatusCode] DEFAULT ((0)) NOT NULL,
     [InvoiceStatusCode]  SMALLINT        NOT NULL,
     [DueOn]              DATETIME        NOT NULL,
-    [UpdatedBy]          NVARCHAR (50)   CONSTRAINT [DF_Invoice_tbChangeLog_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]          NVARCHAR (50)   CONSTRAINT [DF_Invoice_tbChangeLog_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [RowVer]             ROWVERSION      NOT NULL,
     [InvoiceValue]       DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbChangeLog_InvoiceValue] DEFAULT ((0)) NOT NULL,
     [TaxValue]           DECIMAL (18, 5) CONSTRAINT [DF_Invoice_tbChangeLog_TaxValue] DEFAULT ((0)) NOT NULL,

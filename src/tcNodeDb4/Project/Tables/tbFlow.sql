@@ -4,9 +4,9 @@
     [ChildProjectCode]  NVARCHAR (20)   NULL,
     [SyncTypeCode]   SMALLINT        CONSTRAINT [DF_Project_tbFlow_SyncTypeCode] DEFAULT ((0)) NOT NULL,
     [OffsetDays]     REAL            CONSTRAINT [DF_Project_tbFlow_OffsetDays] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]     NVARCHAR (50)   CONSTRAINT [DF_Project_tbFlow_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]     NVARCHAR (50)   CONSTRAINT [DF_Project_tbFlow_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]     DATETIME        CONSTRAINT [DF_Project_tbFlow_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]      NVARCHAR (50)   CONSTRAINT [DF_Project_tbFlow_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]      NVARCHAR (50)   CONSTRAINT [DF_Project_tbFlow_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]      DATETIME        CONSTRAINT [DF_Project_tbFlow_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]         ROWVERSION      NOT NULL,
     [UsedOnQuantity] DECIMAL (18, 6) CONSTRAINT [DF_Project_tbFlow_UsedOnQuantity] DEFAULT ((1)) NOT NULL,
@@ -36,7 +36,7 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY	
 		UPDATE Project.tbFlow
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+		SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM Project.tbFlow INNER JOIN inserted AS i ON tbFlow.ParentProjectCode = i.ParentProjectCode AND tbFlow.StepNumber = i.StepNumber;
 	END TRY
 	BEGIN CATCH

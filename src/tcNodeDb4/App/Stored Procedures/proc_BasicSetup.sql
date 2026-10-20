@@ -34,6 +34,14 @@ AS
 	IF @IsCompany = 0 AND (@ExpectedAnnualProfit IS NULL OR @ExpectedAnnualProfit <= 0)
 		THROW 51002, 'BasicSetup: expected annual profit must be greater than zero for a sole trader.', 1;
 
+	IF EXISTS (SELECT 1 FROM App.tbOptions WHERE UnitOfCharge <> 'BTC')
+		AND NULLIF(LTRIM(RTRIM(@BankName)), '') IS NULL
+		THROW 51003, 'BasicSetup: bank name is required for a fiat-currency node.', 1;
+
+	IF EXISTS (SELECT 1 FROM App.tbOptions WHERE UnitOfCharge <> 'BTC')
+		AND NULLIF(LTRIM(RTRIM(@CurrentAccount)), '') IS NULL
+		THROW 51004, 'BasicSetup: current account name is required for a fiat-currency node.', 1;
+
 		IF EXISTS (SELECT * FROM App.tbOptions WHERE UnitOfCharge <> 'BTC') AND (@CoinTypeCode <> 2)
 			SET @CoinTypeCode = 2;
 

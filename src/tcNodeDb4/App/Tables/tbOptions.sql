@@ -22,9 +22,9 @@ CREATE TABLE [App].[tbOptions] (
     [UserRegistrationTemplateId]    INT NULL,
     [UserRegistrationConfirmTemplateId]     INT NULL,
     [UserRegistrationAdminNotifyTemplateId] INT NULL,
-    [InsertedBy]         NVARCHAR (50)  CONSTRAINT [DF_App_tbOptions_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]         NVARCHAR (50)  CONSTRAINT [DF_App_tbOptions_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]         DATETIME       CONSTRAINT [DF_App_tbOptions_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]          NVARCHAR (50)  CONSTRAINT [DF_App_tbOptions_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]          NVARCHAR (50)  CONSTRAINT [DF_App_tbOptions_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]          DATETIME       CONSTRAINT [DF_App_tbOptions_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]             ROWVERSION     NOT NULL,
     CONSTRAINT [PK_App_tbOptions] PRIMARY KEY CLUSTERED ([Identifier] ASC) WITH (FILLFACTOR = 90),
@@ -58,7 +58,7 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
 		UPDATE App.tbOptions
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+		SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM App.tbOptions INNER JOIN inserted AS i ON tbOptions.Identifier = i.Identifier;
 
 		IF UPDATE(CoinTypeCode)

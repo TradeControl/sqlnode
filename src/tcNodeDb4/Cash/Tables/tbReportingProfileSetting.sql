@@ -13,9 +13,9 @@ CREATE TABLE [Cash].[tbReportingProfileSetting]
     [StatusCode] SMALLINT NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_StatusCode] DEFAULT (0),
     [ValueSourceCode] NVARCHAR(10) NOT NULL,
     [IsReviewed] BIT NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_IsReviewed] DEFAULT (0),
-    [InsertedBy] NVARCHAR(50) NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_InsertedBy] DEFAULT (suser_sname()),
+    [InsertedBy] NVARCHAR(50) NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_InsertedBy] DEFAULT (Usr.fnUserName()),
     [InsertedOn] DATETIME NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_InsertedOn] DEFAULT (getdate()),
-    [UpdatedBy] NVARCHAR(50) NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_UpdatedBy] DEFAULT (suser_sname()),
+    [UpdatedBy] NVARCHAR(50) NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_UpdatedBy] DEFAULT (Usr.fnUserName()),
     [UpdatedOn] DATETIME NOT NULL CONSTRAINT [DF_Cash_tbReportingProfileSetting_UpdatedOn] DEFAULT (getdate()),
     [RowVer] ROWVERSION NOT NULL,
     CONSTRAINT [PK_Cash_tbReportingProfileSetting] PRIMARY KEY CLUSTERED

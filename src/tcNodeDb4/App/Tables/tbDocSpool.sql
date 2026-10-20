@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [App].[tbDocSpool] (
-    [UserName]       NVARCHAR (50) CONSTRAINT [DF_App_tbDocSpool_UserName] DEFAULT (suser_sname()) NOT NULL,
+    [UserName]       NVARCHAR (50) CONSTRAINT [DF_App_tbDocSpool_UserName] DEFAULT (Usr.fnUserName()) NOT NULL,
     [DocTypeCode]    SMALLINT      CONSTRAINT [DF_App_tbDocSpool_DocTypeCode] DEFAULT ((1)) NOT NULL,
     [DocumentNumber] NVARCHAR (25) NOT NULL,
     [SpooledOn]      DATETIME      CONSTRAINT [DF_App_tbDocSpool_SpooledOn] DEFAULT (getdate()) NOT NULL,

@@ -3,9 +3,9 @@ CREATE TABLE [Subject].[tbAddress] (
     [SubjectCode] NVARCHAR (50) NOT NULL,
     [AddressTypeCode] SMALLINT CONSTRAINT [DF_Subject_tbAddress_AddressTypeCode] DEFAULT ((0)) NOT NULL,
     [Address]     NVARCHAR(MAX)         NOT NULL,
-    [InsertedBy]  NVARCHAR (50) CONSTRAINT [DF_Subject_tbAddress_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]  NVARCHAR (50) CONSTRAINT [DF_Subject_tbAddress_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]  DATETIME      CONSTRAINT [DF_Subject_tbAddress_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]   NVARCHAR (50) CONSTRAINT [DF_Subject_tbAddress_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]   NVARCHAR (50) CONSTRAINT [DF_Subject_tbAddress_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]   DATETIME      CONSTRAINT [DF_Subject_tbAddress_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]      ROWVERSION    NOT NULL,
     CONSTRAINT [PK_Subject_tbAddress] PRIMARY KEY CLUSTERED ([AddressCode] ASC) WITH (FILLFACTOR = 90),
@@ -57,7 +57,7 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
 		UPDATE Subject.tbAddress
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+		SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM Subject.tbAddress INNER JOIN inserted AS i ON tbAddress.AddressCode = i.AddressCode;
 	END TRY
 	BEGIN CATCH

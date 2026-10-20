@@ -3,9 +3,9 @@ CREATE TABLE [Subject].[tbDoc] (
     [DocumentName]        NVARCHAR (255) NOT NULL,
     [DocumentDescription] NVARCHAR(MAX)          NULL,
     [DocumentImage]       VARBINARY(MAX)          NULL,
-    [InsertedBy]          NVARCHAR (50)  CONSTRAINT [DF_Subject_tbDoc_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]          NVARCHAR (50)  CONSTRAINT [DF_Subject_tbDoc_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]          DATETIME       CONSTRAINT [DF_Subject_tbDoc_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]           NVARCHAR (50)  CONSTRAINT [DF_Subject_tbDoc_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]           NVARCHAR (50)  CONSTRAINT [DF_Subject_tbDoc_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]           DATETIME       CONSTRAINT [DF_Subject_tbDoc_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]              ROWVERSION     NOT NULL,
     CONSTRAINT [PK_Subject_tbDoc] PRIMARY KEY NONCLUSTERED ([SubjectCode] ASC, [DocumentName] ASC) WITH (FILLFACTOR = 90),
@@ -32,7 +32,7 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY	
 		UPDATE Subject.tbDoc
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+		SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM Subject.tbDoc INNER JOIN inserted AS i ON tbDoc.SubjectCode = i.SubjectCode AND tbDoc.DocumentName = i.DocumentName;
 	END TRY
 	BEGIN CATCH

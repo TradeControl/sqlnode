@@ -54,7 +54,7 @@ BEGIN
             ON s.SubjectCode = i.SubjectCode;
 
         UPDATE s
-        SET UpdatedBy = SUSER_SNAME(),
+        SET UpdatedBy = Usr.fnUserName(),
             UpdatedOn = CURRENT_TIMESTAMP
         FROM Subject.tbSubject AS s
         INNER JOIN inserted AS i
@@ -85,7 +85,7 @@ BEGIN
         END
 
         UPDATE s
-        SET UpdatedBy = SUSER_SNAME(),
+        SET UpdatedBy = Usr.fnUserName(),
             UpdatedOn = CURRENT_TIMESTAMP
         FROM Subject.tbSubject AS s
         INNER JOIN

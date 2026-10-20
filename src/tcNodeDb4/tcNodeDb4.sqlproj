@@ -104,6 +104,7 @@
     <Folder Include="Security\" />
     <Folder Include="Scripts" />
     <Folder Include="Tests\" />
+    <Folder Include="Usr\Functions\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Subject\Tables\tbAddress.sql" />
@@ -137,16 +138,12 @@
     <Build Include="Cash\Tables\tbTxReference.sql" />
     <Build Include="Invoice\Tables\tbChangeLog.sql" />
     <Build Include="Project\Tables\tbProject.sql" />
-    <Build Include="Usr\Tables\tbMenu.sql" />
     <Build Include="Object\Tables\tbObject.sql" />
-    <Build Include="Usr\Tables\tbMenuCommand.sql" />
     <Build Include="Object\Tables\tbAttribute.sql" />
-    <Build Include="Usr\Tables\tbMenuEntry.sql" />
     <Build Include="Object\Tables\tbAttributeType.sql" />
     <Build Include="Object\Tables\tbFlow.sql" />
-    <Build Include="Usr\Tables\tbMenuOpenMode.sql" />
+    <Build Include="App\Tables\tbDocOpenMode.sql" />
     <Build Include="Object\Tables\tbOp.sql" />
-    <Build Include="Usr\Tables\tbMenuUser.sql" />
     <Build Include="Object\Tables\tbSyncType.sql" />
     <Build Include="Usr\Tables\tbUser.sql" />
     <Build Include="App\Tables\tbBucket.sql" />
@@ -196,10 +193,8 @@
     <Build Include="Cash\Tables\tbCode.sql" />
     <Build Include="Cash\Tables\tbCoinType.sql" />
     <Build Include="Cash\Tables\tbMirror.sql" />
-    <Build Include="Usr\Tables\tbInterface.sql" />
     <Build Include="Cash\Tables\tbEntryType.sql" />
     <Build Include="Cash\Tables\tbPolarity.sql" />
-    <Build Include="Usr\Tables\tbMenuView.sql" />
     <Build Include="Cash\Tables\tbPeriod.sql" />
     <Build Include="Subject\Tables\tbAccountKey.sql" />
     <Build Include="Cash\Tables\tbStatus.sql" />
@@ -252,10 +247,8 @@
     <Build Include="Invoice\Views\vwHistorySalesItems.sql" />
     <Build Include="Usr\Views\vwDoc.sql" />
     <Build Include="Cash\Views\vwFlowVatRecurrenceAccruals.sql" />
-    <Build Include="Usr\Views\vwMenuItemFormMode.sql" />
     <Build Include="App\Views\vwTaxBizCashCodes.sql" />
     <Build Include="Invoice\Views\vwNetworkDeployments.sql" />
-    <Build Include="Usr\Views\vwMenuItemReportMode.sql" />
     <Build Include="Cash\Views\vwTaxBizTotalsByPeriod.sql" />
     <Build Include="Cash\Views\vwTaxBizComputationByYear.sql" />
     <Build Include="Invoice\Views\vwNetworkDeploymentItems.sql" />
@@ -292,7 +285,6 @@
     <Build Include="Invoice\Views\vwHistorySales.sql" />
     <Build Include="Cash\Views\vwBankAccounts.sql" />
     <Build Include="App\Views\vwGraphBankBalance.sql" />
-    <Build Include="Usr\Views\vwUserMenus.sql" />
     <Build Include="Invoice\Views\vwChangeLog.sql" />
     <Build Include="Subject\Views\vwInvoiceSummary.sql" />
     <Build Include="App\Views\vwDocPurchaseEnquiry.sql" />
@@ -406,6 +398,7 @@
     <Build Include="Project\Views\vwNetworkAllocations.sql" />
     <Build Include="Invoice\Views\vwSalesInvoiceSpool.sql" />
     <Build Include="Usr\Views\vwCredentials.sql" />
+    <Build Include="Usr\Functions\fnUserName.sql" />
     <Build Include="Project\Views\vwNetworkEvents.sql" />
     <Build Include="Invoice\Views\vwSalesInvoiceSpoolByActivity.sql" />
     <Build Include="Invoice\Views\vwSalesInvoiceSpoolByItem.sql" />
@@ -422,7 +415,6 @@
     <Build Include="Subject\Views\vwCompanyHeader.sql" />
     <Build Include="Subject\Views\vwCompanyLogo.sql" />
     <Build Include="Subject\Views\vwContacts.sql" />
-    <Build Include="Usr\Views\vwUserMenuList.sql" />
     <Build Include="Subject\Views\vwDepartments.sql" />
     <Build Include="Subject\Views\vwProjects.sql" />
     <Build Include="Project\Views\vwBucket.sql" />
@@ -602,10 +594,7 @@
     <Build Include="Project\Stored Procedures\proc_ResetChargedUninvoiced.sql" />
     <Build Include="Project\Stored Procedures\proc_WorkFlow.sql" />
     <Build Include="Project\Stored Procedures\proc_WorkFlowSelected.sql" />
-    <Build Include="Usr\Stored Procedures\proc_MenuCleanReferences.sql" />
-    <Build Include="Usr\Stored Procedures\proc_MenuInsert.sql" />
     <Build Include="Cash\Stored Procedures\proc_CoinType.sql" />
-    <Build Include="Usr\Stored Procedures\proc_MenuItemDelete.sql" />
     <Build Include="Subject\Stored Procedures\proc_WalletInitialise.sql" />
     <Build Include="Subject\Stored Procedures\proc_AccountKeyAdd.sql" />
     <Build Include="Subject\Stored Procedures\proc_AccountKeyRename.sql" />
@@ -653,27 +642,53 @@
     <Build Include="App\Stored Procedures\proc_DatasetCreateProjectTemplate.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetProjectPrint.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Bootstrap.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Bootstrap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_StatutoryProfile.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectInit.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTemplates.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTran.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectInvoice.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectPay.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayInit.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayMisc.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayWages.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Expenses.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectInit.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTemplates.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectTran.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectInvoice.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_ProjectPay.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayInit.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayMisc.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_PayWages.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Expenses.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="App\Functions\fnDatasetMonths.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Assets.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Assets.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_TaxVat.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Transfer.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Transfers.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_TaxOnProfit.sql" />
     <Build Include="Cash\Views\vwEquityReconciliationByYear.sql" />
     <Build Include="Cash\Views\vwFlowReconcilationByYear.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderCapitalIntroduced.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderDrawings.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderCapitalIntroduced.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderDrawings.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="Cash\Functions\fnPersonalEffectiveRateCalculator.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderPersonalTaxRate.sql" />
     <Build Include="App\Tables\tbJurisdiction.sql" />
@@ -716,7 +731,9 @@
     <Build Include="App\Stored Procedures\proc_Template_BASE_MIN_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_STD_2026.sql" />
     <Build Include="Subject\Tables\tbBalanceConstraint.sql" />
-    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_CompanyLoanPayback.sql"><SuppressTSqlWarnings>71502</SuppressTSqlWarnings></Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_CompanyLoanPayback.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="Cash\Tables\tbTaxTagMapType.sql" />
     <Build Include="Subject\Tables\tbClass.sql" />
     <Build Include="Subject\Tables\tbNamespace.sql" />

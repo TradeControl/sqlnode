@@ -58,5 +58,5 @@ AS
 		FROM
 		  App.tbDocSpool AS doc
 		WHERE
-		  (DocTypeCode = 0) AND (UserName = SUSER_SNAME()) AND (sales_order.ProjectCode = DocumentNumber)
+		  (DocTypeCode = 0) AND (UserName = Usr.fnUserName()) AND (sales_order.ProjectCode = DocumentNumber)
 	);

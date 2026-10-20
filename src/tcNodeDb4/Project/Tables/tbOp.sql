@@ -9,9 +9,9 @@
     [StartOn]         DATETIME        CONSTRAINT [DF_Project_tbOp_StartOn] DEFAULT (getdate()) NOT NULL,
     [EndOn]           DATETIME        CONSTRAINT [DF_Project_tbOp_EndOn] DEFAULT (getdate()) NOT NULL,
     [OffsetDays]      SMALLINT        CONSTRAINT [DF_Project_tbOp_OffsetDays] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]      NVARCHAR (50)   CONSTRAINT [DF_Project_tbOp_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]      NVARCHAR (50)   CONSTRAINT [DF_Project_tbOp_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]      DATETIME        CONSTRAINT [DF_Project_tbOp_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]       NVARCHAR (50)   CONSTRAINT [DF_Project_tbOp_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]       NVARCHAR (50)   CONSTRAINT [DF_Project_tbOp_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]       DATETIME        CONSTRAINT [DF_Project_tbOp_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]          ROWVERSION      NOT NULL,
     [Duration]        DECIMAL (18, 4) CONSTRAINT [DF_Project_tbOp_Duration] DEFAULT ((0)) NULL,
@@ -84,7 +84,7 @@ BEGIN
 		WHERE calloff.EndOn <> Project.ActionOn AND Project.ProjectStatusCode < 3;
 
 		UPDATE Project.tbOp
-		SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+		SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM Project.tbOp INNER JOIN inserted AS i ON tbOp.ProjectCode = i.ProjectCode AND tbOp.OperationNumber = i.OperationNumber;
 	END TRY
 	BEGIN CATCH

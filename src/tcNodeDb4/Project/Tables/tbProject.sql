@@ -19,9 +19,9 @@ CREATE TABLE [Project].[tbProject] (
     [AddressCodeTo]      NVARCHAR (15)   NULL,
     [Spooled]            BIT             CONSTRAINT [DF_Project_tb_Spooled] DEFAULT ((0)) NOT NULL,
     [Printed]            BIT             CONSTRAINT [DF_Project_tb_Printed] DEFAULT ((0)) NOT NULL,
-    [InsertedBy]         NVARCHAR (50)   CONSTRAINT [DF_Project_tb_InsertedBy] DEFAULT (suser_sname()) NOT NULL,
+    [InsertedBy]         NVARCHAR (50)   CONSTRAINT [DF_Project_tb_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [InsertedOn]         DATETIME        CONSTRAINT [DF_Project_tb_InsertedOn] DEFAULT (getdate()) NOT NULL,
-    [UpdatedBy]          NVARCHAR (50)   CONSTRAINT [DF_Project_tb_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]          NVARCHAR (50)   CONSTRAINT [DF_Project_tb_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]          DATETIME        CONSTRAINT [DF_Project_tb_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]             ROWVERSION      NOT NULL,
     [Quantity]           DECIMAL (18, 4) CONSTRAINT [DF_Project_tb_Quantity] DEFAULT ((0)) NOT NULL,
@@ -451,9 +451,11 @@ AS
 
             WITH cascade_status AS
             (
-                SELECT ProjectCode, ProjectStatusCode
-                FROM Project.tbProject inserted
-                WHERE NOT CashCode IS NULL
+                SELECT inserted.ProjectCode, inserted.ProjectStatusCode
+                FROM inserted
+                    JOIN deleted ON inserted.ProjectCode = deleted.ProjectCode
+                WHERE inserted.CashCode IS NOT NULL
+                  AND inserted.ProjectStatusCode <> deleted.ProjectStatusCode
             ),
             Project_flow AS
             (
@@ -479,14 +481,17 @@ AS
             SET ProjectStatusCode = CASE Project_flow.ParentStatusCode WHEN 3 THEN 2 ELSE Project_flow.ParentStatusCode END
             FROM Project.tbProject Project
                 JOIN Project_flow ON Project_flow.ChildProjectCode = Project.ProjectCode
-            WHERE Project.ProjectStatusCode < 2;
+            WHERE Project.ProjectStatusCode < 2
+              AND Project.ProjectStatusCode <> CASE Project_flow.ParentStatusCode WHEN 3 THEN 2 ELSE Project_flow.ParentStatusCode END;
 
             WITH cascade_status AS
             (
-                SELECT ProjectCode, ProjectStatusCode
-                FROM Project.tbProject inserted
-                WHERE NOT CashCode IS NULL
-                  AND ProjectStatusCode > 1
+                SELECT inserted.ProjectCode, inserted.ProjectStatusCode
+                FROM inserted
+                    JOIN deleted ON inserted.ProjectCode = deleted.ProjectCode
+                WHERE inserted.CashCode IS NOT NULL
+                  AND inserted.ProjectStatusCode > 1
+                  AND inserted.ProjectStatusCode <> deleted.ProjectStatusCode
             ),
             Project_flow AS
             (
@@ -697,7 +702,7 @@ AS
         END
 
         UPDATE Project.tbProject
-        SET UpdatedBy = SUSER_SNAME(), UpdatedOn = CURRENT_TIMESTAMP
+        SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
         FROM Project.tbProject
             INNER JOIN inserted AS i ON tbProject.ProjectCode = i.ProjectCode;
 

@@ -14,5 +14,5 @@ FROM            Invoice.tbInvoice AS credit_note INNER JOIN
                          Object.tbObject ON Project.tbProject.ObjectCode = Object.tbObject.ObjectCode INNER JOIN
                          Invoice.tbType ON credit_note.InvoiceTypeCode = Invoice.tbType.InvoiceTypeCode
 WHERE credit_note.InvoiceTypeCode = 1 
-	AND EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 5 AND UserName = SUSER_SNAME() AND credit_note.InvoiceNumber = doc.DocumentNumber);
+	AND EXISTS (SELECT * FROM App.tbDocSpool AS doc WHERE DocTypeCode = 5 AND UserName = Usr.fnUserName() AND credit_note.InvoiceNumber = doc.DocumentNumber);
 

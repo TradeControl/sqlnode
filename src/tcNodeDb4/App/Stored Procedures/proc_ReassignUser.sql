@@ -8,7 +8,7 @@ CREATE   PROCEDURE App.proc_ReassignUser
 
 	BEGIN TRY
 		UPDATE    Usr.tbUser
-		SET       LogonName = (SUSER_SNAME())
+		SET       LogonName = SUSER_SNAME()
 		WHERE     (UserId = @UserId)
 	
    	END TRY

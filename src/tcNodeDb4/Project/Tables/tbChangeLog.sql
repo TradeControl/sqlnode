@@ -9,7 +9,7 @@ CREATE TABLE [Project].[tbChangeLog] (
     [ActionOn]           DATETIME        NOT NULL,
     [CashCode]           NVARCHAR (50)   NULL,
     [TaxCode]            NVARCHAR (10)   NULL,
-    [UpdatedBy]          NVARCHAR (50)   CONSTRAINT [DF_Project_tbChangeLog_UpdatedBy] DEFAULT (suser_sname()) NOT NULL,
+    [UpdatedBy]          NVARCHAR (50)   CONSTRAINT [DF_Project_tbChangeLog_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [RowVer]             ROWVERSION      NOT NULL,
     [Quantity]           DECIMAL (18, 4) CONSTRAINT [DF_Project_tbChangeLog_Quantity] DEFAULT ((0)) NOT NULL,
     [UnitCharge]         DECIMAL (18, 7) CONSTRAINT [DF_Project_tbChangeLog_UnitCharge] DEFAULT ((0)) NOT NULL,
