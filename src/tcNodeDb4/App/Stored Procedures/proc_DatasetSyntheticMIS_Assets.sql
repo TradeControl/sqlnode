@@ -67,6 +67,9 @@ AS
 		@BusinessRootCode nvarchar(50) = (SELECT TOP (1) SubjectCode FROM App.tbOptions),
 		@SellerRootCode nvarchar(50) = (SELECT CodeValue FROM #DatasetCodes WHERE CodeType = N'SUBJECT' AND CodeName = N'SellerRoot');
 
+	IF @BusinessRootCode IS NULL OR NOT EXISTS (SELECT 1 FROM Subject.tbSubject WHERE SubjectCode = @BusinessRootCode)
+		THROW 51268, 'DatasetSyntheticMIS_Assets: unable to resolve the business root subject.', 1;
+
 	IF @SellerRootCode IS NULL
 		THROW 51267, 'DatasetSyntheticMIS_Assets: missing SUBJECT/SellerRoot in #DatasetCodes.', 1;
 
@@ -80,7 +83,7 @@ AS
 			SELECT 1
 			FROM Cash.tbPayment p
 			WHERE p.PaymentReference = N'Called Up Shares'
-			  AND p.SubjectCode = N'HOME'
+			  AND p.SubjectCode = @BusinessRootCode
 			  AND p.AccountCode = N'CALUP'
 			  AND CAST(p.PaidOn AS date) = @FirstTradingOn
 		)
@@ -104,7 +107,7 @@ AS
 				@SharePaymentCode,
 				@UserId,
 				1,
-				N'HOME',
+				@BusinessRootCode,
 				N'CALUP',
 				N'CC-SHCAP',
 				N'N/A',
@@ -255,7 +258,7 @@ AS
 		(
 			SELECT 1
 			FROM Cash.tbPayment p
-			WHERE p.SubjectCode = N'HOME'
+			WHERE p.SubjectCode = @BusinessRootCode
 			  AND p.AccountCode = N'LONLIA'
 			  AND p.CashCode = N'CC-LOAN'
 			  AND CAST(p.PaidOn AS date) = @FirstTradingOn
@@ -284,7 +287,7 @@ AS
 				@LiabPaymentCode,
 				@UserId,
 				1,
-				N'HOME',
+				@BusinessRootCode,
 				N'LONLIA',
 				N'CC-LOAN',
 				N'N/A',
@@ -424,7 +427,7 @@ AS
 	(
 		SELECT 1
 		FROM Cash.tbPayment p
-		WHERE p.SubjectCode = N'HOME'
+		WHERE p.SubjectCode = @BusinessRootCode
 		  AND p.AccountCode = @EquipAccountCode
 		  AND p.PaymentReference = N'White Van (Capitalised)'
 		  AND CAST(p.PaidOn AS date) = @Year1LatePurchaseOn
@@ -452,7 +455,7 @@ AS
 			@VehicleCapCode,
 			@UserId,
 			1,
-			N'HOME',
+			@BusinessRootCode,
 			@EquipAccountCode,
 			@EquipCashCode,
 			N'N/A',
@@ -513,7 +516,7 @@ AS
 		(
 			SELECT 1
 			FROM Cash.tbPayment p
-			WHERE p.SubjectCode = N'HOME'
+			WHERE p.SubjectCode = @BusinessRootCode
 			  AND p.AccountCode = @EquipAccountCode
 			  AND p.PaymentReference = N'Depreciation - White Van'
 			  AND CAST(p.PaidOn AS date) = @WriteOffDate
@@ -541,7 +544,7 @@ AS
 				@DepPaymentCode,
 				@UserId,
 				@PaymentStatusCode,
-				N'HOME',
+				@BusinessRootCode,
 				@EquipAccountCode,
 				@EquipCashCode,
 				N'N/A',

@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [App].[tbEventLog] (
     [LogCode]       NVARCHAR (20)  NOT NULL,
-    [LoggedOn]      DATETIME       CONSTRAINT [DF_App_tbLog_LoggedOn] DEFAULT (getdate()) NOT NULL,
+    [LoggedOn]      DATETIME       CONSTRAINT [DF_App_tbLog_LoggedOn] DEFAULT (getutcdate()) NOT NULL,
     [EventTypeCode] SMALLINT       CONSTRAINT [DF_App_tbLog_EventTypeCode] DEFAULT ((2)) NOT NULL,
     [EventMessage]  NVARCHAR (MAX) NULL,
     [InsertedBy]    NVARCHAR (50)  CONSTRAINT [DF_App_tbLog_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,

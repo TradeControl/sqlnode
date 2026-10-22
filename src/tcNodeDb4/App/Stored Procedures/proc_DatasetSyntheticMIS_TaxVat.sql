@@ -45,15 +45,28 @@ AS
 			ON CAST(yp.StartOn AS date) = dq.PayTo
 	)
 	UPDATE yp
-	SET VatAdjustment =
-		CASE (ABS(CHECKSUM(CONCAT(N'DS:VATADJ:', CONVERT(nvarchar(10), CAST(yp.StartOn AS date), 23)))) % 3)
-			WHEN 0 THEN 0.01
-			WHEN 1 THEN -0.02
-			ELSE 0.00
+	SET
+		VatAdjustment = adjustment.Amount,
+		VatAdjustmentNote = CASE
+			WHEN adjustment.Amount <> 0
+				THEN N'Synthetic dataset: illustrative VAT rounding difference.'
+			ELSE NULL
 		END
 	FROM App.tbYearPeriod yp
 	JOIN target_periods t
 		ON t.StartOn = yp.StartOn
+	CROSS APPLY
+	(
+		SELECT CAST
+		(
+			CASE (ABS(CHECKSUM(CONCAT(N'DS:VATADJ:', CONVERT(nvarchar(10), CAST(yp.StartOn AS date), 23)))) % 3)
+				WHEN 0 THEN 0.01
+				WHEN 1 THEN -0.02
+				ELSE 0.00
+			END
+			AS decimal(18, 5)
+		) AS Amount
+	) adjustment
 	WHERE ISNULL(yp.VatAdjustment, 0) = 0
 	  AND (ABS(CHECKSUM(CONCAT(N'DS:VATADJ:ENABLE:', CONVERT(nvarchar(10), CAST(yp.StartOn AS date), 23)))) % 4) <> 0;
 

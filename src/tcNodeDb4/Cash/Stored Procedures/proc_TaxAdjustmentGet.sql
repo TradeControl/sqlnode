@@ -2,7 +2,8 @@ CREATE PROCEDURE [Cash].[proc_TaxAdjustmentGet]
 (
 	@StartOn datetime,
 	@TaxTypeCode smallint,
-	@TaxAdjustment decimal(18, 5) OUTPUT
+	@TaxAdjustment decimal(18, 5) OUTPUT,
+	@TaxAdjustmentNote nvarchar(max) OUTPUT
 )
 AS
 	SET NOCOUNT, XACT_ABORT ON;
@@ -27,6 +28,15 @@ AS
 				WHEN @TaxTypeCode IN (0, 4) THEN BusinessTaxAdjustment
 				WHEN @TaxTypeCode = 1 THEN VatAdjustment
 				ELSE 0
+			END
+		FROM App.tbYearPeriod
+		WHERE StartOn = @StartOn;
+
+		SELECT @TaxAdjustmentNote =
+			CASE
+				WHEN @TaxTypeCode IN (0, 4) THEN BusinessTaxAdjustmentNote
+				WHEN @TaxTypeCode = 1 THEN VatAdjustmentNote
+				ELSE NULL
 			END
 		FROM App.tbYearPeriod
 		WHERE StartOn = @StartOn;

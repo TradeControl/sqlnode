@@ -797,7 +797,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 14;
+		@SQLBuild INT = 15;
 
 	IF NOT EXISTS
 	(

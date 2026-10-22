@@ -12,6 +12,10 @@ AS
 		THROW 51296, 'DatasetSyntheticMIS_CompanyLoanPayback: missing temp table #DatasetCodes. Run via App.proc_DatasetSyntheticMIS.', 1;
 
 	DECLARE @UserId nvarchar(10) = (SELECT TOP (1) UserId FROM Usr.vwCredentials);
+	DECLARE @BusinessRootCode nvarchar(50) = (SELECT TOP (1) SubjectCode FROM App.tbOptions);
+
+	IF @BusinessRootCode IS NULL OR NOT EXISTS (SELECT 1 FROM Subject.tbSubject WHERE SubjectCode = @BusinessRootCode)
+		THROW 51301, 'DatasetSyntheticMIS_CompanyLoanPayback: unable to resolve the business root subject.', 1;
 
 	DECLARE @Year1 smallint = (SELECT MIN(YearNumber) FROM App.tbYear);
 
@@ -70,7 +74,7 @@ AS
 	(
 		SELECT 1
 		FROM Cash.tbPayment p
-		WHERE p.SubjectCode = N'HOME'
+		WHERE p.SubjectCode = @BusinessRootCode
 		  AND p.AccountCode = @SettlementAccountCode
 		  AND p.CashCode = @LoanCashCode
 		  AND CAST(p.PaidOn AS date) = @PaidOn1
@@ -99,7 +103,7 @@ AS
 			@PayCode1,
 			@UserId,
 			1,
-			N'HOME',
+			@BusinessRootCode,
 			@SettlementAccountCode,
 			@LoanCashCode,
 			N'N/A',
@@ -115,7 +119,7 @@ AS
 	(
 		SELECT 1
 		FROM Cash.tbPayment p
-		WHERE p.SubjectCode = N'HOME'
+		WHERE p.SubjectCode = @BusinessRootCode
 		  AND p.AccountCode = @LoanLiabilityAccountCode
 		  AND p.CashCode = @LoanCashCode
 		  AND CAST(p.PaidOn AS date) = @PaidOn1
@@ -144,7 +148,7 @@ AS
 			@PayCode2,
 			@UserId,
 			1,
-			N'HOME',
+			@BusinessRootCode,
 			@LoanLiabilityAccountCode,
 			@LoanCashCode,
 			N'N/A',
@@ -160,7 +164,7 @@ AS
 	(
 		SELECT 1
 		FROM Cash.tbPayment p
-		WHERE p.SubjectCode = N'HOME'
+		WHERE p.SubjectCode = @BusinessRootCode
 		  AND p.AccountCode = @SettlementAccountCode
 		  AND p.CashCode = @LoanCashCode
 		  AND CAST(p.PaidOn AS date) = @PaidOn2
@@ -189,7 +193,7 @@ AS
 			@PayCode3,
 			@UserId,
 			1,
-			N'HOME',
+			@BusinessRootCode,
 			@SettlementAccountCode,
 			@LoanCashCode,
 			N'N/A',
@@ -205,7 +209,7 @@ AS
 	(
 		SELECT 1
 		FROM Cash.tbPayment p
-		WHERE p.SubjectCode = N'HOME'
+		WHERE p.SubjectCode = @BusinessRootCode
 		  AND p.AccountCode = @LoanLiabilityAccountCode
 		  AND p.CashCode = @LoanCashCode
 		  AND CAST(p.PaidOn AS date) = @PaidOn2
@@ -234,7 +238,7 @@ AS
 			@PayCode4,
 			@UserId,
 			1,
-			N'HOME',
+			@BusinessRootCode,
 			@LoanLiabilityAccountCode,
 			@LoanCashCode,
 			N'N/A',
