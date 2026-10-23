@@ -65,7 +65,11 @@ BEGIN
         END
 
         UPDATE AspNetUsers
-        SET PhoneNumber = Usr.tbUser.PhoneNumber, PhoneNumberConfirmed = 1
+        SET PhoneNumber = Usr.tbUser.PhoneNumber,
+            PhoneNumberConfirmed = CASE
+                WHEN NULLIF(LTRIM(RTRIM(Usr.tbUser.PhoneNumber)), '') IS NULL THEN 0
+                ELSE 1
+            END
         FROM AspNetUsers 
             JOIN inserted ON AspNetUsers.Id = inserted.Id
             JOIN Usr.tbUser ON inserted.UserName = Usr.tbUser.EmailAddress;

@@ -37,7 +37,8 @@ AS
 	DECLARE curPayMonths CURSOR LOCAL FAST_FORWARD FOR
 		SELECT MonthStartOn, MonthEndOn
 		FROM App.fnDatasetMonths(@LastClosedStartOn)
-		ORDER BY MonthStartOn;
+		ORDER BY MonthStartOn
+		OPTION (MAXRECURSION 0);
 
 	OPEN curPayMonths;
 	FETCH NEXT FROM curPayMonths INTO @PayMonthStart, @PayMonthEnd;

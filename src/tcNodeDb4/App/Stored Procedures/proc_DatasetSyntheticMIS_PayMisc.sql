@@ -101,7 +101,8 @@ AS
 	DECLARE curL2Months CURSOR LOCAL FAST_FORWARD FOR
 		SELECT MonthStartOn, MonthEndOn, MonthIndex
 		FROM App.fnDatasetMonths(@LastClosedStartOn)
-		ORDER BY MonthStartOn;
+		ORDER BY MonthStartOn
+		OPTION (MAXRECURSION 0);
 
 	OPEN curL2Months;
 	FETCH NEXT FROM curL2Months INTO @L2_MonthStart, @L2_MonthEnd, @L2_MonthIndex;

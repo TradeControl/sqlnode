@@ -149,77 +149,48 @@ AS
 	IF @IdentityUserId IS NULL
 		THROW 51004, 'DatasetSyntheticMIS: current Identity user not found in dbo.AspNetUsers.', 1;
 
-	SELECT * INTO #Keep_AspNetUsers FROM dbo.AspNetUsers WHERE Id = @IdentityUserId;
-	SELECT * INTO #Keep_AspNetUserRoles FROM dbo.AspNetUserRoles WHERE UserId = @IdentityUserId;
-	SELECT * INTO #Keep_AspNetUserClaims FROM dbo.AspNetUserClaims WHERE UserId = @IdentityUserId;
+	DECLARE
+		@KeepDomainUserCount int = (SELECT COUNT(*) FROM Usr.tbUser),
+		@KeepIdentityUserCount int = (SELECT COUNT(*) FROM dbo.AspNetUsers),
+		@KeepIdentityRoleCount int = (SELECT COUNT(*) FROM dbo.AspNetUserRoles),
+		@KeepIdentityClaimCount int = (SELECT COUNT(*) FROM dbo.AspNetUserClaims),
+		@KeepIdentityLoginCount int = (SELECT COUNT(*) FROM dbo.AspNetUserLogins),
+		@KeepIdentityTokenCount int = (SELECT COUNT(*) FROM dbo.AspNetUserTokens),
+		@KeepRoleCatalogueCount int = (SELECT COUNT(*) FROM dbo.AspNetRoles),
+		@KeepRoleClaimCount int = (SELECT COUNT(*) FROM dbo.AspNetRoleClaims);
+
+	-- Recommissioning replaces the accounting dataset, not the tenant's user
+	-- directory. Preserve every approved business profile and every ASP.NET
+	-- Identity record so additional registrations remain usable afterwards.
+	SELECT
+		UserId,
+		UserName,
+		LogonName,
+		CalendarCode,
+		PhoneNumber,
+		MobileNumber,
+		EmailAddress,
+		Address,
+		Avatar,
+		Signature,
+		IsAdministrator,
+		IsEnabled,
+		NextProjectNumber,
+		ThemeCode,
+		InsertedBy,
+		InsertedOn,
+		UpdatedBy,
+		UpdatedOn
+	INTO #Keep_UsrUsers
+	FROM Usr.tbUser;
+
+	SELECT * INTO #Keep_AspNetUsers FROM dbo.AspNetUsers;
+	SELECT * INTO #Keep_AspNetUserRoles FROM dbo.AspNetUserRoles;
+	SELECT * INTO #Keep_AspNetUserClaims FROM dbo.AspNetUserClaims;
+	SELECT * INTO #Keep_AspNetUserLogins FROM dbo.AspNetUserLogins;
+	SELECT * INTO #Keep_AspNetUserTokens FROM dbo.AspNetUserTokens;
 
 	EXEC App.proc_NodeDataInit;
-
-	IF NOT EXISTS (SELECT 1 FROM dbo.AspNetUsers WHERE Id = @IdentityUserId)
-	BEGIN
-		INSERT INTO dbo.AspNetUsers
-		(
-			Id,
-			UserName,
-			NormalizedUserName,
-			Email,
-			NormalizedEmail,
-			EmailConfirmed,
-			PasswordHash,
-			SecurityStamp,
-			ConcurrencyStamp,
-			PhoneNumber,
-			PhoneNumberConfirmed,
-			TwoFactorEnabled,
-			LockoutEnd,
-			LockoutEnabled,
-			AccessFailedCount
-		)
-		SELECT
-			Id,
-			UserName,
-			NormalizedUserName,
-			Email,
-			NormalizedEmail,
-			EmailConfirmed,
-			PasswordHash,
-			SecurityStamp,
-			ConcurrencyStamp,
-			PhoneNumber,
-			PhoneNumberConfirmed,
-			TwoFactorEnabled,
-			LockoutEnd,
-			LockoutEnabled,
-			AccessFailedCount
-		FROM #Keep_AspNetUsers;
-	END
-
-	INSERT INTO dbo.AspNetUserRoles (UserId, RoleId)
-	SELECT k.UserId, k.RoleId
-	FROM #Keep_AspNetUserRoles k
-	WHERE NOT EXISTS
-	(
-		SELECT 1
-		FROM dbo.AspNetUserRoles r
-		WHERE r.UserId = k.UserId
-			AND r.RoleId = k.RoleId
-	);
-
-	INSERT INTO dbo.AspNetUserClaims (UserId, ClaimType, ClaimValue)
-	SELECT k.UserId, k.ClaimType, k.ClaimValue
-	FROM #Keep_AspNetUserClaims k
-	WHERE NOT EXISTS
-	(
-		SELECT 1
-		FROM dbo.AspNetUserClaims c
-		WHERE c.UserId = k.UserId
-			AND ISNULL(c.ClaimType, '') = ISNULL(k.ClaimType, '')
-			AND ISNULL(c.ClaimValue, '') = ISNULL(k.ClaimValue, '')
-	);
-
-	DROP TABLE #Keep_AspNetUsers;
-	DROP TABLE #Keep_AspNetUserRoles;
-	DROP TABLE #Keep_AspNetUserClaims;
 
 	EXEC App.proc_NodeBusinessInit
 		@SubjectCode = @SubjectCode,
@@ -234,6 +205,152 @@ AS
 		@CalendarCode = @CalendarCode,
 		@JurisdictionCode = @JurisdictionCode,
 		@UnitOfCharge = @UnitOfCharge;
+
+	-- NodeBusinessInit creates the administrator needed by a new node. Replace
+	-- that bootstrap row with the complete pre-existing business directory.
+	DELETE FROM Usr.tbUser;
+
+	INSERT INTO Usr.tbUser
+	(
+		UserId,
+		UserName,
+		LogonName,
+		CalendarCode,
+		PhoneNumber,
+		MobileNumber,
+		EmailAddress,
+		Address,
+		Avatar,
+		Signature,
+		IsAdministrator,
+		IsEnabled,
+		NextProjectNumber,
+		ThemeCode,
+		InsertedBy,
+		InsertedOn,
+		UpdatedBy,
+		UpdatedOn
+	)
+	SELECT
+		UserId,
+		UserName,
+		LogonName,
+		CalendarCode,
+		PhoneNumber,
+		MobileNumber,
+		EmailAddress,
+		Address,
+		Avatar,
+		Signature,
+		IsAdministrator,
+		IsEnabled,
+		NextProjectNumber,
+		ThemeCode,
+		InsertedBy,
+		InsertedOn,
+		UpdatedBy,
+		UpdatedOn
+	FROM #Keep_UsrUsers;
+
+	-- Restore Identity only after Usr.tbUser. AspNetUsers_TriggerInsert uses the
+	-- business profiles to decide administrator membership; restoring earlier
+	-- would incorrectly promote every identity in an empty node.
+	INSERT INTO dbo.AspNetUsers
+	(
+		Id,
+		UserName,
+		NormalizedUserName,
+		Email,
+		NormalizedEmail,
+		EmailConfirmed,
+		PasswordHash,
+		SecurityStamp,
+		ConcurrencyStamp,
+		PhoneNumber,
+		PhoneNumberConfirmed,
+		TwoFactorEnabled,
+		LockoutEnd,
+		LockoutEnabled,
+		AccessFailedCount
+	)
+	SELECT
+		Id,
+		UserName,
+		NormalizedUserName,
+		Email,
+		NormalizedEmail,
+		EmailConfirmed,
+		PasswordHash,
+		SecurityStamp,
+		ConcurrencyStamp,
+		PhoneNumber,
+		PhoneNumberConfirmed,
+		TwoFactorEnabled,
+		LockoutEnd,
+		LockoutEnabled,
+		AccessFailedCount
+	FROM #Keep_AspNetUsers;
+
+	-- AspNetUsers_TriggerInsert may synchronise administrator and phone fields.
+	-- Reapply the snapshot so recommissioning preserves the complete Identity
+	-- record, including confirmation and lockout state, byte for byte.
+	UPDATE target
+	SET
+		UserName = source.UserName,
+		NormalizedUserName = source.NormalizedUserName,
+		Email = source.Email,
+		NormalizedEmail = source.NormalizedEmail,
+		EmailConfirmed = source.EmailConfirmed,
+		PasswordHash = source.PasswordHash,
+		SecurityStamp = source.SecurityStamp,
+		ConcurrencyStamp = source.ConcurrencyStamp,
+		PhoneNumber = source.PhoneNumber,
+		PhoneNumberConfirmed = source.PhoneNumberConfirmed,
+		TwoFactorEnabled = source.TwoFactorEnabled,
+		LockoutEnd = source.LockoutEnd,
+		LockoutEnabled = source.LockoutEnabled,
+		AccessFailedCount = source.AccessFailedCount
+	FROM dbo.AspNetUsers target
+		JOIN #Keep_AspNetUsers source ON source.Id = target.Id;
+
+	-- Remove any role rows added by the insert trigger, then restore the exact
+	-- pre-recommissioning security assignments.
+	DELETE r
+	FROM dbo.AspNetUserRoles r
+		JOIN #Keep_AspNetUsers u ON u.Id = r.UserId;
+
+	INSERT INTO dbo.AspNetUserRoles (UserId, RoleId)
+	SELECT UserId, RoleId
+	FROM #Keep_AspNetUserRoles;
+
+	INSERT INTO dbo.AspNetUserClaims (UserId, ClaimType, ClaimValue)
+	SELECT UserId, ClaimType, ClaimValue
+	FROM #Keep_AspNetUserClaims;
+
+	INSERT INTO dbo.AspNetUserLogins (LoginProvider, ProviderKey, ProviderDisplayName, UserId)
+	SELECT LoginProvider, ProviderKey, ProviderDisplayName, UserId
+	FROM #Keep_AspNetUserLogins;
+
+	INSERT INTO dbo.AspNetUserTokens (UserId, LoginProvider, Name, Value)
+	SELECT UserId, LoginProvider, Name, Value
+	FROM #Keep_AspNetUserTokens;
+
+	IF (SELECT COUNT(*) FROM Usr.tbUser) <> @KeepDomainUserCount
+		OR (SELECT COUNT(*) FROM dbo.AspNetUsers) <> @KeepIdentityUserCount
+		OR (SELECT COUNT(*) FROM dbo.AspNetUserRoles) <> @KeepIdentityRoleCount
+		OR (SELECT COUNT(*) FROM dbo.AspNetUserClaims) <> @KeepIdentityClaimCount
+		OR (SELECT COUNT(*) FROM dbo.AspNetUserLogins) <> @KeepIdentityLoginCount
+		OR (SELECT COUNT(*) FROM dbo.AspNetUserTokens) <> @KeepIdentityTokenCount
+		OR (SELECT COUNT(*) FROM dbo.AspNetRoles) <> @KeepRoleCatalogueCount
+		OR (SELECT COUNT(*) FROM dbo.AspNetRoleClaims) <> @KeepRoleClaimCount
+		THROW 51008, 'DatasetSyntheticMIS: tenant user directory was not restored exactly.', 1;
+
+	DROP TABLE #Keep_UsrUsers;
+	DROP TABLE #Keep_AspNetUsers;
+	DROP TABLE #Keep_AspNetUserRoles;
+	DROP TABLE #Keep_AspNetUserClaims;
+	DROP TABLE #Keep_AspNetUserLogins;
+	DROP TABLE #Keep_AspNetUserTokens;
 
 	EXEC App.proc_BasicSetup
 		@TemplateCode = @TemplateCode,

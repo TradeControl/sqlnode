@@ -166,6 +166,7 @@
     <Build Include="Web\Tables\tbTemplate.sql" />
     <Build Include="Object\Tables\tbMirror.sql" />
     <Build Include="App\Tables\tbEventLog.sql" />
+    <Build Include="App\Tables\tbDatabaseIdentity.sql" />
     <Build Include="Web\Tables\tbTemplateImage.sql" />
     <Build Include="App\Tables\tbEventType.sql" />
     <Build Include="Cash\Tables\tbAssetType.sql" />
@@ -484,6 +485,7 @@
     <Build Include="Invoice\Stored Procedures\proc_NetworkUpdated.sql" />
     <Build Include="App\Stored Procedures\proc_EventLog.sql" />
     <Build Include="App\Stored Procedures\proc_ErrorLog.sql" />
+    <Build Include="App\Stored Procedures\proc_VatSourceEvidence.sql" />
     <Build Include="Cash\Stored Procedures\proc_PaymentPostById.sql" />
     <Build Include="Invoice\Stored Procedures\proc_Mirror.sql" />
     <Build Include="Object\Stored Procedures\proc_Mode.sql" />

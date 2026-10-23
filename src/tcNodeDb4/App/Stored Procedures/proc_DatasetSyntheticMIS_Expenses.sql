@@ -133,7 +133,8 @@ AS
 	DECLARE curClaims CURSOR LOCAL FAST_FORWARD FOR
 		SELECT MonthEndOn, MonthIndex
 		FROM App.fnDatasetMonths(@LastClosedStartOn)
-		ORDER BY MonthStartOn;
+		ORDER BY MonthStartOn
+		OPTION (MAXRECURSION 0);
 
 	OPEN curClaims;
 	FETCH NEXT FROM curClaims INTO @L2_ClaimsMonthEnd, @L2_ClaimsMonthIndex;

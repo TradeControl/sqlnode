@@ -15,7 +15,7 @@ ALTER DATABASE [$(DatabaseName)] SET RECURSIVE_TRIGGERS OFF;
 DECLARE
     @SQLDataVersion REAL = 4,
     @SQLRelease INT = 1,
-    @SQLBuild INT = 15;
+    @SQLBuild INT = 17;
 
 IF NOT EXISTS
 (
@@ -37,3 +37,7 @@ IF NOT EXISTS
         @SQLRelease,
         @SQLBuild
     );
+
+IF NOT EXISTS (SELECT 1 FROM App.tbDatabaseIdentity WHERE IdentityCode = 1)
+    INSERT App.tbDatabaseIdentity (IdentityCode)
+    VALUES (1);
