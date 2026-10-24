@@ -50,6 +50,10 @@ AS
     )
         THROW 51086, 'VAT sandbox alignment: no exact calculated local VAT submission period exists.', 1;
 
+    -- HMRC's sandbox obligations can pre-date the synthetic dataset's commissioning date.
+    -- Extend only the disposable synthetic VAT profile to cover the exact matched obligation.
+    SET @ValidFrom = CASE WHEN @ValidFrom > @ObligationStart THEN @ObligationStart ELSE @ValidFrom END;
+
     UPDATE Subject.tbVirtual
     SET VatNumber = @SandboxVrn
     WHERE SubjectCode = @SubjectCode;
