@@ -1,5 +1,6 @@
 CREATE PROCEDURE App.proc_Template_ST_SOLE_CUR_MIN_2026
 (
+    @CategoryVersionId NVARCHAR(10),
     @FinancialMonth      SMALLINT      = 4,
     @GovAccountName      NVARCHAR(255),
     @BankName            NVARCHAR(255) = NULL,
@@ -23,6 +24,7 @@ BEGIN TRY
     -- 1. Base template: Minimal Micro Business (current schema)
     ----------------------------------------------------------------
     EXEC App.proc_Template_BASE_MIN_2026
+        @CategoryVersionId = @CategoryVersionId,
         @FinancialMonth   = @FinancialMonth,
         @GovAccountName   = @GovAccountName,
         @BankName         = @BankName,
@@ -40,7 +42,8 @@ BEGIN TRY
     ----------------------------------------------------------------
     UPDATE Cash.tbCategory
     SET IsEnabled = 0
-    WHERE CategoryCode IN ('CA-DIVID');
+    WHERE VersionId = @CategoryVersionId
+      AND CategoryCode IN ('CA-DIVID');
 
     UPDATE Cash.tbCode
     SET IsEnabled = 0
@@ -53,19 +56,20 @@ BEGIN TRY
     ----------------------------------------------------------------
     -- 3. Cumulative reportable-expense accounting roll-up
     ----------------------------------------------------------------
-    IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE CategoryCode = 'CT-CUMEXP')
+    IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE VersionId = @CategoryVersionId AND CategoryCode = 'CT-CUMEXP')
         INSERT INTO Cash.tbCategory
-            (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+            (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
         VALUES
-            ('CT-CUMEXP', 'Cumulative Reportable Expenses', 1, 2, 0, 55, 1);
+            (@CategoryVersionId, 'CT-CUMEXP', 'Cumulative Reportable Expenses', 1, 2, 0, 55, 1);
 
-    INSERT INTO Cash.tbCategoryTotal (ParentCode, ChildCode)
-    SELECT 'CT-CUMEXP', v.ChildCode
+    INSERT INTO Cash.tbCategoryTotal (VersionId, ParentCode, ChildCode)
+    SELECT @CategoryVersionId, 'CT-CUMEXP', v.ChildCode
     FROM (VALUES ('CT-CSTSAL'), ('CT-STAFFC'), ('CT-OVERHD')) v(ChildCode)
     WHERE NOT EXISTS
     (
         SELECT 1 FROM Cash.tbCategoryTotal ct
-        WHERE ct.ParentCode = 'CT-CUMEXP' AND ct.ChildCode = v.ChildCode
+        WHERE ct.VersionId = @CategoryVersionId
+          AND ct.ParentCode = 'CT-CUMEXP' AND ct.ChildCode = v.ChildCode
     );
 
     UPDATE Subject.tbAccount
@@ -88,12 +92,12 @@ BEGIN TRY
     ----------------------------------------------------------------
 
     -- Ensure the MONEY nominal category exists to hold the owner cash code.
-    IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE CategoryCode = 'CA-OWNER')
+    IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE VersionId = @CategoryVersionId AND CategoryCode = 'CA-OWNER')
     BEGIN
         INSERT INTO Cash.tbCategory
-            (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+            (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
         VALUES
-            ('CA-OWNER', 'Owner Capital Account', 0, 2, 2, 895, 1);
+            (@CategoryVersionId, 'CA-OWNER', 'Owner Capital Account', 0, 2, 2, 895, 1);
     END;
 
     -- Single owner capital asset cash code (polarity indicates introduced vs drawings).
@@ -104,6 +108,11 @@ BEGIN TRY
             TaxCode = 'N/A',
             IsEnabled = 1
         WHERE CashCode = 'CC-OWNCAP';
+
+        UPDATE Cash.tbCategoryCodeMap
+        SET CategoryCode = 'CA-OWNER'
+        WHERE VersionId = @CategoryVersionId
+          AND CashCode = 'CC-OWNCAP';
     END
     ELSE
     BEGIN
@@ -111,6 +120,9 @@ BEGIN TRY
             (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
         VALUES
             ('CC-OWNCAP', 'Owner Capital', 'CA-OWNER', 'N/A', 1);
+
+        INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
+        VALUES (@CategoryVersionId, 'CC-OWNCAP', 'CA-OWNER');
     END;
 
     ----------------------------------------------------------------
@@ -143,7 +155,7 @@ BEGIN TRY
     -- 7. VAT handling for non-registered businesses
     ----------------------------------------------------------------
     IF @IsVATRegistered = 0
-        EXEC App.proc_Template_DisableVAT;
+        EXEC App.proc_Template_DisableVAT @CategoryVersionId = @CategoryVersionId;
 
     ----------------------------------------------------------------
     -- 8. Tax year alignment: financial year starts on April 6

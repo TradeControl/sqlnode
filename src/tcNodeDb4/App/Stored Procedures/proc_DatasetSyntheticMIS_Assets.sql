@@ -303,22 +303,15 @@ AS
 
 	IF NOT EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = N'CC-MREPA')
 	BEGIN
-		INSERT INTO Cash.tbCode
-		(
-			CashCode,
-			CashDescription,
-			CategoryCode,
-			TaxCode,
-			IsEnabled
-		)
-		VALUES
-		(
-			N'CC-MREPA',
-			N'Motors',
-			N'CA-DIRECT',
-			N'T1',
-			1
-		);
+		DECLARE @CategoryVersionId NVARCHAR(10) = (SELECT CategoryVersionId FROM App.tbOptions);
+
+		EXEC Cash.proc_CodeAdd
+			@VersionId = @CategoryVersionId,
+			@CashCode = N'CC-MREPA',
+			@CashDescription = N'Motors',
+			@CategoryCode = N'CA-DIRECT',
+			@TaxCode = N'T1',
+			@IsEnabled = 1;
 	END
 
 	DECLARE @GarageCode nvarchar(50) = NULL;

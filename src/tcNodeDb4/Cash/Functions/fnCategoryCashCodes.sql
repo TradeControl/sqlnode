@@ -1,38 +1,12 @@
-CREATE FUNCTION Cash.fnCategoryCashCodes
-(	
-	@CategoryCode nvarchar(10)
-)
-RETURNS TABLE 
-AS
-RETURN 
+CREATE FUNCTION [Cash].[fnCategoryCashCodes]
 (
-    WITH ct_parent AS
-    (
-        SELECT c.CategoryCode, c.CategoryTypeCode
-        FROM Cash.tbCategory c
-        WHERE c.CategoryCode = @CategoryCode
-
-        UNION ALL
-
-        SELECT ct.ChildCode CategoryCode, c.CategoryTypeCode
-        FROM ct_parent
-            JOIN Cash.tbCategoryTotal ct
-                ON ct.ParentCode = ct_parent.CategoryCode
-            JOIN Cash.tbCategory c
-                ON ct.ChildCode = c.CategoryCode
-        WHERE c.IsEnabled != 0
-    ), cat AS
-    (
-        SELECT c.CategoryCode
-        FROM ct_parent c
-        WHERE c.CategoryTypeCode = 0
-    )
-    SELECT cc.CashCode, cc.CategoryCode
-    FROM Cash.tbCode cc
-        JOIN cat
-            ON cat.CategoryCode = cc.CategoryCode
-    WHERE cc.IsEnabled != 0
+    @CategoryCode NVARCHAR(10)
 )
-
-GO
-
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT member.CashCode, member.CategoryCode
+    FROM App.tbOptions AS options
+    CROSS APPLY Cash.fnCategoryCashCodesByVersion(options.CategoryVersionId, @CategoryCode) AS member
+);

@@ -1,5 +1,6 @@
 CREATE PROCEDURE App.proc_Template_BASE_MIN_2026
 (
+    @CategoryVersionId NVARCHAR(10),
     @FinancialMonth SMALLINT = 4,
     @GovAccountName NVARCHAR(255),
     @BankName NVARCHAR(255) = NULL,
@@ -67,93 +68,101 @@ AS
         --   CE-* = Expression (CategoryTypeCode=2)
         ----------------------------------------------------------------
         INSERT INTO Cash.tbCategory
-            (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+            (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
         VALUES
             -- Totals / reporting groups
-            ('CT-TURNOV', 'Turnover',                 1, 2, 0,  10, 1),
-            ('CT-OTHRIN', 'Other Income',             1, 2, 0,  20, 1),
-            ('CT-CSTSAL', 'Cost of Sales',            1, 2, 0,  30, 1),
-            ('CT-STAFFC', 'Staff Costs',              1, 2, 0,  40, 1),
+            (@CategoryVersionId, 'CT-TURNOV', 'Turnover',                 1, 2, 0,  10, 1),
+            (@CategoryVersionId, 'CT-OTHRIN', 'Other Income',             1, 2, 0,  20, 1),
+            (@CategoryVersionId, 'CT-CSTSAL', 'Cost of Sales',            1, 2, 0,  30, 1),
+            (@CategoryVersionId, 'CT-STAFFC', 'Staff Costs',              1, 2, 0,  40, 1),
 
-            ('CT-OVERHD', 'Overheads',                1, 2, 0,  60, 1),
+            (@CategoryVersionId, 'CT-OVERHD', 'Overheads',                1, 2, 0,  60, 1),
 
             -- Gross profit total (required by expressions; users expect it)
-            ('CT-GROSSP', 'Gross Profit',             1, 2, 0,  70, 1),
+            (@CategoryVersionId, 'CT-GROSSP', 'Gross Profit',             1, 2, 0,  70, 1),
 
             -- Profit root (system net profit root)
-            ('CT-PANDL',  'Profit and Loss',          1, 2, 0,  80, 1),
+            (@CategoryVersionId, 'CT-PANDL',  'Profit and Loss',          1, 2, 0,  80, 1),
 
             -- Internal nominal categories
-            ('CA-SALES',  'Sales',                       0, 1, 0, 100, 1),
-            ('CA-INCOME', 'Other Income (Internal)',     0, 1, 0, 110, 1),
-            ('CA-DIRECT', 'Direct Costs',                0, 0, 0, 120, 1),
-            ('CA-WAGES',  'Wages',                       0, 0, 0, 130, 1),
-            ('CA-ADMIN',  'Admin Expenses',              0, 0, 0, 140, 1),
+            (@CategoryVersionId, 'CA-SALES',  'Sales',                       0, 1, 0, 100, 1),
+            (@CategoryVersionId, 'CA-INCOME', 'Other Income (Internal)',     0, 1, 0, 110, 1),
+            (@CategoryVersionId, 'CA-DIRECT', 'Direct Costs',                0, 0, 0, 120, 1),
+            (@CategoryVersionId, 'CA-WAGES',  'Wages',                       0, 0, 0, 130, 1),
+            (@CategoryVersionId, 'CA-ADMIN',  'Admin Expenses',              0, 0, 0, 140, 1),
 
             -- Minimal asset movement bucket (moved to P&L)
-            ('CA-ASSET',  'Asset Movements',             0, 2, 2, 150, 1),
+            (@CategoryVersionId, 'CA-ASSET',  'Asset Movements',             0, 2, 2, 150, 1),
 
             -- Tax categories
-            ('CA-TAXGD',  'Tax on Goods (VAT / General)',0, 0, 1, 170, 1),
-            ('CA-TAXCO',  'Tax on Company (Biz)',        0, 0, 1, 180, 1),
+            (@CategoryVersionId, 'CA-TAXGD',  'Tax on Goods (VAT / General)',0, 0, 1, 170, 1),
+            (@CategoryVersionId, 'CA-TAXCO',  'Tax on Company (Biz)',        0, 0, 1, 180, 1),
 
             -- VAT root
-            ('CT-VAT',    'VAT Control Root',            1, 2, 1, 900, 1),
+            (@CategoryVersionId, 'CT-VAT',    'VAT Control Root',            1, 2, 1, 900, 1),
 
             -- Internal Balance Sheet-ish groupings
-            ('CA-BANK',   'Bank Accounts',               0, 2, 2, 910, 1),
-            ('CA-INVEST', 'Investments / Capital',       0, 2, 2, 920, 1),
-            ('CA-LIAB',   'Liabilities',                 0, 0, 2, 930, 1),
+            (@CategoryVersionId, 'CA-BANK',   'Bank Accounts',               0, 2, 2, 910, 1),
+            (@CategoryVersionId, 'CA-INVEST', 'Investments / Capital',       0, 2, 2, 920, 1),
+            (@CategoryVersionId, 'CA-LIAB',   'Liabilities',                 0, 0, 2, 930, 1),
 
 			-- Interbank Transfers
-			('CA-IP',	   'Intercompany Payment',	      0, 0, 2, 200, 1),
-			('CA-IR',      'Intercompany Receipt',	      0, 1, 2, 210, 1),
+			(@CategoryVersionId, 'CA-IP',	   'Intercompany Payment',	      0, 0, 2, 200, 1),
+			(@CategoryVersionId, 'CA-IR',      'Intercompany Receipt',	      0, 1, 2, 210, 1),
 
 			-- Dividend Payment
-			('CA-DIVID',   'Dividends',                   0, 0, 0, 300, 1);
+			(@CategoryVersionId, 'CA-DIVID',   'Dividends',                   0, 0, 0, 300, 1);
 
         ----------------------------------------------------------------
         -- CATEGORY TOTALS (roll-up structure)
         ----------------------------------------------------------------
-        INSERT INTO Cash.tbCategoryTotal (ParentCode, ChildCode)
+        INSERT INTO Cash.tbCategoryTotal (VersionId, ParentCode, ChildCode)
         VALUES
             -- Profit and Loss (CT-PANDL)
-            ('CT-PANDL', 'CT-GROSSP'),
-            ('CT-PANDL', 'CT-STAFFC'),
-            ('CT-PANDL', 'CT-OVERHD'),
-            ('CT-PANDL', 'CA-ASSET'),
+            (@CategoryVersionId, 'CT-PANDL', 'CT-GROSSP'),
+            (@CategoryVersionId, 'CT-PANDL', 'CT-STAFFC'),
+            (@CategoryVersionId, 'CT-PANDL', 'CT-OVERHD'),
+            (@CategoryVersionId, 'CT-PANDL', 'CA-ASSET'),
 
             -- Gross Profit
-            ('CT-GROSSP', 'CT-TURNOV'),
-            ('CT-GROSSP', 'CT-OTHRIN'),
-            ('CT-GROSSP', 'CT-CSTSAL'),
+            (@CategoryVersionId, 'CT-GROSSP', 'CT-TURNOV'),
+            (@CategoryVersionId, 'CT-GROSSP', 'CT-OTHRIN'),
+            (@CategoryVersionId, 'CT-GROSSP', 'CT-CSTSAL'),
 
             -- Turnover
-            ('CT-TURNOV', 'CA-SALES'),
+            (@CategoryVersionId, 'CT-TURNOV', 'CA-SALES'),
 
             -- Other income
-            ('CT-OTHRIN', 'CA-INCOME'),
+            (@CategoryVersionId, 'CT-OTHRIN', 'CA-INCOME'),
 
             -- Cost of sales
-            ('CT-CSTSAL', 'CA-DIRECT'),
+            (@CategoryVersionId, 'CT-CSTSAL', 'CA-DIRECT'),
 
             -- Staff costs
-            ('CT-STAFFC', 'CA-WAGES'),
+            (@CategoryVersionId, 'CT-STAFFC', 'CA-WAGES'),
 
             -- Overheads
-            ('CT-OVERHD', 'CA-ADMIN'),
+            (@CategoryVersionId, 'CT-OVERHD', 'CA-ADMIN'),
 
             -- VAT root
-            ('CT-VAT', 'CA-SALES'),
-            ('CT-VAT', 'CA-INCOME'),
-            ('CT-VAT', 'CA-DIRECT'),
-            ('CT-VAT', 'CT-OVERHD');
+            (@CategoryVersionId, 'CT-VAT', 'CA-SALES'),
+            (@CategoryVersionId, 'CT-VAT', 'CA-INCOME'),
+            (@CategoryVersionId, 'CT-VAT', 'CA-DIRECT'),
+            (@CategoryVersionId, 'CT-VAT', 'CT-OVERHD');
 
         ----------------------------------------------------------------
         -- CASH CODES 
         ----------------------------------------------------------------
+        DECLARE @CategoryCodeMap TABLE
+        (
+            CashCode NVARCHAR(50) NOT NULL PRIMARY KEY,
+            CategoryCode NVARCHAR(10) NOT NULL
+        );
+
         INSERT INTO Cash.tbCode
             (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
+        OUTPUT inserted.CashCode, inserted.CategoryCode
+            INTO @CategoryCodeMap (CashCode, CategoryCode)
         VALUES
             -- Income
             ('CC-SALES', 'Sales',             'CA-SALES',  'T1',  1),
@@ -192,20 +201,24 @@ AS
 			-- Dividends
 			('CC-DIVID', 'Dividends',         'CA-DIVID',  'N/A', 1);
 
+        INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
+        SELECT @CategoryVersionId, CashCode, CategoryCode
+        FROM @CategoryCodeMap;
+
         ----------------------------------------------------------------
         -- EXPRESSION CATEGORIES (CategoryTypeCode = 2)
         ----------------------------------------------------------------
         INSERT INTO Cash.tbCategory
-            (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+            (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
         VALUES
-            ('CE-GP', 'Gross Margin %',              2, 2, 0,  1, 1),
-            ('CE-NP', 'Net Profit %',                2, 2, 0,  2, 1),
-            ('CE-WP', 'Wages Ratio',                 2, 2, 0,  3, 1),
-            ('CE-AP', 'Admin Cost Ratio',            2, 2, 0,  4, 1),
-            ('CE-DP', 'Direct Cost Ratio',           2, 2, 0,  5, 1),
-            ('CE-DE', 'Depreciation Ratio',          2, 2, 0,  6, 1),
-            ('CE-OC', 'Overhead Coverage Ratio',     2, 2, 0,  8, 1),
-            ('CE-RS', 'Revenue-to-Wages Ratio',      2, 2, 0,  9, 1);
+            (@CategoryVersionId, 'CE-GP', 'Gross Margin %',              2, 2, 0,  1, 1),
+            (@CategoryVersionId, 'CE-NP', 'Net Profit %',                2, 2, 0,  2, 1),
+            (@CategoryVersionId, 'CE-WP', 'Wages Ratio',                 2, 2, 0,  3, 1),
+            (@CategoryVersionId, 'CE-AP', 'Admin Cost Ratio',            2, 2, 0,  4, 1),
+            (@CategoryVersionId, 'CE-DP', 'Direct Cost Ratio',           2, 2, 0,  5, 1),
+            (@CategoryVersionId, 'CE-DE', 'Depreciation Ratio',          2, 2, 0,  6, 1),
+            (@CategoryVersionId, 'CE-OC', 'Overhead Coverage Ratio',     2, 2, 0,  8, 1),
+            (@CategoryVersionId, 'CE-RS', 'Revenue-to-Wages Ratio',      2, 2, 0,  9, 1);
 
         ----------------------------------------------------------------
         -- EXPRESSION DEFINITIONS
@@ -245,6 +258,9 @@ AS
             INSERT INTO [Cash].[tbCode] ([CashCode], [CashDescription], [CategoryCode], [TaxCode], [IsEnabled])
             VALUES ('CC-MINER', 'Miner Fees', 'CA-DIRECT', 'N/A', 1);
 
+            INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
+            VALUES (@CategoryVersionId, 'CC-MINER', 'CA-DIRECT');
+
             UPDATE App.tbOptions
             SET MinerFeeCode = 'CC-MINER';
         END
@@ -252,6 +268,12 @@ AS
         ----------------------------------------------------------------
         -- NET PROFIT & VAT CATEGORY
         ----------------------------------------------------------------
+        INSERT INTO Cash.tbCategoryRoot (VersionId, RootTypeCode, CategoryCode)
+        VALUES
+            (@CategoryVersionId, 0, 'CT-PANDL'),
+            (@CategoryVersionId, 1, 'CT-VAT');
+
+        -- Transitional compatibility until the legacy option roots are removed.
         UPDATE App.tbOptions
         SET NetProfitCode   = 'CT-PANDL',
             VatCategoryCode = 'CT-VAT';

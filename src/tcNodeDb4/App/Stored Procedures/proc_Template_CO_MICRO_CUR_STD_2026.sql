@@ -1,5 +1,6 @@
 CREATE PROCEDURE App.proc_Template_CO_MICRO_CUR_STD_2026
 (
+    @CategoryVersionId NVARCHAR(10),
     @FinancialMonth SMALLINT = 4,
     @GovAccountName NVARCHAR(255),
     @BankName NVARCHAR(255) = NULL,
@@ -24,6 +25,7 @@ BEGIN TRY
     -- 1. CALL SHARED MICRO CORE
     ----------------------------------------------------------------
     EXEC [App].[proc_Template_CO_MICRO_CUR_2026]
+         @CategoryVersionId = @CategoryVersionId,
          @FinancialMonth   = @FinancialMonth,
          @GovAccountName   = @GovAccountName,
          @BankName         = @BankName,
@@ -40,13 +42,13 @@ BEGIN TRY
     -- 2. STANDARD MICRO CATEGORY TREE (ADDITIVE)
     ----------------------------------------------------------------
     INSERT INTO Cash.tbCategory
-        (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+        (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
     VALUES
-        ('CA-BUILD', 'Building', 0, 0, 0, 411, 1);
+        (@CategoryVersionId, 'CA-BUILD', 'Building', 0, 0, 0, 411, 1);
 
-    INSERT INTO Cash.tbCategoryTotal (ParentCode, ChildCode)
+    INSERT INTO Cash.tbCategoryTotal (VersionId, ParentCode, ChildCode)
     VALUES
-        ('CT-OVERHD', 'CA-BUILD');
+        (@CategoryVersionId, 'CT-OVERHD', 'CA-BUILD');
 
     ----------------------------------------------------------------
     -- 3. REPLACE BASE DEPRECIATION ACCOUNTING MODEL
@@ -60,8 +62,16 @@ BEGIN TRY
     ----------------------------------------------------------------
     -- 4. STANDARD MICRO CASH CODES (ADDITIVE)
     ----------------------------------------------------------------
+    DECLARE @CategoryCodeMap TABLE
+    (
+        CashCode NVARCHAR(50) NOT NULL PRIMARY KEY,
+        CategoryCode NVARCHAR(10) NOT NULL
+    );
+
     INSERT INTO Cash.tbCode
         (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
+    OUTPUT inserted.CashCode, inserted.CategoryCode
+        INTO @CategoryCodeMap (CashCode, CategoryCode)
     VALUES
         -- Sales splits -> CA-SALES
         ('CC-SALAB', 'Sales – Labour',        'CA-SALES',  'T1', 1),
@@ -93,6 +103,10 @@ BEGIN TRY
         ('CC-DEPPL', 'Depreciation – Plant & Tools',  'CA-DEPREC', 'N/A', 1),
         ('CC-DEPMV', 'Depreciation – Motor Vehicles', 'CA-DEPREC', 'N/A', 1),
         ('CC-DEPFX', 'Depreciation – Fixtures',       'CA-DEPREC', 'N/A', 1);
+
+    INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
+    SELECT @CategoryVersionId, CashCode, CategoryCode
+    FROM @CategoryCodeMap;
 
     ----------------------------------------------------------------
     -- 4b. Create capital accounts for the STD depreciation model
@@ -135,17 +149,22 @@ BEGIN TRY
     ----------------------------------------------------------------
     -- 5. DELETE CASH CODE INHERITED FROM BASE TEMPLATE (now unused)
     ----------------------------------------------------------------
+    DELETE FROM Cash.tbCategoryCodeMap
+    WHERE VersionId = @CategoryVersionId
+      AND CashCode = 'CC-DEPRC';
+
     DELETE FROM Cash.tbCode
     WHERE CashCode = 'CC-DEPRC';
 
     -- Add STD expression suite
-    EXEC App.proc_Template_CO_MICRO_CUR_STD_EXP_2026;
+    EXEC App.proc_Template_CO_MICRO_CUR_STD_EXP_2026
+        @CategoryVersionId = @CategoryVersionId;
 
     ----------------------------------------------------------------
     -- 7. VAT handling for non‑registered businesses
     ----------------------------------------------------------------
     IF @IsVATRegistered = 0
-        EXEC App.proc_Template_DisableVAT;
+        EXEC App.proc_Template_DisableVAT @CategoryVersionId = @CategoryVersionId;
 
     ----------------------------------------------------------------
     -- 8. Compose and validate the company statutory projection

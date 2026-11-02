@@ -1,5 +1,6 @@
 CREATE PROCEDURE App.proc_Template_ST_SOLE_CUR_MIN_MTD_2026
 (
+    @CategoryVersionId   NVARCHAR(10),
     @FinancialMonth      SMALLINT      = 4,
     @GovAccountName      NVARCHAR(255),
     @BankName            NVARCHAR(255) = NULL,
@@ -21,7 +22,8 @@ DECLARE @RC int
     BEGIN TRAN SoleTraderMinMtdTemplate;
 
     EXECUTE @RC = App.proc_Template_ST_SOLE_CUR_MIN_2026
-       @FinancialMonth = @FinancialMonth
+       @CategoryVersionId = @CategoryVersionId
+      , @FinancialMonth = @FinancialMonth
       , @GovAccountName = @GovAccountName
       , @BankName = @BankName
       , @BankAddress = @BankAddress

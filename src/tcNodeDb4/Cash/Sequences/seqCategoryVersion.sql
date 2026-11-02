@@ -1,0 +1,8 @@
+CREATE SEQUENCE [Cash].[seqCategoryVersion]
+    AS BIGINT
+    START WITH 1
+    INCREMENT BY 1
+    MINVALUE 1
+    MAXVALUE 99999999
+    CACHE 20
+    NO CYCLE;

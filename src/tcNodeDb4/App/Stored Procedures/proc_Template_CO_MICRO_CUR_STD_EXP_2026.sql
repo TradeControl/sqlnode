@@ -1,4 +1,5 @@
 CREATE PROCEDURE App.proc_Template_CO_MICRO_CUR_STD_EXP_2026
+    @CategoryVersionId NVARCHAR(10)
 AS
 BEGIN
 
@@ -6,8 +7,18 @@ BEGIN
     -- STD-SPECIFIC EXPRESSION CATEGORIES (CategoryTypeCode = 2)
     ----------------------------------------------------------------
     INSERT INTO Cash.tbCategory
-        (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
-    VALUES
+        (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+    SELECT
+        @CategoryVersionId,
+        CategoryCode,
+        Category,
+        CategoryTypeCode,
+        CashPolarityCode,
+        CashTypeCode,
+        DisplayOrder,
+        IsEnabled
+    FROM
+    (VALUES
         -- Enabled by default (the “big four”)
         ('CE-COS',  'Cash Operating Surplus % (Structured)', 2, 2, 0, 20, 1),
         ('CE-LM',   'Labour Margin %',                       2, 2, 0, 21, 1),
@@ -36,7 +47,17 @@ BEGIN
 
         ('CE-DPL',  'Plant Depreciation % of Depreciation',  2, 2, 0, 38, 0),
         ('CE-DMV',  'Motor Depreciation % of Depreciation',  2, 2, 0, 39, 0),
-        ('CE-DFX',  'Fixtures Depreciation % of Depreciation', 2, 2, 0, 40, 0);
+        ('CE-DFX',  'Fixtures Depreciation % of Depreciation', 2, 2, 0, 40, 0)
+    ) AS category
+    (
+        CategoryCode,
+        Category,
+        CategoryTypeCode,
+        CashPolarityCode,
+        CashTypeCode,
+        DisplayOrder,
+        IsEnabled
+    );
 
     ----------------------------------------------------------------
     -- STD-SPECIFIC EXPRESSIONS (STABLE CODE REFERENCES)

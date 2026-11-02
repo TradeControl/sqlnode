@@ -1,5 +1,6 @@
 CREATE PROCEDURE App.proc_Template_ST_SOLE_CUR_STD_2026
 (
+    @CategoryVersionId NVARCHAR(10),
     @FinancialMonth SMALLINT = 4, @GovAccountName NVARCHAR(255),
     @BankName NVARCHAR(255) = NULL, @BankAddress NVARCHAR(MAX) = NULL,
     @DummyAccount NVARCHAR(50), @CurrentAccount NVARCHAR(50) = NULL,
@@ -13,6 +14,7 @@ BEGIN TRY
     BEGIN TRAN SoleTraderStdTemplate;
 
     EXEC App.proc_Template_ST_SOLE_CUR_MIN_2026
+        @CategoryVersionId = @CategoryVersionId,
         @FinancialMonth = @FinancialMonth, @GovAccountName = @GovAccountName,
         @BankName = @BankName, @BankAddress = @BankAddress, @DummyAccount = @DummyAccount,
         @CurrentAccount = @CurrentAccount, @CA_SortCode = @CA_SortCode,
@@ -20,10 +22,10 @@ BEGIN TRY
         @RA_SortCode = @RA_SortCode, @RA_AccountNumber = @RA_AccountNumber,
         @IsVATRegistered = @IsVATRegistered;
 
-    IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE CategoryCode = 'CT-ADMIN')
+    IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE VersionId = @CategoryVersionId AND CategoryCode = 'CT-ADMIN')
         INSERT INTO Cash.tbCategory
-            (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
-        VALUES ('CT-ADMIN', 'Administration Costs', 1, 2, 0, 55, 1);
+            (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+        VALUES (@CategoryVersionId, 'CT-ADMIN', 'Administration Costs', 1, 2, 0, 55, 1);
 
     ;WITH Categories AS
     (
@@ -39,19 +41,21 @@ BEGIN TRY
         ) v(CategoryCode, Category, DisplayOrder)
     )
     INSERT INTO Cash.tbCategory
-        (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
-    SELECT CategoryCode, Category, 0, 0, 0, DisplayOrder, 1
+        (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+    SELECT @CategoryVersionId, CategoryCode, Category, 0, 0, 0, DisplayOrder, 1
     FROM Categories c
-    WHERE NOT EXISTS (SELECT 1 FROM Cash.tbCategory x WHERE x.CategoryCode = c.CategoryCode);
+    WHERE NOT EXISTS (SELECT 1 FROM Cash.tbCategory x WHERE x.VersionId = @CategoryVersionId AND x.CategoryCode = c.CategoryCode);
 
     DELETE FROM Cash.tbCategoryTotal
-    WHERE ParentCode = 'CT-OVERHD' AND ChildCode IN ('CA-ADMIN', 'CA-OFFICE');
+    WHERE VersionId = @CategoryVersionId
+      AND ParentCode = 'CT-OVERHD' AND ChildCode IN ('CA-ADMIN', 'CA-OFFICE');
 
     DELETE FROM Cash.tbCategoryTotal
-    WHERE ParentCode = 'CT-VAT' AND ChildCode = 'CA-DIRECT';
+    WHERE VersionId = @CategoryVersionId
+      AND ParentCode = 'CT-VAT' AND ChildCode = 'CA-DIRECT';
 
-    INSERT INTO Cash.tbCategoryTotal (ParentCode, ChildCode)
-    SELECT v.ParentCode, v.ChildCode
+    INSERT INTO Cash.tbCategoryTotal (VersionId, ParentCode, ChildCode)
+    SELECT @CategoryVersionId, v.ParentCode, v.ChildCode
     FROM (VALUES
         ('CT-VAT', 'CT-CSTSAL'),
         ('CT-CSTSAL', 'CA-COGS'), ('CT-CSTSAL', 'CA-SUBCON'),
@@ -65,7 +69,14 @@ BEGIN TRY
     WHERE NOT EXISTS
     (
         SELECT 1 FROM Cash.tbCategoryTotal ct
-        WHERE ct.ParentCode = v.ParentCode AND ct.ChildCode = v.ChildCode
+        WHERE ct.VersionId = @CategoryVersionId
+          AND ct.ParentCode = v.ParentCode AND ct.ChildCode = v.ChildCode
+    );
+
+    DECLARE @CategoryCodeMap TABLE
+    (
+        CashCode NVARCHAR(50) NOT NULL PRIMARY KEY,
+        CategoryCode NVARCHAR(10) NOT NULL
     );
 
     ;WITH Codes AS
@@ -98,9 +109,15 @@ BEGIN TRY
         ) v(CashCode, CashDescription, CategoryCode, TaxCode)
     )
     INSERT INTO Cash.tbCode (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
+    OUTPUT inserted.CashCode, inserted.CategoryCode
+        INTO @CategoryCodeMap (CashCode, CategoryCode)
     SELECT CashCode, CashDescription, CategoryCode, TaxCode, 1
     FROM Codes c
     WHERE NOT EXISTS (SELECT 1 FROM Cash.tbCode x WHERE x.CashCode = c.CashCode);
+
+    INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
+    SELECT @CategoryVersionId, CashCode, CategoryCode
+    FROM @CategoryCodeMap;
 
     UPDATE cc
     SET CategoryCode = c.CategoryCode, IsEnabled = 1
@@ -110,6 +127,16 @@ BEGIN TRY
         ('CC-ADVT', 'CA-ADVERT'), ('CC-LOINT', 'CA-LOANINT'),
         ('CC-BANKC', 'CA-FINANCE'), ('CC-PROF', 'CA-PROF')
     ) c(CashCode, CategoryCode) ON c.CashCode = cc.CashCode;
+
+    UPDATE map
+    SET CategoryCode = c.CategoryCode
+    FROM Cash.tbCategoryCodeMap AS map
+    JOIN (VALUES
+        ('CC-INSUR', 'CA-PREMS'), ('CC-REPA', 'CA-REPAIR'), ('CC-PHONE', 'CA-OFFICE'),
+        ('CC-ADVT', 'CA-ADVERT'), ('CC-LOINT', 'CA-LOANINT'),
+        ('CC-BANKC', 'CA-FINANCE'), ('CC-PROF', 'CA-PROF')
+    ) c(CashCode, CategoryCode) ON c.CashCode = map.CashCode
+    WHERE map.VersionId = @CategoryVersionId;
 
     UPDATE Cash.tbCode SET IsEnabled = 0 WHERE CashCode IN ('CC-DIRCT', 'CC-ADMIN');
 

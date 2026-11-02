@@ -3,6 +3,7 @@ CREATE TABLE [App].[tbOptions] (
     [IsInitialised]      BIT            CONSTRAINT [DF_App_tbOptions_IsIntialised] DEFAULT ((0)) NOT NULL,
     [SubjectCode]        NVARCHAR (50)  NOT NULL,
     [RegisterName]       NVARCHAR (50)  NOT NULL,
+    [CategoryVersionId]  NVARCHAR (10)  NULL,
     [DefaultPrintMode]   SMALLINT       CONSTRAINT [DF_App_tbOptions_DefaultPrintMode] DEFAULT ((2)) NOT NULL,
     [BucketTypeCode]     SMALLINT       CONSTRAINT [DF_App_tbOptions_BucketTypeCode] DEFAULT ((1)) NOT NULL,
     [BucketIntervalCode] SMALLINT       CONSTRAINT [DF_App_tbOptions_BucketIntervalCode] DEFAULT ((1)) NOT NULL,
@@ -28,6 +29,7 @@ CREATE TABLE [App].[tbOptions] (
     [UpdatedOn]          DATETIME       CONSTRAINT [DF_App_tbOptions_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]             ROWVERSION     NOT NULL,
     CONSTRAINT [PK_App_tbOptions] PRIMARY KEY CLUSTERED ([Identifier] ASC) WITH (FILLFACTOR = 90),
+    CONSTRAINT [FK_App_tbOptions_Cash_tbCategoryVersion] FOREIGN KEY ([CategoryVersionId]) REFERENCES [Cash].[tbCategoryVersion] ([VersionId]),
     CONSTRAINT [FK_App_tbOption_Cash_tbCategory] FOREIGN KEY ([NetProfitCode]) REFERENCES [Cash].[tbCategory] ([CategoryCode]),
     CONSTRAINT [FK_App_tbOptions_App_tbBucketInterval] FOREIGN KEY ([BucketIntervalCode]) REFERENCES [App].[tbBucketInterval] ([BucketIntervalCode]),
     CONSTRAINT [FK_App_tbOptions_App_tbBucketType] FOREIGN KEY ([BucketTypeCode]) REFERENCES [App].[tbBucketType] ([BucketTypeCode]),
@@ -52,11 +54,34 @@ CREATE TABLE [App].[tbOptions] (
 GO
 CREATE TRIGGER App.App_tbOptions_TriggerUpdate 
    ON App.tbOptions
-   AFTER UPDATE
+   AFTER INSERT, UPDATE
 AS 
 BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY
+		IF (SELECT COUNT_BIG(*) FROM App.tbOptions WITH (TABLOCKX, HOLDLOCK)) > 1
+			THROW 51089, 'App.tbOptions must contain no more than one row.', 1;
+
+		IF EXISTS
+		(
+			SELECT 1
+			FROM inserted AS i
+			WHERE i.IsInitialised = 1
+			  AND i.CategoryVersionId IS NULL
+		)
+			THROW 51090, 'An initialised node requires an active Category Tree version.', 1;
+
+		IF EXISTS
+		(
+			SELECT 1
+			FROM inserted AS i
+			LEFT JOIN Cash.tbCategoryVersion AS version
+			  ON version.VersionId = i.CategoryVersionId
+			WHERE i.CategoryVersionId IS NOT NULL
+			  AND (version.VersionId IS NULL OR version.VersionStatusCode NOT IN (1, 2))
+		)
+			THROW 51091, 'The active Category Tree pointer must reference a Published or Submitted version.', 1;
+
 		UPDATE App.tbOptions
 		SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
 		FROM App.tbOptions INNER JOIN inserted AS i ON tbOptions.Identifier = i.Identifier;
@@ -110,6 +135,45 @@ BEGIN
             RAISERROR('Primary root must be a parent in the totals graph (has at least one child).', 16, 1);
             RETURN;
         END
+
+		IF UPDATE(CategoryVersionId) OR UPDATE(NetProfitCode) OR UPDATE(VatCategoryCode)
+		BEGIN
+			UPDATE root
+			SET CategoryCode = source.CategoryCode
+			FROM Cash.tbCategoryRoot AS root
+			JOIN
+			(
+				SELECT i.CategoryVersionId AS VersionId, CAST(0 AS SMALLINT) AS RootTypeCode, i.NetProfitCode AS CategoryCode
+				FROM inserted AS i
+				UNION ALL
+				SELECT i.CategoryVersionId, CAST(1 AS SMALLINT), i.VatCategoryCode
+				FROM inserted AS i
+			) AS source
+			  ON source.VersionId = root.VersionId
+			 AND source.RootTypeCode = root.RootTypeCode
+			WHERE source.CategoryCode IS NOT NULL
+			  AND root.CategoryCode <> source.CategoryCode;
+
+			INSERT INTO Cash.tbCategoryRoot (VersionId, RootTypeCode, CategoryCode)
+			SELECT source.VersionId, source.RootTypeCode, source.CategoryCode
+			FROM
+			(
+				SELECT i.CategoryVersionId AS VersionId, CAST(0 AS SMALLINT) AS RootTypeCode, i.NetProfitCode AS CategoryCode
+				FROM inserted AS i
+				UNION ALL
+				SELECT i.CategoryVersionId, CAST(1 AS SMALLINT), i.VatCategoryCode
+				FROM inserted AS i
+			) AS source
+			WHERE source.VersionId IS NOT NULL
+			  AND source.CategoryCode IS NOT NULL
+			  AND NOT EXISTS
+			  (
+				SELECT 1
+				FROM Cash.tbCategoryRoot AS root
+				WHERE root.VersionId = source.VersionId
+				  AND root.RootTypeCode = source.RootTypeCode
+			  );
+		END
 
 	END TRY
 	BEGIN CATCH

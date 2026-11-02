@@ -21,22 +21,15 @@ AS
 
 	IF NOT EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = N'CC-EXPENSE')
 	BEGIN
-		INSERT INTO Cash.tbCode
-		(
-			CashCode,
-			CashDescription,
-			CategoryCode,
-			TaxCode,
-			IsEnabled
-		)
-		VALUES
-		(
-			N'CC-EXPENSE',
-			N'Employee Expenses',
-			N'CA-ADMIN',
-			N'T0',
-			1
-		);
+		DECLARE @CategoryVersionId NVARCHAR(10) = (SELECT CategoryVersionId FROM App.tbOptions);
+
+		EXEC Cash.proc_CodeAdd
+			@VersionId = @CategoryVersionId,
+			@CashCode = N'CC-EXPENSE',
+			@CashDescription = N'Employee Expenses',
+			@CategoryCode = N'CA-ADMIN',
+			@TaxCode = N'T0',
+			@IsEnabled = 1;
 	END
 
 	IF NOT EXISTS (SELECT 1 FROM Object.tbObject WHERE ObjectCode = 'EXPENSE')

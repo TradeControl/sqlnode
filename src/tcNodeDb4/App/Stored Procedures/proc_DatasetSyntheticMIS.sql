@@ -212,6 +212,38 @@ AS
 
         EXEC App.proc_SystemRebuild;
 
+		DECLARE
+			@CategoryVersionId NVARCHAR(10) = (SELECT CategoryVersionId FROM App.tbOptions),
+			@CategoryVersionSha256 BINARY(32),
+			@CategoryVersionByteLength BIGINT;
+
+		EXEC Cash.proc_CategoryVersionCanonicalise
+			@VersionId = @CategoryVersionId,
+			@CanonicalSha256 = @CategoryVersionSha256 OUTPUT,
+			@CanonicalByteLength = @CategoryVersionByteLength OUTPUT;
+
+		INSERT INTO Cash.tbCategoryVersionEvent
+		(
+			VersionId,
+			EventTypeCode,
+			FromStatusCode,
+			ToStatusCode,
+			UserId,
+			UserName,
+			ChangeNote,
+			ContentSha256
+		)
+		SELECT
+			@CategoryVersionId,
+			2,
+			1,
+			1,
+			UserId,
+			UserName,
+			N'Synthetic dataset generation validated the commissioned Category Tree.',
+			@CategoryVersionSha256
+		FROM Usr.vwCredentials;
+
 		COMMIT TRAN;
 	END TRY
 	BEGIN CATCH

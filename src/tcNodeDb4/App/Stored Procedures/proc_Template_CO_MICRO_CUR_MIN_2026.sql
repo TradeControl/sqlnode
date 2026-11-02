@@ -1,5 +1,6 @@
 CREATE PROCEDURE App.proc_Template_CO_MICRO_CUR_MIN_2026
 (
+    @CategoryVersionId NVARCHAR(10),
     @FinancialMonth SMALLINT = 4,
     @GovAccountName NVARCHAR(255),
     @BankName NVARCHAR(255) = NULL,
@@ -21,6 +22,7 @@ AS
         BEGIN TRAN MicroMinTemplate;
 
         EXEC [App].[proc_Template_CO_MICRO_CUR_2026]
+             @CategoryVersionId = @CategoryVersionId,
              @FinancialMonth   = @FinancialMonth,
              @GovAccountName   = @GovAccountName,
              @BankName         = @BankName,
@@ -39,9 +41,9 @@ AS
         -- 1. EXPRESSION CATEGORIES (CategoryTypeCode = 2)
         ----------------------------------------------------------------
         INSERT INTO Cash.tbCategory
-            (CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
+            (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
         VALUES
-            ('CE-CO', 'Cash Operating Surplus %', 2, 2, 0, 10, 1);
+            (@CategoryVersionId, 'CE-CO', 'Cash Operating Surplus %', 2, 2, 0, 10, 1);
 
         INSERT INTO Cash.tbCategoryExp
             (CategoryCode, Expression, Format, SyntaxTypeCode, IsError, ErrorMessage)
@@ -52,7 +54,7 @@ AS
         -- 2. VAT handling for non‑registered businesses
         ----------------------------------------------------------------
         IF @IsVATRegistered = 0
-            EXEC App.proc_Template_DisableVAT;
+            EXEC App.proc_Template_DisableVAT @CategoryVersionId = @CategoryVersionId;
 
         ----------------------------------------------------------------
         -- 3. Enable Asset Accounts

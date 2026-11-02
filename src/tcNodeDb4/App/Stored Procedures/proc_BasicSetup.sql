@@ -59,10 +59,68 @@ AS
 		UPDATE App.tbOptions
 		SET CoinTypeCode = @CoinTypeCode;
 
+		IF EXISTS (SELECT 1 FROM Cash.tbCategoryVersion)
+			THROW 51005, 'BasicSetup: a Category Tree version already exists.', 1;
+
+		DECLARE
+			@CategoryVersionId NVARCHAR(10),
+			@CreatedByUserId NVARCHAR(10),
+			@CreatedByUserName NVARCHAR(50),
+			@CategoryVersionDescription NVARCHAR(100);
+
+		SELECT
+			@CreatedByUserId = UserId,
+			@CreatedByUserName = UserName
+		FROM Usr.vwCredentials;
+
+		IF @CreatedByUserId IS NULL
+			THROW 51006, 'BasicSetup: no current application user was found.', 1;
+
+		SELECT @CategoryVersionDescription = LEFT(TemplateName, 100)
+		FROM App.tbTemplate
+		WHERE TemplateCode = @TemplateCode;
+
+		EXEC Cash.proc_CategoryVersionIdNext @VersionId = @CategoryVersionId OUTPUT;
+
+		INSERT INTO Cash.tbCategoryVersion
+		(
+			VersionId,
+			VersionStatusCode,
+			Description,
+			CreatedByUserId
+		)
+		VALUES
+		(
+			@CategoryVersionId,
+			0,
+			@CategoryVersionDescription,
+			@CreatedByUserId
+		);
+
+		INSERT INTO Cash.tbCategoryVersionEvent
+		(
+			VersionId,
+			EventTypeCode,
+			ToStatusCode,
+			UserId,
+			UserName,
+			ChangeNote
+		)
+		VALUES
+		(
+			@CategoryVersionId,
+			0,
+			0,
+			@CreatedByUserId,
+			@CreatedByUserName,
+			N'Initial Category Tree version created by node commissioning.'
+		);
+
 		DECLARE @ProcName nvarchar(100) =
 			(SELECT StoredProcedure FROM App.tbTemplate WHERE TemplateCode = @TemplateCode);
 
 		EXEC @ProcName
+				@CategoryVersionId = @CategoryVersionId,
 				@FinancialMonth = @FinancialMonth,
 				@GovAccountName = @GovAccountName, 
 				@BankName = @BankName, 
@@ -134,6 +192,60 @@ AS
 		UPDATE App.tbYear
 		SET CashStatusCode = 2
 		WHERE YearNumber < 	(SELECT YearNumber FROM App.tbYear	WHERE CashStatusCode = 1);
+
+		IF EXISTS
+		(
+			SELECT 1
+			FROM Cash.tbCode AS code
+			LEFT JOIN Cash.tbCategoryCodeMap AS map
+			  ON map.VersionId = @CategoryVersionId
+			 AND map.CashCode = code.CashCode
+			WHERE map.CashCode IS NULL
+		)
+			THROW 51007, 'BasicSetup: one or more Cash Codes lack a shadow Category mapping.', 1;
+
+		IF (SELECT COUNT(*) FROM Cash.tbCategoryRoot WHERE VersionId = @CategoryVersionId) <> 2
+			THROW 51008, 'BasicSetup: the Category Tree requires Net Profit and VAT roots.', 1;
+
+		DECLARE
+			@CategoryVersionSha256 BINARY(32),
+			@CategoryVersionByteLength BIGINT;
+
+		EXEC Cash.proc_CategoryVersionCanonicalise
+			@VersionId = @CategoryVersionId,
+			@CanonicalSha256 = @CategoryVersionSha256 OUTPUT,
+			@CanonicalByteLength = @CategoryVersionByteLength OUTPUT;
+
+		UPDATE Cash.tbCategoryVersion
+		SET VersionStatusCode = 1,
+			EffectiveFromOn = SYSUTCDATETIME()
+		WHERE VersionId = @CategoryVersionId;
+
+		UPDATE App.tbOptions
+		SET CategoryVersionId = @CategoryVersionId;
+
+		INSERT INTO Cash.tbCategoryVersionEvent
+		(
+			VersionId,
+			EventTypeCode,
+			FromStatusCode,
+			ToStatusCode,
+			UserId,
+			UserName,
+			ChangeNote,
+			ContentSha256
+		)
+		VALUES
+		(
+			@CategoryVersionId,
+			3,
+			0,
+			1,
+			@CreatedByUserId,
+			@CreatedByUserName,
+			N'Initial Category Tree version captured from the commissioned template.',
+			@CategoryVersionSha256
+		);
 
 		COMMIT TRAN
 	END TRY

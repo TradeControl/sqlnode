@@ -22,17 +22,22 @@ BEGIN TRY
 	DELETE FROM Subject.tbVirtual;
 	DELETE FROM Subject.tbSubject;
 	DELETE FROM Subject.tbAddressType;
-	DELETE FROM Usr.tbUser;
-	DELETE FROM App.tbCalendar;
 	DELETE FROM App.tbYear;
 	DELETE FROM App.tbBucket;
 	DELETE FROM App.tbUom;
+	DELETE FROM Cash.tbCategoryRoot;
 	DELETE FROM Cash.tbCategoryTotal;
-	DELETE FROM Cash.tbCategoryExp;	
+	DELETE FROM Cash.tbCategoryExp;
+	DELETE FROM Cash.tbCategoryCodeMap;
 	DELETE FROM Cash.tbCode;
 	DELETE FROM App.tbTaxCode;
 	DELETE FROM Cash.tbTaxType;
 	DELETE FROM Cash.tbCategory;
+	DELETE FROM Cash.tbCategoryVersionEvent;
+	DELETE FROM Cash.tbCategoryVersion;
+	ALTER SEQUENCE Cash.seqCategoryVersion RESTART WITH 1;
+	DELETE FROM Usr.tbUser;
+	DELETE FROM App.tbCalendar;
 	DELETE FROM App.tbTemplate;
     DELETE FROM App.tbSettingDefinition;
     DELETE FROM App.tbReportingTypeRegistrationScheme;
@@ -44,6 +49,18 @@ BEGIN TRY
     DELETE FROM App.tbValueType;
     DELETE FROM App.tbJurisdiction;
 	DELETE FROM Subject.tbExportType;
+
+	IF NOT EXISTS (SELECT * FROM Cash.tbCategoryVersionStatus)
+		INSERT INTO Cash.tbCategoryVersionStatus (VersionStatusCode, VersionStatus)
+		VALUES (0, N'Draft')
+		, (1, N'Published')
+		, (2, N'Submitted')
+		, (3, N'Archived');
+
+	IF NOT EXISTS (SELECT * FROM Cash.tbCategoryRootType)
+		INSERT INTO Cash.tbCategoryRootType (RootTypeCode, RootType)
+		VALUES (0, N'NET_PROFIT')
+		, (1, N'VAT');
 	
 	IF NOT EXISTS (SELECT * FROM [Cash].[tbChangeType])
 		INSERT INTO [Cash].[tbChangeType] ([ChangeTypeCode], [ChangeType])

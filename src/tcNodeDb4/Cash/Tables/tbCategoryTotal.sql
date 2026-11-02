@@ -1,9 +1,14 @@
 ﻿CREATE TABLE [Cash].[tbCategoryTotal] (
+    [VersionId] NVARCHAR (10) NOT NULL CONSTRAINT [DF_Cash_tbCategoryTotal_VersionId] DEFAULT ([Cash].[fnCategoryVersionDefault]()),
     [ParentCode] NVARCHAR (10) NOT NULL,
     [ChildCode]  NVARCHAR (10) NOT NULL,
     DisplayOrder  smallint     NOT NULL CONSTRAINT DF_Cash_tbCategoryTotal_DisplayOrder DEFAULT (0),
     [RowVer]     ROWVERSION    NOT NULL,
     CONSTRAINT [PK_Cash_tbCategoryTotal] PRIMARY KEY CLUSTERED ([ParentCode] ASC, [ChildCode] ASC) WITH (FILLFACTOR = 90),
+    CONSTRAINT [UQ_Cash_tbCategoryTotal_VersionParentChild] UNIQUE NONCLUSTERED ([VersionId] ASC, [ParentCode] ASC, [ChildCode] ASC),
+    CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategoryVersion] FOREIGN KEY ([VersionId]) REFERENCES [Cash].[tbCategoryVersion] ([VersionId]),
+    CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategory_ChildVersion] FOREIGN KEY ([VersionId], [ChildCode]) REFERENCES [Cash].[tbCategory] ([VersionId], [CategoryCode]),
+    CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategory_ParentVersion] FOREIGN KEY ([VersionId], [ParentCode]) REFERENCES [Cash].[tbCategory] ([VersionId], [CategoryCode]),
     CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategory_Child] FOREIGN KEY ([ChildCode]) REFERENCES [Cash].[tbCategory] ([CategoryCode]),
     CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategory_Parent] FOREIGN KEY ([ParentCode]) REFERENCES [Cash].[tbCategory] ([CategoryCode])
 );
@@ -13,7 +18,7 @@ GO
 
 CREATE TRIGGER [Cash].[Cash_tbCategoryTotal_Trigger_NoCycles]
 ON [Cash].[tbCategoryTotal]
-AFTER INSERT, UPDATE
+AFTER INSERT, UPDATE, DELETE
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -28,7 +33,7 @@ BEGIN
     IF EXISTS (
         SELECT 1
         FROM inserted i
-        JOIN Cash.tbCategory p ON p.CategoryCode = i.ParentCode
+        JOIN Cash.tbCategory p ON p.VersionId = i.VersionId AND p.CategoryCode = i.ParentCode
         WHERE ISNULL(p.CategoryTypeCode, -1) <> 1
     )
     BEGIN
@@ -41,23 +46,26 @@ BEGIN
 
     ;WITH down_paths AS
     (
-        SELECT i.ChildCode AS StartChild, e.ChildCode AS Descendant
+        SELECT i.VersionId, i.ChildCode AS StartChild, e.ChildCode AS Descendant
         FROM inserted i
         JOIN Cash.tbCategoryTotal e
-          ON e.ParentCode = i.ChildCode
+          ON e.VersionId = i.VersionId
+         AND e.ParentCode = i.ChildCode
 
         UNION ALL
 
-        SELECT dp.StartChild, e.ChildCode
+        SELECT dp.VersionId, dp.StartChild, e.ChildCode
         FROM down_paths dp
         JOIN Cash.tbCategoryTotal e
-          ON e.ParentCode = dp.Descendant
+          ON e.VersionId = dp.VersionId
+         AND e.ParentCode = dp.Descendant
     )
     INSERT INTO @violations (ChildCode, ParentCode)
     SELECT DISTINCT i.ChildCode, i.ParentCode
     FROM inserted i
     JOIN down_paths dp
-      ON dp.StartChild = i.ChildCode
+      ON dp.VersionId = i.VersionId
+     AND dp.StartChild = i.ChildCode
      AND dp.Descendant = i.ParentCode
     OPTION (MAXRECURSION 1000);
 
@@ -67,4 +75,34 @@ BEGIN
         ROLLBACK TRANSACTION;
         RETURN;
     END
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM
+        (
+            SELECT VersionId FROM inserted
+            UNION
+            SELECT VersionId FROM deleted
+        ) AS affected
+        JOIN Cash.tbCategoryVersion AS version
+          ON version.VersionId = affected.VersionId
+        WHERE version.VersionStatusCode IN (2, 3)
+    )
+        THROW 51098, 'Submitted and Archived Category Tree totals are immutable.', 1;
+
+    ;WITH affected AS
+    (
+        SELECT VersionId FROM inserted
+        UNION
+        SELECT VersionId FROM deleted
+    )
+    UPDATE version
+    SET CanonicalSha256 = NULL,
+        CanonicalByteLength = NULL,
+        ContentChangedOn = SYSUTCDATETIME()
+    FROM Cash.tbCategoryVersion AS version
+    JOIN affected
+      ON affected.VersionId = version.VersionId
+    WHERE version.VersionStatusCode IN (0, 1);
 END

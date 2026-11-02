@@ -1,4 +1,5 @@
 CREATE PROCEDURE [App].[proc_Template_DisableVAT]
+    @CategoryVersionId NVARCHAR(10)
 AS
 SET NOCOUNT, XACT_ABORT ON;
 
@@ -11,7 +12,8 @@ BEGIN TRY
     ----------------------------------------------------------------
     UPDATE Cash.tbCategory
     SET IsEnabled = 0
-    WHERE CategoryCode IN ('TC-VAT', 'TC-TAXGD');
+    WHERE VersionId = @CategoryVersionId
+      AND CategoryCode IN ('TC-VAT', 'TC-TAXGD');
 
     ----------------------------------------------------------------
     -- 2. Disable VAT control Cash Codes
