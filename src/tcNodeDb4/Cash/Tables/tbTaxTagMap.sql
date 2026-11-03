@@ -44,8 +44,20 @@ BEGIN
           AND NOT EXISTS
           (
               SELECT 1
-              FROM Cash.tbCategory c
+              FROM Cash.tbCategory AS c
+              CROSS JOIN App.tbOptions AS options
               WHERE c.CategoryCode = i.CategoryCode
+                AND c.VersionId = COALESCE
+                (
+                    options.CategoryVersionId,
+                    CASE WHEN options.IsInitialised = 0 THEN
+                        (
+                            SELECT MIN(version.VersionId)
+                            FROM Cash.tbCategoryVersion AS version
+                            HAVING COUNT(*) = 1
+                        )
+                    END
+                )
           )
     )
     BEGIN
@@ -62,8 +74,22 @@ BEGIN
           AND NOT EXISTS
           (
               SELECT 1
-              FROM Cash.tbCode cc
-              WHERE cc.CashCode = i.CashCode
+              FROM Cash.tbCode AS code
+              CROSS JOIN App.tbOptions AS options
+              JOIN Cash.tbCategoryCodeMap AS map
+                ON map.CashCode = code.CashCode
+               AND map.VersionId = COALESCE
+               (
+                   options.CategoryVersionId,
+                   CASE WHEN options.IsInitialised = 0 THEN
+                       (
+                           SELECT MIN(version.VersionId)
+                           FROM Cash.tbCategoryVersion AS version
+                           HAVING COUNT(*) = 1
+                       )
+                   END
+               )
+              WHERE code.CashCode = i.CashCode
           )
     )
     BEGIN

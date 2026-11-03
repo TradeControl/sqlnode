@@ -32,9 +32,9 @@ AS
 		FROM Project.tbProject AS p
 			INNER JOIN Subject.tbSubject AS s
 				ON p.SubjectCode = s.SubjectCode
-			INNER JOIN Cash.tbCode AS c
+			INNER JOIN Cash.vwCodeActive AS c
 				ON p.CashCode = c.CashCode
-			INNER JOIN Cash.tbCategory AS cat
+			INNER JOIN Cash.vwCategoryActive AS cat
 				ON c.CategoryCode = cat.CategoryCode
 			INNER JOIN App.tbTaxCode AS tc
 				ON p.TaxCode = tc.TaxCode

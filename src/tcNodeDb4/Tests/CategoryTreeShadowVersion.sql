@@ -67,58 +67,6 @@ BEGIN TRY
 
     IF EXISTS
     (
-        SELECT code.CashCode, code.CategoryCode
-        FROM Cash.tbCode AS code
-        EXCEPT
-        SELECT map.CashCode, map.CategoryCode
-        FROM Cash.tbCategoryCodeMap AS map
-        WHERE map.VersionId = @VersionId
-    )
-    OR EXISTS
-    (
-        SELECT map.CashCode, map.CategoryCode
-        FROM Cash.tbCategoryCodeMap AS map
-        WHERE map.VersionId = @VersionId
-        EXCEPT
-        SELECT code.CashCode, code.CategoryCode
-        FROM Cash.tbCode AS code
-    )
-        THROW 51078, 'Shadow Cash Code mappings differ from the operational tbCode relationship.', 1;
-
-    IF EXISTS
-    (
-        SELECT root.RootTypeCode, root.CategoryCode
-        FROM App.tbOptions AS options
-        CROSS APPLY
-        (
-            VALUES
-                (CAST(0 AS SMALLINT), options.NetProfitCode),
-                (CAST(1 AS SMALLINT), options.VatCategoryCode)
-        ) AS root (RootTypeCode, CategoryCode)
-        EXCEPT
-        SELECT RootTypeCode, CategoryCode
-        FROM Cash.tbCategoryRoot
-        WHERE VersionId = @VersionId
-    )
-    OR EXISTS
-    (
-        SELECT RootTypeCode, CategoryCode
-        FROM Cash.tbCategoryRoot
-        WHERE VersionId = @VersionId
-        EXCEPT
-        SELECT root.RootTypeCode, root.CategoryCode
-        FROM App.tbOptions AS options
-        CROSS APPLY
-        (
-            VALUES
-                (CAST(0 AS SMALLINT), options.NetProfitCode),
-                (CAST(1 AS SMALLINT), options.VatCategoryCode)
-        ) AS root (RootTypeCode, CategoryCode)
-    )
-        THROW 51079, 'Shadow roots differ from the operational options roots.', 1;
-
-    IF EXISTS
-    (
         SELECT root.CategoryCode AS RootCode, member.CashCode, member.CategoryCode
         FROM Cash.tbCategoryRoot AS root
         CROSS APPLY Cash.fnCategoryCashCodes(root.CategoryCode) AS member
@@ -203,20 +151,12 @@ BEGIN TRY
         ORDER BY CategoryCode
     );
 
-    INSERT INTO Cash.tbCode
-    (
-        CashCode,
-        CashDescription,
-        CategoryCode,
-        TaxCode
-    )
-    VALUES
-    (
-        N'ZZ-CT-SHADOW',
-        N'Category Tree shadow fixture',
-        @NominalCategoryCode,
-        N'T0'
-    );
+    EXEC Cash.proc_CodeAdd
+        @VersionId = @VersionId,
+        @CashCode = N'ZZ-CT-SHADOW',
+        @CashDescription = N'Category Tree active-mapping fixture',
+        @CategoryCode = @NominalCategoryCode,
+        @TaxCode = N'T0';
 
     IF NOT EXISTS
     (
@@ -226,9 +166,11 @@ BEGIN TRY
           AND CashCode = N'ZZ-CT-SHADOW'
           AND CategoryCode = @NominalCategoryCode
     )
-        THROW 51083, 'Cash Code insertion did not create its shadow mapping.', 1;
+        THROW 51083, 'Cash Code creation did not create its active mapping.', 1;
 
-    DELETE FROM Cash.tbCode WHERE CashCode = N'ZZ-CT-SHADOW';
+    EXEC Cash.proc_CodeDelete
+        @CashCode = N'ZZ-CT-SHADOW',
+        @ChangeNote = N'Rollback-only active-mapping fixture cleanup.';
 
     IF EXISTS
     (
@@ -237,7 +179,7 @@ BEGIN TRY
         WHERE VersionId = @VersionId
           AND CashCode = N'ZZ-CT-SHADOW'
     )
-        THROW 51084, 'Cash Code deletion did not remove its shadow mapping.', 1;
+        THROW 51084, 'Cash Code deletion did not remove its editable-version mapping.', 1;
 
     ROLLBACK TRAN CategoryTreeShadowFixture;
     PRINT 'Category Tree shadow-version fixture passed.';

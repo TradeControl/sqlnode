@@ -11,6 +11,10 @@ AS
 BEGIN
     SET NOCOUNT, XACT_ABORT ON;
 
+    DECLARE @UserId NVARCHAR(10), @UserName NVARCHAR(50);
+    SELECT TOP (1) @UserId = UserId, @UserName = UserName FROM Usr.vwCredentials;
+    IF @UserId IS NULL THROW 51174, 'Cash Code creation requires an enabled application user.', 1;
+
     BEGIN TRY
         BEGIN TRAN;
 
@@ -51,15 +55,10 @@ BEGIN
                )
             THROW 51109, 'The Cash Code or its active Category Tree mapping already exists.', 1;
 
-        EXEC sys.sp_set_session_context
-            @key = N'CategoryTreeExplicitMapping',
-            @value = 1;
-
         INSERT INTO Cash.tbCode
         (
             CashCode,
             CashDescription,
-            CategoryCode,
             TaxCode,
             IsEnabled
         )
@@ -67,7 +66,6 @@ BEGIN
         (
             @CashCode,
             @CashDescription,
-            @CategoryCode,
             @TaxCode,
             @IsEnabled
         );
@@ -85,17 +83,16 @@ BEGIN
             @CategoryCode
         );
 
-        EXEC sys.sp_set_session_context
-            @key = N'CategoryTreeExplicitMapping',
-            @value = NULL;
+        INSERT Cash.tbCategoryVersionEvent
+            (VersionId, EventTypeCode, FromStatusCode, ToStatusCode,
+             UserId, UserName, ChangeNote)
+        VALUES
+            (@VersionId, 1, 1, 1, @UserId, @UserName,
+             N'Cash Code created with its active-version mapping.');
 
         COMMIT TRAN;
     END TRY
     BEGIN CATCH
-        EXEC sys.sp_set_session_context
-            @key = N'CategoryTreeExplicitMapping',
-            @value = NULL;
-
         IF XACT_STATE() <> 0 ROLLBACK TRAN;
         THROW;
     END CATCH

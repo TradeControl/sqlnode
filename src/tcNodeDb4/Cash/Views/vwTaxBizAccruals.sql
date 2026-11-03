@@ -2,10 +2,10 @@ CREATE VIEW Cash.vwTaxBizAccruals
 AS
 	WITH corptax_ordered_confirmed AS
 	(
-		SELECT        Project.ProjectCode, Project.ActionOn, Project.Quantity, CASE WHEN Cash.tbCategory.CashPolarityCode = 0 THEN Project.TotalCharge * - 1 ELSE Project.TotalCharge END AS TotalCharge
+		SELECT Project.ProjectCode, Project.ActionOn, Project.Quantity, CASE WHEN category.CashPolarityCode = 0 THEN Project.TotalCharge * - 1 ELSE Project.TotalCharge END AS TotalCharge
 		FROM            Project.tbProject AS Project INNER JOIN
-								 Cash.tbCode ON Project.CashCode = Cash.tbCode.CashCode INNER JOIN
-								 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode AND Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+								 Cash.vwCodeActive AS code ON Project.CashCode = code.CashCode INNER JOIN
+								 Cash.vwCategoryActive AS category ON code.CategoryCode = category.CategoryCode
 		WHERE        (Project.ProjectStatusCode BETWEEN 1 AND 2) AND (Project.ActionOn <= (SELECT DATEADD(d, TaxHorizon, CURRENT_TIMESTAMP) AS HorizonOn FROM App.tbOptions))
 	), corptax_ordered_invoices AS
 	(

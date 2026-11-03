@@ -6,9 +6,10 @@
 RETURNS TABLE
 AS
 	RETURN (
-		SELECT     Cash.tbCategory.DisplayOrder, Cash.tbCategory.Category, Cash.tbType.CashType, Cash.tbCategory.CategoryCode
-		FROM         Cash.tbCategory INNER JOIN
-							  Cash.tbType ON Cash.tbCategory.CashTypeCode = Cash.tbType.CashTypeCode
-		WHERE     ( Cash.tbCategory.CashTypeCode = @CashTypeCode) AND ( Cash.tbCategory.CategoryTypeCode = @CategoryTypeCode)
+		SELECT category.DisplayOrder, category.Category, Cash.tbType.CashType, category.CategoryCode
+		FROM Cash.vwCategoryActive AS category
+		INNER JOIN Cash.tbType ON category.CashTypeCode = Cash.tbType.CashTypeCode
+		WHERE category.CashTypeCode = @CashTypeCode
+		  AND category.CategoryTypeCode = @CategoryTypeCode
 		)
 

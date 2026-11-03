@@ -53,8 +53,8 @@ AS
 		(
 			SELECT invoices.CashCode, invoices.StartOn, categories.CashPolarityCode, SUM(invoices.InvoiceValue) InvoiceValue, SUM(invoices.TaxValue) TaxValue
 			FROM  Invoice.vwRegisterDetail invoices
-				JOIN Cash.tbCode cash_codes ON invoices.CashCode = cash_codes.CashCode 
-				JOIN Cash.tbCategory categories ON cash_codes.CategoryCode = categories .CategoryCode
+				JOIN Cash.vwCodeActive cash_codes ON invoices.CashCode = cash_codes.CashCode 
+				JOIN Cash.vwCategoryActive categories ON cash_codes.CategoryCode = categories .CategoryCode
 			WHERE   (StartOn < (SELECT StartOn FROM App.fnActivePeriod()))
 			GROUP BY invoices.CashCode, invoices.StartOn, categories.CashPolarityCode
 		), invoice_summary AS
@@ -93,8 +93,8 @@ AS
 				END AssetValue
 			FROM Cash.tbPayment payment
 				JOIN Subject.tbAccount account ON payment.AccountCode = account.AccountCode
-				JOIN Cash.tbCode cash_code ON account.CashCode = cash_code.CashCode
-				JOIN Cash.tbCategory cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
+				JOIN Cash.vwCodeActive cash_code ON account.CashCode = cash_code.CashCode
+				JOIN Cash.vwCategoryActive cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
 			WHERE account.AccountTypeCode = 2 AND PaidOn < (SELECT StartOn FROM App.fnActivePeriod())
 		), asset_summary AS
 		(

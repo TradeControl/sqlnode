@@ -1,4 +1,4 @@
-﻿
+
 CREATE VIEW [Cash].[vwBalanceSheetPeriods]
 AS
 	WITH financial_periods AS
@@ -13,8 +13,8 @@ AS
 			category.CashPolarityCode,
 			YearNumber, StartOn
 		FROM Subject.tbAccount account
-			JOIN Cash.tbCode cash_code ON account.CashCode = cash_code.CashCode
-			JOIN Cash.tbCategory category ON cash_code.CategoryCode = category.CategoryCode
+			JOIN Cash.vwCodeActive cash_code ON account.CashCode = cash_code.CashCode
+			JOIN Cash.vwCategoryActive category ON cash_code.CategoryCode = category.CategoryCode
 			CROSS JOIN financial_periods
 		WHERE (AccountTypeCode= 2) AND (AccountClosed = 0)
 	), cash AS

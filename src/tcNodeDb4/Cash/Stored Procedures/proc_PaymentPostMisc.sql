@@ -13,8 +13,8 @@ CREATE PROCEDURE Cash.proc_PaymentPostMisc
 
 		IF NOT EXISTS (SELECT Cash.tbPayment.PaymentCode
 						FROM Cash.tbPayment
-							INNER JOIN Cash.tbCode ON Cash.tbPayment.CashCode = Cash.tbCode.CashCode
-							INNER JOIN Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+							INNER JOIN Cash.vwCodeActive ON Cash.tbPayment.CashCode = Cash.vwCodeActive.CashCode
+							INNER JOIN Cash.vwCategoryActive ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
 						WHERE (Cash.tbPayment.PaymentStatusCode <> 1)
 							AND Cash.tbPayment.UserId = (SELECT UserId FROM Usr.vwCredentials))
 			RETURN;

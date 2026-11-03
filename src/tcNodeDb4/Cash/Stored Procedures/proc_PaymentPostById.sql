@@ -9,9 +9,9 @@ AS
         DECLARE curMisc CURSOR LOCAL FOR
             SELECT payment.PaymentCode
             FROM Cash.tbPayment AS payment
-                INNER JOIN Cash.tbCode AS code
+                INNER JOIN Cash.vwCodeActive AS code
                     ON payment.CashCode = code.CashCode
-                INNER JOIN Cash.tbCategory AS category
+                INNER JOIN Cash.vwCategoryActive AS category
                     ON code.CategoryCode = category.CategoryCode
                 INNER JOIN Subject.tbAccount AS account
                     ON account.AccountCode = payment.AccountCode

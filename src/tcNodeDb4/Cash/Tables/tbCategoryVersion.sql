@@ -63,7 +63,8 @@ CREATE TABLE [Cash].[tbCategoryVersion]
         (
             ([VersionStatusCode] = 0 AND [EffectiveFromOn] IS NULL AND [EffectiveToOn] IS NULL)
             OR
-            ([VersionStatusCode] IN (1, 2) AND [EffectiveFromOn] IS NOT NULL AND [EffectiveToOn] IS NULL)
+            ([VersionStatusCode] > 0 AND [VersionStatusCode] < 3
+                AND [EffectiveFromOn] IS NOT NULL AND [EffectiveToOn] IS NULL)
             OR
             ([VersionStatusCode] = 3 AND [EffectiveFromOn] IS NOT NULL
                 AND [EffectiveToOn] IS NOT NULL AND [EffectiveToOn] >= [EffectiveFromOn])

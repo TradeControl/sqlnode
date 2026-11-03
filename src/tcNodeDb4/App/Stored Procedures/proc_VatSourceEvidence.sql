@@ -15,6 +15,7 @@ BEGIN
     SELECT
         CONVERT(nvarchar(36), identityRow.DatabaseInstanceId) AS DatabaseInstanceReference,
         options.SubjectCode AS ReportingSubjectReference,
+        options.CategoryVersionId AS CategoryTreeVersionId,
         CONVERT(bigint, @@DBTS) AS AccountingEventId,
         CONCAT(CONVERT(varchar(10), install.SQLDataVersion), '.', install.SQLRelease, '.', install.SQLBuild) AS SqlNodeVersion
     FROM App.tbDatabaseIdentity identityRow
@@ -43,7 +44,7 @@ BEGIN
     );
 
     INSERT @inventory VALUES
-    (N'App.tbOptions', (SELECT Identifier, SubjectCode, VatCategoryCode, JurisdictionCode,
+    (N'App.tbOptions', (SELECT Identifier, SubjectCode, CategoryVersionId, JurisdictionCode,
         CONVERT(varchar(18), RowVer, 1) RowVer FROM App.tbOptions ORDER BY Identifier FOR JSON PATH, INCLUDE_NULL_VALUES)),
     (N'App.tbYear', (SELECT YearNumber, CashStatusCode, CONVERT(varchar(18), RowVer, 1) RowVer
         FROM App.tbYear ORDER BY YearNumber FOR JSON PATH, INCLUDE_NULL_VALUES)),
@@ -54,12 +55,26 @@ BEGIN
     (N'Cash.tbTaxType', (SELECT TaxTypeCode, IsEnabled, CashCode, MonthNumber, RecurrenceCode, SubjectCode, OffsetDays,
         CONVERT(varchar(18), RowVer, 1) RowVer FROM Cash.tbTaxType WHERE TaxTypeCode = 1
         ORDER BY TaxTypeCode FOR JSON PATH, INCLUDE_NULL_VALUES)),
-    (N'Cash.tbCategory', (SELECT CategoryCode, CategoryTypeCode, CashPolarityCode, CashTypeCode, IsEnabled,
-        CONVERT(varchar(18), RowVer, 1) RowVer FROM Cash.tbCategory ORDER BY CategoryCode FOR JSON PATH, INCLUDE_NULL_VALUES)),
-    (N'Cash.tbCategoryTotal', (SELECT ParentCode, ChildCode, DisplayOrder,
-        CONVERT(varchar(18), RowVer, 1) RowVer FROM Cash.tbCategoryTotal
-        ORDER BY ParentCode, ChildCode FOR JSON PATH, INCLUDE_NULL_VALUES)),
-    (N'Cash.tbCode', (SELECT CashCode, CategoryCode, TaxCode, IsEnabled,
+    (N'Cash.tbCategory', (SELECT category.VersionId, category.CategoryCode, category.CategoryTypeCode,
+        category.CashPolarityCode, category.CashTypeCode, category.IsEnabled,
+        CONVERT(varchar(18), category.RowVer, 1) RowVer
+        FROM Cash.tbCategory category
+        JOIN App.tbOptions options ON options.CategoryVersionId = category.VersionId
+        ORDER BY category.CategoryCode FOR JSON PATH, INCLUDE_NULL_VALUES)),
+    (N'Cash.tbCategoryTotal', (SELECT total.VersionId, total.ParentCode, total.ChildCode, total.DisplayOrder,
+        CONVERT(varchar(18), total.RowVer, 1) RowVer
+        FROM Cash.tbCategoryTotal total
+        JOIN App.tbOptions options ON options.CategoryVersionId = total.VersionId
+        ORDER BY total.ParentCode, total.ChildCode FOR JSON PATH, INCLUDE_NULL_VALUES)),
+    (N'Cash.tbCategoryCodeMap', (SELECT map.VersionId, map.CashCode, map.CategoryCode
+        FROM Cash.tbCategoryCodeMap map
+        JOIN App.tbOptions options ON options.CategoryVersionId = map.VersionId
+        ORDER BY map.CashCode FOR JSON PATH, INCLUDE_NULL_VALUES)),
+    (N'Cash.tbCategoryRoot', (SELECT root.VersionId, root.RootTypeCode, root.CategoryCode
+        FROM Cash.tbCategoryRoot root
+        JOIN App.tbOptions options ON options.CategoryVersionId = root.VersionId
+        ORDER BY root.RootTypeCode FOR JSON PATH, INCLUDE_NULL_VALUES)),
+    (N'Cash.tbCode', (SELECT CashCode, TaxCode, IsEnabled,
         CONVERT(varchar(18), RowVer, 1) RowVer FROM Cash.tbCode ORDER BY CashCode FOR JSON PATH, INCLUDE_NULL_VALUES)),
     (N'App.tbTaxCode', (SELECT TaxCode, TaxTypeCode, RoundingCode, TaxRate, Decimals,
         CONVERT(varchar(18), RowVer, 1) RowVer FROM App.tbTaxCode WHERE TaxTypeCode = 1

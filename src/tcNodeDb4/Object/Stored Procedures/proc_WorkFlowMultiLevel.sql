@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE Object.proc_WorkFlowMultiLevel
+CREATE   PROCEDURE Object.proc_WorkFlowMultiLevel
 	(
 	@ObjectCode nvarchar(50)
 	)
@@ -27,8 +27,8 @@ AS
 			FROM workflow
 					JOIN Object.tbObject Object ON workflow.ChildCode = Object.ObjectCode
 					JOIN Project.tbStatus Project_status ON Object.ProjectStatusCode = Project_status.ProjectStatusCode 
-					LEFT OUTER JOIN Cash.tbCode cash_code ON Object.CashCode = cash_code.CashCode 
-					LEFT OUTER JOIN Cash.tbCategory cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
+					LEFT OUTER JOIN Cash.vwCodeActive cash_code ON Object.CashCode = cash_code.CashCode 
+					LEFT OUTER JOIN Cash.vwCategoryActive cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
 			ORDER BY Depth, ParentCode, ChildCode;
 		END
 		ELSE
@@ -51,8 +51,8 @@ AS
 			FROM workflow
 					JOIN Object.tbObject Object ON workflow.ParentCode = Object.ObjectCode
 					JOIN Project.tbStatus Project_status ON Object.ProjectStatusCode = Project_status.ProjectStatusCode 
-					LEFT OUTER JOIN Cash.tbCode cash_code ON Object.CashCode = cash_code.CashCode 
-					LEFT OUTER JOIN Cash.tbCategory cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
+					LEFT OUTER JOIN Cash.vwCodeActive cash_code ON Object.CashCode = cash_code.CashCode 
+					LEFT OUTER JOIN Cash.vwCategoryActive cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
 			ORDER BY Depth DESC, ParentCode, ChildCode;		
 		END
 			 

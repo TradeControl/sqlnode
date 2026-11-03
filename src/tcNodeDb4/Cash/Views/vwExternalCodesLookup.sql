@@ -1,7 +1,7 @@
-﻿
+
 CREATE   VIEW Cash.vwExternalCodesLookup
 AS
-SELECT        Cash.tbCode.CashCode, Cash.tbCode.CashDescription, Cash.tbCategory.Category
-FROM            Cash.tbCode INNER JOIN
-                         Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-WHERE        (Cash.tbCategory.CashTypeCode = 1);
+SELECT        Cash.vwCodeActive.CashCode, Cash.vwCodeActive.CashDescription, Cash.vwCategoryActive.Category
+FROM            Cash.vwCodeActive INNER JOIN
+                         Cash.vwCategoryActive ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
+WHERE        (Cash.vwCategoryActive.CashTypeCode = 1);

@@ -120,8 +120,9 @@ SELECT
 	(
 		SELECT
 			o.SubjectCode,
-			o.NetProfitCode,
-			o.VatCategoryCode,
+			o.CategoryVersionId,
+			NetProfitRootCode = (SELECT CategoryCode FROM Cash.tbCategoryRoot WHERE VersionId = o.CategoryVersionId AND RootTypeCode = 0),
+			VatRootCode = (SELECT CategoryCode FROM Cash.tbCategoryRoot WHERE VersionId = o.CategoryVersionId AND RootTypeCode = 1),
 			o.CoinTypeCode,
 			o.UnitOfCharge
 		FROM App.tbOptions o

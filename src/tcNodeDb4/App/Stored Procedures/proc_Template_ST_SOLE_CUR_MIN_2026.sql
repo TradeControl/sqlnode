@@ -104,8 +104,7 @@ BEGIN TRY
     IF EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = 'CC-OWNCAP')
     BEGIN
         UPDATE Cash.tbCode
-        SET CategoryCode = 'CA-OWNER',
-            TaxCode = 'N/A',
+        SET TaxCode = 'N/A',
             IsEnabled = 1
         WHERE CashCode = 'CC-OWNCAP';
 
@@ -117,9 +116,9 @@ BEGIN TRY
     ELSE
     BEGIN
         INSERT INTO Cash.tbCode
-            (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
+            (CashCode, CashDescription, TaxCode, IsEnabled)
         VALUES
-            ('CC-OWNCAP', 'Owner Capital', 'CA-OWNER', 'N/A', 1);
+            ('CC-OWNCAP', 'Owner Capital', 'N/A', 1);
 
         INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
         VALUES (@CategoryVersionId, 'CC-OWNCAP', 'CA-OWNER');

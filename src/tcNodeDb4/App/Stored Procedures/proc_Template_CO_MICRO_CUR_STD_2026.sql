@@ -65,13 +65,14 @@ BEGIN TRY
     DECLARE @CategoryCodeMap TABLE
     (
         CashCode NVARCHAR(50) NOT NULL PRIMARY KEY,
-        CategoryCode NVARCHAR(10) NOT NULL
+        CashDescription NVARCHAR(100) NOT NULL,
+        CategoryCode NVARCHAR(10) NOT NULL,
+        TaxCode NVARCHAR(10) NOT NULL,
+        IsEnabled SMALLINT NOT NULL
     );
 
-    INSERT INTO Cash.tbCode
+    INSERT INTO @CategoryCodeMap
         (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
-    OUTPUT inserted.CashCode, inserted.CategoryCode
-        INTO @CategoryCodeMap (CashCode, CategoryCode)
     VALUES
         -- Sales splits -> CA-SALES
         ('CC-SALAB', 'Sales – Labour',        'CA-SALES',  'T1', 1),
@@ -103,6 +104,11 @@ BEGIN TRY
         ('CC-DEPPL', 'Depreciation – Plant & Tools',  'CA-DEPREC', 'N/A', 1),
         ('CC-DEPMV', 'Depreciation – Motor Vehicles', 'CA-DEPREC', 'N/A', 1),
         ('CC-DEPFX', 'Depreciation – Fixtures',       'CA-DEPREC', 'N/A', 1);
+
+    INSERT INTO Cash.tbCode
+        (CashCode, CashDescription, TaxCode, IsEnabled)
+    SELECT CashCode, CashDescription, TaxCode, IsEnabled
+    FROM @CategoryCodeMap;
 
     INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
     SELECT @CategoryVersionId, CashCode, CategoryCode

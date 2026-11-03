@@ -245,7 +245,7 @@ BEGIN TRY
     (
         SELECT 1
         FROM @CashCodeSeed expected
-        JOIN Cash.tbCode actual ON actual.CashCode = expected.CashCode
+        JOIN Cash.vwCodeActive actual ON actual.CashCode = expected.CashCode
         WHERE actual.CashDescription <> expected.CashDescription
            OR actual.CategoryCode <> expected.CategoryCode
            OR actual.TaxCode <> expected.TaxCode
@@ -253,11 +253,23 @@ BEGIN TRY
     )
         THROW 51979, 'An existing Year 3 Cash Code does not match the approved additive definition.', 1;
 
-    INSERT INTO Cash.tbCode (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
-    SELECT expected.CashCode, expected.CashDescription, expected.CategoryCode, expected.TaxCode, expected.IsEnabled
+    INSERT INTO Cash.tbCode (CashCode, CashDescription, TaxCode, IsEnabled)
+    SELECT expected.CashCode, expected.CashDescription, expected.TaxCode, expected.IsEnabled
     FROM @CashCodeSeed expected
     WHERE NOT EXISTS
         (SELECT 1 FROM Cash.tbCode actual WHERE actual.CashCode = expected.CashCode);
+
+    INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
+    SELECT options.CategoryVersionId, expected.CashCode, expected.CategoryCode
+    FROM @CashCodeSeed expected
+    CROSS JOIN App.tbOptions options
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM Cash.tbCategoryCodeMap map
+        WHERE map.VersionId = options.CategoryVersionId
+          AND map.CashCode = expected.CashCode
+    );
 
     DECLARE @ProjectSeed TABLE
     (
@@ -540,7 +552,7 @@ BEGIN TRY
     FROM @CategorySeed expected
     JOIN Cash.tbCategory category ON category.CategoryCode = expected.CategoryCode
     JOIN Cash.tbCategoryTotal edge ON edge.ChildCode = category.CategoryCode
-    JOIN Cash.tbCode code ON code.CategoryCode = category.CategoryCode
+    JOIN Cash.vwCodeActive code ON code.CategoryCode = category.CategoryCode
     ORDER BY category.CategoryCode;
 
     SELECT

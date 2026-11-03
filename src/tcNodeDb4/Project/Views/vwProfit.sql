@@ -1,4 +1,4 @@
-﻿CREATE VIEW [Project].[vwProfit] 
+CREATE VIEW [Project].[vwProfit] 
 AS
 	WITH orders AS
 	(
@@ -10,8 +10,8 @@ AS
 		FROM            Project.tbFlow RIGHT OUTER JOIN
 								 Project.tbProject ON Project.tbFlow.ParentProjectCode = Project.tbProject.ProjectCode AND Project.tbFlow.ParentProjectCode = Project.tbProject.ProjectCode AND Project.tbFlow.ParentProjectCode = Project.tbProject.ProjectCode RIGHT OUTER JOIN
 								 Project.tbProject AS Project INNER JOIN
-								 Cash.tbCode AS cashcode ON Project.CashCode = cashcode.CashCode INNER JOIN
-								 Cash.tbCategory AS category ON category.CategoryCode = cashcode.CategoryCode ON Project.tbFlow.ChildProjectCode = Project.ProjectCode AND Project.tbFlow.ChildProjectCode = Project.ProjectCode
+								 Cash.vwCodeActive AS cashcode ON Project.CashCode = cashcode.CashCode INNER JOIN
+								 Cash.vwCategoryActive AS category ON category.CategoryCode = cashcode.CategoryCode ON Project.tbFlow.ChildProjectCode = Project.ProjectCode AND Project.tbFlow.ChildProjectCode = Project.ProjectCode
 		WHERE        (category.CashPolarityCode = 1) AND (Project.ProjectStatusCode BETWEEN 1 AND 3) AND 
 			(Project.ActionOn >= (SELECT        MIN(StartOn)
 											FROM            App.tbYearPeriod p JOIN
@@ -64,8 +64,8 @@ AS
 		FROM Project_flow
 			JOIN Project.tbProject Project ON Project_flow.ChildProjectCode = Project.ProjectCode
 			JOIN invoices ON invoices.ProjectCode = Project.ProjectCode
-			LEFT OUTER JOIN Cash.tbCode cashcode ON cashcode.CashCode = Project.CashCode 
-			LEFT OUTER JOIN Cash.tbCategory category ON category.CategoryCode = cashcode.CategoryCode
+			LEFT OUTER JOIN Cash.vwCodeActive cashcode ON cashcode.CashCode = Project.CashCode 
+			LEFT OUTER JOIN Cash.vwCategoryActive category ON category.CategoryCode = cashcode.CategoryCode
 	)
 	, Project_costs AS
 	(
@@ -96,7 +96,7 @@ AS
 			JOIN Project.tbProject Project ON Project.ProjectCode = orders.ProjectCode
 			JOIN invoices ON invoices.ProjectCode = Project.ProjectCode
 			JOIN Project_costs ON orders.ProjectCode = Project_costs.ProjectCode	
-			JOIN Cash.tbCode cashcode ON Project.CashCode = cashcode.CashCode
+			JOIN Cash.vwCodeActive cashcode ON Project.CashCode = cashcode.CashCode
 			JOIN Project.tbStatus Projectstatus ON Projectstatus.ProjectStatusCode = Project.ProjectStatusCode
 			JOIN Subject.tbSubject Subject ON Subject.SubjectCode = Project.SubjectCode
 			JOIN App.tbYearPeriod yearperiod ON yearperiod.StartOn = orders.StartOn

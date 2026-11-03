@@ -814,7 +814,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 18;
+		@SQLBuild INT = 19;
 
 	IF NOT EXISTS
 	(

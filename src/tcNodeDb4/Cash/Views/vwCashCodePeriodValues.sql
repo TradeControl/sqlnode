@@ -1,4 +1,4 @@
-﻿
+
 CREATE   VIEW Cash.vwCashCodePeriodValues 
 AS
 --cash code invoice value by period
@@ -13,9 +13,9 @@ AS
 	SELECT cc.CategoryCode, cc.CashCode, cat.CashTypeCode, cat.CashPolarityCode, cp.StartOn,
 			CASE cat.CashPolarityCode WHEN 0 THEN cp.InvoiceValue * -1 ELSE cp.InvoiceValue END AS InvoiceValue
 	FROM Cash.tbPeriod cp
-		JOIN Cash.tbCode cc
+		JOIN Cash.vwCodeActive cc
 			ON cp.CashCode = cc.CashCode
-		JOIN Cash.tbCategory cat
+		JOIN Cash.vwCategoryActive cat
 			ON cc.CategoryCode = cat.CategoryCode
 		JOIN active_periods ap
 			ON ap.StartOn = cp.StartOn;

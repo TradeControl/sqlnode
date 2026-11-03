@@ -9,7 +9,7 @@ AS
 		, expr.Format
 		, expr.SyntaxTypeCode
 		, temp.Template
-	FROM Cash.tbCategory cat
+	FROM Cash.vwCategoryActive cat
 		JOIN Cash.tbCategoryExp expr
 			ON cat.CategoryCode = expr.CategoryCode
 		LEFT JOIN Cash.tbCategoryExprFormat temp

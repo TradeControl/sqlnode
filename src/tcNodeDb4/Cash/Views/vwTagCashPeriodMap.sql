@@ -1,4 +1,4 @@
-﻿
+
 CREATE   VIEW Cash.vwTagCashPeriodMap 
 AS
 --tags mapped to cash codes and due dates
@@ -16,7 +16,7 @@ AS
 		UNION
 		SELECT tm.TaxSourceCode, tm.TagCode, cc.CashCode ParentCode, cc.CashCode
 		FROM Cash.tbTaxTagMap tm
-			JOIN Cash.tbCode cc
+			JOIN Cash.vwCodeActive cc
 				on cc.CashCode = tm.CashCode
 		WHERE tm.MapTypeCode = 1 AND tm.IsEnabled != 0 AND cc.IsEnabled != 0
 	)

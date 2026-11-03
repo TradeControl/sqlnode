@@ -156,13 +156,14 @@ AS
         DECLARE @CategoryCodeMap TABLE
         (
             CashCode NVARCHAR(50) NOT NULL PRIMARY KEY,
-            CategoryCode NVARCHAR(10) NOT NULL
+            CashDescription NVARCHAR(100) NOT NULL,
+            CategoryCode NVARCHAR(10) NOT NULL,
+            TaxCode NVARCHAR(10) NOT NULL,
+            IsEnabled SMALLINT NOT NULL
         );
 
-        INSERT INTO Cash.tbCode
+        INSERT INTO @CategoryCodeMap
             (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
-        OUTPUT inserted.CashCode, inserted.CategoryCode
-            INTO @CategoryCodeMap (CashCode, CategoryCode)
         VALUES
             -- Income
             ('CC-SALES', 'Sales',             'CA-SALES',  'T1',  1),
@@ -200,6 +201,11 @@ AS
 			
 			-- Dividends
 			('CC-DIVID', 'Dividends',         'CA-DIVID',  'N/A', 1);
+
+        INSERT INTO Cash.tbCode
+            (CashCode, CashDescription, TaxCode, IsEnabled)
+        SELECT CashCode, CashDescription, TaxCode, IsEnabled
+        FROM @CategoryCodeMap;
 
         INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
         SELECT @CategoryVersionId, CashCode, CategoryCode
@@ -255,8 +261,8 @@ AS
         ----------------------------------------------------------------
         IF @CoinTypeCode < 2
         BEGIN
-            INSERT INTO [Cash].[tbCode] ([CashCode], [CashDescription], [CategoryCode], [TaxCode], [IsEnabled])
-            VALUES ('CC-MINER', 'Miner Fees', 'CA-DIRECT', 'N/A', 1);
+            INSERT INTO [Cash].[tbCode] ([CashCode], [CashDescription], [TaxCode], [IsEnabled])
+            VALUES ('CC-MINER', 'Miner Fees', 'N/A', 1);
 
             INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
             VALUES (@CategoryVersionId, 'CC-MINER', 'CA-DIRECT');
@@ -272,11 +278,6 @@ AS
         VALUES
             (@CategoryVersionId, 0, 'CT-PANDL'),
             (@CategoryVersionId, 1, 'CT-VAT');
-
-        -- Transitional compatibility until the legacy option roots are removed.
-        UPDATE App.tbOptions
-        SET NetProfitCode   = 'CT-PANDL',
-            VatCategoryCode = 'CT-VAT';
 
         ----------------------------------------------------------------
         -- HOME SUBJECT TAX CODE (STANDARD VAT)

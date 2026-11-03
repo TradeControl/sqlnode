@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE Project.proc_Cost 
+CREATE   PROCEDURE Project.proc_Cost 
 	(
 	@ParentProjectCode nvarchar(20),
 	@TotalCost decimal(18, 5) = 0 OUTPUT
@@ -36,8 +36,8 @@ AS
 				END AS UnitCharge
 			FROM Project_flow
 				JOIN Project.tbProject Project ON Project_flow.ChildProjectCode = Project.ProjectCode
-				LEFT OUTER JOIN Cash.tbCode cashcode ON cashcode.CashCode = Project.CashCode 
-				LEFT OUTER JOIN Cash.tbCategory category ON category.CategoryCode = cashcode.CategoryCode
+				LEFT OUTER JOIN Cash.vwCodeActive cashcode ON cashcode.CashCode = Project.CashCode 
+				LEFT OUTER JOIN Cash.vwCategoryActive category ON category.CategoryCode = cashcode.CategoryCode
 		), Project_costs AS
 		(
 			SELECT ProjectCode, SUM(Quantity * UnitCharge) AS TotalCost

@@ -5,19 +5,19 @@ AS
 		SELECT Project.tbProject.ProjectCode AS ReferenceCode, 
 			Project.tbProject.SubjectCode, Project.tbProject.PaymentOn AS TransactOn, 
 			Project.tbProject.PaymentOn, 3 AS CashEntryTypeCode, 
-			CASE WHEN Cash.tbCategory.CashPolarityCode = 0 
+			CASE WHEN category.CashPolarityCode = 0
 				THEN (Project.tbProject.UnitCharge + Project.tbProject.UnitCharge * App.tbTaxCode.TaxRate) * Project.tbProject.Quantity 
 				ELSE 0 
 			END AS PayOut, 
-			CASE WHEN Cash.tbCategory.CashPolarityCode = 1 
+			CASE WHEN category.CashPolarityCode = 1
 				THEN (Project.tbProject.UnitCharge + Project.tbProject.UnitCharge * App.tbTaxCode.TaxRate) * Project.tbProject.Quantity ELSE 0 
 			END AS PayIn, 
 			Project.tbProject.ObjectCode EntryDescription
 		FROM Project.vwCostSetProjects quoted_Projects 
 			JOIN  Project.tbProject ON quoted_Projects.ProjectCode = Project.tbProject.ProjectCode 		
 			JOIN App.tbTaxCode ON App.tbTaxCode.TaxCode = Project.tbProject.TaxCode 
-			JOIN Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode 
-			JOIN Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+			JOIN Cash.vwCodeActive AS code ON Project.tbProject.CashCode = code.CashCode
+			JOIN Cash.vwCategoryActive AS category ON code.CategoryCode = category.CategoryCode
 	), cost_set_Project_vat AS
 	(
 		SELECT  (SELECT TOP (1) p.StartOn FROM App.tbYearPeriod p WHERE (p.StartOn <= quotes.ActionOn) ORDER BY p.StartOn DESC) AS StartOn,  
@@ -26,11 +26,11 @@ AS
 				quotes.UnitCharge * quotes.Quantity AS TotalValue, 
 				quotes.UnitCharge * quotes.Quantity * App.tbTaxCode.TaxRate AS TaxValue,
 				App.tbTaxCode.TaxRate,
-				Cash.tbCategory.CashPolarityCode
+				category.CashPolarityCode
 		FROM    Project.vwCostSetProjects cost_set INNER JOIN	Project.tbProject quotes ON cost_set.ProjectCode = quotes.ProjectCode INNER JOIN
 				Subject.tbSubject ON quotes.SubjectCode = Subject.tbSubject.SubjectCode INNER JOIN
-				Cash.tbCode ON quotes.CashCode = Cash.tbCode.CashCode INNER JOIN
-				Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode INNER JOIN
+				Cash.vwCodeActive AS code ON quotes.CashCode = code.CashCode INNER JOIN
+				Cash.vwCategoryActive AS category ON code.CategoryCode = category.CategoryCode INNER JOIN
 				App.tbTaxCode ON quotes.TaxCode = App.tbTaxCode.TaxCode 
 		WHERE        (App.tbTaxCode.TaxTypeCode = 1) AND (App.tbTaxCode.TaxTypeCode = 1)
 			AND (quotes.ActionOn <= (SELECT DATEADD(d, TaxHorizon, CURRENT_TIMESTAMP) FROM App.tbOptions))
@@ -72,11 +72,11 @@ AS
 	), cost_set_Project_tax AS
 	(
 		SELECT (SELECT TOP (1) StartOn FROM App.tbYearPeriod WHERE (StartOn <= ActionOn) ORDER BY StartOn DESC) AS StartOn, 
-			CASE WHEN Cash.tbCategory.CashPolarityCode = 0 THEN quote.TotalCharge * - 1 ELSE quote.TotalCharge END AS TotalCharge
+			CASE WHEN category.CashPolarityCode = 0 THEN quote.TotalCharge * - 1 ELSE quote.TotalCharge END AS TotalCharge
 		FROM Project.vwCostSetProjects cost_set INNER JOIN
 			Project.tbProject AS quote ON cost_set.ProjectCode = quote.ProjectCode INNER JOIN
-								 Cash.tbCode ON quote.CashCode = Cash.tbCode.CashCode INNER JOIN
-								 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode AND Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+								 Cash.vwCodeActive AS code ON quote.CashCode = code.CashCode INNER JOIN
+								 Cash.vwCategoryActive AS category ON code.CategoryCode = category.CategoryCode
 		WHERE    (quote.ActionOn <= (SELECT DATEADD(d, TaxHorizon, CURRENT_TIMESTAMP) AS HorizonOn FROM App.tbOptions))
 	), cost_set_biztax AS
 	(

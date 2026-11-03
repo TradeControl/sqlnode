@@ -1,10 +1,10 @@
-﻿CREATE VIEW Cash.vwCategoryCodesExpressions
+CREATE VIEW Cash.vwCategoryCodesExpressions
 AS
-SELECT        Cash.tbCategory.CategoryCode, Cash.tbCategory.Category, Cash.tbCategory.DisplayOrder, Cash.tbCategory.CategoryTypeCode, Cash.tbCategory.CashPolarityCode, Cash.tbCategory.CashTypeCode, 
+SELECT        Cash.vwCategoryActive.CategoryCode, Cash.vwCategoryActive.Category, Cash.vwCategoryActive.DisplayOrder, Cash.vwCategoryActive.CategoryTypeCode, Cash.vwCategoryActive.CashPolarityCode, Cash.vwCategoryActive.CashTypeCode, 
                          Cash.tbCategoryExp.SyntaxTypeCode, Cash.tbCategoryExp.IsError, Cash.tbCategoryExp.ErrorMessage
-FROM            Cash.tbCategory INNER JOIN
-                         Cash.tbCategoryExp ON Cash.tbCategory.CategoryCode = Cash.tbCategoryExp.CategoryCode
-WHERE        (Cash.tbCategory.CategoryTypeCode = 2)
+FROM            Cash.vwCategoryActive INNER JOIN
+                         Cash.tbCategoryExp ON Cash.vwCategoryActive.CategoryCode = Cash.tbCategoryExp.CategoryCode
+WHERE        (Cash.vwCategoryActive.CategoryTypeCode = 2)
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_DiagramPaneCount', @value = 1, @level0type = N'SCHEMA', @level0name = N'Cash', @level1type = N'VIEW', @level1name = N'vwCategoryCodesExpressions';
 

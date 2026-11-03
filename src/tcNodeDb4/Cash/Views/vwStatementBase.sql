@@ -133,13 +133,13 @@ AS
 			Project.tbProject.PaymentOn AS TransactOn,
 			Project.tbProject.PaymentOn,
 			2 AS CashEntryTypeCode,
-			CASE WHEN Cash.tbCategory.CashPolarityCode = 0 THEN (Project.tbProject.UnitCharge + Project.tbProject.UnitCharge * App.tbTaxCode.TaxRate) * (Project.tbProject.Quantity - ISNULL(Project_invoiced_quantity.InvoiceQuantity, 0)) ELSE 0 END AS PayOut,
-			CASE WHEN Cash.tbCategory.CashPolarityCode = 1 THEN (Project.tbProject.UnitCharge + Project.tbProject.UnitCharge * App.tbTaxCode.TaxRate) * (Project.tbProject.Quantity - ISNULL(Project_invoiced_quantity.InvoiceQuantity, 0)) ELSE 0 END AS PayIn,
+			CASE WHEN category.CashPolarityCode = 0 THEN (Project.tbProject.UnitCharge + Project.tbProject.UnitCharge * App.tbTaxCode.TaxRate) * (Project.tbProject.Quantity - ISNULL(Project_invoiced_quantity.InvoiceQuantity, 0)) ELSE 0 END AS PayOut,
+			CASE WHEN category.CashPolarityCode = 1 THEN (Project.tbProject.UnitCharge + Project.tbProject.UnitCharge * App.tbTaxCode.TaxRate) * (Project.tbProject.Quantity - ISNULL(Project_invoiced_quantity.InvoiceQuantity, 0)) ELSE 0 END AS PayIn,
 			Project.tbProject.ObjectCode EntryDescription
 		FROM App.tbTaxCode
 			INNER JOIN Project.tbProject ON App.tbTaxCode.TaxCode = Project.tbProject.TaxCode
-			INNER JOIN Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode
-			INNER JOIN Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+			INNER JOIN Cash.vwCodeActive AS code ON Project.tbProject.CashCode = code.CashCode
+			INNER JOIN Cash.vwCategoryActive AS category ON code.CategoryCode = category.CategoryCode
 			LEFT OUTER JOIN Project_invoiced_quantity ON Project.tbProject.ProjectCode = Project_invoiced_quantity.ProjectCode
 		WHERE (Project.tbProject.ProjectStatusCode > 0) AND (Project.tbProject.ProjectStatusCode < 3) AND (Project.tbProject.Quantity - ISNULL(Project_invoiced_quantity.InvoiceQuantity, 0) > 0)
 	)
@@ -148,9 +148,9 @@ AS
 	(
 		SELECT Subject.tbAccount.AccountCode
 		FROM Subject.tbAccount
-			INNER JOIN Cash.tbCode ON Subject.tbAccount.CashCode = Cash.tbCode.CashCode
-			INNER JOIN Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode AND Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-		WHERE (Cash.tbCategory.CashTypeCode = 2)
+			INNER JOIN Cash.vwCodeActive AS code ON Subject.tbAccount.CashCode = code.CashCode
+			INNER JOIN Cash.vwCategoryActive AS category ON code.CategoryCode = category.CategoryCode
+		WHERE category.CashTypeCode = 2
 	), transfer_accruals AS
 	(
 		SELECT Cash.tbPayment.SubjectCode, Cash.tbPayment.CashCode EntryDescription, Cash.tbPayment.PaidOn AS TransactOn, Cash.tbPayment.PaymentCode AS ReferenceCode, 

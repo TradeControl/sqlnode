@@ -8,6 +8,7 @@ SET NOCOUNT, XACT_ABORT ON;
 BEGIN TRAN Phase4DCumulativeFixture;
 BEGIN TRY
     DECLARE @Source NVARCHAR(20) = 'UK-ITSA-SE-CUM';
+    DECLARE @CategoryVersionId NVARCHAR(10) = (SELECT CategoryVersionId FROM App.tbOptions);
     DECLARE @IsConsolidated BIT = CASE WHEN EXISTS
         (SELECT 1 FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
          AND TagCode = 'consolidatedExpenses' AND IsEnabled = 1) THEN 1 ELSE 0 END;
@@ -85,13 +86,13 @@ BEGIN TRY
         IF EXISTS (SELECT 1 FROM Cash.tbTaxTagMap WHERE TaxSourceCode = @Source
                    AND TagCode = 'adminCosts' AND CategoryCode = 'CA-OFFICE')
             THROW 51000, 'The previous direct adminCosts to CA-OFFICE mapping must be removed.', 1;
-        IF EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = 'CC-EXPENSE'
+        IF EXISTS (SELECT 1 FROM Cash.vwCodeActive WHERE CashCode = 'CC-EXPENSE'
                    AND CategoryCode <> 'CA-ADMIN')
             THROW 51000, 'Existing CC-EXPENSE accounting classification must remain CA-ADMIN.', 1;
         IF NOT EXISTS (SELECT 1 FROM Cash.tbCode WHERE CashCode = 'CC-EXPENSE')
-            INSERT INTO Cash.tbCode (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
-            VALUES ('CC-EXPENSE', 'Employee Expenses', 'CA-ADMIN', 'T1', 1);
-        IF (SELECT COUNT(*) FROM Cash.tbCode WHERE CashCode IN ('CC-OFFICE', 'CC-PHONE')
+            EXEC Cash.proc_CodeAdd @VersionId = @CategoryVersionId, @CashCode = N'CC-EXPENSE',
+                @CashDescription = N'Employee Expenses', @CategoryCode = N'CA-ADMIN', @TaxCode = N'T1';
+        IF (SELECT COUNT(*) FROM Cash.vwCodeActive WHERE CashCode IN ('CC-OFFICE', 'CC-PHONE')
             AND CategoryCode = 'CA-OFFICE' AND IsEnabled = 1) <> 2
             THROW 51000, 'STD office Cash Codes must remain enabled beneath CA-OFFICE.', 1;
         IF (SELECT COUNT(*) FROM Cash.vwTaxTagCashCode WHERE TaxSourceCode = @Source

@@ -1,4 +1,4 @@
-﻿CREATE VIEW Project.vwAllocationSvD
+CREATE VIEW Project.vwAllocationSvD
 AS
 	WITH allocs AS
 	(
@@ -20,8 +20,8 @@ AS
 		SELECT Project.ObjectCode, Project.SubjectCode, ProjectCode, ActionOn, Quantity, UnitCharge, CashPolarityCode
 		FROM Project.tbProject Project
 			JOIN Object.tbMirror mirror ON Project.SubjectCode = mirror.SubjectCode AND Project.ObjectCode = mirror.ObjectCode
-			JOIN Cash.tbCode cash_code ON Project.CashCode = cash_code.CashCode
-			JOIN Cash.tbCategory category ON cash_code.CategoryCode = category.CategoryCode
+			JOIN Cash.vwCodeActive cash_code ON Project.CashCode = cash_code.CashCode
+			JOIN Cash.vwCategoryActive category ON cash_code.CategoryCode = category.CategoryCode
 		WHERE ProjectStatusCode BETWEEN 1 AND 2
 	), invoice_quantities AS
 	(

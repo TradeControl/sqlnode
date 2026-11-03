@@ -6,6 +6,6 @@ RETURNS TABLE
 AS
 	RETURN (
 		SELECT     CashCode, CashDescription
-		FROM         Cash.tbCode
+		FROM         Cash.vwCodeActive
 		WHERE     (CategoryCode = @CategoryCode) AND (IsEnabled <> 0)			 
 	)

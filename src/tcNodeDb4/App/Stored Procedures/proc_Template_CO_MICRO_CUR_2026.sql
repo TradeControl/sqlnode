@@ -75,10 +75,6 @@ AS
         INSERT INTO Cash.tbCategoryTotal (VersionId, ParentCode, ChildCode)
         VALUES (@CategoryVersionId, 'CT-OVERHD', 'CA-DEPREC');
 
-        UPDATE Cash.tbCode
-        SET CategoryCode = 'CA-DEPREC'
-        WHERE CashCode = 'CC-DEPRC';
-
         UPDATE Cash.tbCategoryCodeMap
         SET CategoryCode = 'CA-DEPREC'
         WHERE VersionId = @CategoryVersionId

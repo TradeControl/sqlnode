@@ -202,8 +202,8 @@ AS
         FROM inserted
             JOIN Cash.tbPayment payment ON inserted.PaymentCode = payment.PaymentCode
             JOIN Subject.tbAccount account ON payment.AccountCode = account.AccountCode
-            JOIN Cash.tbCode ON inserted.CashCode = Cash.tbCode.CashCode
-            JOIN Cash.tbCategory category ON Cash.tbCode.CategoryCode = category.CategoryCode
+			JOIN Cash.vwCodeActive AS code ON inserted.CashCode = code.CashCode
+			JOIN Cash.vwCategoryActive category ON code.CategoryCode = category.CategoryCode
         WHERE category.CashTypeCode = 2
           AND inserted.PaymentStatusCode = 0
           AND account.AccountTypeCode = 0;

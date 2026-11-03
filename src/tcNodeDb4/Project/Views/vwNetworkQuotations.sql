@@ -1,4 +1,4 @@
-﻿CREATE VIEW Project.vwNetworkQuotations
+CREATE VIEW Project.vwNetworkQuotations
 AS
 	WITH requests AS
 	(
@@ -25,8 +25,8 @@ AS
 				END Quantity, CashPolarityCode
 		FROM Project.tbProject Project
 			JOIN Object.tbMirror mirror ON Project.SubjectCode = mirror.SubjectCode AND Project.ObjectCode = mirror.ObjectCode
-			JOIN Cash.tbCode cash_code ON Project.CashCode = cash_code.CashCode
-			JOIN Cash.tbCategory category ON cash_code.CategoryCode = category.CategoryCode
+			JOIN Cash.vwCodeActive cash_code ON Project.CashCode = cash_code.CashCode
+			JOIN Cash.vwCategoryActive category ON cash_code.CategoryCode = category.CategoryCode
 		WHERE ProjectStatusCode = 0
 	), quotes AS
 	(

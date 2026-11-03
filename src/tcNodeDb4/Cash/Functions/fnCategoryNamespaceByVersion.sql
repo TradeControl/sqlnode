@@ -1,0 +1,80 @@
+CREATE FUNCTION [Cash].[fnCategoryNamespaceByVersion]
+(
+    @VersionId NVARCHAR(10),
+    @CategoryCode NVARCHAR(10)
+)
+RETURNS NVARCHAR(MAX)
+AS
+BEGIN
+    DECLARE @Result NVARCHAR(MAX);
+
+    IF @VersionId IS NULL OR @CategoryCode IS NULL OR LEN(@CategoryCode) = 0
+        RETURN NULL;
+
+    IF NOT EXISTS
+    (
+        SELECT 1 FROM Cash.tbCategory
+        WHERE VersionId = @VersionId AND CategoryCode = @CategoryCode
+    )
+        RETURN NULL;
+
+    IF NOT EXISTS
+    (
+        SELECT 1 FROM Cash.tbCategoryTotal
+        WHERE VersionId = @VersionId
+          AND (ParentCode = @CategoryCode OR ChildCode = @CategoryCode)
+    )
+    BEGIN
+        SELECT @Result = N'Disconnected.' + REPLACE(Category, N' ', N'_')
+        FROM Cash.tbCategory
+        WHERE VersionId = @VersionId AND CategoryCode = @CategoryCode;
+
+        RETURN App.fnToAlphaNumeric(@Result);
+    END;
+
+    ;WITH ParentChoice AS
+    (
+        SELECT
+            edge.ChildCode,
+            edge.ParentCode,
+            ROW_NUMBER() OVER
+            (
+                PARTITION BY edge.ChildCode
+                ORDER BY parent.DisplayOrder, parent.Category, parent.CategoryCode
+            ) AS rn
+        FROM Cash.tbCategoryTotal AS edge
+        JOIN Cash.tbCategory AS parent
+          ON parent.VersionId = edge.VersionId
+         AND parent.CategoryCode = edge.ParentCode
+        WHERE edge.VersionId = @VersionId
+    ),
+    ParentCTE AS
+    (
+        SELECT
+            category.CategoryCode,
+            REPLACE(category.Category, N' ', N'_') AS [Path],
+            CAST(0 AS INT) AS Depth
+        FROM Cash.tbCategory AS category
+        WHERE category.VersionId = @VersionId
+          AND category.CategoryCode = @CategoryCode
+
+        UNION ALL
+
+        SELECT
+            parent_choice.ParentCode,
+            REPLACE(parent.Category, N' ', N'_') + N'.' + category_path.[Path],
+            category_path.Depth + 1
+        FROM ParentCTE AS category_path
+        JOIN ParentChoice AS parent_choice
+          ON parent_choice.ChildCode = category_path.CategoryCode
+         AND parent_choice.rn = 1
+        JOIN Cash.tbCategory AS parent
+          ON parent.VersionId = @VersionId
+         AND parent.CategoryCode = parent_choice.ParentCode
+    )
+    SELECT TOP (1) @Result = [Path]
+    FROM ParentCTE
+    ORDER BY Depth DESC;
+
+    RETURN App.fnToAlphaNumeric(@Result);
+END;

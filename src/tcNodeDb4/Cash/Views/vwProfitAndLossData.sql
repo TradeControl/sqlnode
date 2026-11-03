@@ -15,7 +15,6 @@ AS
 			periods.StartOn,
 			CASE cc.CashPolarityCode WHEN 0 THEN periods.InvoiceValue * -1 ELSE periods.InvoiceValue END AS InvoiceValue
 		FROM App.vwTaxBizCashCodes cc
-			JOIN Cash.tbCategory category ON cc.CategoryCode = category.CategoryCode
 			JOIN Cash.tbPeriod periods ON cc.CashCode = periods.CashCode
 			JOIN active_periods ON active_periods.StartOn = periods.StartOn
 	)

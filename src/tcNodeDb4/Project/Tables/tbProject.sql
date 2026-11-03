@@ -151,7 +151,7 @@ AS
 		(
 			SELECT 1
 			FROM inserted i
-			JOIN Cash.tbCode cash_code ON cash_code.CashCode = i.CashCode
+			JOIN Cash.vwCodeActive cash_code ON cash_code.CashCode = i.CashCode
 			WHERE cash_code.IsEnabled = 0
 		)
 			THROW 51013, 'A Project cannot be assigned a disabled CashCode.', 1;
@@ -293,7 +293,7 @@ AS
                inserted.UnitCharge
         FROM inserted
             JOIN Subject.tbSubject ON inserted.SubjectCode = Subject.tbSubject.SubjectCode
-            JOIN Cash.tbCode ON inserted.CashCode = Cash.tbCode.CashCode;
+            JOIN Cash.vwCodeActive ON inserted.CashCode = Cash.vwCodeActive.CashCode;
 
     END TRY
     BEGIN CATCH
@@ -314,7 +314,7 @@ AS
 		(
 			SELECT 1
 			FROM inserted i
-			JOIN Cash.tbCode cash_code ON cash_code.CashCode = i.CashCode
+			JOIN Cash.vwCodeActive cash_code ON cash_code.CashCode = i.CashCode
 			WHERE cash_code.IsEnabled = 0
 		)
 			THROW 51013, 'A Project cannot be assigned a disabled CashCode.', 1;
@@ -534,7 +534,7 @@ AS
             FROM Project.tbFlow AS flow
                 JOIN inserted ON flow.ChildProjectCode = inserted.ProjectCode
                 JOIN Project.tbProject AS parent_Project ON flow.ParentProjectCode = parent_Project.ProjectCode
-                JOIN Cash.tbCode ON parent_Project.CashCode = Cash.tbCode.CashCode
+                JOIN Cash.vwCodeActive ON parent_Project.CashCode = Cash.vwCodeActive.CashCode
             WHERE (flow.UsedOnQuantity <> 0)
               AND (inserted.Quantity <> 0)
               AND (inserted.Quantity / parent_Project.Quantity <> flow.UsedOnQuantity);
@@ -563,7 +563,7 @@ AS
                 SELECT ParentProjectCode
                 FROM Project.tbFlow flow
                     JOIN Project.tbProject Project ON flow.ParentProjectCode = Project.ProjectCode
-                    JOIN Cash.tbCode cash ON Project.CashCode = cash.CashCode
+                    JOIN Cash.vwCodeActive cash ON Project.CashCode = cash.CashCode
                     JOIN inserted ON flow.ChildProjectCode = inserted.ProjectCode
                 WHERE (SELECT SUM(UsedOnQuantity) FROM inserted JOIN Project.tbFlow ON inserted.ProjectCode = Project.tbFlow.ChildProjectCode) = 0
             ),
@@ -607,7 +607,7 @@ AS
                 FROM Project.tbFlow AS flow
                     JOIN inserted ON flow.ChildProjectCode = inserted.ProjectCode
                     JOIN Project.tbProject AS parent_Project ON flow.ParentProjectCode = parent_Project.ProjectCode
-                    JOIN Cash.tbCode ON parent_Project.CashCode = Cash.tbCode.CashCode
+                    JOIN Cash.vwCodeActive ON parent_Project.CashCode = Cash.vwCodeActive.CashCode
                 WHERE (SELECT SUM(UsedOnQuantity) FROM inserted JOIN Project.tbFlow ON inserted.ProjectCode = Project.tbFlow.ChildProjectCode) = 0;
             END
 
@@ -673,8 +673,8 @@ AS
                    END AS DocTypeCode,
                    Project.ProjectCode
             FROM inserted Project
-                INNER JOIN Cash.tbCode ON Project.CashCode = Cash.tbCode.CashCode
-                INNER JOIN Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+                INNER JOIN Cash.vwCodeActive ON Project.CashCode = Cash.vwCodeActive.CashCode
+                INNER JOIN Cash.vwCategoryActive ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
             WHERE (Project.Spooled <> 0);
 
             DELETE App.tbDocSpool
@@ -777,7 +777,7 @@ AS
                    candidates.UnitCharge
             FROM candidates
                 JOIN Subject.tbSubject ON candidates.SubjectCode = Subject.tbSubject.SubjectCode
-                JOIN Cash.tbCode ON candidates.CashCode = Cash.tbCode.CashCode;
+                JOIN Cash.vwCodeActive ON candidates.CashCode = Cash.vwCodeActive.CashCode;
         END
 
     END TRY

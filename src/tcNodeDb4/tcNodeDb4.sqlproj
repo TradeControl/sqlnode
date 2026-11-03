@@ -623,6 +623,7 @@
     <Build Include="App\Stored Procedures\proc_NodeBusinessInit.sql" />
     <Build Include="App\Stored Procedures\proc_RotateSymmetricKeys.sql" />
     <Build Include="Cash\Functions\fnCategoryNamespace.sql" />
+    <Build Include="Cash\Functions\fnCategoryNamespaceByVersion.sql" />
     <Build Include="App\Functions\fnToAlphaNumeric.sql" />
     <Build Include="Cash\Views\vwCategoryPrimaryParent.sql" />
     <Build Include="Cash\Views\vwCategoryVersionActive.sql" />
@@ -632,12 +633,27 @@
     <Build Include="Cash\Views\vwCategoryRootActive.sql" />
     <Build Include="Cash\Views\vwCodeActive.sql" />
     <Build Include="Cash\Functions\fnCategoryNamespaceInContext.sql" />
+    <Build Include="Cash\Functions\fnCategoryNamespaceInContextByVersion.sql" />
     <Build Include="Cash\Functions\fnCategoryNamespacePrimary.sql" />
+    <Build Include="Cash\Functions\fnCategoryNamespacePrimaryByVersion.sql" />
     <Build Include="Cash\Tables\tbCategoryExpSyntax.sql" />
     <Build Include="Cash\Stored Procedures\proc_CategoryExprStatusSet.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryCodeMapMove.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryDelete.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryRootSet.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategorySave.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryTotalSave.sql" />
     <Build Include="Cash\Stored Procedures\proc_CategoryVersionCanonicalise.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionClone.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionDiscard.sql" />
     <Build Include="Cash\Stored Procedures\proc_CategoryVersionIdNext.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionNotesSet.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionPublish.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionRefresh.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionSubmit.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionValidate.sql" />
     <Build Include="Cash\Stored Procedures\proc_CodeAdd.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CodeDelete.sql" />
     <Build Include="Cash\Sequences\seqCategoryVersion.sql" />
     <Build Include="Cash\Tables\tbCategoryExprFormat.sql" />
     <Build Include="Web\Tables\tbTemplateStatus.sql" />
@@ -740,6 +756,8 @@
     <Build Include="Cash\Tables\tbTaxTag.sql" />
     <Build Include="Cash\Tables\tbTaxTagMap.sql" />
     <Build Include="Cash\Functions\fnTaxTagMapValidate.sql" />
+    <Build Include="Cash\Functions\fnTaxTagMapValidateByVersion.sql" />
+    <Build Include="Cash\Functions\fnTaxTagCashCodeByVersion.sql" />
     <Build Include="Cash\Functions\fnTaxBizCumulative.sql" />
     <Build Include="Cash\Functions\fnTaxBizCumulativeContributors.sql" />
     <Build Include="Cash\Functions\fnTaxBizComputation.sql" />
@@ -829,8 +847,12 @@
     <None Include="Tests\TaxTagMapValidator.sql" />
     <None Include="Tests\CategoryTreeVersionInfrastructure.sql" />
     <None Include="Tests\CategoryTreeShadowVersion.sql" />
+    <None Include="Tests\CategoryTreeCompositeKeys.sql" />
+    <None Include="Tests\CategoryTreeLifecycle.sql" />
     <None Include="Tests\SubjectAgedBalances.sql" />
     <None Include="Scripts\NamespaceSelector_testscript.sql" />
+    <None Include="Scripts\DB4 cat change control migration script.sql" />
+    <None Include="Scripts\DB4 cat change control differential test.sql" />
     <None Include="Scripts\EXEC_PaymentPost.sql" />
     <None Include="Subject\Stored Procedures\proc_AddRoot.sql" />
   </ItemGroup>

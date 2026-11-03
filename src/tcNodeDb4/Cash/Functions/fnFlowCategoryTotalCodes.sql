@@ -3,5 +3,5 @@ RETURNS TABLE
 AS
 	RETURN
 	(
-		SELECT ChildCode AS CategoryCode FROM Cash.tbCategoryTotal WHERE ParentCode = @CategoryCode
+		SELECT ChildCode AS CategoryCode FROM Cash.vwCategoryTotalActive WHERE ParentCode = @CategoryCode
 	)

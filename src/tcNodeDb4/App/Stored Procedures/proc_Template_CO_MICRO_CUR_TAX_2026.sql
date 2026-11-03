@@ -174,7 +174,6 @@ BEGIN TRY
     COMMIT TRAN CompanyStatutoryProjection;
 END TRY
 BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK TRAN CompanyStatutoryProjection;
     EXEC App.proc_ErrorLog;
 END CATCH;
 GO

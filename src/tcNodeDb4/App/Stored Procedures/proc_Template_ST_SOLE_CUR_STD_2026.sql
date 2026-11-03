@@ -73,15 +73,16 @@ BEGIN TRY
           AND ct.ParentCode = v.ParentCode AND ct.ChildCode = v.ChildCode
     );
 
-    DECLARE @CategoryCodeMap TABLE
+    DECLARE @Codes TABLE
     (
         CashCode NVARCHAR(50) NOT NULL PRIMARY KEY,
-        CategoryCode NVARCHAR(10) NOT NULL
+        CashDescription NVARCHAR(100) NOT NULL,
+        CategoryCode NVARCHAR(10) NOT NULL,
+        TaxCode NVARCHAR(10) NOT NULL
     );
 
-    ;WITH Codes AS
-    (
-        SELECT * FROM (VALUES
+    INSERT INTO @Codes (CashCode, CashDescription, CategoryCode, TaxCode)
+    VALUES
             ('CC-COGS', 'Goods and Materials', 'CA-COGS', 'T1'),
             ('CC-SUBCON', 'Subcontractor Payments', 'CA-SUBCON', 'T1'),
             ('CC-PARK', 'Parking and Tolls', 'CA-TRAVEL', 'T1'),
@@ -105,22 +106,26 @@ BEGIN TRY
             ('CC-FINCH', 'Financial Charges', 'CA-FINANCE', 'N/A'),
             ('CC-BANKC', 'Bank Charges', 'CA-FINANCE', 'N/A'),
             ('CC-PROF', 'Professional Fees', 'CA-PROF', 'T1'),
-            ('CC-OTHER', 'Other Business Expenses', 'CA-OTHER', 'T1')
-        ) v(CashCode, CashDescription, CategoryCode, TaxCode)
-    )
-    INSERT INTO Cash.tbCode (CashCode, CashDescription, CategoryCode, TaxCode, IsEnabled)
-    OUTPUT inserted.CashCode, inserted.CategoryCode
-        INTO @CategoryCodeMap (CashCode, CategoryCode)
-    SELECT CashCode, CashDescription, CategoryCode, TaxCode, 1
-    FROM Codes c
+            ('CC-OTHER', 'Other Business Expenses', 'CA-OTHER', 'T1');
+
+    INSERT INTO Cash.tbCode (CashCode, CashDescription, TaxCode, IsEnabled)
+    SELECT CashCode, CashDescription, TaxCode, 1
+    FROM @Codes c
     WHERE NOT EXISTS (SELECT 1 FROM Cash.tbCode x WHERE x.CashCode = c.CashCode);
 
     INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
     SELECT @CategoryVersionId, CashCode, CategoryCode
-    FROM @CategoryCodeMap;
+    FROM @Codes AS code
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM Cash.tbCategoryCodeMap AS map
+        WHERE map.VersionId = @CategoryVersionId
+          AND map.CashCode = code.CashCode
+    );
 
     UPDATE cc
-    SET CategoryCode = c.CategoryCode, IsEnabled = 1
+    SET IsEnabled = 1
     FROM Cash.tbCode cc
     JOIN (VALUES
         ('CC-INSUR', 'CA-PREMS'), ('CC-REPA', 'CA-REPAIR'), ('CC-PHONE', 'CA-OFFICE'),

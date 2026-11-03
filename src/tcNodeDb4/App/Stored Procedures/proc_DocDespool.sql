@@ -1,4 +1,4 @@
-﻿
+
 CREATE   PROCEDURE App.proc_DocDespool
 	(
 	@DocTypeCode SMALLINT
@@ -12,33 +12,33 @@ AS
 			UPDATE       Project.tbProject
 			SET           Spooled = 0, Printed = 1
 			FROM            Project.tbProject INNER JOIN
-									 Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode INNER JOIN
-									 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-			WHERE        ( Project.tbProject.ProjectStatusCode = 0) AND ( Cash.tbCategory.CashPolarityCode = 1) AND ( Project.tbProject.Spooled <> 0)
+									 Cash.vwCodeActive ON Project.tbProject.CashCode = Cash.vwCodeActive.CashCode INNER JOIN
+									 Cash.vwCategoryActive ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
+			WHERE        ( Project.tbProject.ProjectStatusCode = 0) AND ( Cash.vwCategoryActive.CashPolarityCode = 1) AND ( Project.tbProject.Spooled <> 0)
 		ELSE IF @DocTypeCode = 1
 		--SalesOrder:
 			UPDATE       Project.tbProject
 			SET           Spooled = 0, Printed = 1
 			FROM            Project.tbProject INNER JOIN
-									 Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode INNER JOIN
-									 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-			WHERE        ( Project.tbProject.ProjectStatusCode > 0) AND ( Cash.tbCategory.CashPolarityCode = 1) AND ( Project.tbProject.Spooled <> 0)
+									 Cash.vwCodeActive ON Project.tbProject.CashCode = Cash.vwCodeActive.CashCode INNER JOIN
+									 Cash.vwCategoryActive ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
+			WHERE        ( Project.tbProject.ProjectStatusCode > 0) AND ( Cash.vwCategoryActive.CashPolarityCode = 1) AND ( Project.tbProject.Spooled <> 0)
 		ELSE IF @DocTypeCode = 2
 		--PurchaseEnquiry:
 			UPDATE       Project.tbProject
 			SET           Spooled = 0, Printed = 1
 			FROM            Project.tbProject INNER JOIN
-									 Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode INNER JOIN
-									 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-			WHERE        ( Project.tbProject.ProjectStatusCode = 0) AND ( Cash.tbCategory.CashPolarityCode = 0) AND ( Project.tbProject.Spooled <> 0)	
+									 Cash.vwCodeActive ON Project.tbProject.CashCode = Cash.vwCodeActive.CashCode INNER JOIN
+									 Cash.vwCategoryActive ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
+			WHERE        ( Project.tbProject.ProjectStatusCode = 0) AND ( Cash.vwCategoryActive.CashPolarityCode = 0) AND ( Project.tbProject.Spooled <> 0)	
 		ELSE IF @DocTypeCode = 3
 		--PurchaseOrder:
 			UPDATE       Project.tbProject
 			SET           Spooled = 0, Printed = 1
 			FROM            Project.tbProject INNER JOIN
-									 Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode INNER JOIN
-									 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-			WHERE        ( Project.tbProject.ProjectStatusCode > 0) AND ( Cash.tbCategory.CashPolarityCode = 0) AND ( Project.tbProject.Spooled <> 0)
+									 Cash.vwCodeActive ON Project.tbProject.CashCode = Cash.vwCodeActive.CashCode INNER JOIN
+									 Cash.vwCategoryActive ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
+			WHERE        ( Project.tbProject.ProjectStatusCode > 0) AND ( Cash.vwCategoryActive.CashPolarityCode = 0) AND ( Project.tbProject.Spooled <> 0)
 		ELSE IF @DocTypeCode = 4
 		--SalesInvoice:
 			UPDATE       Invoice.tbInvoice

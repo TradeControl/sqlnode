@@ -1,13 +1,13 @@
 CREATE VIEW Cash.vwBankCashCodes
 AS
-	SELECT Cash.tbCode.CashCode, Cash.tbCode.CashDescription, Cash.tbCode.TaxCode, Cash.tbCategory.CashPolarityCode
-	FROM Cash.tbCode
-        INNER JOIN Cash.tbCategory
-            ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
+	SELECT Cash.vwCodeActive.CashCode, Cash.vwCodeActive.CashDescription, Cash.vwCodeActive.TaxCode, Cash.vwCategoryActive.CashPolarityCode
+	FROM Cash.vwCodeActive
+        INNER JOIN Cash.vwCategoryActive
+            ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
         LEFT OUTER JOIN Cash.vwTransferCodeLookup
-            ON Cash.tbCode.CashCode = Cash.vwTransferCodeLookup.CashCode
+            ON Cash.vwCodeActive.CashCode = Cash.vwTransferCodeLookup.CashCode
 	WHERE
-        (Cash.tbCategory.CashTypeCode = 2)
-        AND (Cash.tbCategory.IsEnabled != 0)
-        AND (Cash.tbCode.IsEnabled != 0)
+        (Cash.vwCategoryActive.CashTypeCode = 2)
+        AND (Cash.vwCategoryActive.IsEnabled != 0)
+        AND (Cash.vwCodeActive.IsEnabled != 0)
         AND (Cash.vwTransferCodeLookup.CashCode IS NULL)

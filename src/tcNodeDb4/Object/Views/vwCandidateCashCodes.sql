@@ -1,6 +1,6 @@
-﻿CREATE VIEW Object.vwCandidateCashCodes
+CREATE VIEW Object.vwCandidateCashCodes
 AS
-	SELECT Cash.tbCode.CashCode, Cash.tbCode.CashDescription, Cash.tbCategory.Category, Cash.tbCategory.CashPolarityCode, Cash.tbCategory.CashTypeCode
-	FROM            Cash.tbCode INNER JOIN
-							 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-	WHERE        (Cash.tbCategory.CashTypeCode < 2)  AND (Cash.tbCategory.IsEnabled <> 0) AND (Cash.tbCode.IsEnabled <> 0)
+	SELECT Cash.vwCodeActive.CashCode, Cash.vwCodeActive.CashDescription, Cash.vwCategoryActive.Category, Cash.vwCategoryActive.CashPolarityCode, Cash.vwCategoryActive.CashTypeCode
+	FROM            Cash.vwCodeActive INNER JOIN
+							 Cash.vwCategoryActive ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
+	WHERE        (Cash.vwCategoryActive.CashTypeCode < 2)  AND (Cash.vwCategoryActive.IsEnabled <> 0) AND (Cash.vwCodeActive.IsEnabled <> 0)

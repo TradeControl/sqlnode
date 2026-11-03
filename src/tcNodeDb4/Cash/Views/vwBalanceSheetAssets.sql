@@ -1,4 +1,4 @@
-﻿CREATE VIEW Cash.vwBalanceSheetAssets
+CREATE VIEW Cash.vwBalanceSheetAssets
 AS
 	WITH asset_statements AS
 	(
@@ -65,8 +65,8 @@ AS
 	(
 		SELECT AccountCode, AccountName, CashPolarityCode
 		FROM Subject.tbAccount accounts
-			JOIN Cash.tbCode cash_code ON accounts.CashCode = cash_code.CashCode
-			JOIN Cash.tbCategory cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
+			JOIN Cash.vwCodeActive cash_code ON accounts.CashCode = cash_code.CashCode
+			JOIN Cash.vwCategoryActive cash_category ON cash_code.CategoryCode = cash_category.CategoryCode
 		WHERE AccountTypeCode = 2 AND AccountClosed = 0
 	)
 	SELECT asset_accounts.AccountCode AssetCode, AccountName AssetName, CashPolarityCode, 4 AssetTypeCode, StartOn, Balance

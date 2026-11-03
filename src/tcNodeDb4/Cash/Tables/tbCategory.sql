@@ -12,8 +12,7 @@
     [UpdatedBy]        NVARCHAR (50) CONSTRAINT [DF_Cash_tbCategory_UpdatedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
     [UpdatedOn]        DATETIME      CONSTRAINT [DF_Cash_tbCategory_UpdatedOn] DEFAULT (getdate()) NOT NULL,
     [RowVer]           ROWVERSION    NOT NULL,
-    CONSTRAINT [PK_Cash_tbCategory] PRIMARY KEY CLUSTERED ([CategoryCode] ASC) WITH (FILLFACTOR = 90),
-    CONSTRAINT [UQ_Cash_tbCategory_VersionCategory] UNIQUE NONCLUSTERED ([VersionId] ASC, [CategoryCode] ASC),
+    CONSTRAINT [PK_Cash_tbCategory] PRIMARY KEY CLUSTERED ([VersionId] ASC, [CategoryCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Cash_tbCategory_Cash_tbCategoryVersion] FOREIGN KEY ([VersionId]) REFERENCES [Cash].[tbCategoryVersion] ([VersionId]),
     CONSTRAINT [FK_Cash_tbCategory_Cash_tbCategoryType] FOREIGN KEY ([CategoryTypeCode]) REFERENCES [Cash].[tbCategoryType] ([CategoryTypeCode]),
     CONSTRAINT [FK_Cash_tbCategory_Cash_tbPolarity] FOREIGN KEY ([CashPolarityCode]) REFERENCES [Cash].[tbPolarity] ([CashPolarityCode]),
@@ -23,32 +22,32 @@
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbCategory_DisplayOrder]
-    ON [Cash].[tbCategory]([DisplayOrder] ASC, [Category] ASC) WITH (FILLFACTOR = 90);
+    ON [Cash].[tbCategory]([VersionId] ASC, [DisplayOrder] ASC, [Category] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Cash_tbCategory_IsEnabled_Category]
-    ON [Cash].[tbCategory]([IsEnabled] ASC, [Category] ASC);
+    ON [Cash].[tbCategory]([VersionId] ASC, [IsEnabled] ASC, [Category] ASC);
 
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Cash_tbCategory_IsEnabled_CategoryCode]
-    ON [Cash].[tbCategory]([IsEnabled] ASC, [CategoryCode] ASC);
+    ON [Cash].[tbCategory]([VersionId] ASC, [IsEnabled] ASC, [CategoryCode] ASC);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbCategory_Name]
-    ON [Cash].[tbCategory]([Category] ASC) WITH (FILLFACTOR = 90);
+    ON [Cash].[tbCategory]([VersionId] ASC, [Category] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbCategory_TypeCategory]
-    ON [Cash].[tbCategory]([CategoryTypeCode] ASC, [Category] ASC) WITH (FILLFACTOR = 90);
+    ON [Cash].[tbCategory]([VersionId] ASC, [CategoryTypeCode] ASC, [Category] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
 CREATE NONCLUSTERED INDEX [IX_Cash_tbCategory_TypeOrderCategory]
-    ON [Cash].[tbCategory]([CategoryTypeCode] ASC, [DisplayOrder] ASC, [Category] ASC) WITH (FILLFACTOR = 90);
+    ON [Cash].[tbCategory]([VersionId] ASC, [CategoryTypeCode] ASC, [DisplayOrder] ASC, [Category] ASC) WITH (FILLFACTOR = 90);
 
 
 GO
@@ -71,7 +70,10 @@ BEGIN
 		BEGIN
 			UPDATE Cash.tbCategory
 			SET UpdatedBy = Usr.fnUserName(), UpdatedOn = CURRENT_TIMESTAMP
-			FROM Cash.tbCategory INNER JOIN inserted AS i ON tbCategory.CategoryCode = i.CategoryCode;
+			FROM Cash.tbCategory
+			INNER JOIN inserted AS i
+				ON tbCategory.VersionId = i.VersionId
+				AND tbCategory.CategoryCode = i.CategoryCode;
 		END
 
 	END TRY

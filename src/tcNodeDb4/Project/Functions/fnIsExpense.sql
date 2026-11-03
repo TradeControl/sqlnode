@@ -1,4 +1,4 @@
-﻿CREATE   FUNCTION Project.fnIsExpense
+CREATE   FUNCTION Project.fnIsExpense
 	(
 	@ProjectCode nvarchar(20)
 	)
@@ -9,9 +9,9 @@ AS
 	DECLARE @IsExpense bit
 	IF EXISTS (SELECT     Project.tbProject.ProjectCode
 	           FROM         Project.tbProject INNER JOIN
-	                                 Cash.tbCode ON Project.tbProject.CashCode = Cash.tbCode.CashCode INNER JOIN
-	                                 Cash.tbCategory ON Cash.tbCode.CategoryCode = Cash.tbCategory.CategoryCode
-	           WHERE     ( Cash.tbCategory.CashPolarityCode = 1) AND ( Project.tbProject.ProjectCode = @ProjectCode))
+	                                 Cash.vwCodeActive ON Project.tbProject.CashCode = Cash.vwCodeActive.CashCode INNER JOIN
+	                                 Cash.vwCategoryActive ON Cash.vwCodeActive.CategoryCode = Cash.vwCategoryActive.CategoryCode
+	           WHERE     ( Cash.vwCategoryActive.CashPolarityCode = 1) AND ( Project.tbProject.ProjectCode = @ProjectCode))
 		SET @IsExpense = 0			          
 	ELSE IF EXISTS(SELECT     ParentProjectCode
 	          FROM         Project.tbFlow

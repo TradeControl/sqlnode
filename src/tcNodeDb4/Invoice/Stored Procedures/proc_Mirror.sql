@@ -75,8 +75,8 @@ AS
 				Projects.ProjectCode, Projects.ObjectCode, Projects.SubjectCode, Projects.Quantity, category.CashPolarityCode
 			FROM allocations
 				JOIN Project.tbProject Projects ON Projects.ObjectCode = allocations.ObjectCode AND Projects.SubjectCode = allocations.SubjectCode
-				JOIN Cash.tbCode cash_code ON Projects.CashCode = cash_code.CashCode
-				JOIN Cash.tbCategory category ON cash_code.CategoryCode = category.CategoryCode
+				JOIN Cash.vwCodeActive cash_code ON Projects.CashCode = cash_code.CashCode
+				JOIN Cash.vwCategoryActive category ON cash_code.CategoryCode = category.CategoryCode
 			WHERE Projects.ProjectStatusCode BETWEEN 1 AND 2
 		), order_book AS
 		(
@@ -150,7 +150,7 @@ AS
 		FROM Invoice.tbMirror invoice_mirror 
 			JOIN Invoice.tbMirrorItem item_mirror ON invoice_mirror.ContractAddress = item_mirror.ContractAddress			
 			JOIN Cash.tbMirror cash_code_mirror ON item_mirror.ChargeCode = cash_code_mirror.ChargeCode and invoice_mirror.SubjectCode = cash_code_mirror.SubjectCode
-			JOIN Cash.tbCode cash_code ON cash_code_mirror.CashCode = cash_code.CashCode
+			JOIN Cash.vwCodeActive cash_code ON cash_code_mirror.CashCode = cash_code.CashCode
 			JOIN App.tbTaxCode tax_code ON cash_code.TaxCode = tax_code.TaxCode
 		WHERE invoice_mirror.ContractAddress = @ContractAddress
 

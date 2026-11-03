@@ -4,7 +4,7 @@ AS
 BEGIN
 	INSERT INTO @tbCategory (CategoryCode, Category, CashPolarityCode, DisplayOrder)
 	SELECT CategoryCode, Category, CashPolarityCode, DisplayOrder
-	FROM Cash.tbCategory
+	FROM Cash.vwCategoryActive
 	WHERE (CategoryTypeCode = 0)
 		AND (CashTypeCode = @CashTypeCode)
 		AND (IsEnabled <> 0)

@@ -26,8 +26,8 @@ AS
 		SET ForecastTax = inserted.ForecastValue * tax_code.TaxRate
 		FROM inserted 
 			JOIN Cash.tbPeriod tbPeriod ON inserted.CashCode = tbPeriod.CashCode AND inserted.StartOn = tbPeriod.StartOn
-			JOIN Cash.tbCode cash_code ON tbPeriod.CashCode = cash_code.CashCode 
-			JOIN Cash.tbCategory ON cash_code.CategoryCode = Cash.tbCategory.CategoryCode 
+			JOIN Cash.vwCodeActive cash_code ON tbPeriod.CashCode = cash_code.CashCode
+			JOIN Cash.vwCategoryActive category ON cash_code.CategoryCode = category.CategoryCode
             JOIN App.tbTaxCode tax_code ON cash_code.TaxCode = tax_code.TaxCode
 		END
 	END TRY

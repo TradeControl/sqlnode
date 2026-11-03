@@ -4,14 +4,21 @@
     [ChildCode]  NVARCHAR (10) NOT NULL,
     DisplayOrder  smallint     NOT NULL CONSTRAINT DF_Cash_tbCategoryTotal_DisplayOrder DEFAULT (0),
     [RowVer]     ROWVERSION    NOT NULL,
-    CONSTRAINT [PK_Cash_tbCategoryTotal] PRIMARY KEY CLUSTERED ([ParentCode] ASC, [ChildCode] ASC) WITH (FILLFACTOR = 90),
-    CONSTRAINT [UQ_Cash_tbCategoryTotal_VersionParentChild] UNIQUE NONCLUSTERED ([VersionId] ASC, [ParentCode] ASC, [ChildCode] ASC),
+    CONSTRAINT [PK_Cash_tbCategoryTotal] PRIMARY KEY CLUSTERED ([VersionId] ASC, [ParentCode] ASC, [ChildCode] ASC) WITH (FILLFACTOR = 90),
     CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategoryVersion] FOREIGN KEY ([VersionId]) REFERENCES [Cash].[tbCategoryVersion] ([VersionId]),
     CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategory_ChildVersion] FOREIGN KEY ([VersionId], [ChildCode]) REFERENCES [Cash].[tbCategory] ([VersionId], [CategoryCode]),
-    CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategory_ParentVersion] FOREIGN KEY ([VersionId], [ParentCode]) REFERENCES [Cash].[tbCategory] ([VersionId], [CategoryCode]),
-    CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategory_Child] FOREIGN KEY ([ChildCode]) REFERENCES [Cash].[tbCategory] ([CategoryCode]),
-    CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategory_Parent] FOREIGN KEY ([ParentCode]) REFERENCES [Cash].[tbCategory] ([CategoryCode])
+    CONSTRAINT [FK_Cash_tbCategoryTotal_Cash_tbCategory_ParentVersion] FOREIGN KEY ([VersionId], [ParentCode]) REFERENCES [Cash].[tbCategory] ([VersionId], [CategoryCode])
 );
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_Cash_tbCategoryTotal_VersionParentDisplayChild]
+    ON [Cash].[tbCategoryTotal] ([VersionId], [ParentCode], [DisplayOrder], [ChildCode]);
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_Cash_tbCategoryTotal_VersionChildParent]
+    ON [Cash].[tbCategoryTotal] ([VersionId], [ChildCode], [ParentCode]);
 
 
 GO

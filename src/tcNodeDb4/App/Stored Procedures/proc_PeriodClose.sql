@@ -23,8 +23,8 @@ AS
 			(
 				SELECT invoices.CashCode, invoices.StartOn, categories.CashPolarityCode, SUM(invoices.InvoiceValue) InvoiceValue, SUM(invoices.TaxValue) TaxValue
 				FROM  Invoice.vwRegisterDetail invoices
-					JOIN Cash.tbCode cash_codes ON invoices.CashCode = cash_codes.CashCode 
-					JOIN Cash.tbCategory categories ON cash_codes.CategoryCode = categories .CategoryCode
+					JOIN Cash.vwCodeActive cash_codes ON invoices.CashCode = cash_codes.CashCode 
+					JOIN Cash.vwCategoryActive categories ON cash_codes.CategoryCode = categories .CategoryCode
 				WHERE StartOn = @StartOn
 				GROUP BY invoices.CashCode, invoices.StartOn, categories.CashPolarityCode
 			), invoice_summary AS

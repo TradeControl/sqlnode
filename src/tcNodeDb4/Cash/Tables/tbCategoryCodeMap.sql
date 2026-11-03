@@ -9,6 +9,9 @@ CREATE TABLE [Cash].[tbCategoryCodeMap]
     CONSTRAINT [FK_Cash_tbCategoryCodeMap_Cash_tbCategoryVersion]
         FOREIGN KEY ([VersionId])
         REFERENCES [Cash].[tbCategoryVersion] ([VersionId]),
+    CONSTRAINT [FK_Cash_tbCategoryCodeMap_Cash_tbCode]
+        FOREIGN KEY ([CashCode])
+        REFERENCES [Cash].[tbCode] ([CashCode]),
     CONSTRAINT [FK_Cash_tbCategoryCodeMap_Cash_tbCategory]
         FOREIGN KEY ([VersionId], [CategoryCode])
         REFERENCES [Cash].[tbCategory] ([VersionId], [CategoryCode])
