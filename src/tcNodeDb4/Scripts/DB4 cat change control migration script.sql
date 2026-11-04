@@ -12747,8 +12747,8 @@ CREATE TABLE [Cash].[tmp_ms_xx_tbCategory] (
     [CategoryCode]     NVARCHAR (10) NOT NULL,
     [Category]         NVARCHAR (50) NOT NULL,
     [CategoryTypeCode] SMALLINT      CONSTRAINT [DF_Cash_tbCategory_CategoryTypeCode] DEFAULT ((1)) NOT NULL,
-    [CashPolarityCode] SMALLINT      CONSTRAINT [DF_Cash_tbCategory_CashPolarityCode] DEFAULT ((1)) NULL,
-    [CashTypeCode]     SMALLINT      CONSTRAINT [DF_Cash_tbCategory_CashTypeCode] DEFAULT ((0)) NULL,
+    [CashPolarityCode] SMALLINT      CONSTRAINT [DF_Cash_tbCategory_CashPolarityCode] DEFAULT ((1)) NOT NULL,
+    [CashTypeCode]     SMALLINT      CONSTRAINT [DF_Cash_tbCategory_CashTypeCode] DEFAULT ((0)) NOT NULL,
     [DisplayOrder]     SMALLINT      CONSTRAINT [DF_Cash_tbCategory_DisplayOrder] DEFAULT ((0)) NOT NULL,
     [IsEnabled]        SMALLINT      CONSTRAINT [DF_Cash_tbCategory_IsEnabled] DEFAULT ((1)) NOT NULL,
     [InsertedBy]       NVARCHAR (50) CONSTRAINT [DF_Cash_tbCategory_InsertedBy] DEFAULT (Usr.fnUserName()) NOT NULL,
@@ -13847,6 +13847,17 @@ SELECT
 FROM App.tbOptions AS options
 JOIN Cash.tbCategory AS category
   ON category.VersionId = options.CategoryVersionId;
+GO
+
+PRINT N'Altering View [Cash].[vwCategoryTotals]...';
+
+
+GO
+ALTER VIEW [Cash].[vwCategoryTotals]
+AS
+	SELECT CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled, InsertedBy, InsertedOn, UpdatedBy, UpdatedOn, RowVer
+	FROM Cash.vwCategoryActive
+	WHERE CategoryTypeCode = 1;
 GO
 
 PRINT N'Creating View [Cash].[vwCategoryCodeMapActive]...';
@@ -18390,8 +18401,8 @@ CREATE PROCEDURE [Cash].[proc_CategorySave]
     @CategoryCode NVARCHAR(10),
     @Category NVARCHAR(50),
     @CategoryTypeCode SMALLINT,
-    @CashPolarityCode SMALLINT = NULL,
-    @CashTypeCode SMALLINT = NULL,
+    @CashPolarityCode SMALLINT,
+    @CashTypeCode SMALLINT,
     @DisplayOrder SMALLINT = 0,
     @IsEnabled SMALLINT = 1,
     @ChangeNote NVARCHAR(MAX) = NULL
@@ -18994,6 +19005,15 @@ BEGIN
 
     IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE VersionId = @VersionId)
         THROW 51113, 'A Category Tree version must contain categories.', 1;
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM Cash.tbCategory
+        WHERE VersionId = @VersionId
+          AND (CashPolarityCode IS NULL OR CashTypeCode IS NULL)
+    )
+        THROW 51175, 'Every Category Tree category requires a Cash Polarity and Cash Type.', 1;
 
     IF EXISTS
     (
@@ -26570,6 +26590,399 @@ GO
 EXECUTE sp_refreshsqlmodule N'[Cash].[proc_ChangeAssign]';
 
 
+GO
+
+PRINT N'Installing Cash Statement Category Tree read functions...';
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnCategoryVersionResolve
+(
+    @CategoryVersionId nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT
+        active.VersionId AS ActiveVersionId,
+        active.Description AS ActiveDescription,
+        active.VersionStatusCode AS ActiveStatusCode,
+        active_status.VersionStatus AS ActiveStatus,
+        active.EffectiveFromOn AS ActiveEffectiveFromOn,
+        active.EffectiveToOn AS ActiveEffectiveToOn,
+        active.ContentChangedOn AS ActiveContentChangedOn,
+        CONVERT(varchar(64), active.CanonicalSha256, 2) AS ActiveCanonicalSha256,
+        active.CanonicalByteLength AS ActiveCanonicalByteLength,
+        selected.VersionId AS SelectedVersionId,
+        selected.Description AS SelectedDescription,
+        selected.VersionStatusCode AS SelectedStatusCode,
+        selected_status.VersionStatus AS SelectedStatus,
+        selected.EffectiveFromOn AS SelectedEffectiveFromOn,
+        selected.EffectiveToOn AS SelectedEffectiveToOn,
+        selected.ContentChangedOn AS SelectedContentChangedOn,
+        CONVERT(varchar(64), selected.CanonicalSha256, 2) AS SelectedCanonicalSha256,
+        selected.CanonicalByteLength AS SelectedCanonicalByteLength
+    FROM App.tbOptions AS options
+    JOIN Cash.tbCategoryVersion AS active
+      ON active.VersionId = options.CategoryVersionId
+    JOIN Cash.tbCategoryVersionStatus AS active_status
+      ON active_status.VersionStatusCode = active.VersionStatusCode
+    LEFT JOIN Cash.tbCategoryVersion AS selected
+      ON selected.VersionId = COALESCE(NULLIF(@CategoryVersionId, N''), options.CategoryVersionId)
+    LEFT JOIN Cash.tbCategoryVersionStatus AS selected_status
+      ON selected_status.VersionStatusCode = selected.VersionStatusCode
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnCategoryVersionProjectionMismatches
+(
+    @CategoryVersionId nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    WITH version_context AS
+    (
+        SELECT @CategoryVersionId AS SelectedVersionId, options.CategoryVersionId AS ActiveVersionId
+        FROM App.tbOptions AS options
+    ),
+    vat_selected AS
+    (
+        SELECT CashCode FROM version_context CROSS APPLY App.fnTaxVatCashCodesByVersion(SelectedVersionId)
+    ),
+    vat_active AS
+    (
+        SELECT CashCode FROM version_context CROSS APPLY App.fnTaxVatCashCodesByVersion(ActiveVersionId)
+    ),
+    biz_selected AS
+    (
+        SELECT CashCode, CashTypeCode, CashPolarityCode
+        FROM version_context CROSS APPLY App.fnTaxBizCashCodesByVersion(SelectedVersionId)
+    ),
+    biz_active AS
+    (
+        SELECT CashCode, CashTypeCode, CashPolarityCode
+        FROM version_context CROSS APPLY App.fnTaxBizCashCodesByVersion(ActiveVersionId)
+    ),
+    open_projects AS
+    (
+        SELECT DISTINCT CashCode
+        FROM Project.tbProject
+        WHERE ProjectStatusCode BETWEEN 1 AND 2
+          AND ActionOn <= (SELECT DATEADD(DAY, TaxHorizon, CURRENT_TIMESTAMP) FROM App.tbOptions)
+    ),
+    project_selected AS
+    (
+        SELECT project.CashCode, category.CashPolarityCode
+        FROM open_projects AS project
+        JOIN Cash.tbCategoryCodeMap AS category_code
+          ON category_code.VersionId = @CategoryVersionId AND category_code.CashCode = project.CashCode
+        JOIN Cash.tbCategory AS category
+          ON category.VersionId = category_code.VersionId AND category.CategoryCode = category_code.CategoryCode
+        JOIN Cash.tbCode AS code ON code.CashCode = category_code.CashCode
+    ),
+    project_active AS
+    (
+        SELECT project.CashCode, category.CashPolarityCode
+        FROM open_projects AS project
+        CROSS JOIN version_context
+        JOIN Cash.tbCategoryCodeMap AS category_code
+          ON category_code.VersionId = version_context.ActiveVersionId AND category_code.CashCode = project.CashCode
+        JOIN Cash.tbCategory AS category
+          ON category.VersionId = category_code.VersionId AND category.CategoryCode = category_code.CategoryCode
+        JOIN Cash.tbCode AS code ON code.CashCode = category_code.CashCode
+    ),
+    asset_accounts AS
+    (
+        SELECT AccountCode, CashCode
+        FROM Subject.tbAccount
+        WHERE AccountTypeCode = 2 AND AccountClosed = 0
+    ),
+    asset_selected AS
+    (
+        SELECT account.AccountCode, category.CashPolarityCode
+        FROM asset_accounts AS account
+        JOIN Cash.tbCategoryCodeMap AS category_code
+          ON category_code.VersionId = @CategoryVersionId AND category_code.CashCode = account.CashCode
+        JOIN Cash.tbCategory AS category
+          ON category.VersionId = category_code.VersionId AND category.CategoryCode = category_code.CategoryCode
+        JOIN Cash.tbCode AS code ON code.CashCode = category_code.CashCode
+    ),
+    asset_active AS
+    (
+        SELECT account.AccountCode, category.CashPolarityCode
+        FROM asset_accounts AS account
+        CROSS JOIN version_context
+        JOIN Cash.tbCategoryCodeMap AS category_code
+          ON category_code.VersionId = version_context.ActiveVersionId AND category_code.CashCode = account.CashCode
+        JOIN Cash.tbCategory AS category
+          ON category.VersionId = category_code.VersionId AND category.CategoryCode = category_code.CategoryCode
+        JOIN Cash.tbCode AS code ON code.CashCode = category_code.CashCode
+    )
+    SELECT Dependency
+    FROM
+    (
+        SELECT N'VAT_ROOT' AS Dependency
+        WHERE EXISTS (SELECT CashCode FROM vat_selected EXCEPT SELECT CashCode FROM vat_active)
+           OR EXISTS (SELECT CashCode FROM vat_active EXCEPT SELECT CashCode FROM vat_selected)
+        UNION ALL
+        SELECT N'BIZ_ROOT'
+        WHERE EXISTS
+              (SELECT CashCode, CashTypeCode, CashPolarityCode FROM biz_selected
+               EXCEPT SELECT CashCode, CashTypeCode, CashPolarityCode FROM biz_active)
+           OR EXISTS
+              (SELECT CashCode, CashTypeCode, CashPolarityCode FROM biz_active
+               EXCEPT SELECT CashCode, CashTypeCode, CashPolarityCode FROM biz_selected)
+        UNION ALL
+        SELECT N'OPEN_PROJECT_POLARITY'
+        WHERE EXISTS
+              (SELECT CashCode, CashPolarityCode FROM project_selected
+               EXCEPT SELECT CashCode, CashPolarityCode FROM project_active)
+           OR EXISTS
+              (SELECT CashCode, CashPolarityCode FROM project_active
+               EXCEPT SELECT CashCode, CashPolarityCode FROM project_selected)
+        UNION ALL
+        SELECT N'ASSET_ACCOUNT_POLARITY'
+        WHERE EXISTS
+              (SELECT AccountCode, CashPolarityCode FROM asset_selected
+               EXCEPT SELECT AccountCode, CashPolarityCode FROM asset_active)
+           OR EXISTS
+              (SELECT AccountCode, CashPolarityCode FROM asset_active
+               EXCEPT SELECT AccountCode, CashPolarityCode FROM asset_selected)
+    ) AS mismatches
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnCategoryVersionUnmappedCashCodes
+(
+    @CategoryVersionId nvarchar(10),
+    @FromYearNumber smallint,
+    @ToYearNumber smallint,
+    @IncludeOrderBook bit
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    WITH statement_periods AS
+    (
+        SELECT StartOn,
+               LEAD(StartOn, 1, DATEADD(MONTH, 1, StartOn)) OVER (ORDER BY StartOn) AS EndOn
+        FROM App.tbYearPeriod
+        WHERE YearNumber BETWEEN @FromYearNumber AND @ToYearNumber
+    ),
+    horizon AS
+    (
+        SELECT MIN(StartOn) AS StartOn, MAX(EndOn) AS EndOn FROM statement_periods
+    ),
+    candidates AS
+    (
+        SELECT period.CashCode
+        FROM Cash.tbPeriod AS period
+        JOIN App.tbYearPeriod AS year_period ON year_period.StartOn = period.StartOn
+        WHERE year_period.YearNumber BETWEEN @FromYearNumber AND @ToYearNumber
+          AND (period.ForecastValue <> 0 OR period.ForecastTax <> 0
+            OR period.InvoiceValue <> 0 OR period.InvoiceTax <> 0)
+        UNION
+        SELECT item.CashCode
+        FROM Invoice.tbItem AS item
+        JOIN Invoice.tbInvoice AS invoice ON invoice.InvoiceNumber = item.InvoiceNumber
+        CROSS JOIN horizon
+        WHERE invoice.InvoicedOn >= horizon.StartOn AND invoice.InvoicedOn < horizon.EndOn
+        UNION
+        SELECT project.CashCode
+        FROM Invoice.tbProject AS project
+        JOIN Invoice.tbInvoice AS invoice ON invoice.InvoiceNumber = project.InvoiceNumber
+        CROSS JOIN horizon
+        WHERE invoice.InvoicedOn >= horizon.StartOn AND invoice.InvoicedOn < horizon.EndOn
+        UNION
+        SELECT payment.CashCode
+        FROM Cash.tbPayment AS payment
+        CROSS JOIN horizon
+        WHERE payment.PaidOn >= horizon.StartOn AND payment.PaidOn < horizon.EndOn
+        UNION
+        SELECT project.CashCode
+        FROM Project.tbProject AS project
+        CROSS JOIN horizon
+        WHERE @IncludeOrderBook <> 0
+          AND project.ProjectStatusCode IN (1, 2)
+          AND project.ActionOn >= horizon.StartOn AND project.ActionOn < horizon.EndOn
+    )
+    SELECT TOP (101) code.CashCode, code.CashDescription
+    FROM candidates
+    JOIN Cash.tbCode AS code ON code.CashCode = candidates.CashCode
+    LEFT JOIN Cash.tbCategoryCodeMap AS category_code
+      ON category_code.VersionId = @CategoryVersionId AND category_code.CashCode = candidates.CashCode
+    WHERE category_code.CashCode IS NULL
+    ORDER BY code.CashCode
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnFlowCategoryByVersion
+(
+    @CategoryVersionId nvarchar(10),
+    @CashTypeCode smallint
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT CategoryCode, Category, CashPolarityCode, DisplayOrder
+    FROM Cash.tbCategory
+    WHERE VersionId = @CategoryVersionId
+      AND CategoryTypeCode = 0
+      AND CashTypeCode = @CashTypeCode
+      AND IsEnabled <> 0
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnFlowCategoryCashCodesByVersion
+(
+    @CategoryVersionId nvarchar(10),
+    @CategoryCode nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT code.CashCode, code.CashDescription
+    FROM Cash.tbCategoryCodeMap AS category_code
+    JOIN Cash.tbCode AS code
+      ON code.CashCode = category_code.CashCode
+    WHERE category_code.VersionId = @CategoryVersionId
+      AND category_code.CategoryCode = @CategoryCode
+      AND code.IsEnabled <> 0
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnFlowCategoriesByTypeByVersion
+(
+    @CategoryVersionId nvarchar(10),
+    @CashTypeCode smallint,
+    @CategoryTypeCode smallint
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT category.DisplayOrder, category.CategoryCode, category.Category, cash_type.CashType
+    FROM Cash.tbCategory AS category
+    JOIN Cash.tbType AS cash_type
+      ON cash_type.CashTypeCode = category.CashTypeCode
+    WHERE category.VersionId = @CategoryVersionId
+      AND category.CashTypeCode = @CashTypeCode
+      AND category.CategoryTypeCode = @CategoryTypeCode
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnFlowCategoryTotalsByVersion
+(
+    @CategoryVersionId nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT CategoryCode, Category, DisplayOrder
+    FROM Cash.tbCategory
+    WHERE VersionId = @CategoryVersionId
+      AND CategoryTypeCode = 1
+      AND IsEnabled <> 0
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnFlowCategoryTotalCodesByVersion
+(
+    @CategoryVersionId nvarchar(10),
+    @CategoryCode nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT ChildCode AS CategoryCode, DisplayOrder
+    FROM Cash.tbCategoryTotal
+    WHERE VersionId = @CategoryVersionId
+      AND ParentCode = @CategoryCode
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnCategoryExpressionsByVersion
+(
+    @CategoryVersionId nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT category.DisplayOrder,
+           category.CategoryCode,
+           category.Category,
+           expression.Expression,
+           CASE COALESCE(template.Template, N'')
+               WHEN N'' THEN expression.Format
+               ELSE template.Template
+           END AS Format
+    FROM Cash.tbCategory AS category
+    JOIN Cash.tbCategoryExp AS expression
+      ON expression.CategoryCode = category.CategoryCode
+    LEFT JOIN Cash.tbCategoryExprFormat AS template
+      ON template.TemplateCode = expression.Format
+    WHERE category.VersionId = @CategoryVersionId
+      AND category.CategoryTypeCode = 2
+      AND category.IsEnabled <> 0
+      AND expression.SyntaxTypeCode IN (0, 2)
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnCategoryCodeResolveByVersion
+(
+    @CategoryVersionId nvarchar(10),
+    @Token nvarchar(100)
+)
+RETURNS nvarchar(10)
+AS
+BEGIN
+    RETURN
+    (
+        SELECT CASE
+            WHEN EXISTS (SELECT 1 FROM Cash.tbCategory WHERE VersionId = @CategoryVersionId AND CategoryCode = @Token)
+                THEN @Token
+            WHEN EXISTS
+            (
+                SELECT 1
+                FROM Cash.tbCategoryCodeMap AS category_code
+                JOIN Cash.tbCode AS code ON code.CashCode = category_code.CashCode
+                WHERE category_code.VersionId = @CategoryVersionId
+                  AND category_code.CashCode = @Token
+                  AND code.IsEnabled <> 0
+            ) THEN @Token
+            WHEN (SELECT COUNT(*) FROM Cash.tbCategory WHERE VersionId = @CategoryVersionId AND Category = @Token) = 1
+                THEN (SELECT CategoryCode FROM Cash.tbCategory WHERE VersionId = @CategoryVersionId AND Category = @Token)
+            WHEN NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE VersionId = @CategoryVersionId AND Category = @Token)
+             AND
+             (
+                SELECT COUNT(*)
+                FROM Cash.tbCategoryCodeMap AS category_code
+                JOIN Cash.tbCode AS code ON code.CashCode = category_code.CashCode
+                WHERE category_code.VersionId = @CategoryVersionId
+                  AND code.CashDescription = @Token
+                  AND code.IsEnabled <> 0
+             ) = 1
+                THEN
+                (
+                    SELECT category_code.CashCode
+                    FROM Cash.tbCategoryCodeMap AS category_code
+                    JOIN Cash.tbCode AS code ON code.CashCode = category_code.CashCode
+                    WHERE category_code.VersionId = @CategoryVersionId
+                      AND code.CashDescription = @Token
+                      AND code.IsEnabled <> 0
+                )
+            ELSE N''
+        END
+    );
+END;
 GO
 
 ALTER DATABASE CURRENT SET RECURSIVE_TRIGGERS OFF;

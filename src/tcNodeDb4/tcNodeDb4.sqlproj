@@ -827,6 +827,16 @@
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_STD_MTD_2026.sql" />
     <Build Include="App\Stored Procedures\proc_Template_ST_SOLE_CUR_TAX_MTD_2026.sql" />
     <Build Include="App\Stored Procedures\proc_StatutoryContext.sql" />
+    <Build Include="Cash\Functions\fnCategoryVersionResolve.sql" />
+    <Build Include="Cash\Functions\fnCategoryVersionProjectionMismatches.sql" />
+    <Build Include="Cash\Functions\fnCategoryVersionUnmappedCashCodes.sql" />
+    <Build Include="Cash\Functions\fnFlowCategoryByVersion.sql" />
+    <Build Include="Cash\Functions\fnFlowCategoryCashCodesByVersion.sql" />
+    <Build Include="Cash\Functions\fnFlowCategoriesByTypeByVersion.sql" />
+    <Build Include="Cash\Functions\fnFlowCategoryTotalsByVersion.sql" />
+    <Build Include="Cash\Functions\fnFlowCategoryTotalCodesByVersion.sql" />
+    <Build Include="Cash\Functions\fnCategoryExpressionsByVersion.sql" />
+    <Build Include="Cash\Functions\fnCategoryCodeResolveByVersion.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />

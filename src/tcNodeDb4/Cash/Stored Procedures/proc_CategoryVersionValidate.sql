@@ -38,6 +38,15 @@ BEGIN
     IF EXISTS
     (
         SELECT 1
+        FROM Cash.tbCategory
+        WHERE VersionId = @VersionId
+          AND (CashPolarityCode IS NULL OR CashTypeCode IS NULL)
+    )
+        THROW 51175, 'Every Category Tree category requires a Cash Polarity and Cash Type.', 1;
+
+    IF EXISTS
+    (
+        SELECT 1
         FROM Cash.tbCategoryTotal AS edge
         JOIN Cash.tbCategory AS parent
           ON parent.VersionId = edge.VersionId

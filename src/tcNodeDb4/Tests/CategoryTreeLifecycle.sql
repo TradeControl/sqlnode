@@ -8,6 +8,16 @@
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
+IF EXISTS
+(
+    SELECT 1
+    FROM sys.columns
+    WHERE object_id = OBJECT_ID(N'Cash.tbCategory')
+      AND name IN (N'CashPolarityCode', N'CashTypeCode')
+      AND is_nullable = 1
+)
+    THROW 51962, 'Category classification fields must be structurally required.', 1;
+
 IF COL_LENGTH(N'App.tbOptions', N'NetProfitCode') IS NOT NULL
    OR COL_LENGTH(N'App.tbOptions', N'VatCategoryCode') IS NOT NULL
    OR COL_LENGTH(N'Cash.tbCode', N'CategoryCode') IS NOT NULL

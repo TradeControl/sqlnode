@@ -4,8 +4,8 @@ CREATE PROCEDURE [Cash].[proc_CategorySave]
     @CategoryCode NVARCHAR(10),
     @Category NVARCHAR(50),
     @CategoryTypeCode SMALLINT,
-    @CashPolarityCode SMALLINT = NULL,
-    @CashTypeCode SMALLINT = NULL,
+    @CashPolarityCode SMALLINT,
+    @CashTypeCode SMALLINT,
     @DisplayOrder SMALLINT = 0,
     @IsEnabled SMALLINT = 1,
     @ChangeNote NVARCHAR(MAX) = NULL

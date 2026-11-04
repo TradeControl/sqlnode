@@ -1,6 +1,6 @@
 ﻿
-CREATE   VIEW Cash.vwCategoryTotals
+CREATE VIEW Cash.vwCategoryTotals
 AS
 	SELECT CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled, InsertedBy, InsertedOn, UpdatedBy, UpdatedOn, RowVer
-	FROM            Cash.tbCategory
-	WHERE       (CategoryTypeCode = 1)
+	FROM Cash.vwCategoryActive
+	WHERE CategoryTypeCode = 1;
