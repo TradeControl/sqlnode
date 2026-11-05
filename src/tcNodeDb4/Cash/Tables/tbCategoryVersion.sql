@@ -14,8 +14,8 @@ CREATE TABLE [Cash].[tbCategoryVersion]
     [ContentChangedOn] DATETIME2(3) NOT NULL
         CONSTRAINT [DF_Cash_tbCategoryVersion_ContentChangedOn]
         DEFAULT (SYSUTCDATETIME()),
-    [EffectiveFromOn] DATETIME2(3) NULL,
-    [EffectiveToOn] DATETIME2(3) NULL,
+    [EffectiveFromOn] DATE NULL,
+    [EffectiveToOn] DATE NULL,
     [CreatedOn] DATETIME2(3) NOT NULL
         CONSTRAINT [DF_Cash_tbCategoryVersion_CreatedOn]
         DEFAULT (SYSUTCDATETIME()),
@@ -61,7 +61,7 @@ CREATE TABLE [Cash].[tbCategoryVersion]
     CONSTRAINT [CK_Cash_tbCategoryVersion_EffectiveInterval]
         CHECK
         (
-            ([VersionStatusCode] = 0 AND [EffectiveFromOn] IS NULL AND [EffectiveToOn] IS NULL)
+            ([VersionStatusCode] = 0 AND [EffectiveToOn] IS NULL)
             OR
             ([VersionStatusCode] > 0 AND [VersionStatusCode] < 3
                 AND [EffectiveFromOn] IS NOT NULL AND [EffectiveToOn] IS NULL)

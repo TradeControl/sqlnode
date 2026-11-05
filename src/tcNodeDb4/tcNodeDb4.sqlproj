@@ -717,7 +717,6 @@
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Transfers.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_TaxOnProfit.sql" />
     <Build Include="Cash\Views\vwEquityReconciliationByYear.sql" />
-    <Build Include="Cash\Views\vwFlowReconcilationByYear.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_SoleTraderCapitalIntroduced.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
@@ -837,6 +836,13 @@
     <Build Include="Cash\Functions\fnFlowCategoryTotalCodesByVersion.sql" />
     <Build Include="Cash\Functions\fnCategoryExpressionsByVersion.sql" />
     <Build Include="Cash\Functions\fnCategoryCodeResolveByVersion.sql" />
+    <Build Include="Cash\Functions\fnCategoryVersionTimeline.sql" />
+    <Build Include="App\Functions\fnStatementPeriods.sql" />
+    <Build Include="Cash\Functions\fnProfitAndLossDataByVersion.sql" />
+    <Build Include="Cash\Functions\fnProfitAndLossByYearByVersion.sql" />
+    <Build Include="Cash\Functions\fnTaxBizTotalsByPeriodByVersion.sql" />
+    <Build Include="Cash\Functions\fnTaxBizComputationByYearByVersion.sql" />
+    <Build Include="Cash\Functions\fnEquityReconciliationByYearByVersion.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment.sql" />
@@ -859,6 +865,8 @@
     <None Include="Tests\CategoryTreeShadowVersion.sql" />
     <None Include="Tests\CategoryTreeCompositeKeys.sql" />
     <None Include="Tests\CategoryTreeLifecycle.sql" />
+    <None Include="Tests\CategoryTreeControlledChangeover.sql" />
+    <None Include="Tests\CategoryTreeEquityReconciliationByVersion.sql" />
     <None Include="Tests\SubjectAgedBalances.sql" />
     <None Include="Scripts\NamespaceSelector_testscript.sql" />
     <None Include="Scripts\DB4 cat change control migration script.sql" />

@@ -11726,7 +11726,7 @@ SET NUMERIC_ROUNDABORT OFF;
 DECLARE
     @DatabaseName SYSNAME = DB_NAME(),
     @ExpectedSourceVersion NVARCHAR(20) = N'4.1.18',
-    @TargetVersion NVARCHAR(20) = N'4.1.19';
+    @TargetVersion NVARCHAR(20) = N'4.1.20';
 
 IF @DatabaseName NOT IN
 (
@@ -11916,8 +11916,8 @@ BEGIN TRY
         CanonicalByteLength BIGINT NULL,
         ContentChangedOn DATETIME2(3) NOT NULL
             CONSTRAINT DF_Cash_tbCategoryVersion_ContentChangedOn DEFAULT (SYSUTCDATETIME()),
-        EffectiveFromOn DATETIME2(3) NULL,
-        EffectiveToOn DATETIME2(3) NULL,
+        EffectiveFromOn DATE NULL,
+        EffectiveToOn DATE NULL,
         CreatedOn DATETIME2(3) NOT NULL
             CONSTRAINT DF_Cash_tbCategoryVersion_CreatedOn DEFAULT (SYSUTCDATETIME()),
         CreatedByUserId NVARCHAR(10) NOT NULL,
@@ -11942,7 +11942,7 @@ BEGIN TRY
             CHECK ((CanonicalSha256 IS NULL AND CanonicalByteLength IS NULL)
                 OR (CanonicalSha256 IS NOT NULL AND CanonicalByteLength >= 0)),
         CONSTRAINT CK_Cash_tbCategoryVersion_EffectiveInterval
-            CHECK ((VersionStatusCode = 0 AND EffectiveFromOn IS NULL AND EffectiveToOn IS NULL)
+            CHECK ((VersionStatusCode = 0 AND EffectiveToOn IS NULL)
                 OR (VersionStatusCode > 0 AND VersionStatusCode < 3
                     AND EffectiveFromOn IS NOT NULL AND EffectiveToOn IS NULL)
                 OR (VersionStatusCode = 3 AND EffectiveFromOn IS NOT NULL
@@ -19652,7 +19652,7 @@ AS
 
 		UPDATE Cash.tbCategoryVersion
 		SET VersionStatusCode = 1,
-			EffectiveFromOn = SYSUTCDATETIME()
+			EffectiveFromOn = CONVERT(DATE, SYSUTCDATETIME())
 		WHERE VersionId = @CategoryVersionId;
 
 		UPDATE App.tbOptions
@@ -20508,7 +20508,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 19;
+		@SQLBuild INT = 20;
 
 	IF NOT EXISTS
 	(
@@ -22368,6 +22368,7 @@ CREATE PROCEDURE [Cash].[proc_CategoryVersionClone]
 (
     @Description NVARCHAR(100),
     @Notes NVARCHAR(MAX) = NULL,
+    @EffectiveFromOn DATE = NULL,
     @VersionId NVARCHAR(10) = NULL OUTPUT
 )
 AS
@@ -22430,12 +22431,12 @@ BEGIN
         INSERT INTO Cash.tbCategoryVersion
         (
             VersionId, VersionStatusCode, Description, Notes,
-            PredecessorVersionId, BaseContentSha256, CreatedByUserId
+            PredecessorVersionId, BaseContentSha256, EffectiveFromOn, CreatedByUserId
         )
         VALUES
         (
             @VersionId, 0, @Description, @Notes,
-            @PredecessorVersionId, @BaseContentSha256, @UserId
+            @PredecessorVersionId, @BaseContentSha256, @EffectiveFromOn, @UserId
         );
 
         INSERT INTO Cash.tbCategory
@@ -22509,7 +22510,9 @@ BEGIN
         @PredecessorSha256 BINARY(32),
         @DraftSha256 BINARY(32),
         @CanonicalByteLength BIGINT,
-        @TransitionOn DATETIME2(3) = SYSUTCDATETIME(),
+        @PublicationOn DATE = CONVERT(DATE, SYSUTCDATETIME()),
+        @EffectiveFromOn DATE,
+        @PredecessorEffectiveFromOn DATE,
         @UserId NVARCHAR(10),
         @UserName NVARCHAR(50),
         @LockResult INT;
@@ -22539,7 +22542,8 @@ BEGIN
         FROM App.tbOptions WITH (UPDLOCK, HOLDLOCK);
 
         SELECT
-            @BaseContentSha256 = BaseContentSha256
+            @BaseContentSha256 = BaseContentSha256,
+            @EffectiveFromOn = EffectiveFromOn
         FROM Cash.tbCategoryVersion WITH (UPDLOCK, HOLDLOCK)
         WHERE VersionId = @VersionId
           AND VersionStatusCode = 0
@@ -22548,14 +22552,24 @@ BEGIN
         IF @BaseContentSha256 IS NULL
             THROW 51127, 'The Draft is not a successor of the active version.', 1;
 
+        IF @EffectiveFromOn IS NULL
+            THROW 51165, 'Category Tree publication requires a proposed effective date.', 1;
+
+        IF @EffectiveFromOn <> @PublicationOn
+            THROW 51166, 'A Category Tree Draft may be published only on its proposed effective date.', 1;
+
         SELECT
             @PredecessorStatusCode = VersionStatusCode,
-            @PredecessorSha256 = CanonicalSha256
+            @PredecessorSha256 = CanonicalSha256,
+            @PredecessorEffectiveFromOn = EffectiveFromOn
         FROM Cash.tbCategoryVersion WITH (UPDLOCK, HOLDLOCK)
         WHERE VersionId = @PredecessorVersionId;
 
         IF @PredecessorStatusCode NOT IN (1, 2)
             THROW 51128, 'The active predecessor is not eligible for successor publication.', 1;
+
+        IF @PredecessorEffectiveFromOn IS NULL OR @EffectiveFromOn <= @PredecessorEffectiveFromOn
+            THROW 51167, 'A successor Category Tree must become effective after its predecessor.', 1;
 
         IF @PredecessorStatusCode = 1
             EXEC Cash.proc_CategoryVersionCanonicalise
@@ -22573,7 +22587,7 @@ BEGIN
 
         UPDATE Cash.tbCategoryVersion
         SET VersionStatusCode = 1,
-            EffectiveFromOn = @TransitionOn,
+            EffectiveFromOn = @EffectiveFromOn,
             EffectiveToOn = NULL
         WHERE VersionId = @VersionId;
 
@@ -22582,7 +22596,7 @@ BEGIN
 
         UPDATE Cash.tbCategoryVersion
         SET VersionStatusCode = 3,
-            EffectiveToOn = @TransitionOn
+            EffectiveToOn = DATEADD(DAY, -1, @EffectiveFromOn)
         WHERE VersionId = @PredecessorVersionId;
 
         INSERT INTO Cash.tbCategoryVersionEvent
@@ -26985,6 +26999,51 @@ BEGIN
 END;
 GO
 
+PRINT N'Installing Cash Statement period-attribution functions...';
+GO
+
+CREATE OR ALTER FUNCTION App.fnStatementPeriods()
+RETURNS TABLE
+AS
+RETURN
+(
+    WITH periods AS
+    (
+        SELECT
+            period.YearNumber,
+            period.MonthNumber,
+            CONVERT(date, period.StartOn) AS StartOn,
+            CONVERT(date, LEAD(period.StartOn, 1, DATEADD(month, 1, period.StartOn))
+                OVER (ORDER BY period.StartOn)) AS NextStartOn
+        FROM App.tbYearPeriod AS period
+        JOIN App.tbYear AS year
+          ON year.YearNumber = period.YearNumber
+        WHERE year.CashStatusCode < 3
+    )
+    SELECT
+        YearNumber,
+        MonthNumber,
+        StartOn,
+        DATEADD(day, -1, NextStartOn) AS EndOn
+    FROM periods
+);
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnCategoryVersionTimeline()
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT
+        VersionId,
+        EffectiveFromOn,
+        EffectiveToOn
+    FROM Cash.tbCategoryVersion
+    WHERE VersionStatusCode IN (1, 2, 3)
+      AND EffectiveFromOn IS NOT NULL
+);
+GO
+
 ALTER DATABASE CURRENT SET RECURSIVE_TRIGGERS OFF;
 GO
 
@@ -29486,7 +29545,7 @@ BEGIN TRY
 	DECLARE
 		@SQLDataVersion REAL = 4,
 		@SQLRelease INT = 1,
-		@SQLBuild INT = 19;
+		@SQLBuild INT = 20;
 
 	IF NOT EXISTS
 	(
@@ -32648,7 +32707,7 @@ BEGIN TRY
 
     UPDATE Cash.tbCategoryVersion
     SET VersionStatusCode = 1,
-        EffectiveFromOn = @MigrationOn,
+        EffectiveFromOn = CONVERT(DATE, @MigrationOn),
         EffectiveToOn = NULL
     WHERE VersionId = @InitialVersionId
       AND VersionStatusCode = 0;
@@ -32702,17 +32761,6 @@ BEGIN TRY
     )
         THROW 51276, 'The retired Usr menu subsystem was not removed.', 1;
 
-    IF NOT EXISTS
-    (
-        SELECT 1
-        FROM App.tbInstall
-        WHERE SQLDataVersion = 4
-          AND SQLRelease = 1
-          AND SQLBuild = 19
-    )
-        INSERT App.tbInstall (SQLDataVersion, SQLRelease, SQLBuild)
-        VALUES (4, 1, 19);
-
     IF NOT EXISTS (SELECT 1 FROM App.tbDocOpenMode)
         INSERT App.tbDocOpenMode (OpenMode, OpenModeDescription)
         VALUES (0, N'Normal'),
@@ -32725,7 +32773,14 @@ BEGIN TRY
         VALUES (1);
 
     ALTER TABLE App.tbDoc WITH CHECK CHECK CONSTRAINT FK_App_tbDoc_App_tbDocOpenMode;
-    ALTER TABLE App.tbOptions WITH CHECK CHECK CONSTRAINT FK_App_tbOptions_Cash_tbCategoryVersion;
+    /*
+        The generated build payload recreates every App.tbOptions foreign key
+        WITH NOCHECK while changing the singleton table shape. Revalidate the
+        complete one-row options boundary, not only the new Category Version
+        relationship, so this one-off sandbox adoption cannot leave ordinary
+        configuration relationships untrusted.
+    */
+    ALTER TABLE App.tbOptions WITH CHECK CHECK CONSTRAINT ALL;
     ALTER TABLE Cash.tbCategory WITH CHECK CHECK CONSTRAINT FK_Cash_tbCategory_Cash_tbCategoryType;
     ALTER TABLE Cash.tbCategory WITH CHECK CHECK CONSTRAINT FK_Cash_tbCategory_Cash_tbCategoryVersion;
     ALTER TABLE Cash.tbCategory WITH CHECK CHECK CONSTRAINT FK_Cash_tbCategory_Cash_tbPolarity;
@@ -32739,6 +32794,15 @@ BEGIN TRY
     ALTER TABLE Cash.tbCategoryVersion WITH CHECK CHECK CONSTRAINT CK_Cash_tbCategoryVersion_EffectiveInterval;
     ALTER TABLE App.tbDatabaseIdentity WITH CHECK CHECK CONSTRAINT CK_App_tbDatabaseIdentity_Singleton;
 
+    IF EXISTS
+    (
+        SELECT 1
+        FROM sys.foreign_keys
+        WHERE parent_object_id = OBJECT_ID(N'App.tbOptions')
+          AND (is_not_trusted = 1 OR is_disabled = 1)
+    )
+        THROW 51277, 'An App.tbOptions foreign key remains disabled or untrusted after migration.', 1;
+
     COMMIT TRANSACTION;
 END TRY
 BEGIN CATCH
@@ -32747,13 +32811,552 @@ BEGIN CATCH
 END CATCH;
 GO
 
+PRINT N'Creating Function [Cash].[fnProfitAndLossDataByVersion]...';
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnProfitAndLossDataByVersion
+(
+    @CategoryVersionId nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    WITH active_periods AS
+    (
+        SELECT period.StartOn
+        FROM App.tbYear AS year
+        JOIN App.tbYearPeriod AS period
+          ON period.YearNumber = year.YearNumber
+        WHERE year.CashStatusCode BETWEEN 1 AND 2
+    ),
+    category_data AS
+    (
+        SELECT cash_code.CategoryCode,
+               cash_code.CashTypeCode,
+               period.StartOn,
+               InvoiceValue = CASE cash_code.CashPolarityCode
+                   WHEN 0 THEN period.InvoiceValue * -1
+                   ELSE period.InvoiceValue
+               END
+        FROM App.fnTaxBizCashCodesByVersion(@CategoryVersionId) AS cash_code
+        JOIN Cash.tbPeriod AS period
+          ON period.CashCode = cash_code.CashCode
+        JOIN active_periods
+          ON active_periods.StartOn = period.StartOn
+    )
+    SELECT CategoryCode,
+           CashTypeCode,
+           StartOn,
+           InvoiceValue = SUM(InvoiceValue)
+    FROM category_data
+    GROUP BY CategoryCode, CashTypeCode, StartOn
+);
+GO
+
+PRINT N'Creating Function [Cash].[fnProfitAndLossByYearByVersion]...';
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnProfitAndLossByYearByVersion
+(
+    @CategoryVersionId nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT financial_year.YearNumber,
+           financial_year.Description,
+           category.DisplayOrder,
+           category.CategoryCode,
+           category.Category,
+           category.CashTypeCode,
+           InvoiceValue = SUM(profit_data.InvoiceValue)
+    FROM Cash.fnProfitAndLossDataByVersion(@CategoryVersionId) AS profit_data
+    JOIN Cash.tbCategory AS category
+      ON category.VersionId = @CategoryVersionId
+     AND category.CategoryCode = profit_data.CategoryCode
+    JOIN App.tbYearPeriod AS period
+      ON period.StartOn = profit_data.StartOn
+    JOIN App.tbYear AS financial_year
+      ON financial_year.YearNumber = period.YearNumber
+    GROUP BY financial_year.YearNumber,
+             financial_year.Description,
+             category.DisplayOrder,
+             category.CategoryCode,
+             category.Category,
+             category.CashTypeCode
+);
+GO
+
+PRINT N'Creating Function [Cash].[fnTaxBizTotalsByPeriodByVersion]...';
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnTaxBizTotalsByPeriodByVersion
+(
+    @CategoryVersionId nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    WITH cash_codes AS
+    (
+        SELECT CategoryCode, CashCode, CashTypeCode, CashPolarityCode
+        FROM App.fnTaxBizCashCodesByVersion(@CategoryVersionId)
+    ),
+    invoiced_projects AS
+    (
+        SELECT StartOn =
+               (
+                   SELECT TOP (1) period.StartOn
+                   FROM App.tbYearPeriod AS period
+                   WHERE period.StartOn <= invoice.InvoicedOn
+                   ORDER BY period.StartOn DESC
+               ),
+               InvoiceValue = CASE invoice_type.CashPolarityCode
+                   WHEN 0 THEN project.InvoiceValue * -1
+                   ELSE project.InvoiceValue
+               END
+        FROM Invoice.tbProject AS project
+        JOIN cash_codes
+          ON cash_codes.CashCode = project.CashCode
+        JOIN Invoice.tbInvoice AS invoice
+          ON invoice.InvoiceNumber = project.InvoiceNumber
+        JOIN Invoice.tbType AS invoice_type
+          ON invoice_type.InvoiceTypeCode = invoice.InvoiceTypeCode
+        WHERE cash_codes.CashTypeCode < 3
+    ),
+    invoiced_items AS
+    (
+        SELECT StartOn =
+               (
+                   SELECT TOP (1) period.StartOn
+                   FROM App.tbYearPeriod AS period
+                   WHERE period.StartOn <= invoice.InvoicedOn
+                   ORDER BY period.StartOn DESC
+               ),
+               InvoiceValue = CASE invoice_type.CashPolarityCode
+                   WHEN 0 THEN item.InvoiceValue * -1
+                   ELSE item.InvoiceValue
+               END
+        FROM Invoice.tbItem AS item
+        JOIN cash_codes
+          ON cash_codes.CashCode = item.CashCode
+        JOIN Invoice.tbInvoice AS invoice
+          ON invoice.InvoiceNumber = item.InvoiceNumber
+        JOIN Invoice.tbType AS invoice_type
+          ON invoice_type.InvoiceTypeCode = invoice.InvoiceTypeCode
+        WHERE cash_codes.CashTypeCode < 3
+    ),
+    assets AS
+    (
+        SELECT period.StartOn,
+               AssetValue = CASE cash_codes.CashPolarityCode
+                   WHEN 0 THEN period.InvoiceValue * -1
+                   ELSE period.InvoiceValue
+               END
+        FROM cash_codes
+        JOIN Cash.tbPeriod AS period
+          ON period.CashCode = cash_codes.CashCode
+        WHERE cash_codes.CashTypeCode = 2
+    ),
+    netprofits AS
+    (
+        SELECT StartOn, NetProfit = SUM(InvoiceValue)
+        FROM invoiced_projects
+        GROUP BY StartOn
+
+        UNION
+
+        SELECT StartOn, NetProfit = SUM(InvoiceValue)
+        FROM invoiced_items
+        GROUP BY StartOn
+
+        UNION
+
+        SELECT StartOn, NetProfit = SUM(AssetValue)
+        FROM assets
+        GROUP BY StartOn
+    ),
+    netprofit_consolidated AS
+    (
+        SELECT StartOn, NetProfit = SUM(NetProfit)
+        FROM netprofits
+        GROUP BY StartOn
+    )
+    SELECT period.StartOn,
+           netprofit.NetProfit,
+           BusinessTax = CAST(netprofit.NetProfit * period.BusinessTaxRate
+               + period.BusinessTaxAdjustment AS decimal(18,5)),
+           period.BusinessTaxAdjustment
+    FROM netprofit_consolidated AS netprofit
+    JOIN App.tbYearPeriod AS period
+      ON period.StartOn = netprofit.StartOn
+);
+GO
+
+PRINT N'Creating Function [Cash].[fnTaxBizComputationByYearByVersion]...';
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnTaxBizComputationByYearByVersion
+(
+    @CategoryVersionId nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    WITH year_source AS
+    (
+        SELECT year.YearNumber,
+               year.Description,
+               PeriodStart = CONVERT(date, MIN(period.StartOn)),
+               PeriodEnd = CONVERT(date, DATEADD(day, -1, DATEADD(month, 1, MAX(period.StartOn)))),
+               TaxableResult = CONVERT(decimal(38,5), SUM(COALESCE(total.NetProfit, 0))),
+               BusinessTaxAdjustment = CONVERT(decimal(38,5), SUM(period.BusinessTaxAdjustment)),
+               EffectiveTaxRate = CONVERT(decimal(38,12),
+                   CONVERT(decimal(28,12),
+                       SUM(CONVERT(decimal(19,12), period.BusinessTaxRate)
+                           * DATEDIFF(day, period.StartOn, DATEADD(month, 1, period.StartOn))))
+                   / NULLIF(CONVERT(decimal(10,0),
+                       SUM(DATEDIFF(day, period.StartOn, DATEADD(month, 1, period.StartOn)))), 0))
+        FROM App.tbYear AS year
+        JOIN App.tbYearPeriod AS period
+          ON period.YearNumber = year.YearNumber
+        LEFT JOIN Cash.fnTaxBizTotalsByPeriodByVersion(@CategoryVersionId) AS total
+          ON total.StartOn = period.StartOn
+        GROUP BY year.YearNumber, year.Description
+    ),
+    ordered AS
+    (
+        SELECT *, SequenceNumber = ROW_NUMBER() OVER (ORDER BY YearNumber)
+        FROM year_source
+    ),
+    tax_rollup AS
+    (
+        SELECT source.SequenceNumber,
+               source.YearNumber,
+               source.Description,
+               source.PeriodStart,
+               source.PeriodEnd,
+               source.TaxableResult,
+               source.BusinessTaxAdjustment,
+               source.EffectiveTaxRate,
+               OpeningLoss = CONVERT(decimal(38,5), 0),
+               LossCreated = CONVERT(decimal(38,5), CASE
+                   WHEN source.TaxableResult < 0 THEN -source.TaxableResult
+                   ELSE 0
+               END),
+               LossUsed = CONVERT(decimal(38,5), 0),
+               ClosingLoss = CONVERT(decimal(38,5), CASE
+                   WHEN source.TaxableResult < 0 THEN -source.TaxableResult
+                   ELSE 0
+               END),
+               TaxableProfitAfterRelief = CONVERT(decimal(38,5), CASE
+                   WHEN source.TaxableResult > 0 THEN source.TaxableResult
+                   ELSE 0
+               END)
+        FROM ordered AS source
+        WHERE source.SequenceNumber = 1
+
+        UNION ALL
+
+        SELECT source.SequenceNumber,
+               source.YearNumber,
+               source.Description,
+               source.PeriodStart,
+               source.PeriodEnd,
+               source.TaxableResult,
+               source.BusinessTaxAdjustment,
+               source.EffectiveTaxRate,
+               OpeningLoss = CONVERT(decimal(38,5), rollup.ClosingLoss),
+               LossCreated = CONVERT(decimal(38,5), CASE
+                   WHEN source.TaxableResult < 0 THEN -source.TaxableResult
+                   ELSE 0
+               END),
+               LossUsed = CONVERT(decimal(38,5), CASE
+                   WHEN source.TaxableResult <= 0 THEN 0
+                   WHEN rollup.ClosingLoss < source.TaxableResult THEN rollup.ClosingLoss
+                   ELSE source.TaxableResult
+               END),
+               ClosingLoss = CONVERT(decimal(38,5), CASE
+                   WHEN source.TaxableResult < 0 THEN rollup.ClosingLoss - source.TaxableResult
+                   WHEN rollup.ClosingLoss > source.TaxableResult THEN rollup.ClosingLoss - source.TaxableResult
+                   ELSE 0
+               END),
+               TaxableProfitAfterRelief = CONVERT(decimal(38,5), CASE
+                   WHEN source.TaxableResult > rollup.ClosingLoss
+                       THEN source.TaxableResult - rollup.ClosingLoss
+                   ELSE 0
+               END)
+        FROM tax_rollup AS rollup
+        JOIN ordered AS source
+          ON source.SequenceNumber = rollup.SequenceNumber + 1
+    ),
+    computed AS
+    (
+        SELECT *,
+               TaxBeforeRelief = CONVERT(decimal(38,5),
+                   ROUND(CASE WHEN TaxableResult > 0 THEN TaxableResult ELSE 0 END
+                       * EffectiveTaxRate + BusinessTaxAdjustment, 5)),
+               TaxDue = CONVERT(decimal(38,5),
+                   ROUND(TaxableProfitAfterRelief * EffectiveTaxRate
+                       + BusinessTaxAdjustment, 5))
+        FROM tax_rollup
+    )
+    SELECT YearNumber,
+           Description,
+           PeriodStart,
+           PeriodEnd,
+           TaxableResult,
+           OpeningLoss,
+           LossCreated,
+           LossUsed,
+           ClosingLoss,
+           EffectiveTaxRate,
+           BusinessTaxAdjustment,
+           TaxableProfitAfterRelief,
+           TaxBeforeRelief,
+           TaxReliefApplied = CONVERT(decimal(38,5), TaxDue - TaxBeforeRelief),
+           TaxDue
+    FROM computed
+);
+GO
+
+PRINT N'Creating Function [Cash].[fnEquityReconciliationByYearByVersion]...';
+GO
+
+CREATE OR ALTER FUNCTION Cash.fnEquityReconciliationByYearByVersion
+(
+    @CategoryVersionId nvarchar(10)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    WITH first_period AS
+    (
+        SELECT StartOn = MIN(period.StartOn)
+        FROM App.tbYearPeriod AS period
+        JOIN App.tbYear AS year
+          ON year.YearNumber = period.YearNumber
+        WHERE year.CashStatusCode BETWEEN 1 AND 2
+    ),
+    opening_subject_position AS
+    (
+        SELECT OpeningSubjectPosition = -SUM(subject.OpeningBalance)
+        FROM Subject.tbSubject AS subject
+        WHERE subject.OpeningBalance <> 0
+    ),
+    opening_account_position AS
+    (
+        SELECT OpeningAccountPosition = SUM(account.OpeningBalance)
+        FROM Subject.tbAccount AS account
+        WHERE account.AccountTypeCode = 0
+          AND account.AccountClosed = 0
+          AND account.OpeningBalance <> 0
+    ),
+    opening_capital AS
+    (
+        SELECT Capital = SUM(balance_sheet.Balance)
+        FROM Cash.vwBalanceSheet AS balance_sheet
+        JOIN first_period
+          ON first_period.StartOn = balance_sheet.StartOn
+    ),
+    year_bounds AS
+    (
+        SELECT period.YearNumber, YearEndOn = MAX(period.StartOn)
+        FROM App.tbYearPeriod AS period
+        JOIN App.tbYear AS year
+          ON year.YearNumber = period.YearNumber
+        WHERE year.CashStatusCode BETWEEN 1 AND 2
+        GROUP BY period.YearNumber
+    ),
+    closing_capital AS
+    (
+        SELECT bounds.YearNumber,
+               StartOn = bounds.YearEndOn,
+               Capital = SUM(balance_sheet.Balance)
+        FROM year_bounds AS bounds
+        JOIN Cash.vwBalanceSheet AS balance_sheet
+          ON balance_sheet.StartOn = bounds.YearEndOn
+        GROUP BY bounds.YearNumber, bounds.YearEndOn
+    ),
+    balances AS
+    (
+        SELECT capital.YearNumber,
+               OpeningCapital = LAG(capital.Capital) OVER (ORDER BY capital.StartOn),
+               ClosingCapital = capital.Capital
+        FROM closing_capital AS capital
+    ),
+    profit_by_year AS
+    (
+        SELECT profit.YearNumber, Profit = SUM(profit.InvoiceValue)
+        FROM Cash.fnProfitAndLossByYearByVersion(@CategoryVersionId) AS profit
+        GROUP BY profit.YearNumber
+    ),
+    business_tax_by_year AS
+    (
+        SELECT YearNumber,
+               BusinessTaxExpense = CASE Cash.fnGetBizTaxType()
+                   WHEN 0 THEN TaxDue
+                   ELSE 0
+               END,
+               TaxCarry = TaxReliefApplied,
+               OpeningLoss,
+               ClosingLoss
+        FROM Cash.fnTaxBizComputationByYearByVersion(@CategoryVersionId)
+    ),
+    loss_cf_delta AS
+    (
+        SELECT YearNumber,
+               OpeningLossesCarriedForward = LAG(ClosingLoss) OVER (ORDER BY YearNumber),
+               ClosingLossesCarriedForward = ClosingLoss
+        FROM business_tax_by_year
+    ),
+    capital_position_by_year AS
+    (
+        SELECT bounds.YearNumber,
+               CapitalPosition = SUM(asset.Balance)
+        FROM year_bounds AS bounds
+        JOIN Cash.vwBalanceSheetAssets AS asset
+          ON asset.StartOn = bounds.YearEndOn
+        JOIN Subject.tbAccount AS account
+          ON account.AccountCode = asset.AssetCode
+        WHERE account.BalanceConstraintCode = 2
+        GROUP BY bounds.YearNumber
+    ),
+    capital_movement_by_year AS
+    (
+        SELECT YearNumber,
+               CapitalMovement = COALESCE(CapitalPosition, 0)
+                   - COALESCE(LAG(CapitalPosition) OVER (ORDER BY YearNumber), 0)
+        FROM capital_position_by_year
+    ),
+    reconciliation AS
+    (
+        SELECT year.YearNumber,
+               year.Description,
+               OpeningCapital = CASE
+                   WHEN balance.OpeningCapital IS NULL THEN 0
+                   ELSE ROUND(balance.OpeningCapital, 2)
+               END,
+               ClosingCapital = ROUND(balance.ClosingCapital, 2),
+               Profit = ROUND(profit.Profit, 2),
+               BusinessTax = ROUND(COALESCE(tax.BusinessTaxExpense, 0), 2),
+               ProfitAfterTax = ROUND(COALESCE(profit.Profit, 0)
+                   - COALESCE(tax.BusinessTaxExpense, 0), 2),
+               TaxCarry = ROUND(COALESCE(tax.TaxCarry, 0), 2),
+               OpeningSubjectPosition = CASE
+                   WHEN balance.OpeningCapital IS NULL
+                       THEN COALESCE((SELECT OpeningSubjectPosition FROM opening_subject_position), 0)
+                   ELSE 0
+               END,
+               OpeningAccountPosition = CASE
+                   WHEN balance.OpeningCapital IS NULL
+                       THEN COALESCE((SELECT OpeningAccountPosition FROM opening_account_position), 0)
+                   ELSE 0
+               END,
+               OpeningLossesCarriedForward =
+                   ROUND(COALESCE(loss.OpeningLossesCarriedForward, 0), 2),
+               ClosingLossesCarriedForward =
+                   ROUND(COALESCE(loss.ClosingLossesCarriedForward, 0), 2),
+               LossesCarriedForwardDelta =
+                   ROUND(COALESCE(loss.ClosingLossesCarriedForward, 0)
+                       - COALESCE(loss.OpeningLossesCarriedForward, 0), 2),
+               CapitalDelta = ROUND(balance.ClosingCapital
+                   - CASE
+                       WHEN balance.OpeningCapital IS NULL THEN 0
+                       ELSE balance.OpeningCapital
+                     END, 2),
+               CapitalMovement = COALESCE(movement.CapitalMovement, 0)
+        FROM App.tbYear AS year
+        JOIN balances AS balance
+          ON balance.YearNumber = year.YearNumber
+        LEFT JOIN profit_by_year AS profit
+          ON profit.YearNumber = year.YearNumber
+        LEFT JOIN business_tax_by_year AS tax
+          ON tax.YearNumber = year.YearNumber
+        LEFT JOIN loss_cf_delta AS loss
+          ON loss.YearNumber = year.YearNumber
+        LEFT JOIN capital_movement_by_year AS movement
+          ON movement.YearNumber = year.YearNumber
+        WHERE year.CashStatusCode BETWEEN 1 AND 2
+    )
+    SELECT YearNumber,
+           Description,
+           OpeningCapital = CONVERT(decimal(38,5), OpeningCapital),
+           ClosingCapital = CONVERT(decimal(38,5), ClosingCapital),
+           Profit,
+           BusinessTax,
+           ProfitAfterTax,
+           TaxCarry,
+           CapitalMovement = CONVERT(decimal(38,5), CapitalMovement),
+           OpeningSubjectPosition,
+           OpeningAccountPosition,
+           OpeningLossesCarriedForward,
+           ClosingLossesCarriedForward,
+           LossesCarriedForwardDelta,
+           CapitalDelta = CONVERT(decimal(38,5), CapitalDelta),
+           Variance = CONVERT(decimal(38,5),
+               CapitalDelta
+               - (ProfitAfterTax + CapitalMovement + OpeningAccountPosition))
+    FROM reconciliation
+);
+GO
+
+PRINT N'Altering View [Cash].[vwEquityReconciliationByYear]...';
+GO
+
+CREATE OR ALTER VIEW Cash.vwEquityReconciliationByYear
+AS
+	SELECT eb.YearNumber,
+		eb.Description,
+		eb.OpeningCapital,
+		eb.ClosingCapital,
+		eb.Profit,
+		eb.BusinessTax,
+		eb.ProfitAfterTax,
+		eb.TaxCarry,
+		eb.CapitalMovement,
+		eb.OpeningSubjectPosition,
+		eb.OpeningAccountPosition,
+		eb.OpeningLossesCarriedForward,
+		eb.ClosingLossesCarriedForward,
+		eb.LossesCarriedForwardDelta,
+		eb.CapitalDelta,
+		eb.Variance
+	FROM App.tbOptions AS opt
+	CROSS APPLY Cash.fnEquityReconciliationByYearByVersion(opt.CategoryVersionId) AS eb;
+GO
+
+PRINT N'Dropping obsolete View [Cash].[vwFlowReconciliationByYear]...';
+GO
+
+DROP VIEW IF EXISTS Cash.vwFlowReconciliationByYear;
+GO
+
+
 ALTER DATABASE CURRENT SET RECURSIVE_TRIGGERS OFF;
+GO
+
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM App.tbInstall
+    WHERE SQLDataVersion = 4
+      AND SQLRelease = 1
+      AND SQLBuild = 20
+)
+    INSERT App.tbInstall (SQLDataVersion, SQLRelease, SQLBuild)
+    VALUES (4, 1, 20);
 GO
 
 SELECT
     DB_NAME() AS DatabaseName,
     N'4.1.13' AS PreviousBuild,
-    N'4.1.19' AS InstalledBuild,
+    N'4.1.20' AS InstalledBuild,
     version.VersionId,
     status.VersionStatus,
     version.EffectiveFromOn,

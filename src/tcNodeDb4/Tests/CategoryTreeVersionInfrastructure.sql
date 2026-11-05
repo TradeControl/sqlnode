@@ -91,7 +91,7 @@ BEGIN TRY
 
     UPDATE Cash.tbCategoryVersion
     SET VersionStatusCode = 1,
-        EffectiveFromOn = SYSUTCDATETIME()
+        EffectiveFromOn = CONVERT(DATE, SYSUTCDATETIME())
     WHERE VersionId = @VersionId;
 
     BEGIN TRY

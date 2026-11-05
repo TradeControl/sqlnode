@@ -2,6 +2,7 @@ CREATE PROCEDURE [Cash].[proc_CategoryVersionClone]
 (
     @Description NVARCHAR(100),
     @Notes NVARCHAR(MAX) = NULL,
+    @EffectiveFromOn DATE = NULL,
     @VersionId NVARCHAR(10) = NULL OUTPUT
 )
 AS
@@ -64,12 +65,12 @@ BEGIN
         INSERT INTO Cash.tbCategoryVersion
         (
             VersionId, VersionStatusCode, Description, Notes,
-            PredecessorVersionId, BaseContentSha256, CreatedByUserId
+            PredecessorVersionId, BaseContentSha256, EffectiveFromOn, CreatedByUserId
         )
         VALUES
         (
             @VersionId, 0, @Description, @Notes,
-            @PredecessorVersionId, @BaseContentSha256, @UserId
+            @PredecessorVersionId, @BaseContentSha256, @EffectiveFromOn, @UserId
         );
 
         INSERT INTO Cash.tbCategory

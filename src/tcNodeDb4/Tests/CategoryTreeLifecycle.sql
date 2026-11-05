@@ -74,20 +74,18 @@ DECLARE
     @OriginalCategory NVARCHAR(50),
     @FixtureCategory NVARCHAR(50),
     @ProtectedCashCode NVARCHAR(50),
+    @EffectiveFromOn DATE = CONVERT(DATE, SYSUTCDATETIME()),
     @DirectDmlRejected BIT = 0,
     @DeleteRejected BIT = 0;
 
 SELECT @OriginalVersionId = CategoryVersionId FROM App.tbOptions;
-SELECT @OriginalSha256 = CanonicalSha256
-FROM Cash.tbCategoryVersion
-WHERE VersionId = @OriginalVersionId;
 SELECT TOP (1) @UserId = UserId
 FROM Usr.tbUser
 WHERE IsEnabled <> 0
 ORDER BY IsAdministrator DESC, UserId;
 
-IF @OriginalVersionId IS NULL OR @OriginalSha256 IS NULL OR @UserId IS NULL
-    THROW 51940, 'The lifecycle fixture requires one active canonical version and an enabled user.', 1;
+IF @OriginalVersionId IS NULL OR @UserId IS NULL
+    THROW 51940, 'The lifecycle fixture requires one active version and an enabled user.', 1;
 
 BEGIN TRY
     BEGIN TRANSACTION;
@@ -102,7 +100,12 @@ BEGIN TRY
     EXEC Cash.proc_CategoryVersionClone
         @Description = N'Lifecycle fixture Draft',
         @Notes = N'Rollback-only SQL acceptance.',
+        @EffectiveFromOn = @EffectiveFromOn,
         @VersionId = @DraftVersionId OUTPUT;
+
+    SELECT @OriginalSha256 = CanonicalSha256
+    FROM Cash.tbCategoryVersion
+    WHERE VersionId = @OriginalVersionId;
 
     IF (SELECT CategoryVersionId FROM App.tbOptions) <> @OriginalVersionId
         THROW 51942, 'Cloning a Draft changed the active version.', 1;

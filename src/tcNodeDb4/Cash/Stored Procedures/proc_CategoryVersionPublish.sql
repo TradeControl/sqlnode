@@ -14,7 +14,9 @@ BEGIN
         @PredecessorSha256 BINARY(32),
         @DraftSha256 BINARY(32),
         @CanonicalByteLength BIGINT,
-        @TransitionOn DATETIME2(3) = SYSUTCDATETIME(),
+        @PublicationOn DATE = CONVERT(DATE, SYSUTCDATETIME()),
+        @EffectiveFromOn DATE,
+        @PredecessorEffectiveFromOn DATE,
         @UserId NVARCHAR(10),
         @UserName NVARCHAR(50),
         @LockResult INT;
@@ -44,7 +46,8 @@ BEGIN
         FROM App.tbOptions WITH (UPDLOCK, HOLDLOCK);
 
         SELECT
-            @BaseContentSha256 = BaseContentSha256
+            @BaseContentSha256 = BaseContentSha256,
+            @EffectiveFromOn = EffectiveFromOn
         FROM Cash.tbCategoryVersion WITH (UPDLOCK, HOLDLOCK)
         WHERE VersionId = @VersionId
           AND VersionStatusCode = 0
@@ -53,14 +56,24 @@ BEGIN
         IF @BaseContentSha256 IS NULL
             THROW 51127, 'The Draft is not a successor of the active version.', 1;
 
+        IF @EffectiveFromOn IS NULL
+            THROW 51165, 'Category Tree publication requires a proposed effective date.', 1;
+
+        IF @EffectiveFromOn <> @PublicationOn
+            THROW 51166, 'A Category Tree Draft may be published only on its proposed effective date.', 1;
+
         SELECT
             @PredecessorStatusCode = VersionStatusCode,
-            @PredecessorSha256 = CanonicalSha256
+            @PredecessorSha256 = CanonicalSha256,
+            @PredecessorEffectiveFromOn = EffectiveFromOn
         FROM Cash.tbCategoryVersion WITH (UPDLOCK, HOLDLOCK)
         WHERE VersionId = @PredecessorVersionId;
 
         IF @PredecessorStatusCode NOT IN (1, 2)
             THROW 51128, 'The active predecessor is not eligible for successor publication.', 1;
+
+        IF @PredecessorEffectiveFromOn IS NULL OR @EffectiveFromOn <= @PredecessorEffectiveFromOn
+            THROW 51167, 'A successor Category Tree must become effective after its predecessor.', 1;
 
         IF @PredecessorStatusCode = 1
             EXEC Cash.proc_CategoryVersionCanonicalise
@@ -78,7 +91,7 @@ BEGIN
 
         UPDATE Cash.tbCategoryVersion
         SET VersionStatusCode = 1,
-            EffectiveFromOn = @TransitionOn,
+            EffectiveFromOn = @EffectiveFromOn,
             EffectiveToOn = NULL
         WHERE VersionId = @VersionId;
 
@@ -87,7 +100,7 @@ BEGIN
 
         UPDATE Cash.tbCategoryVersion
         SET VersionStatusCode = 3,
-            EffectiveToOn = @TransitionOn
+            EffectiveToOn = DATEADD(DAY, -1, @EffectiveFromOn)
         WHERE VersionId = @PredecessorVersionId;
 
         INSERT INTO Cash.tbCategoryVersionEvent
