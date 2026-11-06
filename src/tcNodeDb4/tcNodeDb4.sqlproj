@@ -25,7 +25,7 @@
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
     <TargetFrameworkProfile />
     <GenerateCreateScript>True</GenerateCreateScript>
-    <RecursiveTriggersEnabled>True</RecursiveTriggersEnabled>
+    <RecursiveTriggersEnabled>False</RecursiveTriggersEnabled>
     <AutoShrink>True</AutoShrink>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
