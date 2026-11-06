@@ -6,73 +6,59 @@ RETURNS TABLE
 AS
 RETURN
 (
-    WITH category_relations AS
+    WITH category_tree AS
     (
         SELECT
             edge.ParentCode,
-            edge.ChildCode,
-            category.CategoryTypeCode,
-            category.CategoryCode,
-            code.CashCode,
-            category.CashTypeCode,
-            category.CashPolarityCode
-        FROM Cash.tbCategoryTotal AS edge
+            edge.ChildCode
+        FROM Cash.tbCategoryRoot AS root
+        JOIN Cash.tbCategoryTotal AS edge
+          ON edge.VersionId = root.VersionId
+         AND edge.ParentCode = root.CategoryCode
         JOIN Cash.tbCategory AS category
           ON category.VersionId = edge.VersionId
          AND category.CategoryCode = edge.ChildCode
-        LEFT JOIN Cash.tbCategoryCodeMap AS map
-          ON map.VersionId = category.VersionId
-         AND map.CategoryCode = category.CategoryCode
-        LEFT JOIN Cash.tbCode AS code
-          ON code.CashCode = map.CashCode
-        WHERE edge.VersionId = @VersionId
-    ),
-    cashcode_candidates AS
-    (
-        SELECT
-            relation.ChildCode,
-            relation.CategoryCode,
-            relation.CashCode,
-            relation.CashTypeCode,
-            relation.CashPolarityCode
-        FROM category_relations AS relation
-        JOIN Cash.tbCategoryRoot AS root
-          ON root.VersionId = @VersionId
-         AND root.RootTypeCode = 0
-         AND root.CategoryCode = relation.ParentCode
-        WHERE relation.CategoryTypeCode = 1
+        WHERE root.VersionId = @VersionId
+          AND root.RootTypeCode = 0
+          AND category.CategoryTypeCode = 1
 
         UNION ALL
 
         SELECT
-            relation.ChildCode,
-            relation.CategoryCode,
-            relation.CashCode,
-            relation.CashTypeCode,
-            relation.CashPolarityCode
-        FROM category_relations AS relation
-        JOIN cashcode_candidates AS candidate
-          ON candidate.ChildCode = relation.ParentCode
+            edge.ParentCode,
+            edge.ChildCode
+        FROM category_tree AS tree
+        JOIN Cash.tbCategoryTotal AS edge
+          ON edge.VersionId = @VersionId
+         AND edge.ParentCode = tree.ChildCode
     ),
-    cashcode_selected AS
+    selected_categories AS
     (
-        SELECT CategoryCode, CashCode, CashTypeCode, CashPolarityCode
-        FROM cashcode_candidates
+        SELECT tree.ChildCode AS CategoryCode
+        FROM category_tree AS tree
 
         UNION
 
-        SELECT
-            relation.CategoryCode,
-            relation.CashCode,
-            relation.CashTypeCode,
-            relation.CashPolarityCode
-        FROM category_relations AS relation
-        JOIN Cash.tbCategoryRoot AS root
-          ON root.VersionId = @VersionId
-         AND root.RootTypeCode = 0
-         AND root.CategoryCode = relation.ParentCode
+        SELECT edge.ChildCode
+        FROM Cash.tbCategoryRoot AS root
+        JOIN Cash.tbCategoryTotal AS edge
+          ON edge.VersionId = root.VersionId
+         AND edge.ParentCode = root.CategoryCode
+        WHERE root.VersionId = @VersionId
+          AND root.RootTypeCode = 0
     )
-    SELECT CategoryCode, CashCode, CashTypeCode, CashPolarityCode
-    FROM cashcode_selected
-    WHERE CashCode IS NOT NULL
+    SELECT
+        category.CategoryCode,
+        code.CashCode,
+        category.CashTypeCode,
+        category.CashPolarityCode
+    FROM selected_categories AS selected
+    JOIN Cash.tbCategory AS category
+      ON category.VersionId = @VersionId
+     AND category.CategoryCode = selected.CategoryCode
+    JOIN Cash.tbCategoryCodeMap AS map
+      ON map.VersionId = category.VersionId
+     AND map.CategoryCode = category.CategoryCode
+    JOIN Cash.tbCode AS code
+      ON code.CashCode = map.CashCode
 );
