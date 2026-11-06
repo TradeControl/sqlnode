@@ -20,6 +20,9 @@ CREATE TABLE [Cash].[tbCategoryVersion]
         CONSTRAINT [DF_Cash_tbCategoryVersion_CreatedOn]
         DEFAULT (SYSUTCDATETIME()),
     [CreatedByUserId] NVARCHAR(10) NOT NULL,
+    [SubmissionLockReference] NVARCHAR(64) NULL,
+    [SubmissionLockSha256] BINARY(32) NULL,
+    [SubmissionLockedOn] DATETIME2(3) NULL,
     [RowVer] ROWVERSION NOT NULL,
     CONSTRAINT [PK_Cash_tbCategoryVersion]
         PRIMARY KEY CLUSTERED ([VersionId] ASC),
@@ -57,6 +60,17 @@ CREATE TABLE [Cash].[tbCategoryVersion]
             ([CanonicalSha256] IS NULL AND [CanonicalByteLength] IS NULL)
             OR
             ([CanonicalSha256] IS NOT NULL AND [CanonicalByteLength] >= 0)
+        ),
+    CONSTRAINT [CK_Cash_tbCategoryVersion_SubmissionLock]
+        CHECK
+        (
+            ([SubmissionLockReference] IS NULL
+                AND [SubmissionLockSha256] IS NULL
+                AND [SubmissionLockedOn] IS NULL)
+            OR
+            (LEN(LTRIM(RTRIM([SubmissionLockReference]))) > 0
+                AND [SubmissionLockSha256] IS NOT NULL
+                AND [SubmissionLockedOn] IS NOT NULL)
         ),
     CONSTRAINT [CK_Cash_tbCategoryVersion_EffectiveInterval]
         CHECK

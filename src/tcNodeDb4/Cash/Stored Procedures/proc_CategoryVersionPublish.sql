@@ -17,6 +17,7 @@ BEGIN
         @PublicationOn DATE = CONVERT(DATE, SYSUTCDATETIME()),
         @EffectiveFromOn DATE,
         @PredecessorEffectiveFromOn DATE,
+        @PredecessorSubmissionLockReference NVARCHAR(64),
         @UserId NVARCHAR(10),
         @UserName NVARCHAR(50),
         @LockResult INT;
@@ -65,12 +66,16 @@ BEGIN
         SELECT
             @PredecessorStatusCode = VersionStatusCode,
             @PredecessorSha256 = CanonicalSha256,
-            @PredecessorEffectiveFromOn = EffectiveFromOn
+            @PredecessorEffectiveFromOn = EffectiveFromOn,
+            @PredecessorSubmissionLockReference = SubmissionLockReference
         FROM Cash.tbCategoryVersion WITH (UPDLOCK, HOLDLOCK)
         WHERE VersionId = @PredecessorVersionId;
 
         IF @PredecessorStatusCode NOT IN (1, 2)
             THROW 51128, 'The active predecessor is not eligible for successor publication.', 1;
+
+        IF @PredecessorSubmissionLockReference IS NOT NULL
+            THROW 51181, 'The active predecessor is locked by an unfinished statutory filing.', 1;
 
         IF @PredecessorEffectiveFromOn IS NULL OR @EffectiveFromOn <= @PredecessorEffectiveFromOn
             THROW 51167, 'A successor Category Tree must become effective after its predecessor.', 1;

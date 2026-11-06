@@ -95,8 +95,9 @@ BEGIN
         JOIN Cash.tbCategoryVersion AS version
           ON version.VersionId = affected.VersionId
         WHERE version.VersionStatusCode IN (2, 3)
+           OR version.SubmissionLockReference IS NOT NULL
     )
-        THROW 51098, 'Submitted and Archived Category Tree totals are immutable.', 1;
+        THROW 51098, 'Submitted, Archived and submission-locked Category Tree totals are immutable.', 1;
 
     ;WITH affected AS
     (

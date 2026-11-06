@@ -651,6 +651,9 @@
     <Build Include="Cash\Stored Procedures\proc_CategoryVersionPublish.sql" />
     <Build Include="Cash\Stored Procedures\proc_CategoryVersionRefresh.sql" />
     <Build Include="Cash\Stored Procedures\proc_CategoryVersionSubmit.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionSubmissionLockAcquire.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionSubmissionComplete.sql" />
+    <Build Include="Cash\Stored Procedures\proc_CategoryVersionSubmissionLockRelease.sql" />
     <Build Include="Cash\Stored Procedures\proc_CategoryVersionValidate.sql" />
     <Build Include="Cash\Stored Procedures\proc_CodeAdd.sql" />
     <Build Include="Cash\Stored Procedures\proc_CodeDelete.sql" />

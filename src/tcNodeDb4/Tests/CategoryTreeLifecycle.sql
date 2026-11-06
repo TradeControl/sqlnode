@@ -201,9 +201,29 @@ BEGIN TRY
        OR EXISTS (SELECT 1 FROM Cash.tbCategoryCodeMap WHERE CashCode = N'ZZ-CT-LIFE')
         THROW 51949, 'Guarded Cash Code deletion left identity or mapping rows behind.', 1;
 
-    EXEC Cash.proc_CategoryVersionSubmit
+    DECLARE @SubmissionCanonicalProfile NVARCHAR(50),
+            @SubmissionCanonicalSha256 BINARY(32),
+            @SubmissionCanonicalByteLength BIGINT,
+            @SubmissionSealSha256 BINARY(32) = HASHBYTES('SHA2_256', N'CategoryTreeLifecycle');
+    SELECT @SubmissionCanonicalProfile = CanonicalProfile,
+           @SubmissionCanonicalSha256 = CanonicalSha256,
+           @SubmissionCanonicalByteLength = CanonicalByteLength
+    FROM Cash.tbCategoryVersion
+    WHERE VersionId = @DraftVersionId;
+
+    EXEC Cash.proc_CategoryVersionSubmissionLockAcquire
         @VersionId = @DraftVersionId,
-        @ChangeNote = N'Lifecycle fixture submission transition.';
+        @CanonicalProfile = @SubmissionCanonicalProfile,
+        @CanonicalSha256 = @SubmissionCanonicalSha256,
+        @CanonicalByteLength = @SubmissionCanonicalByteLength,
+        @SubmissionLockReference = N'category-tree-lifecycle-fixture',
+        @SubmissionLockSha256 = @SubmissionSealSha256;
+
+    EXEC Cash.proc_CategoryVersionSubmissionComplete
+        @VersionId = @DraftVersionId,
+        @SubmissionLockReference = N'category-tree-lifecycle-fixture',
+        @SubmissionLockSha256 = @SubmissionSealSha256,
+        @ChangeNote = N'Lifecycle fixture sealed submission transition.';
 
     /* This authoritative rejection deliberately rolls back the complete fixture. */
     SELECT TOP (1) @ProtectedCashCode = CashCode
