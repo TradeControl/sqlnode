@@ -60,8 +60,8 @@ BEGIN
         IF @EffectiveFromOn IS NULL
             THROW 51165, 'Category Tree publication requires a proposed effective date.', 1;
 
-        IF @EffectiveFromOn <> @PublicationOn
-            THROW 51166, 'A Category Tree Draft may be published only on its proposed effective date.', 1;
+        IF @EffectiveFromOn > @PublicationOn
+            THROW 51166, 'A Category Tree Draft cannot be published before its proposed effective date.', 1;
 
         SELECT
             @PredecessorStatusCode = VersionStatusCode,

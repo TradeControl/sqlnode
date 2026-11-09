@@ -52,6 +52,57 @@ IF EXISTS
 )
     THROW 51994, 'Synthetic completed-year Equity Bridge exceeds tolerance.', 1;
 
+DECLARE
+    @VehicleGrossCost decimal(18, 5),
+    @VehicleCapitalValue decimal(18, 5),
+    @VehicleTaxRate decimal(18, 4),
+    @VehicleTaxDecimals smallint;
+
+SELECT @VehicleGrossCost = PaidOutValue
+FROM Cash.tbPayment
+WHERE PaymentReference = N'White Van';
+
+SELECT @VehicleCapitalValue = PaidInValue
+FROM Cash.tbPayment
+WHERE PaymentReference = N'White Van (Capitalised)';
+
+SELECT
+    @VehicleTaxRate = TaxRate,
+    @VehicleTaxDecimals = Decimals
+FROM App.tbTaxCode
+WHERE TaxCode = N'T1';
+
+IF (SELECT COUNT(*) FROM Cash.tbPayment WHERE PaymentReference = N'White Van') <> 1
+   OR (SELECT COUNT(*) FROM Cash.tbPayment WHERE PaymentReference = N'White Van (Capitalised)') <> 1
+   OR @VehicleGrossCost IS NULL
+   OR @VehicleCapitalValue IS NULL
+   OR @VehicleTaxRate IS NULL
+   OR @VehicleTaxDecimals IS NULL
+    THROW 51999, 'Synthetic White Van accounting evidence is incomplete.', 1;
+
+DECLARE @ExpectedVehicleCapitalValue decimal(18, 5) =
+    CASE
+        WHEN @VehicleTaxRate > 0
+            THEN CAST(ROUND(@VehicleGrossCost / (1 + @VehicleTaxRate), @VehicleTaxDecimals) AS decimal(18, 5))
+        ELSE @VehicleGrossCost
+    END;
+
+IF @VehicleCapitalValue <> @ExpectedVehicleCapitalValue
+    THROW 52000, 'Synthetic White Van was not capitalised at its recoverable-VAT net value.', 1;
+
+DECLARE @ExpectedVehicleWriteOff decimal(18, 5) =
+    CAST(@ExpectedVehicleCapitalValue * 0.20 AS decimal(18, 5));
+
+IF (SELECT COUNT(*) FROM Cash.tbPayment WHERE PaymentReference = N'Depreciation - White Van') <> 5
+   OR EXISTS
+   (
+       SELECT 1
+       FROM Cash.tbPayment
+       WHERE PaymentReference = N'Depreciation - White Van'
+         AND PaidOutValue <> @ExpectedVehicleWriteOff
+   )
+    THROW 52001, 'Synthetic White Van depreciation is not based on its capitalised value.', 1;
+
 IF EXISTS
 (
     SELECT 1

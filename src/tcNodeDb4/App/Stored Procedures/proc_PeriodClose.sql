@@ -58,7 +58,9 @@ AS
 					(PaidInValue - PaidOutValue) AssetValue
 				FROM Cash.tbPayment payment
 					JOIN Subject.tbAccount account ON payment.AccountCode = account.AccountCode
-				WHERE account.AccountTypeCode = 2 AND PaidOn >= @StartOn
+				WHERE account.AccountTypeCode = 2
+					AND payment.PaymentStatusCode = 1
+					AND PaidOn >= @StartOn
 			), asset_summary AS
 			(
 				SELECT CashCode, StartOn, SUM(AssetValue) AssetValue

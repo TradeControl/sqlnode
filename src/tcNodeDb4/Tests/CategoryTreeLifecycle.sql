@@ -74,7 +74,7 @@ DECLARE
     @OriginalCategory NVARCHAR(50),
     @FixtureCategory NVARCHAR(50),
     @ProtectedCashCode NVARCHAR(50),
-    @EffectiveFromOn DATE = CONVERT(DATE, SYSUTCDATETIME()),
+    @EffectiveFromOn DATE = DATEADD(DAY, -1, CONVERT(DATE, SYSUTCDATETIME())),
     @DirectDmlRejected BIT = 0,
     @DeleteRejected BIT = 0;
 
@@ -167,12 +167,17 @@ BEGIN TRY
         @VersionId = @DraftVersionId,
         @ChangeNote = N'Lifecycle fixture publication.';
 
+    IF @EffectiveFromOn >= CONVERT(DATE, SYSUTCDATETIME())
+        THROW 51963, 'The lifecycle fixture did not exercise delayed publication of a past effective date.', 1;
+
     IF (SELECT CategoryVersionId FROM App.tbOptions) <> @DraftVersionId
         THROW 51946, 'Publication did not atomically select the successor.', 1;
     IF NOT EXISTS
     (
         SELECT 1 FROM Cash.tbCategoryVersion
-        WHERE VersionId = @OriginalVersionId AND VersionStatusCode = 3 AND EffectiveToOn IS NOT NULL
+        WHERE VersionId = @OriginalVersionId
+          AND VersionStatusCode = 3
+          AND EffectiveToOn = DATEADD(DAY, -1, @EffectiveFromOn)
     )
         THROW 51947, 'Publication did not archive the predecessor.', 1;
 

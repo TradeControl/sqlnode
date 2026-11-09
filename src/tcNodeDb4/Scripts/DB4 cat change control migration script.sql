@@ -22555,8 +22555,8 @@ BEGIN
         IF @EffectiveFromOn IS NULL
             THROW 51165, 'Category Tree publication requires a proposed effective date.', 1;
 
-        IF @EffectiveFromOn <> @PublicationOn
-            THROW 51166, 'A Category Tree Draft may be published only on its proposed effective date.', 1;
+        IF @EffectiveFromOn > @PublicationOn
+            THROW 51166, 'A Category Tree Draft cannot be published before its proposed effective date.', 1;
 
         SELECT
             @PredecessorStatusCode = VersionStatusCode,
@@ -23651,7 +23651,26 @@ AS
 			@Address = N'Address of Dataset Garage';
 	END
 
-	DECLARE @VehicleCost decimal(18,5) = 5000.00000;
+	DECLARE
+		@VehicleGrossCost decimal(18,5) = 5000.00000,
+		@VehicleTaxRate decimal(18,4),
+		@VehicleTaxDecimals smallint;
+
+	SELECT
+		@VehicleTaxRate = TaxRate,
+		@VehicleTaxDecimals = Decimals
+	FROM App.tbTaxCode
+	WHERE TaxCode = N'T1';
+
+	IF @VehicleTaxRate IS NULL OR @VehicleTaxDecimals IS NULL
+		THROW 51274, 'DatasetSyntheticMIS_Assets: standard VAT tax code T1 is unavailable.', 1;
+
+	DECLARE @VehicleCapitalValue decimal(18,5) =
+		CASE
+			WHEN @IsVatRegistered = 1 AND @VehicleTaxRate > 0
+				THEN CAST(ROUND(@VehicleGrossCost / (1 + @VehicleTaxRate), @VehicleTaxDecimals) AS decimal(18,5))
+			ELSE @VehicleGrossCost
+		END;
 
 	IF NOT EXISTS
 	(
@@ -23691,7 +23710,7 @@ AS
 			N'T1',
 			@Year1LatePurchaseOn,
 			0.00000,
-			@VehicleCost,
+			@VehicleGrossCost,
 			N'White Van'
 		);
 	END
@@ -23754,7 +23773,7 @@ AS
 			@EquipCashCode,
 			N'N/A',
 			@Year1LatePurchaseOn,
-			@VehicleCost,
+			@VehicleCapitalValue,
 			0.00000,
 			N'White Van (Capitalised)'
 		);
@@ -23762,7 +23781,7 @@ AS
 
 	DECLARE
 		@PurchaseOn date = @Year1LatePurchaseOn,
-		@Price decimal(18,5) = @VehicleCost,
+		@Price decimal(18,5) = @VehicleCapitalValue,
 		@WriteOffPercent decimal(9,6) = 0.20;
 
 	IF @WriteOffPercent <= 0 OR @WriteOffPercent > 1
@@ -23844,7 +23863,7 @@ AS
 				N'N/A',
 				@WriteOffDate,
 				0.00000,
-				CAST(ROUND(@Price * @WriteOffPercent, 2) AS decimal(18,5)),
+				CAST(@Price * @WriteOffPercent AS decimal(18,5)),
 				N'Depreciation - White Van'
 			);
 		END
