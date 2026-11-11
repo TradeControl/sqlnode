@@ -1,6 +1,15 @@
 ﻿
 CREATE   VIEW App.vwEventLog
 AS
-	SELECT        App.tbEventLog.LogCode, App.tbEventLog.LoggedOn, App.tbEventLog.EventTypeCode, App.tbEventType.EventType, App.tbEventLog.EventMessage, App.tbEventLog.InsertedBy, App.tbEventLog.RowVer
-	FROM            App.tbEventLog INNER JOIN
-							 App.tbEventType ON App.tbEventLog.EventTypeCode = App.tbEventType.EventTypeCode
+	SELECT eventLog.LogCode,
+		eventLog.LoggedOn,
+		eventLog.EventTypeCode,
+		eventType.EventType,
+		eventLog.EventMessage,
+		COALESCE([user].UserName, eventLog.InsertedBy) AS InsertedBy,
+		eventLog.RowVer
+	FROM App.tbEventLog AS eventLog
+	JOIN App.tbEventType AS eventType
+	  ON eventType.EventTypeCode = eventLog.EventTypeCode
+	LEFT JOIN Usr.tbUser AS [user]
+	  ON [user].UserId = eventLog.InsertedBy;

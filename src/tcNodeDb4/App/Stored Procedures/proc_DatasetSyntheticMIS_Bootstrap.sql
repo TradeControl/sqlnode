@@ -130,7 +130,7 @@ AS
 
 	IF EXISTS (SELECT 1 FROM Cash.vwReserveAccount)
 		SELECT
-			@ReserveAccount = ra.AccountCode,
+			@ReserveAccount = ra.AccountName,
 			@RA_SortCode = ra.SortCode,
 			@RA_AccountNumber = ra.AccountNumber
 		FROM Cash.vwReserveAccount ra;

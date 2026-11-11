@@ -11,6 +11,19 @@ BEGIN TRY
 	SET SubjectCode = null, CashCode = null;
 
 	DELETE FROM App.tbOptions;
+
+	-- A complete node reset deliberately invalidates and removes retained Category Tree history,
+	-- including any unfinished submission. Once the active pointer has gone, normalise every
+	-- version to mutable Draft state and clear its submission lock so the version-owned integrity
+	-- triggers can permit the ordered child-row deletion below.
+	UPDATE Cash.tbCategoryVersion
+	SET VersionStatusCode = 0,
+		EffectiveFromOn = NULL,
+		EffectiveToOn = NULL,
+		SubmissionLockReference = NULL,
+		SubmissionLockSha256 = NULL,
+		SubmissionLockedOn = NULL;
+
 	DELETE FROM dbo.AspNetUsers;
 	DELETE FROM Cash.tbPayment;
 	DELETE FROM Invoice.tbInvoice;
@@ -810,22 +823,6 @@ BEGIN TRY
 		FROM App.tbText target
 		WHERE target.TextId = source.TextId
 	);
-
-	DECLARE
-		@SQLDataVersion REAL = 4,
-		@SQLRelease INT = 1,
-		@SQLBuild INT = 21;
-
-	IF NOT EXISTS
-	(
-		SELECT 1
-		FROM App.tbInstall
-		WHERE SQLDataVersion = @SQLDataVersion
-			AND SQLRelease = @SQLRelease
-			AND SQLBuild = @SQLBuild
-	)
-		INSERT INTO App.tbInstall (SQLDataVersion, SQLRelease, SQLBuild)
-		VALUES (@SQLDataVersion, @SQLRelease, @SQLBuild);
 
 	COMMIT TRAN
 END TRY

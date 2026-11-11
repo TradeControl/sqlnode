@@ -1,4 +1,4 @@
-﻿CREATE   PROCEDURE App.proc_EventLog (@EventMessage NVARCHAR(MAX), @EventTypeCode SMALLINT = 0, @LogCode NVARCHAR(20) = NULL OUTPUT)
+CREATE   PROCEDURE App.proc_EventLog (@EventMessage NVARCHAR(MAX), @EventTypeCode SMALLINT = 0, @LogCode NVARCHAR(20) = NULL OUTPUT, @InsertedBy NVARCHAR(50) = NULL)
 AS
 	SET XACT_ABORT, NOCOUNT ON;
 
@@ -17,18 +17,24 @@ AS
 
 		DECLARE 
 			@UserId nvarchar(10)
+		, @EventInsertedBy nvarchar(50)
 			, @LogNumber INT
 			, @RegisterName nvarchar(50) = (SELECT RegisterName FROM App.tbOptions);
 	
-		SET @UserId = (SELECT TOP 1 Usr.tbUser.UserId FROM Usr.vwCredentials c INNER JOIN
-								Usr.tbUser ON c.UserId = Usr.tbUser.UserId);
+	    SET @UserId = COALESCE
+	    (
+		    (SELECT UserId FROM Usr.tbUser WHERE UserId = NULLIF(LTRIM(RTRIM(@InsertedBy)), N'')),
+		    (SELECT TOP 1 Usr.tbUser.UserId FROM Usr.vwCredentials c INNER JOIN
+								    Usr.tbUser ON c.UserId = Usr.tbUser.UserId)
+	    );
+	    SET @EventInsertedBy = LEFT(COALESCE(NULLIF(LTRIM(RTRIM(@InsertedBy)), N''), @UserId, Usr.fnUserName()), 50);
 
 		IF @RegisterName IS NULL OR @UserId IS NULL
 		BEGIN
 			SET @LogCode = LEFT(REPLACE(CONVERT(nvarchar(36), NEWID()), '-', ''), 20);
 
 			INSERT INTO App.tbEventLog (LogCode, EventTypeCode, EventMessage, InsertedBy)
-			VALUES (@LogCode, @EventTypeCode, @EventMessage, Usr.fnUserName());
+			VALUES (@LogCode, @EventTypeCode, @EventMessage, @EventInsertedBy);
 
 			RETURN;
 		END;
@@ -52,7 +58,7 @@ AS
 			END
 
 		INSERT INTO App.tbEventLog (LogCode, EventTypeCode, EventMessage, InsertedBy)
-		VALUES (@LogCode, @EventTypeCode, @EventMessage, LEFT(COALESCE(@UserId, Usr.fnUserName()), 50));
+		VALUES (@LogCode, @EventTypeCode, @EventMessage, @EventInsertedBy);
 
 		COMMIT TRANSACTION;
 
