@@ -11,7 +11,7 @@ BEGIN TRY
     IF (SELECT COUNT(*) FROM Cash.tbTaxTag WHERE TaxSourceCode = 'UK-CO-ACCTS-2026') <> 28
         THROW 51002, 'Accounts semantic manifest is incomplete.', 1;
 
-    IF (SELECT COUNT(*) FROM Cash.tbTaxTag WHERE TaxSourceCode = 'UK-CO-CT-2026') <> 12
+    IF (SELECT COUNT(*) FROM Cash.tbTaxTag WHERE TaxSourceCode = 'UK-CO-CT-2026') <> 13
         THROW 51003, 'Corporation Tax semantic manifest is incomplete.', 1;
 
     IF (SELECT COUNT(*) FROM Cash.tbTaxTag WHERE TaxSourceCode = 'UK-CO-CT600-2026') <> 13
@@ -53,14 +53,53 @@ BEGIN TRY
     )
         THROW 51008, 'Accounting depreciation was incorrectly mapped as capital allowances.', 1;
 
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM Cash.tbCategoryRoot root
+        JOIN App.tbOptions options ON options.CategoryVersionId = root.VersionId
+        WHERE root.RootTypeCode = 2
+          AND root.CategoryCode = N'CT-DIST'
+    )
+        THROW 51020, 'The company Category Tree does not expose the Relevant Distributions root.', 1;
+
+    IF NOT EXISTS
+    (
+        SELECT 1 FROM Cash.tbTaxTagMap
+        WHERE TaxSourceCode = N'UK-CO-CT-2026'
+          AND TagCode = N'RelevantDistributions'
+          AND CategoryCode = N'CT-DIST'
+    )
+        THROW 51021, 'Relevant distributions are not mapped to the D root.', 1;
+
+    IF (SELECT COUNT(*)
+        FROM Cash.tbReportingProfileSetting setting
+        JOIN Cash.tbReportingProfile profile
+          ON profile.SubjectCode = setting.SubjectCode
+         AND profile.ReportingProfileCode = setting.ReportingProfileCode
+        WHERE profile.ReportingTypeCode = 2
+          AND setting.SettingCode IN
+              (N'CT-ASSOCIATED-COMPANIES', N'CT-UK-RESIDENT',
+               N'CT-CLOSE-INVESTMENT-HOLDING', N'CT-RING-FENCE-PROFITS')
+          AND setting.IsReviewed = 0) <> 4
+        THROW 51022, 'The four CT company facts were not seeded as unreviewed settings.', 1;
+
     -- The statutory-composition procedure is deliberately repeatable.
     EXEC App.proc_Template_CO_MICRO_CUR_TAX_2026;
 
-    IF (SELECT COUNT(*) FROM Cash.tbTaxTagMap WHERE TaxSourceCode IN ('UK-CO-ACCTS-2026', 'UK-CO-CT-2026', 'UK-CO-CT600-2026')) <> 10
+    IF (SELECT COUNT(*) FROM Cash.tbTaxTagMap WHERE TaxSourceCode IN ('UK-CO-ACCTS-2026', 'UK-CO-CT-2026', 'UK-CO-CT600-2026')) <> 11
         THROW 51009, 'Rerunning statutory composition changed the mapping cardinality.', 1;
 
-    DECLARE @AccountsEnd DATE = DATEADD(DAY, -1,
-        (SELECT PayTo FROM Cash.fnTaxTypeDueDates(Cash.fnGetBizTaxType(), 0)));
+    DECLARE @AccountsEnd DATE =
+    (
+        SELECT MAX(CONVERT(date, EOMONTH(period.StartOn)))
+        FROM App.tbYear year
+        JOIN App.tbYearPeriod period ON period.YearNumber = year.YearNumber
+        WHERE year.CashStatusCode = 2
+    );
+
+    IF @AccountsEnd IS NULL
+        THROW 51023, 'The company projection fixture requires one closed financial year.', 1;
 
     IF (SELECT COUNT(*) FROM Cash.fnTaxBizBalanceSheet('UK-CO-ACCTS-2026', @AccountsEnd)) <> 4
         THROW 51018, 'The generic balance-sheet source projection is incomplete.', 1;

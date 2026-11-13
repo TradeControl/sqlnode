@@ -24,7 +24,7 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM Cash.tbCategory WHERE VersionId = @VersionId)
         THROW 51095, 'Category Tree canonicalisation requires at least one category.', 1;
 
-    IF (SELECT COUNT(*) FROM Cash.tbCategoryRoot WHERE VersionId = @VersionId) <> 2
+    IF (SELECT COUNT(*) FROM Cash.tbCategoryRoot WHERE VersionId = @VersionId) NOT BETWEEN 2 AND 3
         OR EXISTS
         (
             SELECT required.RootTypeCode
@@ -34,7 +34,7 @@ BEGIN
             FROM Cash.tbCategoryRoot
             WHERE VersionId = @VersionId
         )
-        THROW 51096, 'The v1 Category Tree profile requires exactly NET_PROFIT and VAT roots.', 1;
+        THROW 51096, 'The v1 Category Tree profile requires NET_PROFIT and VAT roots and permits DISTRIBUTIONS.', 1;
 
     DECLARE
         @Categories NVARCHAR(MAX),

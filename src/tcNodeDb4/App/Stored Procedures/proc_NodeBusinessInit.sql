@@ -96,7 +96,6 @@ BEGIN TRY
 	INSERT INTO App.tbOptions
 	(
 		Identifier,
-		IsInitialised,
 		SubjectCode,
 		RegisterName,
 		DefaultPrintMode,
@@ -114,7 +113,6 @@ BEGIN TRY
 	VALUES
 	(
 		'TC',
-		0,
 		@SubjectCode,
 		'Event Log',
 		2,

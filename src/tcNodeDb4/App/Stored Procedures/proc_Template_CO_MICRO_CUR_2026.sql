@@ -70,15 +70,29 @@ AS
         INSERT INTO Cash.tbCategory
             (VersionId, CategoryCode, Category, CategoryTypeCode, CashPolarityCode, CashTypeCode, DisplayOrder, IsEnabled)
         VALUES
-            (@CategoryVersionId, 'CA-DEPREC', 'Depreciation expense', 0, 0, 0, 145, 1);
+            (@CategoryVersionId, 'CA-DEPREC', 'Depreciation expense', 0, 0, 0, 145, 1),
+            (@CategoryVersionId, 'CT-DIST', 'Relevant distributions', 1, 2, 0, 90, 1),
+            (@CategoryVersionId, 'CA-DIVRC', 'Dividends received', 0, 1, 0, 115, 1);
 
         INSERT INTO Cash.tbCategoryTotal (VersionId, ParentCode, ChildCode)
-        VALUES (@CategoryVersionId, 'CT-OVERHD', 'CA-DEPREC');
+        VALUES
+            (@CategoryVersionId, 'CT-OVERHD', 'CA-DEPREC'),
+            (@CategoryVersionId, 'CT-OTHRIN', 'CA-DIVRC'),
+            (@CategoryVersionId, 'CT-DIST', 'CA-DIVRC');
 
         UPDATE Cash.tbCategoryCodeMap
         SET CategoryCode = 'CA-DEPREC'
         WHERE VersionId = @CategoryVersionId
           AND CashCode = 'CC-DEPRC';
+
+        INSERT INTO Cash.tbCode (CashCode, CashDescription, TaxCode, IsEnabled)
+        VALUES ('CC-DIVRC', 'Dividends received', 'N/A', 1);
+
+        INSERT INTO Cash.tbCategoryCodeMap (VersionId, CashCode, CategoryCode)
+        VALUES (@CategoryVersionId, 'CC-DIVRC', 'CA-DIVRC');
+
+        INSERT INTO Cash.tbCategoryRoot (VersionId, RootTypeCode, CategoryCode)
+        VALUES (@CategoryVersionId, 2, 'CT-DIST');
 
         ----------------------------------------------------------------
         -- 4. Business Tax settings for Corporations

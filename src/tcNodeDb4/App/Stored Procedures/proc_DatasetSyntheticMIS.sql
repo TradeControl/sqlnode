@@ -20,6 +20,7 @@ CREATE PROCEDURE App.proc_DatasetSyntheticMIS
 	@EnableWages bit = 1,
 	@EnableExpenses bit = 1,
     @EnableAssets bit = 1,
+    @EnableDividends bit = 1,
     @EnableTax bit = 1,
 	@EnableTransfers bit = 1,
     @EnableOpeningBalance bit = 0,
@@ -179,6 +180,15 @@ AS
 		        @IsVatRegistered = @IsVatRegistered;
 
             EXEC App.proc_DatasetSyntheticMIS_CompanyLoanPayback
+                @IsCompany = @IsCompany;
+        END
+
+		---------------------------------------------------------------------
+		-- 3d) Company received dividends (non-VAT Account-mode transactions)
+		---------------------------------------------------------------------
+        IF @IsCompany <> 0 AND @EnableDividends <> 0
+        BEGIN
+            EXEC App.proc_DatasetSyntheticMIS_DividendsReceived
                 @IsCompany = @IsCompany;
         END
 

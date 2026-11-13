@@ -14,13 +14,11 @@ RETURN
         COALESCE
         (
             options.CategoryVersionId,
-            CASE WHEN options.IsInitialised = 0 THEN
-                (
-                    SELECT MIN(version.VersionId)
-                    FROM Cash.tbCategoryVersion AS version
-                    HAVING COUNT(*) = 1
-                )
-            END
+            (
+                SELECT MIN(version.VersionId)
+                FROM Cash.tbCategoryVersion AS version
+                HAVING COUNT(*) = 1
+            )
         )
     ) AS validation
 );

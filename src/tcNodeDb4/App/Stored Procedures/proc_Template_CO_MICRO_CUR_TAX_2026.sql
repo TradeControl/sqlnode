@@ -7,9 +7,24 @@ BEGIN TRY
     -- Retire the obsolete Government Gateway-era mixed vocabulary if this
     -- projection is applied to an upgraded rather than freshly reset node.
     DELETE FROM Cash.tbTaxTagSource
-    WHERE TaxSourceCode IN ('UK-MTD', 'UK-CO-ACCTS-2026', 'UK-CO-CT-2026', 'UK-CO-CT600-2026');
+    WHERE TaxSourceCode = 'UK-MTD';
 
-    INSERT INTO Cash.tbTaxTagSource
+    -- Reporting profiles retain a foreign key to their statutory source. A
+    -- repeat composition must therefore replace the source's child manifest,
+    -- not delete and recreate the source row itself.
+    DELETE FROM Cash.tbTaxTag
+    WHERE TaxSourceCode IN ('UK-CO-ACCTS-2026', 'UK-CO-CT-2026', 'UK-CO-CT600-2026');
+
+    DECLARE @TaxSources TABLE
+    (
+        TaxSourceCode nvarchar(20) NOT NULL PRIMARY KEY,
+        SourceName nvarchar(50) NOT NULL,
+        SourceDescription nvarchar(255) NULL,
+        TaxTypeCode smallint NOT NULL,
+        ReportingTypeCode smallint NOT NULL
+    );
+
+    INSERT INTO @TaxSources
         (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode, ReportingTypeCode)
     VALUES
         ('UK-CO-ACCTS-2026', 'Company Accounts',
@@ -19,10 +34,31 @@ BEGIN TRY
         ('UK-CO-CT600-2026', 'CT600 Return',
          'CT600 return semantic projection; CT600 V3 RIM 1.994 contract family', 0, 2);
 
+    UPDATE target
+    SET SourceName = source.SourceName,
+        SourceDescription = source.SourceDescription,
+        TaxTypeCode = source.TaxTypeCode,
+        ReportingTypeCode = source.ReportingTypeCode
+    FROM Cash.tbTaxTagSource target
+    JOIN @TaxSources source ON source.TaxSourceCode = target.TaxSourceCode;
+
+    INSERT INTO Cash.tbTaxTagSource
+        (TaxSourceCode, SourceName, SourceDescription, TaxTypeCode, ReportingTypeCode)
+    SELECT source.TaxSourceCode, source.SourceName, source.SourceDescription,
+           source.TaxTypeCode, source.ReportingTypeCode
+    FROM @TaxSources source
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM Cash.tbTaxTagSource target
+        WHERE target.TaxSourceCode = source.TaxSourceCode
+    );
+
     DECLARE
         @SubjectCode NVARCHAR(50) = (SELECT SubjectCode FROM App.tbOptions),
         @ValidFrom DATE = COALESCE((SELECT MIN(CONVERT(DATE, StartOn)) FROM App.tbYearPeriod), CONVERT(DATE, CURRENT_TIMESTAMP)),
-        @ReportingProfileCode NVARCHAR(20) = NULL;
+        @ReportingProfileCode NVARCHAR(20) = NULL,
+        @CorporationTaxProfileCode NVARCHAR(20) = NULL;
 
     SELECT @ReportingProfileCode = ReportingProfileCode
     FROM Cash.tbReportingProfile
@@ -59,6 +95,29 @@ BEGIN TRY
             @ValueSourceCode = N'IMPORTED',
             @IsReviewed = 0,
             @ReportingProfileCode = @ReportingProfileCode OUTPUT;
+
+    SET @CorporationTaxProfileCode = @ReportingProfileCode;
+
+    INSERT INTO Cash.tbReportingProfileSetting
+        (SubjectCode, ReportingProfileCode, SettingCode, EffectiveFrom,
+         IntegerValue, BooleanValue, StatusCode, ValueSourceCode, IsReviewed)
+    SELECT @SubjectCode, @CorporationTaxProfileCode, seed.SettingCode, @ValidFrom,
+        seed.IntegerValue, seed.BooleanValue, 0, N'IMPORTED', 0
+    FROM (VALUES
+        (N'CT-ASSOCIATED-COMPANIES', CONVERT(BIGINT, 0), CONVERT(BIT, NULL)),
+        (N'CT-UK-RESIDENT', CONVERT(BIGINT, NULL), CONVERT(BIT, 1)),
+        (N'CT-CLOSE-INVESTMENT-HOLDING', CONVERT(BIGINT, NULL), CONVERT(BIT, 0)),
+        (N'CT-RING-FENCE-PROFITS', CONVERT(BIGINT, NULL), CONVERT(BIT, 0))
+    ) seed (SettingCode, IntegerValue, BooleanValue)
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM Cash.tbReportingProfileSetting existing
+        WHERE existing.SubjectCode = @SubjectCode
+          AND existing.ReportingProfileCode = @CorporationTaxProfileCode
+          AND existing.SettingCode = seed.SettingCode
+          AND existing.EffectiveFrom = @ValidFrom
+    );
 
     IF EXISTS (SELECT 1 FROM Cash.tbTaxType WHERE TaxTypeCode = 1 AND IsEnabled = 1)
        AND NOT EXISTS
@@ -121,6 +180,7 @@ BEGIN TRY
         ('UK-CO-CT-2026', 'AddBacks.AccountingDepreciation', 'Accounting depreciation', 1, 0, 'Direct accounting component supplied to the reviewed adjustment schedule.', 20),
         ('UK-CO-CT-2026', 'AddBacks.Other', 'Other add-backs', 2, 0, 'External/reviewed structured adjustments; unsupported by the Category Tree.', 30),
         ('UK-CO-CT-2026', 'Deductions', 'Tax deductions', 2, 1, 'External/reviewed structured adjustments.', 40),
+        ('UK-CO-CT-2026', 'RelevantDistributions', 'Relevant distributions', 1, 1, 'Received distributions used to derive augmented profits and the exempt-distribution deduction.', 45),
         ('UK-CO-CT-2026', 'CapitalAllowances', 'Capital allowances', 2, 0, 'External or future asset-workflow calculation; never accounting depreciation.', 50),
         ('UK-CO-CT-2026', 'Losses', 'Loss relief schedule', 2, 0, 'External/contextual loss and claims state.', 60),
         ('UK-CO-CT-2026', 'TaxableTotalProfits', 'Taxable total profits', 2, 1, 'Derived computation result.', 70),
@@ -164,7 +224,8 @@ BEGIN TRY
     INSERT INTO Cash.tbTaxTagMap
         (TaxSourceCode, TagCode, MapTypeCode, CategoryCode, CashCode, IsEnabled)
     VALUES
-        ('UK-CO-CT-2026', 'AddBacks.AccountingDepreciation', 0, 'CA-DEPREC', '', 1);
+        ('UK-CO-CT-2026', 'AddBacks.AccountingDepreciation', 0, 'CA-DEPREC', '', 1),
+        ('UK-CO-CT-2026', 'RelevantDistributions', 0, 'CT-DIST', '', 1);
 
     INSERT INTO Cash.tbTaxTagMap
         (TaxSourceCode, TagCode, MapTypeCode, CategoryCode, CashCode, IsEnabled)

@@ -48,7 +48,6 @@ BEGIN TRY
 	DELETE FROM Cash.tbCategory;
 	DELETE FROM Cash.tbCategoryVersionEvent;
 	DELETE FROM Cash.tbCategoryVersion;
-	ALTER SEQUENCE Cash.seqCategoryVersion RESTART WITH 1;
 	DELETE FROM Usr.tbUser;
 	DELETE FROM App.tbCalendar;
 	DELETE FROM App.tbTemplate;
@@ -70,10 +69,19 @@ BEGIN TRY
 		, (2, N'Submitted')
 		, (3, N'Archived');
 
-	IF NOT EXISTS (SELECT * FROM Cash.tbCategoryRootType)
-		INSERT INTO Cash.tbCategoryRootType (RootTypeCode, RootType)
-		VALUES (0, N'NET_PROFIT')
-		, (1, N'VAT');
+	INSERT INTO Cash.tbCategoryRootType (RootTypeCode, RootType)
+	SELECT seed.RootTypeCode, seed.RootType
+	FROM (VALUES
+		(CAST(0 AS SMALLINT), N'NET_PROFIT'),
+		(CAST(1 AS SMALLINT), N'VAT'),
+		(CAST(2 AS SMALLINT), N'DISTRIBUTIONS')
+	) seed (RootTypeCode, RootType)
+	WHERE NOT EXISTS
+	(
+		SELECT 1
+		FROM Cash.tbCategoryRootType existing
+		WHERE existing.RootTypeCode = seed.RootTypeCode
+	);
 	
 	IF NOT EXISTS (SELECT * FROM [Cash].[tbChangeType])
 		INSERT INTO [Cash].[tbChangeType] ([ChangeTypeCode], [ChangeType])
@@ -339,19 +347,30 @@ BEGIN TRY
           AND existing.RegistrationSchemeCode = seed.RegistrationSchemeCode
     );
 
-    IF NOT EXISTS (SELECT * FROM App.tbSettingDefinition)
-        INSERT INTO App.tbSettingDefinition
-            (SettingCode, SettingName, JurisdictionCode, AuthorityCode, ReportingTypeCode, ValueTypeCode, AllowedValues)
-        VALUES
+    INSERT INTO App.tbSettingDefinition
+        (SettingCode, SettingName, JurisdictionCode, AuthorityCode, ReportingTypeCode, ValueTypeCode, AllowedValues)
+    SELECT seed.SettingCode, seed.SettingName, seed.JurisdictionCode, seed.AuthorityCode,
+        seed.ReportingTypeCode, seed.ValueTypeCode, seed.AllowedValues
+    FROM (VALUES
             (N'ACCOUNTING-BASIS', N'Accounting basis', N'UK', N'HMRC', 1, N'TEXT', N'["CASH","ACCRUAL"]'),
             (N'QUARTERLY-PERIOD-TYPE', N'Quarterly period type', N'UK', N'HMRC', 1, N'TEXT', N'["STANDARD","CALENDAR"]'),
             (N'PERIODS-OF-ACCOUNT', N'Periods of account choice', N'UK', N'HMRC', 1, N'TEXT', NULL),
             (N'LATE-DATE-ELECTION', N'Late accounting date rule election', N'UK', N'HMRC', 1, N'BOOLEAN', NULL),
             (N'CLASS4-EXEMPTION', N'Class 4 exemption reason', N'UK', N'HMRC', 1, N'TEXT', NULL),
+            (N'CT-ASSOCIATED-COMPANIES', N'CT associated companies', N'UK', N'HMRC', 2, N'INTEGER', NULL),
+            (N'CT-UK-RESIDENT', N'CT UK resident', N'UK', N'HMRC', 2, N'BOOLEAN', NULL),
+            (N'CT-CLOSE-INVESTMENT-HOLDING', N'CT close investment holding company', N'UK', N'HMRC', 2, N'BOOLEAN', NULL),
+            (N'CT-RING-FENCE-PROFITS', N'CT ring-fence profits', N'UK', N'HMRC', 2, N'BOOLEAN', NULL),
             (N'ACCOUNTING-STANDARD', N'Accounting standard', N'UK', N'COMPANIES-HOUSE', 3, N'TEXT', N'["FRS-105"]'),
             (N'ACCOUNTS-TYPE', N'Accounts type', N'UK', N'COMPANIES-HOUSE', 3, N'TEXT', N'["MICRO-ENTITY"]'),
             (N'BALANCE-SHEET-FORMAT', N'Balance sheet format', N'UK', N'COMPANIES-HOUSE', 3, N'TEXT', N'["FORMAT-1","FORMAT-2"]'),
-            (N'ACCOUNTING-POLICIES', N'Accounting policies narrative', N'UK', N'COMPANIES-HOUSE', 3, N'TEXT', NULL);
+            (N'ACCOUNTING-POLICIES', N'Accounting policies narrative', N'UK', N'COMPANIES-HOUSE', 3, N'TEXT', NULL)
+    ) seed (SettingCode, SettingName, JurisdictionCode, AuthorityCode, ReportingTypeCode, ValueTypeCode, AllowedValues)
+    WHERE NOT EXISTS
+    (
+        SELECT 1 FROM App.tbSettingDefinition existing
+        WHERE existing.SettingCode = seed.SettingCode
+    );
 
 	IF NOT EXISTS (SELECT * FROM [Subject].[tbAccountType])
 		INSERT INTO [Subject].[tbAccountType] ([AccountTypeCode], [AccountType])

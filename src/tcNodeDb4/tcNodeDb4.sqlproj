@@ -512,7 +512,6 @@
     <Build Include="App\Stored Procedures\proc_DocDespool.sql" />
     <Build Include="Invoice\Stored Procedures\proc_CancelByUserId.sql" />
     <Build Include="Cash\Stored Procedures\proc_ChangeAssign.sql" />
-    <Build Include="App\Stored Procedures\proc_Initialised.sql" />
     <Build Include="Cash\Stored Procedures\proc_TaxAdjustment.sql" />
     <Build Include="Cash\Stored Procedures\proc_ChangeDelete.sql" />
     <Build Include="Cash\Stored Procedures\proc_GeneratePeriods.sql" />
@@ -711,6 +710,9 @@
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Expenses.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_DividendsReceived.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="App\Functions\fnDatasetMonths.sql" />
     <Build Include="App\Stored Procedures\proc_DatasetSyntheticMIS_Assets.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
@@ -763,6 +765,7 @@
     <Build Include="Cash\Functions\fnTaxBizCumulative.sql" />
     <Build Include="Cash\Functions\fnTaxBizCumulativeContributors.sql" />
     <Build Include="Cash\Functions\fnTaxBizComputation.sql" />
+    <Build Include="Cash\Functions\fnTaxCorpMarginalReliefUK.sql" />
     <Build Include="Cash\Functions\fnTaxBizBalanceSheet.sql" />
     <Build Include="Cash\Functions\fnTaxBizBalanceSheetUK.sql" />
     <Build Include="Cash\Stored Procedures\proc_TaxTagMapValidate.sql" />
@@ -848,6 +851,7 @@
     <Build Include="Cash\Functions\fnEquityReconciliationByYearByVersion.sql" />
   </ItemGroup>
   <ItemGroup>
+    <PreDeploy Include="Script.PreDeployment.sql" />
     <PostDeploy Include="Script.PostDeployment.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -863,6 +867,9 @@
     <None Include="Tests\PhaseDP5_Verification.sql" />
     <None Include="Tests\Phase6A_ReportingProfileReadiness.sql" />
     <None Include="Tests\SoleTraderBusinessTaxRate.sql" />
+    <None Include="Tests\CorporationTaxMarginalReliefBoundaries.sql" />
+    <None Include="Tests\CorporationTaxMarginalReliefAuthority.sql" />
+    <None Include="Tests\CorporationTaxRelevantDistributions.sql" />
     <None Include="Tests\TaxTagMapValidator.sql" />
     <None Include="Tests\CategoryTreeVersionInfrastructure.sql" />
     <None Include="Tests\CategoryTreeShadowVersion.sql" />

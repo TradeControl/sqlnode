@@ -1,6 +1,5 @@
 CREATE TABLE [App].[tbOptions] (
     [Identifier]         NVARCHAR (4)   NOT NULL,
-    [IsInitialised]      BIT            CONSTRAINT [DF_App_tbOptions_IsIntialised] DEFAULT ((0)) NOT NULL,
     [SubjectCode]        NVARCHAR (50)  NOT NULL,
     [RegisterName]       NVARCHAR (50)  NOT NULL,
     [CategoryVersionId]  NVARCHAR (10)  NULL,
@@ -58,15 +57,6 @@ BEGIN
 	BEGIN TRY
 		IF (SELECT COUNT_BIG(*) FROM App.tbOptions WITH (TABLOCKX, HOLDLOCK)) > 1
 			THROW 51089, 'App.tbOptions must contain no more than one row.', 1;
-
-		IF EXISTS
-		(
-			SELECT 1
-			FROM inserted AS i
-			WHERE i.IsInitialised = 1
-			  AND i.CategoryVersionId IS NULL
-		)
-			THROW 51090, 'An initialised node requires an active Category Tree version.', 1;
 
 		IF EXISTS
 		(

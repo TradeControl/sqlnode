@@ -204,8 +204,15 @@ AS
 		)
 			THROW 51007, 'BasicSetup: one or more Cash Codes lack a shadow Category mapping.', 1;
 
-		IF (SELECT COUNT(*) FROM Cash.tbCategoryRoot WHERE VersionId = @CategoryVersionId) <> 2
-			THROW 51008, 'BasicSetup: the Category Tree requires Net Profit and VAT roots.', 1;
+		IF (SELECT COUNT(*) FROM Cash.tbCategoryRoot WHERE VersionId = @CategoryVersionId) NOT BETWEEN 2 AND 3
+		   OR EXISTS
+		   (
+				SELECT required.RootTypeCode
+				FROM (VALUES (CAST(0 AS SMALLINT)), (CAST(1 AS SMALLINT))) required (RootTypeCode)
+				EXCEPT
+				SELECT RootTypeCode FROM Cash.tbCategoryRoot WHERE VersionId = @CategoryVersionId
+		   )
+			THROW 51008, 'BasicSetup: the Category Tree requires Net Profit and VAT roots and may include Relevant Distributions.', 1;
 
 		DECLARE
 			@CategoryVersionSha256 BINARY(32),

@@ -24,13 +24,13 @@ BEGIN TRY
     )
         THROW 51062, 'Category Tree version status vocabulary differs from the contract.', 1;
 
-    IF (SELECT COUNT(*) FROM Cash.tbCategoryRootType) <> 2
+    IF (SELECT COUNT(*) FROM Cash.tbCategoryRootType) <> 3
         THROW 51063, 'Category Tree root-type vocabulary is incomplete.', 1;
 
     IF EXISTS
     (
         SELECT expected.RootTypeCode, expected.RootType
-        FROM (VALUES (0, N'NET_PROFIT'), (1, N'VAT')) expected (RootTypeCode, RootType)
+        FROM (VALUES (0, N'NET_PROFIT'), (1, N'VAT'), (2, N'DISTRIBUTIONS')) expected (RootTypeCode, RootType)
         EXCEPT
         SELECT RootTypeCode, RootType
         FROM Cash.tbCategoryRootType
@@ -38,12 +38,16 @@ BEGIN TRY
         THROW 51064, 'Category Tree root-type vocabulary differs from the contract.', 1;
 
     DECLARE
-        @UserId NVARCHAR(10) = (SELECT TOP (1) UserId FROM Usr.vwCredentials),
+        @UserId NVARCHAR(10) = COALESCE
+        (
+            (SELECT TOP (1) UserId FROM Usr.vwCredentials),
+            (SELECT TOP (1) UserId FROM Usr.tbUser WHERE IsEnabled <> 0 ORDER BY UserId)
+        ),
         @VersionId NVARCHAR(10),
         @NextVersionId NVARCHAR(10);
 
     IF @UserId IS NULL
-        THROW 51065, 'The fixture requires one current application user.', 1;
+        THROW 51065, 'The fixture requires one enabled application user.', 1;
 
     EXEC Cash.proc_CategoryVersionIdNext @VersionId = @VersionId OUTPUT;
     EXEC Cash.proc_CategoryVersionIdNext @VersionId = @NextVersionId OUTPUT;

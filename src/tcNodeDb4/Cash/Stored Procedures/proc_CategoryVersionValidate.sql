@@ -56,7 +56,7 @@ BEGIN
     )
         THROW 51114, 'Every Category Tree parent must be a Total category.', 1;
 
-    IF (SELECT COUNT(*) FROM Cash.tbCategoryRoot WHERE VersionId = @VersionId) <> 2
+    IF (SELECT COUNT(*) FROM Cash.tbCategoryRoot WHERE VersionId = @VersionId) NOT BETWEEN 2 AND 3
        OR EXISTS
           (
               SELECT required.RootTypeCode
@@ -66,7 +66,7 @@ BEGIN
               FROM Cash.tbCategoryRoot
               WHERE VersionId = @VersionId
           )
-        THROW 51115, 'A Category Tree version requires exactly the Net Profit and VAT roots.', 1;
+        THROW 51115, 'A Category Tree version requires Net Profit and VAT roots and may include Relevant Distributions.', 1;
 
     IF EXISTS
     (

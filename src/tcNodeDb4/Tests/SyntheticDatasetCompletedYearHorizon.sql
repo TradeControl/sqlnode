@@ -10,6 +10,16 @@ DECLARE
     @ExpectedCompletedYears smallint = 3,
     @Tolerance decimal(18, 5) = 0.10;
 
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM App.tbOptions AS options
+    JOIN Cash.tbCategoryVersion AS version
+      ON version.VersionId = options.CategoryVersionId
+    WHERE version.VersionStatusCode IN (1, 2)
+)
+    THROW 52002, 'Synthetic dataset has no active commissioned Category Tree.', 1;
+
 DECLARE @CompletedYears TABLE
 (
     SequenceNumber int NOT NULL,
