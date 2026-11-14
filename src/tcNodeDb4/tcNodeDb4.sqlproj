@@ -187,6 +187,7 @@
     <Build Include="App\Tables\tbUom.sql" />
     <Build Include="App\Tables\tbYear.sql" />
     <Build Include="App\Tables\tbYearPeriod.sql" />
+    <Build Include="App\Tables\tbYearPeriodTaxUk.sql" />
     <Build Include="Invoice\Tables\tbEntry.sql" />
     <Build Include="Cash\Tables\tbCategory.sql" />
     <Build Include="Cash\Tables\tbCategoryCodeMap.sql" />
@@ -259,6 +260,9 @@
     <Build Include="Invoice\Views\vwNetworkDeployments.sql" />
     <Build Include="Cash\Views\vwTaxBizTotalsByPeriod.sql" />
     <Build Include="Cash\Views\vwTaxBizComputationByYear.sql" />
+    <Build Include="Cash\Views\vwTaxCorpLiabilityUK.sql" />
+    <Build Include="Cash\Views\vwTaxCorpOrderBookLiabilityUK.sql" />
+    <Build Include="Cash\Views\vwTaxBizLiability.sql" />
     <Build Include="Invoice\Views\vwNetworkDeploymentItems.sql" />
     <Build Include="Cash\Views\vwTaxBizStatement.sql" />
     <Build Include="Invoice\Views\vwNetworkUpdates.sql" />
@@ -268,6 +272,7 @@
     <Build Include="Cash\Views\vwTaxVatSummary.sql" />
     <Build Include="Cash\Views\vwNetworkMirrors.sql" />
     <Build Include="Cash\Views\vwTaxVatStatement.sql" />
+    <Build Include="Cash\Views\vwTaxBizOrderBook.sql" />
     <Build Include="Cash\Views\vwTaxBizAccruals.sql" />
     <Build Include="Cash\Views\vwStatement.sql" />
     <Build Include="Cash\Views\vwTaxBizAuditAccruals.sql" />
@@ -339,6 +344,7 @@
     <Build Include="App\Views\vwWarehouseOrg.sql" />
     <Build Include="App\Views\vwWarehouseTask.sql" />
     <Build Include="App\Views\vwYearPeriod.sql" />
+    <Build Include="App\Views\vwYearPeriodTaxUkSeed.sql" />
     <Build Include="Cash\Views\vwAccountRebuild.sql" />
     <Build Include="Cash\Views\vwCategoryCapital.sql" />
     <Build Include="Cash\Views\vwBudget.sql" />
@@ -516,6 +522,7 @@
     <Build Include="Cash\Stored Procedures\proc_ChangeDelete.sql" />
     <Build Include="Cash\Stored Procedures\proc_GeneratePeriods.sql" />
     <Build Include="App\Stored Procedures\proc_TaxRates.sql" />
+    <Build Include="App\Stored Procedures\proc_YearPeriodTaxUkSet.sql" />
     <Build Include="Cash\Stored Procedures\proc_ChangeNote.sql" />
     <Build Include="App\Stored Procedures\proc_EventLogCleardown.sql" />
     <Build Include="App\Stored Procedures\proc_PeriodClose.sql" />
@@ -765,6 +772,7 @@
     <Build Include="Cash\Functions\fnTaxBizCumulative.sql" />
     <Build Include="Cash\Functions\fnTaxBizCumulativeContributors.sql" />
     <Build Include="Cash\Functions\fnTaxBizComputation.sql" />
+    <Build Include="Cash\Functions\fnTaxBizComputationByYearSelected.sql" />
     <Build Include="Cash\Functions\fnTaxCorpMarginalReliefUK.sql" />
     <Build Include="Cash\Functions\fnTaxBizBalanceSheet.sql" />
     <Build Include="Cash\Functions\fnTaxBizBalanceSheetUK.sql" />
@@ -870,6 +878,11 @@
     <None Include="Tests\CorporationTaxMarginalReliefBoundaries.sql" />
     <None Include="Tests\CorporationTaxMarginalReliefAuthority.sql" />
     <None Include="Tests\CorporationTaxRelevantDistributions.sql" />
+    <None Include="Tests\CorporationTaxPeriodParametersUk.sql" />
+    <None Include="Tests\CorporationTaxLiabilityProjectionUK.sql" />
+    <None Include="Tests\CorporationTaxStatementReconciliation.sql" />
+    <None Include="Tests\CorporationTaxOrderBook.sql" />
+    <None Include="Tests\CorporationTaxOrderBookLiabilityUK.sql" />
     <None Include="Tests\TaxTagMapValidator.sql" />
     <None Include="Tests\CategoryTreeVersionInfrastructure.sql" />
     <None Include="Tests\CategoryTreeShadowVersion.sql" />

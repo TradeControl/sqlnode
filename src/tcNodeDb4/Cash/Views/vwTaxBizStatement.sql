@@ -1,16 +1,12 @@
 
 CREATE VIEW Cash.vwTaxBizStatement
 AS
-	WITH tax_dates AS
+	WITH period_totals AS
 	(
-		SELECT PayOn, PayFrom, PayTo FROM Cash.fnTaxTypeDueDates(Cash.fnGetBizTaxType(), 0)
-	), period_totals AS
-	(
-		SELECT due.PayOn AS StartOn, computation.TaxDue AS BusinessTax
-		FROM Cash.vwTaxBizComputationByYear computation
-			JOIN tax_dates due
-				ON CONVERT(date, due.PayFrom) = computation.PeriodStart
-				AND CONVERT(date, due.PayTo) = DATEADD(day, 1, computation.PeriodEnd)
+		SELECT liability.PayOn AS StartOn, liability.LiabilityAmount AS BusinessTax
+		FROM Cash.vwTaxBizLiability liability
+		WHERE liability.IsAccrualReady = 1
+		  AND liability.PayOn IS NOT NULL
 	), tax_entries AS
 	(
 		SELECT StartOn, SUM(BusinessTax) AS TaxDue, 0 AS TaxPaid

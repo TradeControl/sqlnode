@@ -38,6 +38,38 @@ AS
 	
 		CLOSE curYr
 		DEALLOCATE curYr
+
+		IF Cash.fnGetBizTaxType() = 0
+		   AND EXISTS (SELECT 1 FROM App.tbOptions WHERE JurisdictionCode = N'UK')
+		BEGIN
+			INSERT INTO App.tbYearPeriodTaxUk
+			(
+				YearNumber, StartOn,
+				CorporationTaxMainRate, CorporationTaxSmallProfitsRate,
+				CorporationTaxMarginalReliefFraction,
+				CorporationTaxLowerLimit, CorporationTaxUpperLimit
+			)
+			SELECT period.YearNumber, period.StartOn,
+				seed.CorporationTaxMainRate,
+				seed.CorporationTaxSmallProfitsRate,
+				seed.CorporationTaxMarginalReliefFraction,
+				seed.CorporationTaxLowerLimit,
+				seed.CorporationTaxUpperLimit
+			FROM App.tbYearPeriod period
+			CROSS APPLY
+			(
+				SELECT TOP (1) ledger.*
+				FROM App.vwYearPeriodTaxUkSeed ledger
+				WHERE period.StartOn >= ledger.EffectiveFrom
+				ORDER BY ledger.EffectiveFrom DESC, ledger.SQLBuild DESC
+			) seed
+			WHERE NOT EXISTS
+			(
+				SELECT 1 FROM App.tbYearPeriodTaxUk existing
+				WHERE existing.YearNumber = period.YearNumber
+				  AND existing.StartOn = period.StartOn
+			);
+		END;
 	
 		INSERT INTO Cash.tbPeriod
 							  (CashCode, StartOn)
