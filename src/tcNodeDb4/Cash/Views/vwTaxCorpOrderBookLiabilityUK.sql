@@ -7,12 +7,32 @@
 */
 CREATE VIEW Cash.vwTaxCorpOrderBookLiabilityUK
 AS
-WITH distribution_codes AS
+WITH tax_source_context AS
 (
-    SELECT DISTINCT projection.TaxSourceCode, mapping.CashCode
-    FROM Cash.vwTaxCorpLiabilityUK projection
+    SELECT profile.TaxSourceCode
+    FROM App.tbOptions options
+    OUTER APPLY
+    (
+        SELECT TOP (1) candidate.TaxSourceCode,
+               candidate.StatusCode,
+               candidate.ValidFrom,
+               candidate.ReportingProfileCode
+        FROM Cash.tbReportingProfile candidate
+        WHERE candidate.SubjectCode = options.SubjectCode
+          AND candidate.ReportingTypeCode = 2
+          AND candidate.TaxSourceCode IS NOT NULL
+        ORDER BY CASE candidate.StatusCode WHEN 1 THEN 0 ELSE 1 END,
+                 candidate.ValidFrom DESC,
+                 candidate.ReportingProfileCode
+    ) profile
+    WHERE options.JurisdictionCode = N'UK'
+      AND Cash.fnGetBizTaxType() = 0
+), distribution_codes AS
+(
+    SELECT DISTINCT context.TaxSourceCode, mapping.CashCode
+    FROM tax_source_context context
     JOIN Cash.vwTaxTagCashCode mapping
-      ON mapping.TaxSourceCode = projection.TaxSourceCode
+      ON mapping.TaxSourceCode = context.TaxSourceCode
      AND mapping.TagCode = N'RelevantDistributions'
 ), order_book_by_year AS
 (
@@ -88,6 +108,15 @@ SELECT projection.YearNumber,
        projection.Description,
        projection.PeriodStart,
        projection.PeriodEnd,
+       ActualTaxableResultBeforeRelief = projection.TaxableResultBeforeRelief,
+       ActualRelevantDistributions = projection.RelevantDistributions,
+       projection.BusinessTaxAdjustment,
+       projection.AssociatedCompanyCount,
+       projection.MainRate,
+       projection.SmallProfitsRate,
+       projection.MarginalReliefFraction,
+       projection.LowerLimit,
+       projection.UpperLimit,
        projection.OrderBookProfit,
        projection.OrderBookDistributions,
        projection.ProjectedTaxableResultBeforeRelief,

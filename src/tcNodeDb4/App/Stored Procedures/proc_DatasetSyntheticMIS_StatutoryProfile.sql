@@ -23,10 +23,13 @@ IF @JurisdictionCode <> N'UK'
 IF @StatusCode IS NULL
     THROW 51072, 'Synthetic statutory profile: an active statutory status is required.', 1;
 
+-- A synthetic profile must cover the complete generated accounting history.
+-- The dataset temporal anchor can be later than its completed years, so it is
+-- only a fallback when no generated financial period is available.
 SET @AsOfDate = COALESCE
 (
-    @AsOfDate,
     (SELECT MIN(CONVERT(DATE, StartOn)) FROM App.tbYearPeriod),
+    @AsOfDate,
     CONVERT(DATE, CURRENT_TIMESTAMP)
 );
 
@@ -140,6 +143,38 @@ BEGIN
         @TaxSourceCode = N'UK-CO-CT-2026', @ValidFrom = @AsOfDate,
         @StatusCode = @StatusCode, @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1,
         @ReportingProfileCode = @ProfileCode OUTPUT;
+
+    -- Node commissioning creates conservative, unreviewed eligibility
+    -- placeholders. A disposable synthetic company has explicit fixture facts,
+    -- so replace only those untouched imported defaults before saving the
+    -- reviewed effective-dated values.
+    DELETE Cash.tbReportingProfileSetting
+    WHERE SubjectCode = @SubjectCode
+      AND ReportingProfileCode = @ProfileCode
+      AND SettingCode IN
+      (
+          N'CT-ASSOCIATED-COMPANIES', N'CT-UK-RESIDENT',
+          N'CT-CLOSE-INVESTMENT-HOLDING', N'CT-RING-FENCE-PROFITS'
+      )
+      AND ValueSourceCode = N'IMPORTED'
+      AND IsReviewed = 0;
+
+    EXEC Cash.proc_ReportingProfileSettingSave @SubjectCode, @ProfileCode,
+        N'CT-ASSOCIATED-COMPANIES', @AsOfDate,
+        @IntegerValue = 0, @StatusCode = @StatusCode,
+        @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1;
+    EXEC Cash.proc_ReportingProfileSettingSave @SubjectCode, @ProfileCode,
+        N'CT-UK-RESIDENT', @AsOfDate,
+        @BooleanValue = 1, @StatusCode = @StatusCode,
+        @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1;
+    EXEC Cash.proc_ReportingProfileSettingSave @SubjectCode, @ProfileCode,
+        N'CT-CLOSE-INVESTMENT-HOLDING', @AsOfDate,
+        @BooleanValue = 0, @StatusCode = @StatusCode,
+        @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1;
+    EXEC Cash.proc_ReportingProfileSettingSave @SubjectCode, @ProfileCode,
+        N'CT-RING-FENCE-PROFITS', @AsOfDate,
+        @BooleanValue = 0, @StatusCode = @StatusCode,
+        @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1;
 
     SET @ProfileCode = NULL;
     SELECT @ProfileCode = ReportingProfileCode

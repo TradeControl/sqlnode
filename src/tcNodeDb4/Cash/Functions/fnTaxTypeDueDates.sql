@@ -55,6 +55,18 @@ BEGIN
 						END;	
 		END;
 
+		-- The final configured accounting/tax period needs the following
+		-- recurrence boundary in order to obtain its payment date. That boundary
+		-- is normally outside App.tbYearPeriod and therefore is not found by the
+		-- loop above.
+		IF @StartOn IS NOT NULL AND @MonthInterval IS NOT NULL
+		BEGIN
+			DECLARE @TrailingBoundary datetime = DATEADD(month, @MonthInterval, @StartOn);
+
+			IF NOT EXISTS (SELECT 1 FROM @tbDueDate WHERE PayOn = @TrailingBoundary)
+				INSERT INTO @tbDueDate (PayOn) VALUES (@TrailingBoundary);
+		END;
+
 		WITH dd AS
 		(
 			SELECT PayOn, LAG(PayOn) OVER (ORDER BY PayOn) AS PayFrom

@@ -69,19 +69,10 @@ AS
 				CASE WHEN TaxDue >= 0 THEN TaxDue ELSE 0 END AS PayOut
 		FROM vat_accrual_totals
 			CROSS JOIN vat_taxcode
-	), cost_set_Project_tax AS
-	(
-		SELECT (SELECT TOP (1) StartOn FROM App.tbYearPeriod WHERE (StartOn <= ActionOn) ORDER BY StartOn DESC) AS StartOn, 
-			CASE WHEN category.CashPolarityCode = 0 THEN quote.TotalCharge * - 1 ELSE quote.TotalCharge END AS TotalCharge
-		FROM Project.vwCostSetProjects cost_set INNER JOIN
-			Project.tbProject AS quote ON cost_set.ProjectCode = quote.ProjectCode INNER JOIN
-								 Cash.vwCodeActive AS code ON quote.CashCode = code.CashCode INNER JOIN
-								 Cash.vwCategoryActive AS category ON code.CategoryCode = category.CategoryCode
-		WHERE    (quote.ActionOn <= (SELECT DATEADD(d, TaxHorizon, CURRENT_TIMESTAMP) AS HorizonOn FROM App.tbOptions))
 	), cost_set_biztax AS
 	(
-		SELECT cost_set_Project_tax.StartOn, TotalCharge, TotalCharge * BusinessTaxRate AS TaxDue
-		FROM cost_set_Project_tax JOIN App.tbYearPeriod year_period ON cost_set_Project_tax.StartOn = year_period.StartOn
+		SELECT StartOn, TaxDue
+		FROM Cash.fnTaxBizWhatIfAccrualsSelected()
 	), biztax_dates AS
 	(
 		SELECT PayOn, PayFrom, PayTo FROM Cash.fnTaxTypeDueDates(0, 0)

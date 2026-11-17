@@ -262,6 +262,8 @@
     <Build Include="Cash\Views\vwTaxBizComputationByYear.sql" />
     <Build Include="Cash\Views\vwTaxCorpLiabilityUK.sql" />
     <Build Include="Cash\Views\vwTaxCorpOrderBookLiabilityUK.sql" />
+    <Build Include="Cash\Views\vwTaxCorpOrderBookAccrualUK.sql" />
+    <Build Include="Cash\Views\vwTaxCorpWhatIfLiabilityUK.sql" />
     <Build Include="Cash\Views\vwTaxBizLiability.sql" />
     <Build Include="Invoice\Views\vwNetworkDeploymentItems.sql" />
     <Build Include="Cash\Views\vwTaxBizStatement.sql" />
@@ -273,6 +275,7 @@
     <Build Include="Cash\Views\vwNetworkMirrors.sql" />
     <Build Include="Cash\Views\vwTaxVatStatement.sql" />
     <Build Include="Cash\Views\vwTaxBizOrderBook.sql" />
+    <Build Include="Cash\Views\vwTaxBizWhatIfOrderBook.sql" />
     <Build Include="Cash\Views\vwTaxBizAccruals.sql" />
     <Build Include="Cash\Views\vwStatement.sql" />
     <Build Include="Cash\Views\vwTaxBizAuditAccruals.sql" />
@@ -451,7 +454,7 @@
     <Build Include="Project\Views\vwCostSet.sql" />
     <Build Include="Cash\Views\vwStatementBase.sql" />
     <Build Include="Subject\Views\vwStatement.sql" />
-    <Build Include="Project\Views\vwCostSetTasks.sql" />
+    <Build Include="Project\Views\vwCostSetProjects.sql" />
     <Build Include="Subject\Views\vwTypeLookup.sql" />
     <Build Include="Cash\Views\vwStatementWhatIf.sql" />
     <Build Include="Project\Views\vwActiveStatusCodes.sql" />
@@ -774,6 +777,9 @@
     <Build Include="Cash\Functions\fnTaxBizComputation.sql" />
     <Build Include="Cash\Functions\fnTaxBizComputationByYearSelected.sql" />
     <Build Include="Cash\Functions\fnTaxCorpMarginalReliefUK.sql" />
+    <Build Include="Cash\Functions\fnTaxCorpOrderBookLiabilityUK.sql" />
+    <Build Include="Cash\Functions\fnTaxBizAccrualsSelected.sql" />
+    <Build Include="Cash\Functions\fnTaxBizWhatIfAccrualsSelected.sql" />
     <Build Include="Cash\Functions\fnTaxBizBalanceSheet.sql" />
     <Build Include="Cash\Functions\fnTaxBizBalanceSheetUK.sql" />
     <Build Include="Cash\Stored Procedures\proc_TaxTagMapValidate.sql" />
@@ -883,6 +889,11 @@
     <None Include="Tests\CorporationTaxStatementReconciliation.sql" />
     <None Include="Tests\CorporationTaxOrderBook.sql" />
     <None Include="Tests\CorporationTaxOrderBookLiabilityUK.sql" />
+    <None Include="Tests\CorporationTaxOrderBookAccrualUK.sql" />
+    <None Include="Tests\CorporationTaxOrderBookStatement.sql" />
+    <None Include="Tests\CorporationTaxWhatIfUK.sql" />
+    <None Include="Tests\CorporationTaxJurisdictionIsolation.sql" />
+    <None Include="Tests\CorporationTaxPerformance.sql" />
     <None Include="Tests\TaxTagMapValidator.sql" />
     <None Include="Tests\CategoryTreeVersionInfrastructure.sql" />
     <None Include="Tests\CategoryTreeShadowVersion.sql" />

@@ -119,14 +119,24 @@ IF EXISTS
 )
     THROW 51325, 'A dividend receipt has invalid VAT treatment or payment polarity.', 1;
 
-IF EXISTS (SELECT 1 FROM @Results WHERE RelevantDistributions > 0)
-   AND NOT EXISTS
-   (
-       SELECT 1 FROM @Results
-       WHERE RelevantDistributions > 0
-         AND CorporationTaxChargeable <> ZeroDistributionCharge
-   )
-    THROW 51326, 'Positive D did not affect the marginal-relief result.', 1;
+IF EXISTS
+(
+    SELECT 1 FROM @Results
+    WHERE RelevantDistributions > 0
+      AND AugmentedProfits <= 50000
+      AND CorporationTaxChargeable <> ZeroDistributionCharge
+)
+    THROW 51326, 'Positive D incorrectly affected a small-profits result.', 1;
+
+IF EXISTS
+(
+    SELECT 1 FROM @Results
+    WHERE RelevantDistributions > 0
+      AND AugmentedProfits > 50000
+      AND AugmentedProfits <= 250000
+      AND CorporationTaxChargeable = ZeroDistributionCharge
+)
+    THROW 51327, 'Positive D did not affect a marginal-relief result.', 1;
 
 SELECT * FROM @Results ORDER BY YearNumber;
 PRINT 'Corporation Tax relevant-distributions fixture passed.';

@@ -10,10 +10,27 @@ SET XACT_ABORT ON;
 IF OBJECT_ID(N'Cash.vwTaxCorpOrderBookLiabilityUK', N'V') IS NULL
     THROW 51440, 'The UK CT order-book liability projection is not deployed.', 1;
 
+/*
+    The expanded annual views are materialised once so each invariant inspects
+    one identical calculation set. Re-reading the view for every assertion
+    obscures the live execution cost with repeated compilation and execution.
+*/
+SELECT *
+INTO #OrderBook
+FROM Cash.vwTaxBizOrderBook;
+
+SELECT *
+INTO #Actual
+FROM Cash.vwTaxCorpLiabilityUK;
+
+SELECT *
+INTO #Projection
+FROM Cash.vwTaxCorpOrderBookLiabilityUK;
+
 IF EXISTS
 (
     SELECT 1
-    FROM Cash.vwTaxCorpOrderBookLiabilityUK projection
+    FROM #Projection projection
     WHERE projection.ProjectedLiability - projection.ActualLiability <> projection.TaxAccrual
 )
     THROW 51441, 'The order-book tax accrual does not reconcile to projected less actual liability.', 1;
@@ -21,12 +38,12 @@ IF EXISTS
 IF EXISTS
 (
     SELECT 1
-    FROM Cash.vwTaxCorpOrderBookLiabilityUK projection
+    FROM #Projection projection
     WHERE projection.OrderBookProfit = 0
       AND projection.OrderBookDistributions = 0
       AND projection.ProjectedTaxableResultBeforeRelief
           <> (SELECT actual.TaxableResultBeforeRelief
-              FROM Cash.vwTaxCorpLiabilityUK actual
+              FROM #Actual actual
               WHERE actual.YearNumber = projection.YearNumber)
 )
     THROW 51442, 'A zero-order-book year changed its taxable result before relief.', 1;
@@ -38,11 +55,11 @@ IF EXISTS
                WHEN distribution.CashCode IS NULL THEN order_book.OrderValue ELSE 0 END)),
            OrderBookDistributions = CONVERT(decimal(38,5), SUM(CASE
                WHEN distribution.CashCode IS NOT NULL THEN order_book.OrderValue ELSE 0 END))
-    FROM Cash.vwTaxBizOrderBook order_book
+    FROM #OrderBook order_book
     LEFT JOIN
     (
         SELECT DISTINCT projection.TaxSourceCode, mapping.CashCode
-        FROM Cash.vwTaxCorpLiabilityUK projection
+        FROM #Projection projection
         JOIN Cash.vwTaxTagCashCode mapping
           ON mapping.TaxSourceCode = projection.TaxSourceCode
          AND mapping.TagCode = N'RelevantDistributions'
@@ -52,7 +69,7 @@ IF EXISTS
     EXCEPT
 
     SELECT YearNumber, OrderBookProfit, OrderBookDistributions
-    FROM Cash.vwTaxCorpOrderBookLiabilityUK
+    FROM #Projection
     WHERE OrderBookProfit <> 0 OR OrderBookDistributions <> 0
 )
     THROW 51443, 'The UK order-book N/D accumulation does not reconcile to the canonical order book.', 1;
@@ -60,7 +77,7 @@ IF EXISTS
 IF EXISTS
 (
     SELECT 1
-    FROM Cash.vwTaxCorpOrderBookLiabilityUK
+    FROM #Projection
     WHERE IsAccrualReady = 0
       AND TaxAccrual IS NOT NULL
 )
@@ -71,5 +88,5 @@ SELECT YearNumber, OrderBookProfit, OrderBookDistributions,
        CalculationCode, MarginalRelief,
        ActualLiability, ProjectedLiability, TaxAccrual,
        FindingCode, IsAccrualReady
-FROM Cash.vwTaxCorpOrderBookLiabilityUK
+FROM #Projection
 ORDER BY YearNumber;
