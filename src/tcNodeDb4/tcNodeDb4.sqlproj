@@ -776,6 +776,8 @@
     <Build Include="Cash\Functions\fnTaxBizCumulativeContributors.sql" />
     <Build Include="Cash\Functions\fnTaxBizComputation.sql" />
     <Build Include="Cash\Functions\fnTaxBizComputationByYearSelected.sql" />
+    <Build Include="Cash\Functions\fnTaxBizComputationByYearSelectedByVersion.sql" />
+    <Build Include="Cash\Functions\fnTaxCorpLiabilityUKByVersion.sql" />
     <Build Include="Cash\Functions\fnTaxCorpMarginalReliefUK.sql" />
     <Build Include="Cash\Functions\fnTaxCorpOrderBookLiabilityUK.sql" />
     <Build Include="Cash\Functions\fnTaxBizAccrualsSelected.sql" />
@@ -894,6 +896,7 @@
     <None Include="Tests\CorporationTaxWhatIfUK.sql" />
     <None Include="Tests\CorporationTaxJurisdictionIsolation.sql" />
     <None Include="Tests\CorporationTaxPerformance.sql" />
+    <None Include="Tests\SyntheticStatutoryProfileReanchor.sql" />
     <None Include="Tests\TaxTagMapValidator.sql" />
     <None Include="Tests\CategoryTreeVersionInfrastructure.sql" />
     <None Include="Tests\CategoryTreeShadowVersion.sql" />

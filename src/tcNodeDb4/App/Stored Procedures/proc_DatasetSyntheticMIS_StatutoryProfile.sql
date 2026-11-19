@@ -126,6 +126,29 @@ BEGIN
         @IsReviewed = 1,
         @ReportingProfileCode = @ProfileCode OUTPUT;
 
+    IF EXISTS
+    (
+        SELECT setting.SettingCode
+        FROM Cash.tbReportingProfileSetting setting
+        WHERE setting.SubjectCode = @SubjectCode
+          AND setting.ReportingProfileCode = @ProfileCode
+          AND setting.SettingCode IN (N'ACCOUNTING-BASIS', N'QUARTERLY-PERIOD-TYPE')
+        GROUP BY setting.SettingCode
+        HAVING COUNT(*) <> 1
+            OR MAX(CASE WHEN setting.ValueSourceCode IN (N'IMPORTED', N'SYNTHETIC')
+                        THEN 0 ELSE 1 END) = 1
+    )
+        THROW 51520, 'Synthetic statutory profile: existing income-tax setting history cannot be re-anchored safely.', 1;
+
+    UPDATE setting
+    SET EffectiveFrom = @AsOfDate
+    FROM Cash.tbReportingProfileSetting setting
+    WHERE setting.SubjectCode = @SubjectCode
+      AND setting.ReportingProfileCode = @ProfileCode
+      AND setting.SettingCode IN (N'ACCOUNTING-BASIS', N'QUARTERLY-PERIOD-TYPE')
+      AND setting.ValueSourceCode IN (N'IMPORTED', N'SYNTHETIC')
+      AND setting.EffectiveFrom <> @AsOfDate;
+
     EXEC Cash.proc_ReportingProfileSettingSave @SubjectCode, @ProfileCode, N'ACCOUNTING-BASIS', @AsOfDate,
         @TextValue = N'CASH', @StatusCode = @StatusCode, @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1;
     EXEC Cash.proc_ReportingProfileSettingSave @SubjectCode, @ProfileCode, N'QUARTERLY-PERIOD-TYPE', @AsOfDate,
@@ -143,6 +166,37 @@ BEGIN
         @TaxSourceCode = N'UK-CO-CT-2026', @ValidFrom = @AsOfDate,
         @StatusCode = @StatusCode, @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1,
         @ReportingProfileCode = @ProfileCode OUTPUT;
+
+    IF EXISTS
+    (
+        SELECT setting.SettingCode
+        FROM Cash.tbReportingProfileSetting setting
+        WHERE setting.SubjectCode = @SubjectCode
+          AND setting.ReportingProfileCode = @ProfileCode
+          AND setting.SettingCode IN
+          (
+              N'CT-ASSOCIATED-COMPANIES', N'CT-UK-RESIDENT',
+              N'CT-CLOSE-INVESTMENT-HOLDING', N'CT-RING-FENCE-PROFITS'
+          )
+        GROUP BY setting.SettingCode
+        HAVING COUNT(*) <> 1
+            OR MAX(CASE WHEN setting.ValueSourceCode IN (N'IMPORTED', N'SYNTHETIC')
+                        THEN 0 ELSE 1 END) = 1
+    )
+        THROW 51521, 'Synthetic statutory profile: existing Corporation Tax setting history cannot be re-anchored safely.', 1;
+
+    UPDATE setting
+    SET EffectiveFrom = @AsOfDate
+    FROM Cash.tbReportingProfileSetting setting
+    WHERE setting.SubjectCode = @SubjectCode
+      AND setting.ReportingProfileCode = @ProfileCode
+      AND setting.SettingCode IN
+      (
+          N'CT-ASSOCIATED-COMPANIES', N'CT-UK-RESIDENT',
+          N'CT-CLOSE-INVESTMENT-HOLDING', N'CT-RING-FENCE-PROFITS'
+      )
+      AND setting.ValueSourceCode IN (N'IMPORTED', N'SYNTHETIC')
+      AND setting.EffectiveFrom <> @AsOfDate;
 
     -- Node commissioning creates conservative, unreviewed eligibility
     -- placeholders. A disposable synthetic company has explicit fixture facts,
@@ -186,6 +240,37 @@ BEGIN
         @TaxSourceCode = N'UK-CO-ACCTS-2026', @ValidFrom = @AsOfDate,
         @StatusCode = @StatusCode, @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1,
         @ReportingProfileCode = @ProfileCode OUTPUT;
+
+    IF EXISTS
+    (
+        SELECT setting.SettingCode
+        FROM Cash.tbReportingProfileSetting setting
+        WHERE setting.SubjectCode = @SubjectCode
+          AND setting.ReportingProfileCode = @ProfileCode
+          AND setting.SettingCode IN
+          (
+              N'ACCOUNTING-STANDARD', N'ACCOUNTS-TYPE',
+              N'BALANCE-SHEET-FORMAT', N'ACCOUNTING-POLICIES'
+          )
+        GROUP BY setting.SettingCode
+        HAVING COUNT(*) <> 1
+            OR MAX(CASE WHEN setting.ValueSourceCode IN (N'IMPORTED', N'SYNTHETIC')
+                        THEN 0 ELSE 1 END) = 1
+    )
+        THROW 51522, 'Synthetic statutory profile: existing Companies House setting history cannot be re-anchored safely.', 1;
+
+    UPDATE setting
+    SET EffectiveFrom = @AsOfDate
+    FROM Cash.tbReportingProfileSetting setting
+    WHERE setting.SubjectCode = @SubjectCode
+      AND setting.ReportingProfileCode = @ProfileCode
+      AND setting.SettingCode IN
+      (
+          N'ACCOUNTING-STANDARD', N'ACCOUNTS-TYPE',
+          N'BALANCE-SHEET-FORMAT', N'ACCOUNTING-POLICIES'
+      )
+      AND setting.ValueSourceCode IN (N'IMPORTED', N'SYNTHETIC')
+      AND setting.EffectiveFrom <> @AsOfDate;
 
     EXEC Cash.proc_ReportingProfileSettingSave @SubjectCode, @ProfileCode, N'ACCOUNTING-STANDARD', @AsOfDate,
         @TextValue = N'FRS-105', @StatusCode = @StatusCode, @ValueSourceCode = N'SYNTHETIC', @IsReviewed = 1;

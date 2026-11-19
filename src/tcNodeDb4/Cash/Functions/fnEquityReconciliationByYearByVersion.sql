@@ -77,7 +77,7 @@ RETURN
                TaxCarry = TaxReliefApplied,
                OpeningLoss,
                ClosingLoss
-        FROM Cash.fnTaxBizComputationByYearByVersion(@CategoryVersionId)
+        FROM Cash.fnTaxBizComputationByYearSelectedByVersion(@CategoryVersionId)
     ),
     loss_cf_delta AS
     (
